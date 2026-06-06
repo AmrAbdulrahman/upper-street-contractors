@@ -1,4 +1,11 @@
-export const ICON_KEYS = ["chat", "shield", "star", "check", "whatsapp"] as const;
+export const ICON_KEYS = [
+  "arrow-right",
+  "chat",
+  "shield",
+  "star",
+  "check",
+  "whatsapp",
+] as const;
 
 export type IconCode = (typeof ICON_KEYS)[number];
 

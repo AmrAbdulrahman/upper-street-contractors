@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { ArrowRightIcon } from "./icons/arrow-right";
 import { ChatIcon } from "./icons/chat";
 import { CheckIcon } from "./icons/check";
 import { ShieldIcon } from "./icons/shield";
@@ -8,6 +9,7 @@ import type { IconCode, IconSvgProps } from "./types";
 import { IconFragment } from "@/generated/graphql";
 
 const iconMap: Record<IconCode, ComponentType<IconSvgProps>> = {
+  "arrow-right": ArrowRightIcon,
   chat: ChatIcon,
   shield: ShieldIcon,
   star: StarIcon,
