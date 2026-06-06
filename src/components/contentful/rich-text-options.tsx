@@ -82,3 +82,50 @@ export const atAGlanceFooterRichTextOptions: Options = {
     ),
   },
 };
+
+export const workCardBodyRichTextOptions: Options = {
+  renderNode: {
+    [BLOCKS.PARAGRAPH]: (_node, children) => (
+      <p className="text-[15px] leading-relaxed text-muted transition-colors group-hover:text-subtle">
+        {children}
+      </p>
+    ),
+  },
+};
+
+export const whatWeDoBodyRichTextOptions: Options = {
+  renderNode: {
+    [BLOCKS.PARAGRAPH]: (_node, children) => (
+      <p className="text-[17px] leading-[1.7] text-muted">{children}</p>
+    ),
+  },
+};
+
+export const bannerBodyDarkRichTextOptions: Options = {
+  renderNode: {
+    [BLOCKS.PARAGRAPH]: (_node, children) => (
+      <p className="text-sm leading-relaxed text-subtle">{children}</p>
+    ),
+  },
+};
+
+export const bannerBodyLightRichTextOptions: Options = {
+  renderNode: {
+    [BLOCKS.PARAGRAPH]: (_node, children) => (
+      <p className="text-sm leading-relaxed text-muted">{children}</p>
+    ),
+  },
+};
+
+export const bannerBodyInlineRichTextOptions: Options = {
+  renderNode: {
+    [BLOCKS.PARAGRAPH]: (_node, children) => (
+      <p className="text-sm leading-relaxed text-inherit">{children}</p>
+    ),
+  },
+  renderMark: {
+    [MARKS.BOLD]: (text) => (
+      <span className="font-bold text-gold">{text}</span>
+    ),
+  },
+};

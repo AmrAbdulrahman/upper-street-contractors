@@ -2,10 +2,15 @@ import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import type { Document } from "@contentful/rich-text-types";
 import {
   atAGlanceFooterRichTextOptions,
+  bannerBodyDarkRichTextOptions,
+  bannerBodyInlineRichTextOptions,
+  bannerBodyLightRichTextOptions,
   defaultRichTextOptions,
   heroFooterRichTextOptions,
   heroTitleRichTextOptions,
+  whatWeDoBodyRichTextOptions,
   whoWeAreBodyRichTextOptions,
+  workCardBodyRichTextOptions,
 } from "./rich-text-options";
 
 type RichTextVariant =
@@ -13,7 +18,12 @@ type RichTextVariant =
   | "hero-title"
   | "hero-footer"
   | "at-a-glance-footer"
-  | "who-we-are-body";
+  | "who-we-are-body"
+  | "work-card-body"
+  | "what-we-do-body"
+  | "banner-body-dark"
+  | "banner-body-light"
+  | "banner-body-inline";
 
 const variantOptions = {
   default: defaultRichTextOptions,
@@ -21,6 +31,11 @@ const variantOptions = {
   "hero-footer": heroFooterRichTextOptions,
   "at-a-glance-footer": atAGlanceFooterRichTextOptions,
   "who-we-are-body": whoWeAreBodyRichTextOptions,
+  "work-card-body": workCardBodyRichTextOptions,
+  "what-we-do-body": whatWeDoBodyRichTextOptions,
+  "banner-body-dark": bannerBodyDarkRichTextOptions,
+  "banner-body-light": bannerBodyLightRichTextOptions,
+  "banner-body-inline": bannerBodyInlineRichTextOptions,
 } as const;
 
 type RichTextElement = "div" | "h1" | "h2" | "p";
