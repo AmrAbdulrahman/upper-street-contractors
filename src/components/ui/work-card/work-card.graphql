@@ -1,0 +1,15 @@
+fragment WorkCard on WorkCard {
+  _id
+  __typename
+  sys {
+    id
+  }
+  emoji
+  title
+  body {
+    json
+  }
+  priceLine
+  linkText
+  href
+}
