@@ -1,0 +1,20 @@
+fragment WhatWeDoSection on WhatWeDoSection {
+  _id
+  __typename
+  sys {
+    id
+  }
+  overline
+  title
+  body {
+    json
+  }
+  workCardsCollection(preview: $preview) {
+    items {
+      ...WorkCard
+    }
+  }
+  banner(preview: $preview) {
+    ...Banner
+  }
+}
