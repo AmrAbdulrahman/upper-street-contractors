@@ -1,9 +1,25 @@
 "use client";
 
 import { buildContentfulEntryUrl } from "@/lib/contentful/entry-url";
+import { useRef } from "react";
 import { useContentfulEntry } from "./contentful-entry-context";
 import { useContentfulInspection } from "./contentful-inspection-provider";
+import { type SurfaceTone } from "./detect-surface-tone";
 import { PlusIcon } from "./plus-icon";
+import { useSurfaceTone } from "./use-surface-tone";
+
+const addButtonToneClassNames: Record<SurfaceTone, string> = {
+  dark: [
+    "border-white/35 text-white",
+    "hover:border-whatsapp hover:bg-white/5",
+    "active:bg-white/10",
+  ].join(" "),
+  light: [
+    "border-dark/30 text-dark",
+    "hover:border-whatsapp hover:bg-dark/5",
+    "active:bg-dark/10",
+  ].join(" "),
+};
 
 export type AddContentfulEntryProps = {
   /** Contentful field API id to focus when adding an entry (e.g. `buttons`). */
@@ -17,8 +33,10 @@ export function AddContentfulEntry({
   children,
   className = "",
 }: AddContentfulEntryProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const { enabled, spaceId, environmentId } = useContentfulInspection();
   const parentEntry = useContentfulEntry();
+  const surfaceTone = useSurfaceTone(buttonRef);
 
   if (!enabled || !parentEntry?.entryId || !spaceId || !field) {
     return children ?? null;
@@ -33,15 +51,15 @@ export function AddContentfulEntry({
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       aria-label="Add entry in Contentful"
       className={[
         "inline-flex h-12 min-w-12 cursor-pointer items-center justify-center gap-2 rounded-xl px-4",
-        "text-base font-semibold transition-colors",
-        "border border-dashed border-white/35 bg-transparent text-white",
-        "hover:border-solid hover:border-whatsapp hover:bg-white/5",
-        "active:bg-white/10",
+        "border border-dashed bg-transparent text-base font-semibold transition-colors",
+        "hover:border-solid",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500",
+        addButtonToneClassNames[surfaceTone],
         className,
       ]
         .filter(Boolean)
