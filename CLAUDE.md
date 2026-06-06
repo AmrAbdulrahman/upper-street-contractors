@@ -29,3 +29,7 @@ Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agen
 ### Project stack
 
 Next.js 16 + Contentful + Apollo + colocated GraphQL. See `docs/agents/project-stack.md`. Use stack-specific slash commands in `.cursor/commands/`.
+
+### Quality standards
+
+**SEO = 100, full a11y, fully responsive** — non-negotiable on every UI task. See `docs/agents/quality-standards.md`.
