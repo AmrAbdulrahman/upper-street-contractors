@@ -13,6 +13,9 @@ query GetHomePage($preview: Boolean = false) {
           ... on HomeHeaderSection {
             ...HomeHeroSection
           }
+          ... on AccreditationList {
+            ...AccreditationList
+          }
           ... on WhoWeAreSection {
             ...WhoWeAreSection
           }
