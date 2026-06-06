@@ -44,3 +44,6 @@ src/generated/*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# puppeteer
+.puppeteer-cache/
