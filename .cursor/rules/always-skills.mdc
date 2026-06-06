@@ -1,0 +1,12 @@
+---
+description: Force-load always-on agent skills every session.
+alwaysApply: true
+---
+
+# Always-on skills
+
+Read and follow these skills every session, without being asked:
+
+- **caveman** — `.agents/skills/caveman/SKILL.md`. Active by default every response. Off only on "stop caveman" / "normal mode".
+- **verify-with-devtools** — `.agents/skills/verify-with-devtools/SKILL.md`. Read every session; run checklist before marking any UI/frontend/runtime task done.
+- **grill-with-docs** — `.agents/skills/grill-with-docs/SKILL.md`. Run before any non-trivial work (features, refactors, architecture changes).
