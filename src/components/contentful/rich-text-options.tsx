@@ -62,6 +62,14 @@ export const heroFooterRichTextOptions: Options = {
   },
 };
 
+export const whoWeAreBodyRichTextOptions: Options = {
+  renderNode: {
+    [BLOCKS.PARAGRAPH]: (_node, children) => (
+      <p className="text-[17px] leading-[1.7] text-muted">{children}</p>
+    ),
+  },
+};
+
 export const atAGlanceFooterRichTextOptions: Options = {
   renderNode: {
     [BLOCKS.PARAGRAPH]: (_node, children) => (

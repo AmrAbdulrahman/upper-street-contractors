@@ -5,19 +5,22 @@ import {
   defaultRichTextOptions,
   heroFooterRichTextOptions,
   heroTitleRichTextOptions,
+  whoWeAreBodyRichTextOptions,
 } from "./rich-text-options";
 
 type RichTextVariant =
   | "default"
   | "hero-title"
   | "hero-footer"
-  | "at-a-glance-footer";
+  | "at-a-glance-footer"
+  | "who-we-are-body";
 
 const variantOptions = {
   default: defaultRichTextOptions,
   "hero-title": heroTitleRichTextOptions,
   "hero-footer": heroFooterRichTextOptions,
   "at-a-glance-footer": atAGlanceFooterRichTextOptions,
+  "who-we-are-body": whoWeAreBodyRichTextOptions,
 } as const;
 
 type RichTextElement = "div" | "h1" | "h2" | "p";
