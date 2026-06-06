@@ -66,6 +66,7 @@ declare global {
 }
 
 function loadTrustpilotWidget(element: HTMLDivElement | null) {
+  if (!element) return;
   window.Trustpilot?.loadFromElement(element, true);
 }
 
