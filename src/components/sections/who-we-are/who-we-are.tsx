@@ -1,66 +1,69 @@
 import { AddContentfulEntry, ContentfulEntry, ContentfulEntryField } from "@/components/contentful";
+import { RichText } from "@/components/contentful/rich-text";
 import { Button } from "@/components/ui/button";
+import { ImageContainer } from "@/components/ui/image-container";
 import { WhoWeAreSectionFragment } from "@/generated/graphql";
-
+import type { Document } from "@contentful/rich-text-types";
 
 type WhoWeAreSectionProps = {
   data: WhoWeAreSectionFragment;
-}
+};
 
 export function WhoWeAreSection({ data }: WhoWeAreSectionProps) {
-  // const { data } = await getClient().query({
-  //   query: GetHomeHeroSectionDocument,
-  // });
-
-  // const hero = data?.homeHeaderSectionCollection?.items?.at(0) ?? null;
-
-  // if (!hero) {
-  //   return null;
-  // }
-
-  const { overline, title, body, buttonsCollection } = data;
+  const { overline, title, body, imageContainer, buttonsCollection } = data;
+  const bodyDocument = body?.json as Document | undefined;
 
   return (
     <ContentfulEntry entry={data}>
-      <section className="relative overflow-hidden text-white">
-        <div className="min-w-0 flex flex-col gap-8">
-          {overline ? (
-            <ContentfulEntryField field="overline">
-              <p className="flex items-center gap-2 text-xs font-medium tracking-[0.22em] text-gold uppercase">
-                {overline}
-              </p>
-            </ContentfulEntryField>
-          ) : null}
+      <section className="bg-white">
+        <div className="mx-auto grid max-w-container gap-10 px-6 py-[88px] lg:grid-cols-2 lg:items-center">
+          <div className="min-w-0 flex flex-col">
+            {overline ? (
+              <ContentfulEntryField field="overline">
+                <p className="mb-2.5 text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+                  {overline}
+                </p>
+              </ContentfulEntryField>
+            ) : null}
 
-        {title ? (
-          <ContentfulEntryField field="title">
-            <h1 className="text-4xl leading-[1.15] tracking-tight text-white sm:text-5xl">
-              {title}
-            </h1>
-          </ContentfulEntryField>
-        ) : null}
+            {title ? (
+              <ContentfulEntryField field="title">
+                <h2 className="text-[2rem] leading-tight text-dark">{title}</h2>
+              </ContentfulEntryField>
+            ) : null}
 
-        {body ? (
-          <ContentfulEntryField field="body">
-            <p className="max-w-xl text-lg leading-relaxed text-subtle">
-              {body}
-            </p>
-          </ContentfulEntryField>
-        ) : null}
+            {bodyDocument ? (
+              <ContentfulEntryField field="body">
+                <RichText
+                  document={bodyDocument}
+                  variant="who-we-are-body"
+                  className="mt-4 flex flex-col gap-5"
+                />
+              </ContentfulEntryField>
+            ) : null}
 
-        {buttonsCollection?.items?.length ? (
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            {buttonsCollection.items.map((button) =>
-              button ? (
-                <ContentfulEntry key={button._id} entry={button}>
-                  <Button data={button} />
-                </ContentfulEntry>
-              ) : null,
-            )}
+            {buttonsCollection?.items?.length ? (
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                {buttonsCollection.items.map((button) =>
+                  button ? (
+                    <ContentfulEntry key={button._id} entry={button}>
+                      <Button data={button} />
+                    </ContentfulEntry>
+                  ) : null,
+                )}
 
-            <AddContentfulEntry field="buttons" />
+                <AddContentfulEntry field="buttons" />
+              </div>
+            ) : null}
           </div>
-        ) : null}
+
+          <ContentfulEntryField field="imageContainer">
+            <ImageContainer
+              data={imageContainer}
+              alt={imageContainer?.imgDescription ?? title ?? "Team photo"}
+              placeholderLabel="Team photo placeholder"
+            />
+          </ContentfulEntryField>
         </div>
       </section>
     </ContentfulEntry>

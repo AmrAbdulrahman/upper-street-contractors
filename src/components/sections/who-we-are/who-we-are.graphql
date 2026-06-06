@@ -12,7 +12,12 @@ fragment WhoWeAreSection on WhoWeAreSection {
   }
   overline
   title
-  body
+  body {
+    json
+  }
+  imageContainer {
+    ...ImageContainer
+  }
   buttonsCollection(preview: $preview) {
     items {
       ...Button
