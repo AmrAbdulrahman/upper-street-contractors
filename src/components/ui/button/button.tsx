@@ -2,15 +2,18 @@
 
 import { Icon } from "@/components/ui/icon";
 import { ButtonFragment, IconFragment } from "@/generated/graphql";
-import { forwardRef, type CSSProperties } from "react";
+import Link from "next/link";
+import { forwardRef, type CSSProperties, type ForwardedRef } from "react";
 
 export const BUTTON_VARIANTS = ["contained", "outlined", "text"] as const;
 export const BUTTON_COLORS = ["green", "dark-blue", "white", "black"] as const;
 export const BUTTON_ACTIONS = ["whatsapp", "contact-form"] as const;
+export const ICON_POSITIONS = ["start", "end"] as const;
 
 export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 export type ButtonColor = (typeof BUTTON_COLORS)[number];
 export type ButtonAction = (typeof BUTTON_ACTIONS)[number];
+export type IconPosition = (typeof ICON_POSITIONS)[number];
 
 const DEFAULT_BORDER_RADIUS = 8;
 
@@ -51,14 +54,22 @@ const actionHandlers: Record<ButtonAction, () => void> = {
   },
 };
 
+export type ButtonData = Partial<
+  Pick<
+    ButtonFragment,
+    | "action"
+    | "borderRadius"
+    | "color"
+    | "href"
+    | "icon"
+    | "iconPosition"
+    | "label"
+    | "variant"
+  >
+>;
+
 export type ButtonProps = {
-  // label: string;
-  // variant?: string | null;
-  // color?: string | null;
-  // action?: string | null;
-  // borderRadius?: number | null;
-  // icon?: string | null;
-  data: ButtonFragment;
+  data: ButtonData;
   className?: string;
 };
 
@@ -102,6 +113,28 @@ export function normalizeButtonAction(
   return undefined;
 }
 
+export function normalizeIconPosition(
+  position?: string | null,
+): IconPosition {
+  const key = position?.trim().toLowerCase();
+
+  if (
+    key === "end" ||
+    key === "right" ||
+    key === "trailing" ||
+    key === "after" ||
+    key === "after text"
+  ) {
+    return "end";
+  }
+
+  return "start";
+}
+
+export function isExternalHref(href: string): boolean {
+  return /^https?:\/\//i.test(href) || href.startsWith("//");
+}
+
 function getDefaultBorderRadius(
   variant: ButtonVariant,
   color: ButtonColor,
@@ -137,17 +170,19 @@ function getButtonStyle(
 function ButtonContent({
   label,
   icon,
+  iconPosition,
 }: {
   label: string | null;
   icon?: IconFragment | null;
-  color: ButtonColor;
+  iconPosition: IconPosition;
 }) {
-
+  const iconElement = <Icon data={icon} className="h-4 w-4 shrink-0" />;
 
   return (
     <>
-      <Icon data={icon} />
-      {label ?? 'N/A'}
+      {iconPosition === "start" ? iconElement : null}
+      {label ?? "N/A"}
+      {iconPosition === "end" ? iconElement : null}
     </>
   );
 }
@@ -157,26 +192,61 @@ function resolveButtonBorderRadius(value: unknown): number | undefined {
   return Number.isFinite(radius) ? radius : undefined;
 }
 
-
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+export const Button = forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  ButtonProps
+>(function Button(
   {
     data,
     className,
   },
   ref,
 ) {
-  const { borderRadius: rawBorderRadius, variant, color, action, label = '', icon } = data;
+  const {
+    borderRadius: rawBorderRadius,
+    variant,
+    color,
+    action,
+    href,
+    iconPosition,
+    label = "",
+    icon,
+  } = data;
   const borderRadius = resolveButtonBorderRadius(rawBorderRadius);
   const buttonVariant = normalizeButtonVariant(variant);
   const buttonColor = normalizeButtonColor(color);
   const buttonAction = normalizeButtonAction(action);
+  const buttonIconPosition = normalizeIconPosition(iconPosition);
   const classes = getButtonClasses(buttonVariant, buttonColor, className);
   const style = getButtonStyle(buttonVariant, buttonColor, borderRadius);
-  const content = <ButtonContent label={label} icon={icon} color={buttonColor} />;
+  const content = (
+    <ButtonContent
+      label={label}
+      icon={icon}
+      iconPosition={buttonIconPosition}
+    />
+  );
+
+  if (href) {
+    const external = isExternalHref(href);
+
+    return (
+      <Link
+        ref={ref as ForwardedRef<HTMLAnchorElement>}
+        href={href}
+        className={classes}
+        style={style}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noopener noreferrer" : undefined}
+      >
+        {content}
+      </Link>
+    );
+  }
 
   return (
     <button
-      ref={ref}
+      ref={ref as ForwardedRef<HTMLButtonElement>}
       type="button"
       className={classes}
       style={style}

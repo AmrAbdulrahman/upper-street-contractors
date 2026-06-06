@@ -6,6 +6,8 @@ fragment Button on Button {
   }
   action
   color
+  href
+  iconPosition
   label
   borderRadius
   variant
