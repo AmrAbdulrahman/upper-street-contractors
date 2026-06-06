@@ -1,0 +1,17 @@
+fragment Banner on Banner {
+  _id
+  __typename
+  sys {
+    id
+  }
+  title
+  body {
+    json
+  }
+  emoji
+  variant
+  hoverable
+  button {
+    ...Button
+  }
+}
