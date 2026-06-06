@@ -1,0 +1,20 @@
+fragment ImageContainer on ImageContainer {
+  _id
+  __typename
+  sys {
+    id
+  }
+  height
+  width
+  imageRadius
+  imgDescription
+  imageFile {
+    sys {
+      id
+    }
+    url
+    title
+    width
+    height
+  }
+}
