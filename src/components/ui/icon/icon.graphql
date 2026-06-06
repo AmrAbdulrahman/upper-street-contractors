@@ -1,0 +1,3 @@
+fragment Icon on Icon {
+  code
+}

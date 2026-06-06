@@ -1,0 +1,23 @@
+query GetHomePage($preview: Boolean = false) {
+  pageCollection(limit: 1, preview: $preview, where: { key: "home" }) {
+    items {
+      _id
+      __typename
+      sys {
+        id
+      }
+      title
+      description
+      sectionsCollection(limit: 10, preview: $preview) {
+        items {
+          ... on HomeHeaderSection {
+            ...HomeHeroSection
+          }
+          ... on WhoWeAreSection {
+            ...WhoWeAreSection
+          }
+        }
+      }
+    }
+  }
+}

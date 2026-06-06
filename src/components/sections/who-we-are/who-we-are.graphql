@@ -1,0 +1,21 @@
+query GetWhoWeAreSectionById($id: String!, $preview: Boolean = false) {
+  whoWeAreSection(id: $id, preview: $preview) {
+    ...WhoWeAreSection
+  }
+}
+
+fragment WhoWeAreSection on WhoWeAreSection {
+  _id
+  __typename
+  sys {
+    id
+  }
+  overline
+  title
+  body
+  buttonsCollection(preview: $preview) {
+    items {
+      ...Button
+    }
+  }
+}

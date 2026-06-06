@@ -1,0 +1,15 @@
+fragment Button on Button {
+  _id
+  __typename
+  sys {
+    id
+  }
+  action
+  color
+  label
+  borderRadius
+  variant
+  icon {
+    ...Icon
+  }
+}

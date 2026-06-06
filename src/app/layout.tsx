@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Serif_Display, Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
+import { ContentfulInspectionProvider } from "@/components/contentful";
+import { ApolloProvider } from "@/lib/apollo-client";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,6 +13,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const dmSerifDisplay = DM_Serif_Display({
+  variable: "--font-dm-serif-display",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -25,9 +34,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${dmSerifDisplay.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col bg-surface text-foreground">
+        <Suspense fallback={<span>Loading...</span>}>
+          <ContentfulInspectionProvider
+            spaceId={process.env.CONTENTFUL_SPACE_ID ?? ""}
+            environmentId={process.env.CONTENTFUL_ENVIRONMENT ?? "master"}
+          >
+            <ApolloProvider>{children}</ApolloProvider>
+          </ContentfulInspectionProvider>
+        </Suspense>
+      </body>
     </html>
   );
 }

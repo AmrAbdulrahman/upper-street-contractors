@@ -1,0 +1,9 @@
+fragment GlanceCard on AtAGlanceCard {
+  _id
+  sys {
+    id
+  }
+  label
+  quantity
+  unit
+}
