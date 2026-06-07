@@ -1,0 +1,9 @@
+fragment PageMetadata on MetaData {
+  _id
+  __typename
+  sys {
+    id
+  }
+  title
+  description
+}
