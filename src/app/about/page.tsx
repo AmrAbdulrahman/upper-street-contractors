@@ -4,9 +4,9 @@ export default function AboutPage() {
   return (
     <div>
       <h1>About Us</h1>
-      <TrustpilotWidget  variant="mini" />
+      <TrustpilotWidget variant="mini" />
       <hr className="my-4" />
-      <TrustpilotWidget  variant="micro-combo" />
+      <TrustpilotWidget variant="micro-combo" />
       <hr className="my-4" />
       <TrustpilotWidget variant="micro-review-count" />
       <hr className="my-4" />
