@@ -1,0 +1,9 @@
+query GetPageMeta($key: String!, $preview: Boolean = false) {
+  pageCollection(limit: 1, preview: $preview, where: { key: $key }) {
+    items {
+      meta {
+        ...PageMetadata
+      }
+    }
+  }
+}
