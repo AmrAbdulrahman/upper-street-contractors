@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Serif_Display, Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import { ContentfulInspectionProvider } from "@/components/contentful";
-import { LocalBusinessJsonLd } from "@/components/metadata";
+import { LocalBusinessJsonLd, PageMetadataInspectButton } from "@/components/metadata";
 import { buildBaseMetadata } from "@/components/metadata/to-metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { ApolloProvider } from "@/lib/apollo-client";
@@ -56,6 +56,9 @@ export default async function RootLayout({
         >
           Skip to content
         </a>
+        <Suspense fallback={null}>
+          <PageMetadataInspectButton />
+        </Suspense>
         <Suspense fallback={<span>Loading...</span>}>
           <ContentfulInspectionProvider
             spaceId={process.env.CONTENTFUL_SPACE_ID ?? ""}
