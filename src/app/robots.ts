@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { normalizeSiteUrl } from "@/components/metadata/to-metadata";
+import { normalizeSiteUrl } from "@/helpers";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {

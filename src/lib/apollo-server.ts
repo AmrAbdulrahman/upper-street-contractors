@@ -8,7 +8,7 @@ import { createContentfulPreviewLink } from './apollo-preview-link'
 import {
   getContentfulAccessToken,
   isContentfulPreviewEnabled,
-} from './contentful-preview'
+} from '@/helpers'
 
 function getEndpoint() {
   const spaceId = process.env.CONTENTFUL_SPACE_ID

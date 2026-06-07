@@ -1,6 +1,6 @@
 "use client";
 
-import { buildContentfulEntryUrl } from "@/lib/contentful/entry-url";
+import { buildContentfulEntryUrl } from "@/helpers";
 import { useState, type ReactElement } from "react";
 import { useContentfulEntry } from "./contentful-entry-context";
 import { useContentfulInspection } from "./contentful-inspection-provider";

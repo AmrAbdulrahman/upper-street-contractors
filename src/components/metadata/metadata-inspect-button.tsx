@@ -1,4 +1,4 @@
-import { buildContentfulEntryUrl } from "@/lib/contentful/entry-url";
+import { buildContentfulEntryUrl } from "@/helpers";
 
 const TOOLTIP = "Change this pages meta information";
 

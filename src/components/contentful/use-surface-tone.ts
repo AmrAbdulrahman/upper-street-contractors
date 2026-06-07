@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useState, type RefObject } from "react";
-import { detectSurfaceTone, type SurfaceTone } from "./detect-surface-tone";
+import { detectSurfaceTone, type SurfaceTone } from "@/helpers";
 
 export function useSurfaceTone(ref: RefObject<HTMLElement | null>): SurfaceTone {
   const [tone, setTone] = useState<SurfaceTone>("light");

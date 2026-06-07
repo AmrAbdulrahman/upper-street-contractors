@@ -1,6 +1,6 @@
 "use client";
 
-import { buildContentfulEntryUrl } from "@/lib/contentful/entry-url";
+import { buildContentfulEntryUrl } from "@/helpers";
 import { useState } from "react";
 import {
   ContentfulEntryProvider,

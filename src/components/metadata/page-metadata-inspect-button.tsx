@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { getPageMeta } from "./get-page-meta";
 import { isContentfulInspectionEnabled } from "./is-contentful-inspection-enabled";
 import { MetadataInspectButton } from "./metadata-inspect-button";
-import { pathnameToPageKey } from "./page-key";
+import { pathnameToPageKey } from "@/helpers";
 
 export async function PageMetadataInspectButton() {
   if (!(await isContentfulInspectionEnabled())) {

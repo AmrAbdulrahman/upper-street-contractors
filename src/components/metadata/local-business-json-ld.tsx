@@ -1,5 +1,5 @@
 import type { SiteMetaConfigFragment } from "@/generated/graphql";
-import { normalizeSiteUrl } from "@/components/metadata/to-metadata";
+import { normalizeSiteUrl } from "@/helpers";
 
 type LocalBusinessJsonLdProps = {
   config: SiteMetaConfigFragment;

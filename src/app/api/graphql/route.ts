@@ -3,7 +3,7 @@ import {
   getContentfulAccessToken,
   isContentfulPreviewEnabled,
   withContentfulPreviewVariables,
-} from '@/lib/contentful-preview'
+} from '@/helpers'
 
 function getEndpoint() {
   const spaceId = process.env.CONTENTFUL_SPACE_ID

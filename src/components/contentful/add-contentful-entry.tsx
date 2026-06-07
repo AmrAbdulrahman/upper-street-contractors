@@ -1,10 +1,10 @@
 "use client";
 
-import { buildContentfulEntryUrl } from "@/lib/contentful/entry-url";
+import { buildContentfulEntryUrl } from "@/helpers";
 import { useRef } from "react";
 import { useContentfulEntry } from "./contentful-entry-context";
 import { useContentfulInspection } from "./contentful-inspection-provider";
-import { type SurfaceTone } from "./detect-surface-tone";
+import { type SurfaceTone } from "@/helpers";
 import { PlusIcon } from "./plus-icon";
 import { useSurfaceTone } from "./use-surface-tone";
 
