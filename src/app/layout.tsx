@@ -2,8 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { DM_Serif_Display, Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import { ContentfulInspectionProvider } from "@/components/contentful";
+import { Footer, Header } from "@/components/layout";
 import { LocalBusinessJsonLd, PageMetadataInspectButton } from "@/components/metadata";
-import { buildBaseMetadata } from "@/components/metadata/to-metadata";
+import { buildBaseMetadata } from "@/helpers";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { ApolloProvider } from "@/lib/apollo-client";
 import "./globals.css";
@@ -65,9 +66,11 @@ export default async function RootLayout({
             environmentId={process.env.CONTENTFUL_ENVIRONMENT ?? "master"}
           >
             <ApolloProvider>
+              <Header config={siteMetaConfig} />
               <main id="main" className="flex flex-1 flex-col">
                 {children}
               </main>
+              <Footer config={siteMetaConfig} />
             </ApolloProvider>
           </ContentfulInspectionProvider>
         </Suspense>
