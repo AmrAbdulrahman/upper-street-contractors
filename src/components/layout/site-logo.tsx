@@ -5,6 +5,7 @@ type SiteLogoProps = {
   href?: string;
   streetClassName?: string;
   suffixClassName?: string;
+  fontClassName?: string;
   className?: string;
 };
 
@@ -26,6 +27,7 @@ export function SiteLogo({
   href = "/",
   streetClassName = "text-dark",
   suffixClassName = "text-gold",
+  fontClassName = "font-serif",
   className = "text-[1.35rem] leading-none tracking-[-0.01em]",
 }: SiteLogoProps) {
   if (!siteName) {
@@ -35,7 +37,7 @@ export function SiteLogo({
   const { prefix, suffix } = splitSiteName(siteName);
 
   const logo = (
-    <span className={`font-serif font-normal ${className}`}>
+    <span className={`${fontClassName} font-normal ${className}`}>
       <span className={streetClassName}>{prefix}</span>
       {suffix ? <span className={suffixClassName}>{suffix}</span> : null}
     </span>
