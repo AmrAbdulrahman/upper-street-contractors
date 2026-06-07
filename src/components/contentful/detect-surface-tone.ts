@@ -34,21 +34,41 @@ function relativeLuminance(r: number, g: number, b: number): number {
   );
 }
 
-/** Walk ancestors until an opaque background is found; default light (page surface). */
-export function detectSurfaceTone(element: HTMLElement): SurfaceTone {
-  let node: HTMLElement | null = element.parentElement;
+function toneFromOpaqueBackground(backgroundColor: string): SurfaceTone | null {
+  const rgb = parseRgb(backgroundColor);
+
+  if (!rgb || rgb.a < 0.5) {
+    return null;
+  }
+
+  return relativeLuminance(rgb.r, rgb.g, rgb.b) > 0.5 ? "light" : "dark";
+}
+
+function walkSurfaceTone(
+  start: HTMLElement | null,
+  includeStart: boolean,
+): SurfaceTone {
+  let node: HTMLElement | null = includeStart ? start : start?.parentElement ?? null;
 
   while (node && node !== document.documentElement) {
-    const { backgroundColor } = getComputedStyle(node);
-    const rgb = parseRgb(backgroundColor);
+    const tone = toneFromOpaqueBackground(getComputedStyle(node).backgroundColor);
 
-    if (!rgb || rgb.a < 0.5) {
-      node = node.parentElement;
-      continue;
+    if (tone) {
+      return tone;
     }
 
-    return relativeLuminance(rgb.r, rgb.g, rgb.b) > 0.5 ? "light" : "dark";
+    node = node.parentElement;
   }
 
   return "light";
+}
+
+/** Check the element's own background, then walk ancestors; default light. */
+export function surfaceToneAtElement(element: HTMLElement): SurfaceTone {
+  return walkSurfaceTone(element, true);
+}
+
+/** Walk ancestors until an opaque background is found; default light (page surface). */
+export function detectSurfaceTone(element: HTMLElement): SurfaceTone {
+  return walkSurfaceTone(element, false);
 }
