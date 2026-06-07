@@ -4,6 +4,8 @@ export {
   isContentfulPreviewEnabled,
   withContentfulPreviewVariables,
 } from "./contentful-preview";
+export { formatAddress } from "./format-address";
+export { formatPhoneDisplay } from "./format-phone";
 export { iconData } from "./icon-data";
 export { isIconCode } from "./is-icon-code";
 export {
@@ -27,8 +29,10 @@ export {
   type IconPosition,
 } from "./normalize-button";
 export { pathnameToPageKey } from "./page-key";
+export { resolveWhatsAppUrl } from "./resolve-whatsapp-url";
 export {
   detectSurfaceTone,
   surfaceToneAtElement,
   type SurfaceTone,
 } from "./surface-tone";
+export { formatUkPhoneForWhatsApp, getWhatsAppUrl } from "./whatsapp-url";
