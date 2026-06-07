@@ -1,5 +1,6 @@
 import type { SiteMetaConfigFragment } from "@/generated/graphql";
 import Link from "next/link";
+import { HeaderMobileNav } from "@/components/layout/header/header-mobile-nav";
 import { MAIN_NAV_LINKS } from "@/components/layout/nav-links";
 import { SiteLogo } from "@/components/layout/site-logo";
 import { resolveWhatsAppUrl, iconData } from "@/helpers";
@@ -23,13 +24,21 @@ export function Header({ config }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-white">
-      <div className="mx-auto w-full max-w-[1320px] px-6 py-4 lg:px-10">
-        <div className="grid w-full grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)] items-center gap-6">
+      <div className="relative mx-auto w-full max-w-[1320px] px-6 py-4 lg:px-10">
+        <div className="flex items-center justify-between gap-4 lg:hidden">
+          <SiteLogo
+            siteName={config?.siteName}
+            className="min-w-0 text-[1.1875rem] leading-none"
+          />
+          <HeaderMobileNav links={MAIN_NAV_LINKS} whatsappUrl={whatsappUrl} />
+        </div>
+
+        <div className="hidden w-full grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)] items-center gap-6 lg:grid">
           <SiteLogo siteName={config?.siteName} />
 
           <nav
             aria-label="Main navigation"
-            className="hidden min-w-0 overflow-hidden lg:block"
+            className="min-w-0 overflow-hidden"
           >
             <ul className="flex items-center justify-center gap-4 xl:gap-6">
               {MAIN_NAV_LINKS.map((link) => (
@@ -60,21 +69,6 @@ export function Header({ config }: HeaderProps) {
           </div>
         </div>
       </div>
-
-      <nav
-        aria-label="Main navigation"
-        className="border-t border-border-light lg:hidden"
-      >
-        <ul className="mx-auto flex max-w-[1320px] gap-6 overflow-x-auto px-6 py-3 lg:px-10">
-          {MAIN_NAV_LINKS.map((link) => (
-            <li key={link.href} className="shrink-0">
-              <Link href={link.href} className={navLinkClass}>
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
     </header>
   );
 }
