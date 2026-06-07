@@ -1,17 +1,29 @@
 import type { ReactNode } from "react";
+
 import type { SiteMetaConfigFragment } from "@/generated/graphql";
+
 import Link from "next/link";
+
+import {
+  FOOTER_ACCREDITATIONS,
+  FOOTER_COMPANY_REGISTRATION,
+  FOOTER_OPENING_HOURS,
+} from "@/components/layout/footer/footer-static";
+
 import {
   FOOTER_COMPANY_LINKS,
   FOOTER_SERVICE_LINKS,
 } from "@/components/layout/nav-links";
+
 import { SiteLogo } from "@/components/layout/site-logo";
+
 import {
   formatAddress,
   formatPhoneDisplay,
   iconData,
   resolveWhatsAppUrl,
 } from "@/helpers";
+
 import { Icon } from "@/components/ui/icon";
 
 type FooterProps = {
@@ -24,20 +36,32 @@ function formatTelHref(phone: string): string {
 
 function FooterColumnHeading({ children }: { children: ReactNode }) {
   return (
-    <p className="font-sans text-[11px] font-bold tracking-[0.14em] text-subtle uppercase">
+    <p className="mb-3.5 font-sans text-[11px] font-bold tracking-[0.1em] text-white/35 uppercase">
       {children}
     </p>
   );
 }
 
-function FooterLinkList({ links }: { links: { label: string; href: string }[] }) {
+function FooterBadge({ children }: { children: ReactNode }) {
   return (
-    <ul className="mt-4 space-y-2.5">
+    <span className="rounded-[6px] border border-white/10 bg-white/[0.07] px-2.5 py-[5px] text-[11px] font-semibold text-white/60">
+      {children}
+    </span>
+  );
+}
+
+function FooterLinkList({
+  links,
+}: {
+  links: { label: string; href: string }[];
+}) {
+  return (
+    <ul className="flex flex-col gap-[9px]">
       {links.map((link) => (
         <li key={link.href}>
           <Link
             href={link.href}
-            className="font-sans text-sm text-subtle transition-colors hover:text-white"
+            className="font-sans text-[13px] text-white/55 transition-colors hover:text-white"
           >
             {link.label}
           </Link>
@@ -49,113 +73,145 @@ function FooterLinkList({ links }: { links: { label: string; href: string }[] })
 
 export function Footer({ config }: FooterProps) {
   const address = formatAddress(config);
+
   const phone = config?.phoneNumber
     ? formatPhoneDisplay(config.phoneNumber)
     : null;
+
   const email = config?.email ?? null;
+
   const description = config?.defaultMetaDescription ?? null;
+
   const legalName = config?.legalName ?? null;
+
   const whatsappUrl = resolveWhatsAppUrl(config);
+
   const currentYear = new Date().getFullYear();
+
   const hasContactDetails = Boolean(phone || email || whatsappUrl);
 
+  const copyrightName =
+    legalName ?? config?.siteName ?? "Upper Street Contractors";
+
   return (
-    <footer className="bg-dark font-sans text-subtle">
-      <div className="mx-auto max-w-container px-6 py-14 lg:px-10 lg:py-16">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+    <footer className="bg-dark-2 font-sans text-white/55">
+      <div className="mx-auto max-w-container px-6 pt-14 pb-7">
+        <div className="mb-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.5fr] lg:gap-12">
           <div>
             <SiteLogo
               siteName={config?.siteName}
               streetClassName="text-white"
               suffixClassName="text-gold"
-              className="text-[1.375rem] leading-none"
+              className="mb-3 text-[20px] leading-[1.2]"
             />
+
             {description ? (
-              <p className="mt-4 max-w-[17rem] text-sm leading-[1.65] text-subtle">
+              <p className="text-[13px] leading-[1.75] text-muted mt-3">
                 {description}
               </p>
             ) : null}
+
             {address ? (
-              <p className="mt-4 flex items-start gap-2 text-sm leading-[1.65] text-subtle">
+              <p className="mt-3 flex items-start gap-2 text-[12px] leading-[1.75] text-white/55">
                 <Icon
                   data={iconData("pin")}
-                  className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#e879a8]"
+                  className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold"
                 />
+
                 <span>{address}</span>
               </p>
             ) : null}
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {FOOTER_ACCREDITATIONS.map((label) => (
+                <FooterBadge key={label}>{label}</FooterBadge>
+              ))}
+            </div>
           </div>
 
           <div>
             <FooterColumnHeading>Services</FooterColumnHeading>
+
             <FooterLinkList links={FOOTER_SERVICE_LINKS} />
           </div>
 
           <div>
             <FooterColumnHeading>Company</FooterColumnHeading>
+
             <FooterLinkList links={FOOTER_COMPANY_LINKS} />
           </div>
 
-          {hasContactDetails ? (
-            <div>
-              <FooterColumnHeading>Contact</FooterColumnHeading>
-              <ul className="mt-4 space-y-2.5 text-sm">
+          <div>
+            <FooterColumnHeading>Contact</FooterColumnHeading>
+
+            {hasContactDetails ? (
+              <ul className="flex flex-col gap-[9px] text-[13px]">
                 {phone ? (
                   <li>
                     <a
                       href={formatTelHref(phone)}
-                      className="inline-flex items-center gap-2 text-subtle transition-colors hover:text-white"
+                      className="inline-flex items-center gap-2 text-white/55 transition-colors hover:text-white"
                     >
                       <Icon
                         data={iconData("phone")}
-                        className="h-3.5 w-3.5 shrink-0 text-[#e879a8]"
+                        className="h-3.5 w-3.5 shrink-0 text-gold"
                       />
+
                       {phone}
                     </a>
                   </li>
                 ) : null}
+
                 {email ? (
                   <li>
                     <a
                       href={`mailto:${email}`}
-                      className="inline-flex items-center gap-2 text-subtle transition-colors hover:text-white"
+                      className="inline-flex items-center gap-2 text-white/55 transition-colors hover:text-white"
                     >
                       <Icon
                         data={iconData("envelope")}
-                        className="h-3.5 w-3.5 shrink-0 text-subtle"
+                        className="h-3.5 w-3.5 shrink-0 text-gold"
                       />
+
                       {email}
                     </a>
                   </li>
                 ) : null}
+
                 {whatsappUrl ? (
                   <li>
                     <a
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-subtle transition-colors hover:text-white"
+                      className="inline-flex items-center gap-2 text-white/55 transition-colors hover:text-white"
                     >
                       <Icon
                         data={iconData("chat")}
-                        className="h-3.5 w-3.5 shrink-0 text-subtle"
+                        className="h-3.5 w-3.5 shrink-0 text-gold"
                       />
                       WhatsApp available
                     </a>
                   </li>
                 ) : null}
               </ul>
+            ) : null}
+
+            <div className="mt-5 space-y-0.5 text-[13px] leading-[1.85] text-white/55">
+              {FOOTER_OPENING_HOURS.map((hours) => (
+                <p key={hours}>{hours}</p>
+              ))}
             </div>
-          ) : null}
+          </div>
         </div>
 
-        {legalName ? (
-          <div className="mt-12 border-t border-white/10 pt-6">
-            <p className="text-xs text-subtle">
-              © {currentYear} {legalName}. All rights reserved.
-            </p>
-          </div>
-        ) : null}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 border-t border-white/[0.08] pt-5 text-xs text-white/55">
+          <p>
+            © {currentYear} {copyrightName}. All rights reserved.
+          </p>
+
+          <p className="text-white/35">{FOOTER_COMPANY_REGISTRATION}</p>
+        </div>
       </div>
     </footer>
   );
