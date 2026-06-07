@@ -8,6 +8,9 @@ query GetHomePage($preview: Boolean = false) {
       }
       title
       description
+      meta {
+        ...PageMetadata
+      }
       sectionsCollection(limit: 10, preview: $preview) {
         items {
           ... on HomeHeaderSection {
