@@ -1,0 +1,44 @@
+fragment SiteMetaConfig on SiteMetaConfig {
+  _id
+  __typename
+  sys {
+    id
+  }
+  siteName
+  siteUrl
+  pageTitleTemplate
+  defaultMetaTitle
+  defaultMetaDescription
+  locale
+  indexable
+  legalName
+  phoneNumber
+  email
+  addressLine
+  city
+  postalCode
+  mapLocation {
+    lat
+    lon
+  }
+  defaultImage {
+    url
+    title
+    width
+    height
+  }
+  socialLinksCollection(limit: 10, preview: $preview) {
+    items {
+      socialNetworkName
+      url
+    }
+  }
+}
+
+query GetSiteMetaConfig($preview: Boolean = false) {
+  siteMetaConfigCollection(limit: 1, preview: $preview) {
+    items {
+      ...SiteMetaConfig
+    }
+  }
+}
