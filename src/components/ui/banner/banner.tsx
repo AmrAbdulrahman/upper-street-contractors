@@ -73,13 +73,13 @@ export function Banner({ data, className = "" }: BannerProps) {
   const richTextVariant = getRichTextVariant(bannerVariant, hasTitle);
 
   const containerClasses = [
-    "flex w-full items-center gap-6 rounded-xl border border-2 px-5 py-4 md:px-6 md:py-5",
+    "flex w-full flex-col items-start gap-4 rounded-xl border border-2 px-5 py-4 md:flex-row md:items-center md:gap-6 md:px-6 md:py-5",
     hoverable
       ? "transition-[border-color] duration-500 ease-in-out"
       : "transition-colors duration-300",
     base,
     hoverable ? hoverableClass : "",
-    hasButton ? "justify-between" : "justify-center",
+    hasButton ? "md:justify-between" : "justify-center",
     className,
   ]
     .filter(Boolean)
@@ -138,7 +138,7 @@ export function Banner({ data, className = "" }: BannerProps) {
 
         {hasButton && button ? (
           <ContentfulEntry entry={button}>
-            <Button data={button} className="shrink-0" />
+            <Button data={button} className="w-full shrink-0 md:w-auto" />
           </ContentfulEntry>
         ) : null}
       </div>
