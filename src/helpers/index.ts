@@ -4,6 +4,8 @@ export {
   isContentfulPreviewEnabled,
   withContentfulPreviewVariables,
 } from "./contentful-preview";
+export { iconData } from "./icon-data";
+export { isIconCode } from "./is-icon-code";
 export {
   buildBaseMetadata,
   normalizeSiteUrl,

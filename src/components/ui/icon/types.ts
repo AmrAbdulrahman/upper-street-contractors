@@ -1,9 +1,12 @@
 export const ICON_KEYS = [
   "arrow-right",
   "chat",
+  "check",
+  "envelope",
+  "phone",
+  "pin",
   "shield",
   "star",
-  "check",
   "whatsapp",
 ] as const;
 
@@ -13,6 +16,3 @@ export type IconSvgProps = {
   className?: string;
 };
 
-export function isIconCode(value: string): value is IconCode {
-  return ICON_KEYS.includes(value as IconCode);
-}

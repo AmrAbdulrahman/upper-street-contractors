@@ -1,2 +1,3 @@
 export { Icon, type IconProps } from "./icon";
-export { ICON_KEYS, isIconCode as isIconKey, type IconCode as IconKey, type IconSvgProps } from "./types";
+export { iconData, isIconCode as isIconKey } from "@/helpers";
+export { ICON_KEYS, type IconCode as IconKey, type IconSvgProps } from "./types";

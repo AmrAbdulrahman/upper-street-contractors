@@ -2,6 +2,9 @@ import type { ComponentType } from "react";
 import { ArrowRightIcon } from "./icons/arrow-right";
 import { ChatIcon } from "./icons/chat";
 import { CheckIcon } from "./icons/check";
+import { EnvelopeIcon } from "./icons/envelope";
+import { PhoneIcon } from "./icons/phone";
+import { PinIcon } from "./icons/pin";
 import { ShieldIcon } from "./icons/shield";
 import { StarIcon } from "./icons/star";
 import { WhatsappIcon } from "./icons/whatsapp";
@@ -11,9 +14,12 @@ import { IconFragment } from "@/generated/graphql";
 const iconMap: Record<IconCode, ComponentType<IconSvgProps>> = {
   "arrow-right": ArrowRightIcon,
   chat: ChatIcon,
+  check: CheckIcon,
+  envelope: EnvelopeIcon,
+  phone: PhoneIcon,
+  pin: PinIcon,
   shield: ShieldIcon,
   star: StarIcon,
-  check: CheckIcon,
   whatsapp: WhatsappIcon,
 };
 
