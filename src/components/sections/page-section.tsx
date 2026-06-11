@@ -3,17 +3,20 @@ import {
   type HomeHeroSectionFragment,
   type WhatWeDoSectionFragment,
   type WhoWeAreSectionFragment,
+  type WhyChooseUsSectionFragment,
 } from "@/generated/graphql";
 import { AccreditationList } from "./accreditation-list";
 import { HeroHeroSection } from "./home-hero";
 import { WhatWeDoSection } from "./what-we-do";
 import { WhoWeAreSection } from "./who-we-are";
+import { WhyChooseUsSection } from "./why-choose-us";
 
 export type PageSectionData =
   | AccreditationListFragment
   | HomeHeroSectionFragment
   | WhatWeDoSectionFragment
-  | WhoWeAreSectionFragment;
+  | WhoWeAreSectionFragment
+  | WhyChooseUsSectionFragment;
 
 export function PageSection({ section }: { section: PageSectionData }) {
   switch (section.__typename) {
@@ -28,6 +31,9 @@ export function PageSection({ section }: { section: PageSectionData }) {
 
     case "AccreditationList":
       return <AccreditationList data={section} />;
+
+    case "WhyChooseUsSection":
+      return <WhyChooseUsSection data={section} />;
 
     default:
       return null;
