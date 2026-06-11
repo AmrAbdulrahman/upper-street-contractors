@@ -23,24 +23,27 @@ export function normalizeBannerVariant(variant?: string | null): BannerVariant {
   return "light";
 }
 
+const sharedLayoutClasses =
+  "flex w-full flex-col items-start gap-4 px-5 py-4 md:flex-row md:items-center md:gap-6 md:px-6 md:py-5";
+
 const variantContainerClasses: Record<
   BannerVariant,
   { base: string; hoverable: string }
 > = {
   dark: {
-    base: "border-white/10 bg-dark text-white",
+    base: "rounded-sm border-2 border-white/10 bg-dark text-white",
     hoverable: "hover:border-gold/60",
   },
   light: {
-    base: "border-gold/40 bg-gold/15 text-light",
+    base: "rounded-sm border-2 border-gold/40 bg-gold/15 text-light",
     hoverable: "hover:border-gold",
   },
   note: {
-    base: "border-border border-l-4 border-l-gold bg-gold-light/30 text-dark",
+    base: "rounded-sm border border-border border-l-4 border-l-gold bg-gold-light text-dark",
     hoverable: "hover:border-gold",
   },
   transparent: {
-    base: "border-border bg-transparent text-muted",
+    base: "rounded-sm border-2 border-border bg-transparent text-muted",
     hoverable: "hover:border-gold/60",
   },
 };
@@ -73,11 +76,11 @@ export function Banner({ data, className = "" }: BannerProps) {
   const richTextVariant = getRichTextVariant(bannerVariant, hasTitle);
 
   const containerClasses = [
-    "flex w-full flex-col items-start gap-4 rounded-xl border border-2 px-5 py-4 md:flex-row md:items-center md:gap-6 md:px-6 md:py-5",
+    sharedLayoutClasses,
+    base,
     hoverable
       ? "transition-[border-color] duration-500 ease-in-out"
       : "transition-colors duration-300",
-    base,
     hoverable ? hoverableClass : "",
     hasButton ? "md:justify-between" : "justify-center",
     className,
