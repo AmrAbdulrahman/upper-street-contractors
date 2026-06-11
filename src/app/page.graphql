@@ -28,6 +28,9 @@ query GetHomePage($preview: Boolean = false) {
           ... on WhyChooseUsSection {
             ...WhyChooseUsSection
           }
+          ... on HowItWorksSection {
+            ...HowItWorksSection
+          }
         }
       }
     }
