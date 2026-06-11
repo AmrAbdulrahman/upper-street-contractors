@@ -32,7 +32,7 @@ const variantContainerClasses: Record<
     hoverable: "hover:border-gold/60",
   },
   light: {
-    base: "border-gold/40 bg-gold-light/40 text-dark",
+    base: "border-gold/40 bg-gold/15 text-light",
     hoverable: "hover:border-gold",
   },
   note: {
