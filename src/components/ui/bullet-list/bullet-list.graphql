@@ -1,0 +1,11 @@
+fragment BulletList on BulletList {
+  _id
+  __typename
+  sys {
+    id
+  }
+  text
+  listIcon {
+    ...Icon
+  }
+}
