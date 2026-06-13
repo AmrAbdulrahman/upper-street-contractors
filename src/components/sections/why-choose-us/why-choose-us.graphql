@@ -1,0 +1,24 @@
+fragment WhyChooseUsSection on WhyChooseUsSection {
+  _id
+  __typename
+  sys {
+    id
+  }
+  overline
+  listOfPointsCollection(preview: $preview) {
+    items {
+      ...BulletList
+    }
+  }
+  cardImage {
+    ...ImageContainer
+  }
+  cardTitle
+  cardRole
+  cardParagraph {
+    json
+  }
+  cardBanner(preview: $preview) {
+    ...Banner
+  }
+}

@@ -1,0 +1,20 @@
+fragment HowItWorksSection on HowItWorksSection {
+  _id
+  __typename
+  sys {
+    id
+  }
+  overline
+  title
+  sectionSummary {
+    json
+  }
+  processListCollection(preview: $preview) {
+    items {
+      ...StaticStep
+    }
+  }
+  sectionBanner(preview: $preview) {
+    ...Banner
+  }
+}

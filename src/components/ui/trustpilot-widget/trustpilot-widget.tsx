@@ -7,6 +7,7 @@ const TRUSTPILOT_BOOTSTRAP =
   "https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js";
 
 const BUSINESS_UNIT_ID = "69a014cb7a802e7c5ea1df91";
+const TOKEN = "f10fb5d1-2609-4e1b-8427-e4c88338878f";
 const REVIEW_URL = "https://uk.trustpilot.com/review/upperstreet.contractors";
 
 export const TRUSTPILOT_VARIANTS = [
@@ -101,6 +102,7 @@ export function TrustpilotWidget({
           data-style-height={config.styleHeight}
           data-style-width={config.styleWidth}
           data-theme="light"
+          data-token={TOKEN}
         >
           <a
             href={REVIEW_URL}

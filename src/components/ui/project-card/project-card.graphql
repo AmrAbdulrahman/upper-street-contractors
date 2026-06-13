@@ -1,0 +1,26 @@
+#import "../badge/badge.graphql"
+
+fragment ProjectCard on ProjectCard {
+  _id
+  __typename
+  sys {
+    id
+  }
+  title
+  description
+  projectBanner {
+    url
+    title
+    width
+    height
+    description
+  }
+  projectCategory {
+    ...Badge
+  }
+  projectBadgesCollection(limit: 6, preview: $preview) {
+    items {
+      ...Badge
+    }
+  }
+}

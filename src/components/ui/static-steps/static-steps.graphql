@@ -1,0 +1,10 @@
+fragment StaticStep on StaticStep {
+  _id
+  __typename
+  sys {
+    id
+  }
+  stepOrder
+  stepTitle
+  stepDescription
+}

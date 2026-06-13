@@ -1,0 +1,11 @@
+fragment Badge on Badge {
+  _id
+  __typename
+  sys {
+    id
+  }
+  text
+  variant
+  href
+  borderRadius
+}
