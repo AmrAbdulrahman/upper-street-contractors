@@ -1,12 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Serif_Display, Geist, Geist_Mono } from "next/font/google";
-import { Suspense } from "react";
-import { ContentfulInspectionProvider } from "@/components/contentful";
+// import { Suspense } from "react";
+// import { ContentfulInspectionProvider } from "@/components/contentful";
 import { Footer, Header } from "@/components/layout";
-import { LocalBusinessJsonLd, PageMetadataInspectButton } from "@/components/metadata";
+import {
+  isContentfulInspectionBuildEnabled,
+  LocalBusinessJsonLd,
+  PageMetadataInspectButton,
+} from "@/components/metadata";
 import { buildBaseMetadata } from "@/helpers";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
-import { ApolloProvider } from "@/lib/apollo-client";
+// import { ApolloProvider } from "@/lib/apollo-client";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -57,23 +61,23 @@ export default async function RootLayout({
         >
           Skip to content
         </a>
-        <Suspense fallback={null}>
+        {isContentfulInspectionBuildEnabled() ? (
           <PageMetadataInspectButton />
-        </Suspense>
-        <Suspense fallback={<span>Loading...</span>}>
-          <ContentfulInspectionProvider
+        ) : null}
+        {/* <Suspense fallback={<span>Loading...</span>}> */}
+          {/* <ContentfulInspectionProvider
             spaceId={process.env.CONTENTFUL_SPACE_ID ?? ""}
             environmentId={process.env.CONTENTFUL_ENVIRONMENT ?? "master"}
-          >
-            <ApolloProvider>
+          > */}
+            {/* <ApolloProvider> */}
               <Header config={siteMetaConfig} />
               <main id="main" className="flex flex-1 flex-col">
                 {children}
               </main>
               <Footer config={siteMetaConfig} />
-            </ApolloProvider>
-          </ContentfulInspectionProvider>
-        </Suspense>
+            {/* </ApolloProvider> */}
+          {/* </ContentfulInspectionProvider> */}
+        {/* </Suspense> */}
       </body>
     </html>
   );

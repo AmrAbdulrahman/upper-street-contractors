@@ -3,8 +3,40 @@ export type NavLink = {
   href: string;
 };
 
+export function isNavLinkActive(pathname: string, href: string): boolean {
+  if (href === "/") {
+    return pathname === "/";
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+const desktopNavLinkBaseClass =
+  "whitespace-nowrap rounded-[8px] px-2.5 py-2 text-sm font-medium transition-colors xl:px-3 xl:text-[0.9375rem]";
+
+export function getDesktopNavLinkClassName(isActive: boolean): string {
+  return [
+    desktopNavLinkBaseClass,
+    isActive
+      ? "bg-border-light/60 text-dark font-semibold"
+      : "text-muted hover:bg-border-light/25 hover:text-dark",
+  ].join(" ");
+}
+
+const mobileNavLinkBaseClass =
+  "block rounded-md px-2 py-3 text-base font-medium transition-colors";
+
+export function getMobileNavLinkClassName(isActive: boolean): string {
+  return [
+    mobileNavLinkBaseClass,
+    isActive
+      ? "bg-border-light text-dark font-semibold"
+      : "text-muted hover:bg-border-light hover:text-dark",
+  ].join(" ");
+}
+
 export const MAIN_NAV_LINKS: NavLink[] = [
-  { label: "Home", href: "/" },
+  // { label: "Home", href: "/" },
   { label: "Refurbishments", href: "/refurbishments" },
   { label: "Kitchens", href: "/kitchens" },
   { label: "Bathrooms", href: "/bathrooms" },

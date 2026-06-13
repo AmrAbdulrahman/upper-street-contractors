@@ -1,28 +1,48 @@
 import { headers } from "next/headers";
 import { getPageMeta } from "./get-page-meta";
-import { isContentfulInspectionEnabled } from "./is-contentful-inspection-enabled";
+import {
+  isContentfulInspectionBuildEnabled,
+  isContentfulInspectionEnabled,
+} from "./is-contentful-inspection-enabled";
 import { MetadataInspectButton } from "./metadata-inspect-button";
+import { PageMetadataInspectButtonClient } from "./page-metadata-inspect-button-client";
 import { pathnameToPageKey } from "@/helpers";
 
 export async function PageMetadataInspectButton() {
+  if (!isContentfulInspectionBuildEnabled()) {
+    return null;
+  }
+
   if (!(await isContentfulInspectionEnabled())) {
     return null;
   }
 
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "/";
-  const key = pathnameToPageKey(pathname);
-  const metaId = await getPageMeta(key);
+  const spaceId = process.env.CONTENTFUL_SPACE_ID ?? "";
+  const environmentId = process.env.CONTENTFUL_ENVIRONMENT ?? "master";
 
-  if (!metaId) {
-    return null;
+  if (process.env.CONTENTFUL_PREVIEW === "true") {
+    const headersList = await headers();
+    const pathname = headersList.get("x-pathname") ?? "/";
+    const key = pathnameToPageKey(pathname);
+    const metaId = await getPageMeta(key);
+
+    if (!metaId) {
+      return null;
+    }
+
+    return (
+      <MetadataInspectButton
+        metaId={metaId}
+        spaceId={spaceId}
+        environmentId={environmentId}
+      />
+    );
   }
 
   return (
-    <MetadataInspectButton
-      metaId={metaId}
-      spaceId={process.env.CONTENTFUL_SPACE_ID ?? ""}
-      environmentId={process.env.CONTENTFUL_ENVIRONMENT ?? "master"}
+    <PageMetadataInspectButtonClient
+      spaceId={spaceId}
+      environmentId={environmentId}
     />
   );
 }

@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useState } from "react";
-import type { NavLink } from "@/components/layout/nav-links";
+import {
+  getMobileNavLinkClassName,
+  isNavLinkActive,
+  type NavLink,
+} from "@/components/layout/nav-links";
+import { usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import { iconData } from "@/helpers";
 
@@ -10,9 +15,6 @@ type HeaderMobileNavProps = {
   links: NavLink[];
   whatsappUrl: string | null;
 };
-
-const mobileNavLinkClass =
-  "block rounded-md px-2 py-3 text-base font-medium text-muted transition-colors hover:bg-border-light hover:text-dark";
 
 const quoteButtonClass =
   "inline-flex h-11 w-full items-center justify-center rounded-full border border-border bg-white px-5 text-sm font-semibold text-dark transition-colors hover:bg-border-light";
@@ -53,6 +55,7 @@ function CloseIcon() {
 }
 
 export function HeaderMobileNav({ links, whatsappUrl }: HeaderMobileNavProps) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const menuId = useId();
 
@@ -107,13 +110,22 @@ export function HeaderMobileNav({ links, whatsappUrl }: HeaderMobileNavProps) {
             className="absolute right-0 z-40 mt-3 w-[min(100vw-3rem,20rem)] rounded-xl border border-border bg-white p-4 shadow-lg"
           >
             <ul>
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className={mobileNavLinkClass} onClick={close}>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {links.map((link) => {
+                const isActive = isNavLinkActive(pathname, link.href);
+
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={getMobileNavLinkClassName(isActive)}
+                      aria-current={isActive ? "page" : undefined}
+                      onClick={close}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
 
             <div className="mt-2 flex flex-col gap-3 border-t border-border-light pt-4">

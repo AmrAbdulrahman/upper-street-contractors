@@ -1,5 +1,6 @@
 import type { SiteMetaConfigFragment } from "@/generated/graphql";
 import Link from "next/link";
+import { HeaderDesktopNav } from "@/components/layout/header/header-desktop-nav";
 import { HeaderMobileNav } from "@/components/layout/header/header-mobile-nav";
 import { MAIN_NAV_LINKS } from "@/components/layout/nav-links";
 import { SiteLogo } from "@/components/layout/site-logo";
@@ -9,9 +10,6 @@ import { Icon } from "@/components/ui/icon";
 type HeaderProps = {
   config: SiteMetaConfigFragment | null;
 };
-
-const navLinkClass =
-  "whitespace-nowrap text-sm font-medium text-muted transition-colors hover:text-dark xl:text-[0.9375rem]";
 
 const quoteButtonClass =
   "inline-flex h-11 shrink-0 items-center justify-center rounded-full border border-border bg-white px-5 text-sm font-semibold text-dark transition-colors hover:bg-border-light xl:text-[0.9375rem]";
@@ -36,20 +34,7 @@ export function Header({ config }: HeaderProps) {
         <div className="hidden w-full grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)] items-center gap-6 lg:grid">
           <SiteLogo siteName={config?.siteName} />
 
-          <nav
-            aria-label="Main navigation"
-            className="min-w-0 overflow-hidden"
-          >
-            <ul className="flex items-center justify-center gap-4 xl:gap-6">
-              {MAIN_NAV_LINKS.map((link) => (
-                <li key={link.href} className="shrink-0">
-                  <Link href={link.href} className={navLinkClass}>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <HeaderDesktopNav links={MAIN_NAV_LINKS} />
 
           <div className="flex shrink-0 items-center justify-end gap-3">
             <Link href="/contact" className={quoteButtonClass}>
