@@ -1,0 +1,21 @@
+#import "../../ui/project-card/project-card.graphql"
+#import "../../ui/button/button.graphql"
+
+fragment RecentWorkSection on RecentWorkSection {
+  _id
+  __typename
+  sys {
+    id
+  }
+  overline
+  title
+  description
+  projectsCollection(limit: 12, preview: $preview) {
+    items {
+      ...ProjectCard
+    }
+  }
+  viewAllProjects {
+    ...Button
+  }
+}
