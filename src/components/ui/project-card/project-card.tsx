@@ -1,3 +1,5 @@
+"use client";
+
 import { ContentfulEntry, ContentfulEntryField } from "@/components/contentful";
 import { Badge, badgePropsFromContentful } from "@/components/ui/badge";
 import { ProjectCardFragment } from "@/generated/graphql";
