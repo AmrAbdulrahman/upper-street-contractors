@@ -20,6 +20,14 @@ _Avoid_: Label, pill, proj-tag (CSS class name only)
 A small badge below the image showing one project facet such as location, duration, or scope.
 _Avoid_: Tag, chip, proj-chip (CSS class name only)
 
+**Projects index**:
+The `/projects` page listing all Projects with a category filter.
+_Avoid_: Portfolio page, gallery, work listing
+
+**Category filter**:
+The client control on the Projects index that narrows the grid by Category tag text.
+_Avoid_: Tab bar, filter pills (UI class names only)
+
 **Badge**:
 The reusable pill component that renders category tags and meta chips from variant, radius, href, and text props.
 _Avoid_: Tag, chip, label
