@@ -1,0 +1,9 @@
+#import "../../components/ui/project-card/project-card.graphql"
+
+query GetProjects($preview: Boolean = false) {
+  projectCardCollection(limit: 50, preview: $preview) {
+    items {
+      ...ProjectCard
+    }
+  }
+}
