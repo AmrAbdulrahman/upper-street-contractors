@@ -29,9 +29,9 @@ const config: CodegenConfig = {
       },
     },
   },
-  documents: 'src/**/*.graphql',
+  documents: 'apps/website/src/**/*.graphql',
   generates: {
-    'src/generated/graphql.ts': {
+    'apps/website/src/generated/graphql.ts': {
       plugins: [
         'typescript',
         'typescript-operations',
@@ -41,7 +41,7 @@ const config: CodegenConfig = {
         documentMode: 'documentNode',
       },
     },
-    'src/generated/apollo-hooks.ts': {
+    'apps/website/src/generated/apollo-hooks.ts': {
       plugins: [
         {
           add: {
@@ -51,7 +51,7 @@ const config: CodegenConfig = {
         { 'typescript-react-apollo': reactApolloPluginConfig },
       ],
     },
-    'src/generated/schema.graphql': {
+    'apps/website/src/generated/schema.graphql': {
        plugins: ['schema-ast'],
        config: {
          includeDirectives: true

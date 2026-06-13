@@ -6,11 +6,11 @@
     "node": ">=22.0.0 <25.0.0"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "nx dev website",
     "generate:sitemap": "node scripts/generate-sitemap.mjs",
-    "build": "npm run generate:sitemap && next build",
-    "start": "next start",
-    "lint": "eslint",
+    "build": "npm run generate:sitemap && nx build website",
+    "start": "nx start website",
+    "lint": "nx run-many --target lint",
     "codegen": "graphql-codegen --config codegen.ts",
     "codegen:watch": "graphql-codegen --config codegen.ts --watch"
   },
@@ -31,6 +31,9 @@
     "@graphql-codegen/typescript": "^6.0.1",
     "@graphql-codegen/typescript-operations": "^6.0.2",
     "@graphql-codegen/typescript-react-apollo": "^4.4.2",
+    "@nx/eslint": "^22.7.5",
+    "@nx/js": "^22.7.5",
+    "@nx/next": "^22.7.5",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -38,6 +41,7 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "nx": "^22.7.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

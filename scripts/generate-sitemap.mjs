@@ -19,7 +19,7 @@ if (!spaceId || !token) {
   process.exit(1);
 }
 
-const APP_DIR = join(root, "src", "app");
+const APP_DIR = join(root, "apps", "website", "src", "app");
 const IGNORED_SEGMENTS = new Set(["api", "_not-found"]);
 
 const SITEMAP_QUERY = `
@@ -159,7 +159,7 @@ async function main() {
 
   const lastModifiedByPath = buildLastModifiedMap();
 
-  const outputPath = join(root, "public", "sitemap.xml");
+  const outputPath = join(root, "apps", "website", "public", "sitemap.xml");
 
   if (!indexable) {
     writeFileSync(

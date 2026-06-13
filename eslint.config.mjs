@@ -9,10 +9,13 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    "apps/website/.next/**",
     "out/**",
+    "apps/website/out/**",
     "build/**",
     "next-env.d.ts",
-    "src/generated/apollo-hooks.ts",
+    "apps/website/next-env.d.ts",
+    "apps/website/src/generated/apollo-hooks.ts",
   ]),
 ]);
 

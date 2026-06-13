@@ -6,7 +6,7 @@ import {
 } from '@/helpers'
 
 function getEndpoint() {
-  const spaceId = process.env.CONTENTFUL_SPACE_ID
+  const spaceId = process.env.CONTENTFUL_SPACE_IDID;
   if (!spaceId) throw new Error('CONTENTFUL_SPACE_ID is not set')
   return `https://graphql.contentful.com/content/v1/spaces/${spaceId}`
 }
