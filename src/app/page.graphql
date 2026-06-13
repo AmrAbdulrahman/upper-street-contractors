@@ -31,6 +31,9 @@ query GetHomePage($preview: Boolean = false) {
           ... on HowItWorksSection {
             ...HowItWorksSection
           }
+          ... on RecentWorkSection {
+            ...RecentWorkSection
+          }
         }
       }
     }

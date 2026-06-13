@@ -2,6 +2,7 @@ import {
   type AccreditationListFragment,
   type HomeHeroSectionFragment,
   type HowItWorksSectionFragment,
+  type RecentWorkSectionFragment,
   type WhatWeDoSectionFragment,
   type WhoWeAreSectionFragment,
   type WhyChooseUsSectionFragment,
@@ -9,6 +10,7 @@ import {
 import { AccreditationList } from "./accreditation-list";
 import { HeroHeroSection } from "./home-hero";
 import { HowItWorksSection } from "./how-it-works";
+import { RecentWorkSection } from "./recent-work";
 import { WhatWeDoSection } from "./what-we-do";
 import { WhoWeAreSection } from "./who-we-are";
 import { WhyChooseUsSection } from "./why-choose-us";
@@ -19,7 +21,8 @@ export type PageSectionData =
   | WhatWeDoSectionFragment
   | WhoWeAreSectionFragment
   | WhyChooseUsSectionFragment
-  | HowItWorksSectionFragment;
+  | HowItWorksSectionFragment
+  | RecentWorkSectionFragment;
 
 export function PageSection({ section }: { section: PageSectionData }) {
   switch (section.__typename) {
@@ -40,6 +43,9 @@ export function PageSection({ section }: { section: PageSectionData }) {
 
     case "HowItWorksSection":
       return <HowItWorksSection data={section} />;
+
+    case "RecentWorkSection":
+      return <RecentWorkSection data={section} />;
 
     default:
       return null;
