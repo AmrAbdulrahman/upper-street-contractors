@@ -30,6 +30,8 @@ Copy `.env.example` → `.env.local`:
 - `STRAPI_URL` — Strapi server URL (default `http://localhost:1337`)
 - `NEXT_PUBLIC_STRAPI_URL` — public Strapi URL for inspection overlays
 - `STRAPI_API_TOKEN` — full-access API token from Strapi admin (Settings → API Tokens)
+- `STRAPI_TRANSFER_TOKEN` — transfer token for `cms:push` / `cms:pull` (Settings → Transfer Tokens on cloud)
+- `STRAPI_CLOUD_URL` — cloud Strapi URL for push/pull (preferred; avoids shell `STRAPI_URL=localhost` conflicts)
 - `ENABLE_PREVIEW` — toggles preview vs static export
 - `NEXT_PUBLIC_STRAPI_INSPECTION_MODE` — optional entry inspection overlays
 
@@ -115,6 +117,10 @@ Wrap editable Strapi fields with `StrapiEntry` / `StrapiEntryField` from `@/comp
 | `npm run lint` | ESLint |
 | `npm run codegen` | After `.graphql` changes (Strapi must be running) |
 | `npm run codegen:watch` | Watch mode during schema work |
+| `npm run cms:push` | Push local Strapi data/assets to cloud (destructive — overwrites cloud) |
+| `npm run cms:pull` | Pull cloud Strapi data/assets to local (destructive — overwrites local) |
+
+Cloud GraphQL introspection is enabled in `apps/cms/config/plugins.ts`; redeploy cms to Strapi Cloud after changing that config.
 
 ## Next.js agent rules
 

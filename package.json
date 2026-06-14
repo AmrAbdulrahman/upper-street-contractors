@@ -13,7 +13,9 @@
     "start": "nx start website",
     "lint": "nx run-many --target lint",
     "codegen": "graphql-codegen --config apps/website/codegen.ts && node scripts/fix-graphql-codegen.mjs",
-    "codegen:watch": "graphql-codegen --config apps/website/codegen.ts --watch"
+    "codegen:watch": "graphql-codegen --config apps/website/codegen.ts --watch",
+    "cms:push": "node scripts/strapi-transfer.mjs push",
+    "cms:pull": "node scripts/strapi-transfer.mjs pull"
   },
   "dependencies": {
     "@apollo/client": "^4.2.0",
