@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageSection } from "@/components/sections";
 import { pageMetaToMetadata } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
+import { flattenSectionRefs } from "@/helpers/flatten-section-refs";
 import { GetHomePageDocument } from "@/generated/graphql";
 import { getClient } from "@/lib/apollo-server";
 
@@ -11,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
     getClient().query({ query: GetHomePageDocument }),
   ]);
 
-  const page = data?.pageCollection?.items?.at(0);
+  const page = data?.pages?.at(0);
 
   return pageMetaToMetadata(page?.meta, {
     path: "/",
@@ -24,16 +25,14 @@ export default async function Home() {
     query: GetHomePageDocument,
   });
 
-  const page = data?.pageCollection?.items?.at(0);
-  const sections = page?.sectionsCollection?.items ?? [];
+  const page = data?.pages?.at(0);
+  const sections = flattenSectionRefs(page?.section_refs);
 
   return (
     <>
-      {sections.map((section) =>
-        section ? (
-          <PageSection key={section._id} section={section} />
-        ) : null,
-      )}
+      {sections.map((section) => (
+        <PageSection key={section.documentId} section={section} />
+      ))}
     </>
   );
 }

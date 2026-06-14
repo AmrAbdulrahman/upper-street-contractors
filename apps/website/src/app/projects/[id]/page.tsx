@@ -1,4 +1,4 @@
-import { Badge, badgePropsFromContentful } from "@/components/ui/badge";
+import { Badge, badgePropsFromStrapi } from "@/components/ui/badge";
 import { ProjectBanner } from "@/components/ui/project-card";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import {
@@ -20,9 +20,9 @@ export async function generateStaticParams() {
   });
 
   return (
-    data?.projectCardCollection?.items
-      ?.filter((item) => item?.sys?.id)
-      .map((item) => ({ id: item!.sys.id })) ?? []
+    data?.projectCards
+      ?.filter((item) => item?.documentId)
+      .map((item) => ({ id: item!.documentId })) ?? []
   );
 }
 
@@ -34,7 +34,7 @@ export async function generateMetadata({
     getSiteMetaConfig(),
     getClient().query({
       query: GetProjectCardDocument,
-      variables: { id },
+      variables: { documentId: id },
     }),
   ]);
 
@@ -67,7 +67,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const { data } = await getClient().query({
     query: GetProjectCardDocument,
-    variables: { id },
+    variables: { documentId: id },
   });
 
   const project = data?.projectCard;
@@ -76,7 +76,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
-  const badges = project.projectBadgesCollection?.items?.filter(Boolean) ?? [];
+  const badges = project.projectBadges?.filter(Boolean) ?? [];
 
   return (
     <div className="mx-auto max-w-container px-6 py-20">
@@ -104,7 +104,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 return null;
               }
 
-              const badgeProps = badgePropsFromContentful(badge, {
+              const badgeProps = badgePropsFromStrapi(badge, {
                 stripHref: true,
                 className: "border border-border bg-surface text-subtle",
               });
@@ -113,7 +113,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 return null;
               }
 
-              return <Badge key={badge._id} {...badgeProps} />;
+              return <Badge key={badge.documentId} {...badgeProps} />;
             })}
           </div>
         ) : null}

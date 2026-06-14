@@ -39,8 +39,8 @@ export default async function ProjectsPage() {
   });
 
   const projects =
-    data?.projectCardCollection?.items?.filter(
-      (item): item is NonNullable<typeof item> => Boolean(item),
+    data?.projectCards?.filter((item): item is NonNullable<typeof item> =>
+      Boolean(item),
     ) ?? [];
 
   return (
