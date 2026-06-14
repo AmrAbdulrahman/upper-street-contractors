@@ -1,0 +1,157 @@
+{
+  "locale": "en-US",
+  "types": {
+    "homeHeaderSection": {
+      "singularName": "home-header-section",
+      "pluralName": "home-header-sections",
+      "displayName": "homeHeroSection",
+      "kind": "single"
+    },
+    "button": {
+      "singularName": "button",
+      "pluralName": "buttons",
+      "displayName": "button",
+      "kind": "collection"
+    },
+    "icon": {
+      "singularName": "icon",
+      "pluralName": "icons",
+      "displayName": "icon",
+      "kind": "collection"
+    },
+    "atAGlance": {
+      "singularName": "at-aglance",
+      "pluralName": "at-aglances",
+      "displayName": "atAGlance",
+      "kind": "single"
+    },
+    "atAGlanceCard": {
+      "singularName": "at-aglance-card",
+      "pluralName": "at-aglance-cards",
+      "displayName": "atAGlanceCard",
+      "kind": "collection"
+    },
+    "page": {
+      "singularName": "page",
+      "pluralName": "pages",
+      "displayName": "page",
+      "kind": "collection"
+    },
+    "whoWeAreSection": {
+      "singularName": "who-we-are-section",
+      "pluralName": "who-we-are-sections",
+      "displayName": "whoWeAreSection",
+      "kind": "single"
+    },
+    "imageContainer": {
+      "singularName": "image-container",
+      "pluralName": "image-containers",
+      "displayName": "Image Container",
+      "kind": "collection"
+    },
+    "accreditation": {
+      "singularName": "accreditation",
+      "pluralName": "accreditations",
+      "displayName": "Accreditation",
+      "kind": "collection"
+    },
+    "accreditationList": {
+      "singularName": "accreditation-list",
+      "pluralName": "accreditation-lists",
+      "displayName": "Accreditation List",
+      "kind": "single"
+    },
+    "whatWeDoSection": {
+      "singularName": "what-we-do-section",
+      "pluralName": "what-we-do-sections",
+      "displayName": "What we do section",
+      "kind": "single"
+    },
+    "workCard": {
+      "singularName": "work-card",
+      "pluralName": "work-cards",
+      "displayName": "Work Card",
+      "kind": "collection"
+    },
+    "banner": {
+      "singularName": "banner",
+      "pluralName": "banners",
+      "displayName": "Banner",
+      "kind": "collection"
+    },
+    "metaData": {
+      "singularName": "meta-data",
+      "pluralName": "meta-datas",
+      "displayName": "Meta Data",
+      "kind": "collection"
+    },
+    "siteMetaConfig": {
+      "singularName": "site-meta-config",
+      "pluralName": "site-meta-configs",
+      "displayName": "Site Meta Config",
+      "kind": "single"
+    },
+    "socialLink": {
+      "singularName": "social-link",
+      "pluralName": "social-links",
+      "displayName": "Social Link",
+      "kind": "collection"
+    },
+    "bulletList": {
+      "singularName": "bullet-list",
+      "pluralName": "bullet-lists",
+      "displayName": "Bullet List",
+      "kind": "collection"
+    },
+    "whyChooseUsSection": {
+      "singularName": "why-choose-us-section",
+      "pluralName": "why-choose-us-sections",
+      "displayName": "Why Choose Us Section",
+      "kind": "single"
+    },
+    "staticStep": {
+      "singularName": "static-step",
+      "pluralName": "static-steps",
+      "displayName": "Static Step",
+      "kind": "collection"
+    },
+    "howItWorksSection": {
+      "singularName": "how-it-works-section",
+      "pluralName": "how-it-works-sections",
+      "displayName": "How It Works Section",
+      "kind": "single"
+    },
+    "projectCard": {
+      "singularName": "project-card",
+      "pluralName": "project-cards",
+      "displayName": "Project Card",
+      "kind": "collection"
+    },
+    "recentWorkSection": {
+      "singularName": "recent-work-section",
+      "pluralName": "recent-work-sections",
+      "displayName": "Recent Work Section",
+      "kind": "single"
+    },
+    "badge": {
+      "singularName": "badge",
+      "pluralName": "badges",
+      "displayName": "Badge",
+      "kind": "collection"
+    },
+    "reviewCard": {
+      "singularName": "review-card",
+      "pluralName": "review-cards",
+      "displayName": "Review Card",
+      "kind": "collection"
+    },
+    "clientReviewInfo": {
+      "singularName": "client-review-info",
+      "pluralName": "client-review-infos",
+      "displayName": "Client Review Info",
+      "kind": "collection"
+    }
+  },
+  "promote": {},
+  "jsonRelations": ["page.sections"]
+}

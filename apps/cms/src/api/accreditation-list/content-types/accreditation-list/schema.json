@@ -1,0 +1,26 @@
+{
+  "kind": "singleType",
+  "collectionName": "accreditation_lists",
+  "info": {
+    "singularName": "accreditation-list",
+    "pluralName": "accreditation-lists",
+    "displayName": "Accreditation List"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "list": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::accreditation.accreditation"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

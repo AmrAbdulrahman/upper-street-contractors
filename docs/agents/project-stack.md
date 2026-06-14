@@ -12,7 +12,7 @@ Reference for agents working in **upper-street-contractors**.
 | Client data | Apollo Client 4 + `@apollo/client-integration-nextjs` |
 | Codegen | `@graphql-codegen/*` — colocated `apps/website/src/**/*.graphql` → `apps/website/src/generated/` |
 | Lint | ESLint 9 + `eslint-config-next` |
-| Monorepo | Nx workspace — app in `apps/website`, shared config at repo root |
+| Monorepo | Nx workspace — `apps/website` (Next.js), `apps/cms` (Strapi 5), shared config at repo root |
 
 ## Build modes
 
@@ -37,6 +37,12 @@ Codegen (`codegen.ts`) also reads `.env.local` for schema introspection.
 ## Directory layout
 
 ```
+apps/cms/                   # Strapi 5 headless CMS (isolated node_modules — React 18)
+├── src/                    # API, admin extensions
+├── config/                 # server, database, plugins
+├── public/uploads/         # media uploads
+└── project.json            # Nx targets: dev, build, start, console
+
 apps/website/               # Next.js application
 ├── src/
 │   ├── app/                # App Router pages + API routes
@@ -99,7 +105,8 @@ Wrap editable Contentful fields with `ContentfulEntry` / `ContentfulEntryField` 
 
 | Command | When |
 | ------- | ---- |
-| `npm run dev` | Local dev server (`nx dev website`) |
+| `npm run dev` | Website dev server (`nx dev website`) |
+| `npm run dev:cms` | Strapi dev server (`nx dev cms`) |
 | `npm run build` | Production/preview build (`nx build website`) |
 | `npm run lint` | ESLint |
 | `npm run codegen` | After `.graphql` changes |

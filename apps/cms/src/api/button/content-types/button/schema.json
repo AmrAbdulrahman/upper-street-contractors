@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "buttons",
+  "info": {
+    "singularName": "button",
+    "pluralName": "buttons",
+    "displayName": "button"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "variant": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    },
+    "borderRadius": {
+      "type": "integer"
+    },
+    "icon": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::icon.icon"
+    },
+    "iconPosition": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "href": {
+      "type": "string"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

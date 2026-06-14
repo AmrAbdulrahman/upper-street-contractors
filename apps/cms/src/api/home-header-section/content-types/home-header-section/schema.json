@@ -1,0 +1,35 @@
+{
+  "kind": "singleType",
+  "collectionName": "home_header_sections",
+  "info": {
+    "singularName": "home-header-section",
+    "pluralName": "home-header-sections",
+    "displayName": "homeHeroSection"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "overline": {
+      "type": "string"
+    },
+    "title": {
+      "type": "blocks"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "buttons": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::button.button"
+    },
+    "footer": {
+      "type": "blocks"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

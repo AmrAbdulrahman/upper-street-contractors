@@ -1,0 +1,37 @@
+{
+  "kind": "singleType",
+  "collectionName": "recent_work_sections",
+  "info": {
+    "singularName": "recent-work-section",
+    "pluralName": "recent-work-sections",
+    "displayName": "Recent Work Section"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "overline": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "projects": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::project-card.project-card"
+    },
+    "viewAllProjects": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::button.button"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

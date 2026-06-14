@@ -1,0 +1,74 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_meta_configs",
+  "info": {
+    "singularName": "site-meta-config",
+    "pluralName": "site-meta-configs",
+    "displayName": "Site Meta Config"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "siteName": {
+      "type": "string"
+    },
+    "siteUrl": {
+      "type": "string"
+    },
+    "pageTitleTemplate": {
+      "type": "string"
+    },
+    "defaultMetaTitle": {
+      "type": "string"
+    },
+    "defaultMetaDescription": {
+      "type": "string"
+    },
+    "defaultImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
+    },
+    "locale": {
+      "type": "string"
+    },
+    "indexable": {
+      "type": "boolean"
+    },
+    "legalName": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "mapLocation": {
+      "type": "json"
+    },
+    "addressLine": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "postalCode": {
+      "type": "string"
+    },
+    "socialLinks": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::social-link.social-link"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

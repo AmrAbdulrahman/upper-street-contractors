@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "static_steps",
+  "info": {
+    "singularName": "static-step",
+    "pluralName": "static-steps",
+    "displayName": "Static Step"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "stepOrder": {
+      "type": "string"
+    },
+    "stepTitle": {
+      "type": "string"
+    },
+    "stepDescription": {
+      "type": "string"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

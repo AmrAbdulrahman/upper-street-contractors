@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "image_containers",
+  "info": {
+    "singularName": "image-container",
+    "pluralName": "image-containers",
+    "displayName": "Image Container"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "imageFile": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
+    },
+    "imgDescription": {
+      "type": "string"
+    },
+    "width": {
+      "type": "integer"
+    },
+    "height": {
+      "type": "integer"
+    },
+    "imageRadius": {
+      "type": "string"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

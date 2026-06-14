@@ -4,6 +4,9 @@
   "references": [
     {
       "path": "./apps/website"
+    },
+    {
+      "path": "./apps/cms"
     }
   ]
 }

@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "accreditations",
+  "info": {
+    "singularName": "accreditation",
+    "pluralName": "accreditations",
+    "displayName": "Accreditation"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "accreditationTitle": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::icon.icon"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

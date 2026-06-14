@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "project_cards",
+  "info": {
+    "singularName": "project-card",
+    "pluralName": "project-cards",
+    "displayName": "Project Card"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "projectBanner": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
+    },
+    "projectCategory": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::badge.badge"
+    },
+    "projectBadges": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::badge.badge"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

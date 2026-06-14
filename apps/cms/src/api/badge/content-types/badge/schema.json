@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "badges",
+  "info": {
+    "singularName": "badge",
+    "pluralName": "badges",
+    "displayName": "Badge"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "text": {
+      "type": "string"
+    },
+    "variant": {
+      "type": "string"
+    },
+    "href": {
+      "type": "string"
+    },
+    "borderRadius": {
+      "type": "integer"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

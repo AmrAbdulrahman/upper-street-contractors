@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "work_cards",
+  "info": {
+    "singularName": "work-card",
+    "pluralName": "work-cards",
+    "displayName": "Work Card"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "emoji": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "blocks"
+    },
+    "priceLine": {
+      "type": "string"
+    },
+    "linkText": {
+      "type": "string"
+    },
+    "href": {
+      "type": "string"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

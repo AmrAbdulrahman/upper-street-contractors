@@ -1,0 +1,29 @@
+{
+  "kind": "collectionType",
+  "collectionName": "meta_datas",
+  "info": {
+    "singularName": "meta-data",
+    "pluralName": "meta-datas",
+    "displayName": "Meta Data"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "globalMetaConfig": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site-meta-config.site-meta-config"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}

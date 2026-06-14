@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "at_aglance_cards",
+  "info": {
+    "singularName": "at-aglance-card",
+    "pluralName": "at-aglance-cards",
+    "displayName": "atAGlanceCard"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "quantity": {
+      "type": "integer"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "contentfulId": {
+      "type": "string"
+    }
+  }
+}
