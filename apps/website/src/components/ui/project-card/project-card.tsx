@@ -1,7 +1,7 @@
 "use client";
 
-import { ContentfulEntry, ContentfulEntryField } from "@/components/contentful";
-import { Badge, badgePropsFromContentful } from "@/components/ui/badge";
+import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import { Badge, badgePropsFromStrapi } from "@/components/ui/badge";
 import { ProjectCardFragment } from "@/generated/graphql";
 import Link from "next/link";
 import { ProjectBanner } from "./project-banner";
@@ -22,26 +22,26 @@ export function ProjectCard({ data }: ProjectCardProps) {
     description,
     projectBanner,
     projectCategory,
-    projectBadgesCollection,
-    sys,
+    projectBadges,
+    documentId,
   } = data;
-  const badges = projectBadgesCollection?.items?.filter(Boolean) ?? [];
-  const href = `/projects/${sys.id}`;
+  const badges = projectBadges?.filter(Boolean) ?? [];
+  const href = `/projects/${documentId}`;
 
   return (
-    <ContentfulEntry entry={data}>
+    <StrapiEntry entry={data}>
       <article className={cardClasses}>
         <Link href={href} className="block">
-          <ContentfulEntryField field="projectBanner">
+          <StrapiEntryField field="projectBanner">
             <ProjectBanner banner={projectBanner} category={projectCategory} />
-          </ContentfulEntryField>
+          </StrapiEntryField>
         </Link>
 
         <div className="p-[18px]">
           {badges.length > 0 ? (
             <div className="relative z-10 mb-2.5 flex flex-wrap gap-1.5">
               {badges.map((badge) => {
-                const badgeProps = badgePropsFromContentful(badge, {
+                const badgeProps = badgePropsFromStrapi(badge, {
                   className: "border border-border bg-surface text-subtle",
                 });
 
@@ -50,11 +50,11 @@ export function ProjectCard({ data }: ProjectCardProps) {
                 }
 
                 return (
-                  <ContentfulEntry key={badge._id} entry={badge}>
-                    <ContentfulEntryField field="text">
+                  <StrapiEntry key={badge.documentId} entry={badge}>
+                    <StrapiEntryField field="text">
                       <Badge {...badgeProps} />
-                    </ContentfulEntryField>
-                  </ContentfulEntry>
+                    </StrapiEntryField>
+                  </StrapiEntry>
                 );
               })}
             </div>
@@ -62,21 +62,21 @@ export function ProjectCard({ data }: ProjectCardProps) {
 
           <Link href={href} className="block">
             {title ? (
-              <ContentfulEntryField field="title">
+              <StrapiEntryField field="title">
                 <h3 className={titleClasses}>{title}</h3>
-              </ContentfulEntryField>
+              </StrapiEntryField>
             ) : null}
 
             {description ? (
-              <ContentfulEntryField field="description">
+              <StrapiEntryField field="description">
                 <p className="text-[13px] leading-[1.55] text-muted">
                   {description}
                 </p>
-              </ContentfulEntryField>
+              </StrapiEntryField>
             ) : null}
           </Link>
         </div>
       </article>
-    </ContentfulEntry>
+    </StrapiEntry>
   );
 }

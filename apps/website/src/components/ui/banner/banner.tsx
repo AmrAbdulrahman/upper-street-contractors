@@ -1,8 +1,7 @@
-import { ContentfulEntry, ContentfulEntryField } from "@/components/contentful";
-import { RichText } from "@/components/contentful/rich-text";
+import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import { RichText } from "@/components/strapi/rich-text";
 import { Button } from "@/components/ui/button";
 import { BannerFragment } from "@/generated/graphql";
-import type { Document } from "@contentful/rich-text-types";
 
 export const BANNER_VARIANTS = ["dark", "light", "note", "transparent"] as const;
 export type BannerVariant = (typeof BANNER_VARIANTS)[number];
@@ -68,7 +67,6 @@ function getRichTextVariant(
 
 export function Banner({ data, className = "" }: BannerProps) {
   const { title, body, emoji, variant, hoverable, button } = data;
-  const bodyDocument = body?.json as Document | undefined;
   const bannerVariant = normalizeBannerVariant(variant);
   const hasTitle = Boolean(title?.trim());
   const hasButton = Boolean(button);
@@ -92,59 +90,59 @@ export function Banner({ data, className = "" }: BannerProps) {
     <div className="min-w-0 flex flex-col gap-1">
       <div className="flex items-center gap-2.5">
         {emoji ? (
-          <ContentfulEntryField field="emoji" as="span">
+          <StrapiEntryField field="emoji" as="span">
             <span aria-hidden className="shrink-0 text-lg leading-none">
               {emoji}
             </span>
-          </ContentfulEntryField>
+          </StrapiEntryField>
         ) : null}
 
         {title ? (
-          <ContentfulEntryField field="title" as="span">
+          <StrapiEntryField field="title" as="span">
             <span className={titleClasses[bannerVariant]}>{title}</span>
-          </ContentfulEntryField>
+          </StrapiEntryField>
         ) : null}
       </div>
 
-      {bodyDocument ? (
-        <ContentfulEntryField field="body" className="min-w-0">
+      {body ? (
+        <StrapiEntryField field="body" className="min-w-0">
           <RichText
-            document={bodyDocument}
+            content={body}
             variant={richTextVariant}
             className={hasButton ? "max-w-2xl" : undefined}
           />
-        </ContentfulEntryField>
+        </StrapiEntryField>
       ) : null}
     </div>
   ) : (
     <div className="flex min-w-0 items-center gap-2.5">
       {emoji ? (
-        <ContentfulEntryField field="emoji" as="span">
+        <StrapiEntryField field="emoji" as="span">
           <span aria-hidden className="shrink-0 text-lg leading-none">
             {emoji}
           </span>
-        </ContentfulEntryField>
+        </StrapiEntryField>
       ) : null}
 
-      {bodyDocument ? (
-        <ContentfulEntryField field="body" className="min-w-0">
-          <RichText document={bodyDocument} variant={richTextVariant} />
-        </ContentfulEntryField>
+      {body ? (
+        <StrapiEntryField field="body" className="min-w-0">
+          <RichText content={body} variant={richTextVariant} />
+        </StrapiEntryField>
       ) : null}
     </div>
   );
 
   return (
-    <ContentfulEntry entry={data}>
+    <StrapiEntry entry={data}>
       <div className={containerClasses}>
         {contentBlock}
 
         {hasButton && button ? (
-          <ContentfulEntry entry={button}>
+          <StrapiEntry entry={button}>
             <Button data={button} className="w-full shrink-0 md:w-auto" />
-          </ContentfulEntry>
+          </StrapiEntry>
         ) : null}
       </div>
-    </ContentfulEntry>
+    </StrapiEntry>
   );
 }

@@ -1,7 +1,7 @@
-import { Badge, badgePropsFromContentful } from "@/components/ui/badge";
+import { Badge, badgePropsFromStrapi } from "@/components/ui/badge";
 import { ProjectCardFragment } from "@/generated/graphql";
+import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
 import Image from "next/image";
-
 type ProjectBannerProps = {
   banner: ProjectCardFragment["projectBanner"];
   category: ProjectCardFragment["projectCategory"];
@@ -20,7 +20,7 @@ export function ProjectBanner({
   priority = false,
 }: ProjectBannerProps) {
   const categoryProps = category
-    ? badgePropsFromContentful(category, {
+    ? badgePropsFromStrapi(category, {
         stripHref: true,
         className:
           "relative z-10 bg-gold px-2.5 py-1 text-[10px] font-bold tracking-[0.06em] text-white uppercase",
@@ -29,12 +29,14 @@ export function ProjectBanner({
 
   const roundedClass = rounded ? "rounded-lg" : "";
 
-  if (banner?.url) {
+  const bannerUrl = resolveStrapiMediaUrl(banner?.url);
+
+  if (bannerUrl) {
     return (
       <div className={`relative overflow-hidden ${heightClassName} ${roundedClass}`}>
         <Image
-          src={banner.url}
-          alt={banner.description ?? banner.title ?? "Project photo"}
+          src={bannerUrl}
+          alt={banner.alternativeText ?? "Project photo"}
           width={banner.width ?? 800}
           height={banner.height ?? 560}
           className="h-full w-full object-cover"

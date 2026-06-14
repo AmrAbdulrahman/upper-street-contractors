@@ -79,7 +79,7 @@ export function Badge({
   );
 }
 
-export function badgePropsFromContentful(
+export function badgePropsFromStrapi(
   data:
     | {
         text?: string | null;

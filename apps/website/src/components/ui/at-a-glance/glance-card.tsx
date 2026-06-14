@@ -1,4 +1,4 @@
-import { ContentfulEntryField } from "@/components/contentful/contentful-entry-field";
+import { StrapiEntryField } from "@/components/strapi/strapi-entry-field";
 
 export type GlanceCardProps = {
   value: string;
@@ -10,19 +10,19 @@ export function GlanceCard({ value, valueAccent, label }: GlanceCardProps) {
   return (
     <div className="rounded-lg border border-white/5 bg-[rgba(255,255,255,0.06)] px-5 py-4">
       <p className="font-serif text-3xl leading-none tracking-tight text-white">
-        <ContentfulEntryField field="quantity" as="span">
+        <StrapiEntryField field="quantity" as="span">
           <span>{value}</span>
-        </ContentfulEntryField>
+        </StrapiEntryField>
 
         {valueAccent ? (
-          <ContentfulEntryField field="unit" as="span">
+          <StrapiEntryField field="unit" as="span">
             <span className="text-gold-mid">{valueAccent}</span>
-          </ContentfulEntryField>
+          </StrapiEntryField>
         ) : null}
       </p>
-      <ContentfulEntryField field="label">
+      <StrapiEntryField field="label">
         <p className="mt-2 text-sm text-subtle">{label}</p>
-      </ContentfulEntryField>
+      </StrapiEntryField>
     </div>
   );
 }

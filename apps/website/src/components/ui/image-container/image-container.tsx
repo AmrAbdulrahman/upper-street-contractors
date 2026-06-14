@@ -1,6 +1,6 @@
 import { ImageContainerFragment } from "@/generated/graphql";
-import Image from "next/image";
-import type { CSSProperties } from "react";
+import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
+import Image from "next/image";import type { CSSProperties } from "react";
 
 export const IMAGE_RADIUS_CLASSES = {
   none: "rounded-none",
@@ -39,7 +39,7 @@ function getImageAlt(
   return (
     alt ??
     data.imgDescription ??
-    data.imageFile?.title ??
+    data.imageFile?.alternativeText ??
     "Image"
   );
 }
@@ -75,7 +75,9 @@ export function ImageContainer({
     height: hasExplicitHeight ? data.height ?? undefined : undefined,
   };
 
-  if (!image?.url) {
+  const imageUrl = resolveStrapiMediaUrl(image?.url);
+
+  if (!imageUrl) {
     return (
       <div
         className={`flex items-center justify-center text-sm text-white/15 ${imageClasses}`}
@@ -93,10 +95,10 @@ export function ImageContainer({
 
   return (
     <Image
-      src={image.url}
+      src={imageUrl}
       alt={imageAlt}
-      width={data.width ?? image.width ?? 800}
-      height={data.height ?? image.height ?? 680}
+      width={data.width ?? image?.width ?? 800}
+      height={data.height ?? image?.height ?? 680}
       className={imageClasses}
       style={imageStyle}
       sizes="(max-width: 1024px) 100vw, 536px"

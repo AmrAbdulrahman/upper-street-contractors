@@ -1,7 +1,7 @@
 export {
   Badge,
   BADGE_VARIANTS,
-  badgePropsFromContentful,
+  badgePropsFromStrapi,
   normalizeBadgeVariant,
   type BadgeProps,
   type BadgeVariant,

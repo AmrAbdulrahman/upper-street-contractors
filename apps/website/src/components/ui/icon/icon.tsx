@@ -24,7 +24,7 @@ const iconMap: Record<IconCode, ComponentType<IconSvgProps>> = {
 };
 
 export type IconProps = {
-  data: IconFragment | null | undefined;
+  data: Pick<IconFragment, "code"> | null | undefined;
   className?: string;
 };
 

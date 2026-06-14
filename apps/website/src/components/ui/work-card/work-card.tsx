@@ -1,8 +1,7 @@
-import { ContentfulEntry, ContentfulEntryField } from "@/components/contentful";
-import { RichText } from "@/components/contentful/rich-text";
+import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import { RichText } from "@/components/strapi/rich-text";
 import { Icon } from "@/components/ui/icon";
 import { WorkCardFragment } from "@/generated/graphql";
-import type { Document } from "@contentful/rich-text-types";
 import Link from "next/link";
 
 type WorkCardProps = {
@@ -11,7 +10,6 @@ type WorkCardProps = {
 
 export function WorkCard({ data }: WorkCardProps) {
   const { emoji, title, body, href, linkText, priceLine } = data;
-  const bodyDocument = body?.json as Document | undefined;
 
   const cardClasses = [
     "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white p-7 shadow-sm",
@@ -24,60 +22,60 @@ export function WorkCard({ data }: WorkCardProps) {
   const content = (
     <>
       {emoji ? (
-        <ContentfulEntryField field="emoji" as="span">
+        <StrapiEntryField field="emoji" as="span">
           <span
             aria-hidden
             className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-gold-light text-xl transition-colors group-hover:bg-white/10"
           >
             {emoji}
           </span>
-        </ContentfulEntryField>
+        </StrapiEntryField>
       ) : null}
 
       {title ? (
-        <ContentfulEntryField field="title">
+        <StrapiEntryField field="title">
           <h3 className="mt-5 truncate font-serif text-2xl leading-tight text-dark transition-colors group-hover:text-white">
             {title}
           </h3>
-        </ContentfulEntryField>
+        </StrapiEntryField>
       ) : null}
 
-      {bodyDocument ? (
-        <ContentfulEntryField field="body" className="mt-3 min-w-0">
-          <RichText document={bodyDocument} variant="work-card-body" />
-        </ContentfulEntryField>
+      {body ? (
+        <StrapiEntryField field="body" className="mt-3 min-w-0">
+          <RichText content={body} variant="work-card-body" />
+        </StrapiEntryField>
       ) : null}
 
       {priceLine ? (
-        <ContentfulEntryField field="priceLine">
+        <StrapiEntryField field="priceLine">
           <p className="mt-5 text-sm font-bold text-gold">{priceLine}</p>
-        </ContentfulEntryField>
+        </StrapiEntryField>
       ) : null}
 
       {linkText ? (
-        <ContentfulEntryField field="linkText">
+        <StrapiEntryField field="linkText">
           <p className="mt-4 flex items-center gap-1.5 text-sm font-bold text-gold transition-colors group-hover:text-white">
             {linkText}
             <Icon data={{ code: "arrow-right" }} className="h-4 w-4 shrink-0" />
           </p>
-        </ContentfulEntryField>
+        </StrapiEntryField>
       ) : null}
     </>
   );
 
   if (href) {
     return (
-      <ContentfulEntry entry={data}>
+      <StrapiEntry entry={data}>
         <Link href={href} className={cardClasses}>
           {content}
         </Link>
-      </ContentfulEntry>
+      </StrapiEntry>
     );
   }
 
   return (
-    <ContentfulEntry entry={data}>
+    <StrapiEntry entry={data}>
       <article className={cardClasses}>{content}</article>
-    </ContentfulEntry>
+    </StrapiEntry>
   );
 }
