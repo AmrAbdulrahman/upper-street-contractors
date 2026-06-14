@@ -26,8 +26,8 @@ fragment SiteMetaConfig on SiteMetaConfig {
   }
 }
 
-query GetSiteMetaConfig {
-  siteMetaConfig {
+query GetSiteMetaConfig($status: PublicationStatus = PUBLISHED) {
+  siteMetaConfigs(pagination: { limit: 1 }, status: $status) {
     ...SiteMetaConfig
   }
 }

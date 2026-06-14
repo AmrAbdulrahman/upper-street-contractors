@@ -1,40 +1,45 @@
-query GetHomePage($status: PublicationStatus = false) {
-  pageCollection(limit: 1, status: $status, where: { key: "home" }) {
-    items {
-      _id
-      __typename
-      sys {
-        id
+query GetHomePage($status: PublicationStatus = PUBLISHED) {
+  pages(
+    filters: { key: { eq: "home" } }
+    pagination: { limit: 1 }
+    status: $status
+  ) {
+    documentId
+    title
+    description
+    meta {
+      ...PageMetadata
+    }
+    section_refs(sort: ["order:asc"]) {
+      documentId
+      order
+      home_hero_section {
+        __typename
+        ...HomeHeroSection
       }
-      title
-      description
-      meta {
-        ...PageMetadata
+      who_we_are_section {
+        __typename
+        ...WhoWeAreSection
       }
-      sectionsCollection(limit: 10, status: $status) {
-        items {
-          ... on HomeHeaderSection {
-            ...HomeHeroSection
-          }
-          ... on AccreditationList {
-            ...AccreditationList
-          }
-          ... on WhoWeAreSection {
-            ...WhoWeAreSection
-          }
-          ... on WhatWeDoSection {
-            ...WhatWeDoSection
-          }
-          ... on WhyChooseUsSection {
-            ...WhyChooseUsSection
-          }
-          ... on HowItWorksSection {
-            ...HowItWorksSection
-          }
-          ... on RecentWorkSection {
-            ...RecentWorkSection
-          }
-        }
+      accreditation_list {
+        __typename
+        ...AccreditationList
+      }
+      what_we_do_section {
+        __typename
+        ...WhatWeDoSection
+      }
+      why_choose_us_section {
+        __typename
+        ...WhyChooseUsSection
+      }
+      how_it_works_section {
+        __typename
+        ...HowItWorksSection
+      }
+      recent_work_section {
+        __typename
+        ...RecentWorkSection
       }
     }
   }

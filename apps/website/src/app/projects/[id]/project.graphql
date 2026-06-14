@@ -1,17 +1,13 @@
 #import "../../components/ui/project-card/project-card.graphql"
 
-query GetProjectCard($id: String!, $status: PublicationStatus = false) {
-  projectCard(id: $id, status: $status) {
+query GetProjectCard($documentId: ID!, $status: PublicationStatus = PUBLISHED) {
+  projectCard(documentId: $documentId, status: $status) {
     ...ProjectCard
   }
 }
 
 query GetProjectCardIds {
-  projectCardCollection(limit: 100) {
-    items {
-      sys {
-        id
-      }
-    }
+  projectCards(pagination: { limit: 100 }) {
+    documentId
   }
 }
