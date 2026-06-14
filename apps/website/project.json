@@ -5,11 +5,9 @@
   "projectType": "application",
   "tags": [],
   "targets": {
-    "codegen": {
-      "executor": "nx:run-script",
-      "options": {
-        "script": "codegen"
-      }
-    }
+    "build": {
+      "dependsOn": ["codegen"]
+    },
+    "codegen": {}
   }
 }

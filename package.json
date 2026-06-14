@@ -12,8 +12,8 @@
     "build": "npm run generate:sitemap && nx build website",
     "start": "nx start website",
     "lint": "nx run-many --target lint",
-    "codegen": "graphql-codegen --config codegen.ts && node scripts/fix-graphql-codegen.mjs",
-    "codegen:watch": "graphql-codegen --config codegen.ts --watch"
+    "codegen": "graphql-codegen --config apps/website/codegen.ts && node scripts/fix-graphql-codegen.mjs",
+    "codegen:watch": "graphql-codegen --config apps/website/codegen.ts --watch"
   },
   "dependencies": {
     "@apollo/client": "^4.2.0",
