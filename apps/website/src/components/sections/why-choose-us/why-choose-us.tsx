@@ -1,8 +1,7 @@
-import { AddContentfulEntry, ContentfulEntry, ContentfulEntryField } from "@/components/contentful";
+import { AddStrapiEntry, StrapiEntry, StrapiEntryField } from "@/components/strapi";
 import { BulletList } from "@/components/ui/bullet-list";
 import { ProfileCard } from "@/components/ui/profile-card";
 import { WhyChooseUsSectionFragment } from "@/generated/graphql";
-import type { Document } from "@contentful/rich-text-types";
 
 type WhyChooseUsSectionProps = {
   data: WhyChooseUsSectionFragment;
@@ -11,27 +10,26 @@ type WhyChooseUsSectionProps = {
 export function WhyChooseUsSection({ data }: WhyChooseUsSectionProps) {
   const {
     overline,
-    listOfPointsCollection,
+    listOfPoints,
     cardImage,
     cardTitle,
     cardRole,
     cardParagraph,
     cardBanner,
   } = data;
-  const paragraphDocument = cardParagraph?.json as Document | undefined;
-  const bulletItems = listOfPointsCollection?.items?.filter(Boolean) ?? [];
+  const bulletItems = listOfPoints?.filter(Boolean) ?? [];
 
   return (
-    <ContentfulEntry entry={data}>
+    <StrapiEntry entry={data}>
       <section className="bg-white">
         <div className="mx-auto grid max-w-container gap-12 px-6 py-[88px] lg:grid-cols-2 lg:items-start lg:gap-x-[72px] lg:gap-y-12">
           <div className="min-w-0">
             {overline ? (
-              <ContentfulEntryField field="overline">
+              <StrapiEntryField field="overline">
                 <p className="mb-2.5 text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
                   {overline}
                 </p>
-              </ContentfulEntryField>
+              </StrapiEntryField>
             ) : null}
 
             <h2 className="text-[clamp(26px,3.5vw,42px)] leading-tight text-dark">
@@ -41,9 +39,9 @@ export function WhyChooseUsSection({ data }: WhyChooseUsSectionProps) {
             {bulletItems.length > 0 ? (
               <ul className="mt-6 flex flex-col gap-3">
                 {bulletItems.map((item) =>
-                  item ? <BulletList key={item._id} data={item} /> : null,
+                  item ? <BulletList key={item.documentId} data={item} /> : null,
                 )}
-                <AddContentfulEntry field="listOfPoints" />
+                <AddStrapiEntry field="listOfPoints" />
               </ul>
             ) : null}
           </div>
@@ -53,13 +51,13 @@ export function WhyChooseUsSection({ data }: WhyChooseUsSectionProps) {
               image={cardImage}
               title={cardTitle}
               role={cardRole}
-              paragraph={paragraphDocument}
+              paragraph={cardParagraph}
               banner={cardBanner}
               imageAlt={cardImage?.imgDescription ?? cardTitle ?? "Profile photo"}
             />
           </div>
         </div>
       </section>
-    </ContentfulEntry>
+    </StrapiEntry>
   );
 }

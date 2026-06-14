@@ -15,37 +15,38 @@ import { WhatWeDoSection } from "./what-we-do";
 import { WhoWeAreSection } from "./who-we-are";
 import { WhyChooseUsSection } from "./why-choose-us";
 
-export type PageSectionData =
+export type PageSectionData = (
   | AccreditationListFragment
   | HomeHeroSectionFragment
   | WhatWeDoSectionFragment
   | WhoWeAreSectionFragment
   | WhyChooseUsSectionFragment
   | HowItWorksSectionFragment
-  | RecentWorkSectionFragment;
+  | RecentWorkSectionFragment
+) & { __typename?: string };
 
 export function PageSection({ section }: { section: PageSectionData }) {
   switch (section.__typename) {
     case "HomeHeaderSection":
-      return <HeroHeroSection data={section} />;
+      return <HeroHeroSection data={section as HomeHeroSectionFragment} />;
 
     case "WhoWeAreSection":
-      return <WhoWeAreSection data={section} />;
+      return <WhoWeAreSection data={section as WhoWeAreSectionFragment} />;
 
     case "WhatWeDoSection":
-      return <WhatWeDoSection data={section} />;
+      return <WhatWeDoSection data={section as WhatWeDoSectionFragment} />;
 
     case "AccreditationList":
-      return <AccreditationList data={section} />;
+      return <AccreditationList data={section as AccreditationListFragment} />;
 
     case "WhyChooseUsSection":
-      return <WhyChooseUsSection data={section} />;
+      return <WhyChooseUsSection data={section as WhyChooseUsSectionFragment} />;
 
     case "HowItWorksSection":
-      return <HowItWorksSection data={section} />;
+      return <HowItWorksSection data={section as HowItWorksSectionFragment} />;
 
     case "RecentWorkSection":
-      return <RecentWorkSection data={section} />;
+      return <RecentWorkSection data={section as RecentWorkSectionFragment} />;
 
     default:
       return null;

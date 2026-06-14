@@ -1,8 +1,8 @@
 import {
-  AddContentfulEntry,
-  ContentfulEntry,
-  ContentfulEntryField,
-} from "@/components/contentful";
+  AddStrapiEntry,
+  StrapiEntry,
+  StrapiEntryField,
+} from "@/components/strapi";
 import { Button } from "@/components/ui/button";
 import { ProjectCard } from "@/components/ui/project-card";
 import { RecentWorkSectionFragment } from "@/generated/graphql";
@@ -12,59 +12,60 @@ type RecentWorkSectionProps = {
 };
 
 export function RecentWorkSection({ data }: RecentWorkSectionProps) {
-  const { overline, title, description, projectsCollection, viewAllProjects } =
-    data;
-  const projects = projectsCollection?.items?.filter(Boolean) ?? [];
+  const { overline, title, description, projects, viewAllProjects } = data;
+  const projectItems = projects?.filter(Boolean) ?? [];
 
   return (
-    <ContentfulEntry entry={data}>
+    <StrapiEntry entry={data}>
       <section className="bg-white">
         <div className="mx-auto max-w-container px-6 py-[88px]">
           <div className="mx-auto max-w-2xl text-center">
             {overline ? (
-              <ContentfulEntryField field="overline">
+              <StrapiEntryField field="overline">
                 <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
                   {overline}
                 </p>
-              </ContentfulEntryField>
+              </StrapiEntryField>
             ) : null}
 
             {title ? (
-              <ContentfulEntryField field="title">
+              <StrapiEntryField field="title">
                 <h2 className="mt-2.5 text-[clamp(26px,3.5vw,42px)] leading-tight text-dark">
                   {title}
                 </h2>
-              </ContentfulEntryField>
+              </StrapiEntryField>
             ) : null}
 
             {description ? (
-              <ContentfulEntryField field="description">
+              <StrapiEntryField field="description">
                 <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted">
                   {description}
                 </p>
-              </ContentfulEntryField>
+              </StrapiEntryField>
             ) : null}
           </div>
 
-          {projects.length > 0 ? (
+          {projectItems.length > 0 ? (
             <div className="mt-12 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) =>
-                project ? <ProjectCard key={project._id} data={project} /> : null,
+              {projectItems.map((project) =>
+                project ? (
+                  <ProjectCard key={project.documentId} data={project} />
+                ) : null,
               )}
 
-              <AddContentfulEntry field="projects" />
+              <AddStrapiEntry field="projects" />
             </div>
           ) : null}
 
           {viewAllProjects ? (
             <div className="mt-9 flex justify-center">
-              <ContentfulEntryField field="viewAllProjects">
+              <StrapiEntryField field="viewAllProjects">
                 <Button data={viewAllProjects} />
-              </ContentfulEntryField>
+              </StrapiEntryField>
             </div>
           ) : null}
         </div>
       </section>
-    </ContentfulEntry>
+    </StrapiEntry>
   );
 }

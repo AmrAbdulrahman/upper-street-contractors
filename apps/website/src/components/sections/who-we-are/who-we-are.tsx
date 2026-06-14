@@ -1,71 +1,70 @@
-import { AddContentfulEntry, ContentfulEntry, ContentfulEntryField } from "@/components/contentful";
-import { RichText } from "@/components/contentful/rich-text";
+import { AddStrapiEntry, StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import { RichText } from "@/components/strapi/rich-text";
 import { Button } from "@/components/ui/button";
 import { ImageContainer } from "@/components/ui/image-container";
 import { WhoWeAreSectionFragment } from "@/generated/graphql";
-import type { Document } from "@contentful/rich-text-types";
 
 type WhoWeAreSectionProps = {
   data: WhoWeAreSectionFragment;
 };
 
 export function WhoWeAreSection({ data }: WhoWeAreSectionProps) {
-  const { overline, title, body, imageContainer, buttonsCollection } = data;
-  const bodyDocument = body?.json as Document | undefined;
+  const { overline, title, body, imageContainer, buttons } = data;
+  const buttonItems = buttons?.filter(Boolean) ?? [];
 
   return (
-    <ContentfulEntry entry={data}>
+    <StrapiEntry entry={data}>
       <section className="bg-white">
         <div className="mx-auto grid max-w-container gap-10 px-6 py-[88px] lg:grid-cols-2 lg:items-center">
           <div className="min-w-0 flex flex-col">
             {overline ? (
-              <ContentfulEntryField field="overline">
+              <StrapiEntryField field="overline">
                 <p className="mb-2.5 text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
                   {overline}
                 </p>
-              </ContentfulEntryField>
+              </StrapiEntryField>
             ) : null}
 
             {title ? (
-              <ContentfulEntryField field="title">
+              <StrapiEntryField field="title">
                 <h2 className="text-[2rem] leading-tight text-dark">{title}</h2>
-              </ContentfulEntryField>
+              </StrapiEntryField>
             ) : null}
 
-            {bodyDocument ? (
-              <ContentfulEntryField field="body">
+            {body ? (
+              <StrapiEntryField field="body">
                 <RichText
-                  document={bodyDocument}
+                  content={body}
                   variant="who-we-are-body"
                   className="mt-4 flex flex-col gap-5"
                 />
-              </ContentfulEntryField>
+              </StrapiEntryField>
             ) : null}
 
-            {buttonsCollection?.items?.length ? (
+            {buttonItems.length ? (
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                {buttonsCollection.items.map((button) =>
+                {buttonItems.map((button) =>
                   button ? (
-                    <ContentfulEntry key={button._id} entry={button}>
+                    <StrapiEntry key={button.documentId} entry={button}>
                       <Button data={button} />
-                    </ContentfulEntry>
+                    </StrapiEntry>
                   ) : null,
                 )}
 
-                <AddContentfulEntry field="buttons" />
+                <AddStrapiEntry field="buttons" />
               </div>
             ) : null}
           </div>
 
-          <ContentfulEntryField field="imageContainer">
+          <StrapiEntryField field="imageContainer">
             <ImageContainer
               data={imageContainer}
               alt={imageContainer?.imgDescription ?? title ?? "Team photo"}
               placeholderLabel="Team photo placeholder"
             />
-          </ContentfulEntryField>
+          </StrapiEntryField>
         </div>
       </section>
-    </ContentfulEntry>
+    </StrapiEntry>
   );
 }
