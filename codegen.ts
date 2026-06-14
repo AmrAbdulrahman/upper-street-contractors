@@ -1,13 +1,13 @@
 import type { CodegenConfig } from '@graphql-codegen/cli'
 import * as dotenv from 'dotenv'
 
-dotenv.config({ path: 'apps/website/.env.local' })
+dotenv.config({ path: '.env.local' })
 
 const strapiUrl = process.env.STRAPI_URL || 'http://localhost:1337'
 const strapiToken = process.env.STRAPI_API_TOKEN
 
 if (!strapiToken) {
-  throw new Error('STRAPI_API_TOKEN must be set in apps/website/.env.local')
+  throw new Error('STRAPI_API_TOKEN must be set in .env.local')
 }
 
 const reactApolloPluginConfig = {
@@ -21,6 +21,12 @@ const reactApolloPluginConfig = {
   importDocumentNodeFrom: 'graphql',
 }
 
+const sharedScalars = {
+  JSON: 'unknown',
+  DateTime: 'string',
+  Upload: 'unknown',
+}
+
 const config: CodegenConfig = {
   schema: {
     [`${strapiUrl}/graphql`]: {
@@ -30,21 +36,14 @@ const config: CodegenConfig = {
     },
   },
   documents: 'apps/website/src/**/*.graphql',
-  // documents: 'apps/website/src/test.graphql',
   generates: {
     'apps/website/src/generated/graphql.ts': {
-      plugins: [
-        'typescript',
-        'typescript-operations',
-        'typed-document-node',
-      ],
+      plugins: ['typescript', 'typescript-operations', 'typed-document-node'],
       config: {
         documentMode: 'documentNode',
-        scalars: {
-          JSON: 'unknown',
-          DateTime: 'string',
-          Upload: 'unknown',
-        },
+        enumsAsTypes: true,
+        onlyOperationTypes: true,
+        scalars: sharedScalars,
       },
     },
     'apps/website/src/generated/apollo-hooks.ts': {
