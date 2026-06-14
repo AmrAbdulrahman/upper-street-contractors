@@ -6,14 +6,14 @@ Read `docs/agents/project-stack.md`. Use caveman mode.
 
 ## Steps
 
-1. Confirm `.env.local` exists with `CONTENTFUL_SPACE_ID` and `CONTENTFUL_ACCESS_TOKEN` (see `.env.example`)
+1. Confirm Strapi is running (`npm run dev:cms`) and `.env.local` has `STRAPI_URL` and `STRAPI_API_TOKEN` (see `.env.example`)
 
 2. Run `npm run codegen`
 
 3. Verify output updated:
-   - `src/generated/graphql.ts` — types + document nodes
-   - `src/generated/apollo-hooks.ts` — React Apollo hooks
-   - `src/generated/schema.graphql` — introspected schema
+   - `apps/website/src/generated/graphql.ts` — types + document nodes
+   - `apps/website/src/generated/apollo-hooks.ts` — React Apollo hooks
+   - `apps/website/src/generated/schema.graphql` — introspected schema
 
 4. Fix any codegen errors (missing fragments, schema drift, typos in `.graphql` files)
 

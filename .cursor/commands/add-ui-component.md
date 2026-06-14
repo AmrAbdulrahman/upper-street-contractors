@@ -1,26 +1,26 @@
 # Add UI component
 
-Scaffold a reusable UI component under `src/components/ui/`.
+Scaffold a reusable UI component under `apps/website/src/components/ui/`.
 
-Read `docs/agents/project-stack.md`. Use caveman mode. Match existing patterns in `src/components/ui/button/` and `src/components/ui/icon/`.
+Read `docs/agents/project-stack.md`. Use caveman mode. Match existing patterns in `apps/website/src/components/ui/button/` and `apps/website/src/components/ui/icon/`.
 
 ## Gather from user
 
 - Component name (PascalCase)
-- Whether it maps to a Contentful type (needs `.graphql` fragment)
+- Whether it maps to a Strapi content type (needs `.graphql` fragment)
 - Props / variants needed
 
 ## Steps
 
-1. **Folder** — `src/components/ui/<kebab-name>/`
+1. **Folder** — `apps/website/src/components/ui/<kebab-name>/`
 
 2. **Component** — `<kebab-name>.tsx`:
    - Named export (or default + re-export — match siblings)
    - Tailwind utilities; use design tokens from `globals.css` (`bg-surface`, `text-foreground`, etc.)
    - TypeScript props interface
 
-3. **GraphQL** (if Contentful-backed) — `<kebab-name>.graphql`:
-   - Fragment on Contentful type with `_id`, `__typename`, `sys { id }`
+3. **GraphQL** (if Strapi-backed) — `<kebab-name>.graphql`:
+   - Fragment on Strapi type with `documentId`
    - Compose child fragments (`...Icon`, etc.) as needed
 
 4. **Barrel** — `index.ts` re-exporting public API
@@ -29,4 +29,4 @@ Read `docs/agents/project-stack.md`. Use caveman mode. Match existing patterns i
 
 6. **Verify** — `npm run lint`
 
-Do not edit `src/generated/` by hand. Report files created.
+Do not edit `apps/website/src/generated/` by hand. Report files created.
