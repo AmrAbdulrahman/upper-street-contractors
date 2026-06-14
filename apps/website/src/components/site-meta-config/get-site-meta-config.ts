@@ -10,7 +10,7 @@ async function fetchSiteMetaConfig(): Promise<SiteMetaConfigFragment | null> {
     query: GetSiteMetaConfigDocument,
   });
 
-  return data?.siteMetaConfigCollection?.items?.at(0) ?? null;
+  return data?.siteMetaConfigs?.at(0) ?? null;
 }
 
 export const getSiteMetaConfig = cache(fetchSiteMetaConfig);

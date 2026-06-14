@@ -1,8 +1,10 @@
-export { buildContentfulEntryUrl } from "./contentful-entry-url";
+export { buildStrapiEntryUrl } from "./strapi-entry-url";
+export { resolveStrapiMediaUrl } from "./strapi-media-url";
+export { flattenSectionRefs } from "./flatten-section-refs";
 export {
   // getContentfulAccessToken,
   isPreviewEnabled,
-  withContentfulPreviewVariables,
+  withPreviewVariables,
 } from "./preview-utils";
 export { formatAddress } from "./format-address";
 export { formatPhoneDisplay } from "./format-phone";

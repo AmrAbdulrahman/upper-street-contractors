@@ -1,48 +1,50 @@
 import { headers } from "next/headers";
 import { getPageMeta } from "./get-page-meta";
 import {
-  isContentfulInspectionBuildEnabled,
-  isContentfulInspectionEnabled,
-} from "./is-contentful-inspection-enabled";
+  isStrapiInspectionBuildEnabled,
+  isStrapiInspectionEnabled,
+} from "./is-strapi-inspection-enabled";
 import { MetadataInspectButton } from "./metadata-inspect-button";
 import { PageMetadataInspectButtonClient } from "./page-metadata-inspect-button-client";
 import { pathnameToPageKey } from "@/helpers";
+import { getSiteMetaConfig } from "@/components/site-meta-config";
 
 export async function PageMetadataInspectButton() {
-  if (!isContentfulInspectionBuildEnabled()) {
+  if (!isStrapiInspectionBuildEnabled()) {
     return null;
   }
 
-  if (!(await isContentfulInspectionEnabled())) {
+  if (!(await isStrapiInspectionEnabled())) {
     return null;
   }
 
-  const spaceId = process.env.CONTENTFUL_SPACE_ID ?? "";
-  const environmentId = process.env.CONTENTFUL_ENVIRONMENT ?? "master";
+  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337";
+  const siteMetaConfig = await getSiteMetaConfig();
+  const siteMetaConfigId = siteMetaConfig?.documentId ?? null;
 
-  if (process.env.CONTENTFUL_PREVIEW === "true") {
+  if (process.env.ENABLE_PREVIEW === "true") {
     const headersList = await headers();
     const pathname = headersList.get("x-pathname") ?? "/";
     const key = pathnameToPageKey(pathname);
     const metaId = await getPageMeta(key);
 
-    if (!metaId) {
+    if (!metaId && !siteMetaConfigId) {
       return null;
     }
 
     return (
       <MetadataInspectButton
-        metaId={metaId}
-        spaceId={spaceId}
-        environmentId={environmentId}
+        metaId={metaId ?? ""}
+        siteMetaConfigId={siteMetaConfigId}
+        strapiUrl={strapiUrl}
       />
     );
   }
 
   return (
     <PageMetadataInspectButtonClient
-      spaceId={spaceId}
-      environmentId={environmentId}
+      strapiUrl={strapiUrl}
+      siteMetaConfigId={siteMetaConfigId}
     />
   );
 }

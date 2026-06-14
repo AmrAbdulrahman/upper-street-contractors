@@ -1,5 +1,5 @@
 import type { SiteMetaConfigFragment } from "@/generated/graphql";
-import { normalizeSiteUrl } from "@/helpers";
+import { normalizeSiteUrl, resolveStrapiMediaUrl } from "@/helpers";
 
 type LocalBusinessJsonLdProps = {
   config: SiteMetaConfigFragment;
@@ -8,9 +8,13 @@ type LocalBusinessJsonLdProps = {
 export function LocalBusinessJsonLd({ config }: LocalBusinessJsonLdProps) {
   const siteUrl = normalizeSiteUrl(config.siteUrl);
   const sameAs =
-    config.socialLinksCollection?.items
+    config.socialLinks
       ?.map((link) => link?.url)
       .filter((url): url is string => Boolean(url)) ?? [];
+  const mapLocation = config.mapLocation as
+    | { lat?: number | null; lon?: number | null }
+    | null
+    | undefined;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -20,7 +24,7 @@ export function LocalBusinessJsonLd({ config }: LocalBusinessJsonLdProps) {
     url: siteUrl,
     telephone: config.phoneNumber ?? undefined,
     email: config.email ?? undefined,
-    image: config.defaultImage?.url ?? undefined,
+    image: resolveStrapiMediaUrl(config.defaultImage?.url),
     address: {
       "@type": "PostalAddress",
       streetAddress: config.addressLine ?? undefined,
@@ -29,11 +33,11 @@ export function LocalBusinessJsonLd({ config }: LocalBusinessJsonLdProps) {
       addressCountry: "GB",
     },
     geo:
-      config.mapLocation?.lat != null && config.mapLocation?.lon != null
+      mapLocation?.lat != null && mapLocation?.lon != null
         ? {
             "@type": "GeoCoordinates",
-            latitude: config.mapLocation.lat,
-            longitude: config.mapLocation.lon,
+            latitude: mapLocation.lat,
+            longitude: mapLocation.lon,
           }
         : undefined,
     sameAs: sameAs.length > 0 ? sameAs : undefined,

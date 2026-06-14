@@ -8,9 +8,9 @@ async function fetchPageMeta(key: string): Promise<string | null> {
     variables: { key },
   });
 
-  const meta = data?.pageCollection?.items?.at(0)?.meta;
+  const meta = data?.pages?.at(0)?.meta;
 
-  return meta?.sys?.id ?? null;
+  return meta?.documentId ?? null;
 }
 
 export const getPageMeta = cache(fetchPageMeta);

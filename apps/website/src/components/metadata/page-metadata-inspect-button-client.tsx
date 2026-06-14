@@ -7,13 +7,13 @@ import { getPageMetaId } from "./get-page-meta-action";
 import { MetadataInspectButton } from "./metadata-inspect-button";
 
 type PageMetadataInspectButtonClientProps = {
-  spaceId: string;
-  environmentId: string;
+  strapiUrl: string;
+  siteMetaConfigId?: string | null;
 };
 
 export function PageMetadataInspectButtonClient({
-  spaceId,
-  environmentId,
+  strapiUrl,
+  siteMetaConfigId,
 }: PageMetadataInspectButtonClientProps) {
   const pathname = usePathname();
   const [metaId, setMetaId] = useState<string | null>(null);
@@ -33,15 +33,15 @@ export function PageMetadataInspectButtonClient({
     };
   }, [pathname]);
 
-  if (!metaId) {
+  if (!metaId && !siteMetaConfigId) {
     return null;
   }
 
   return (
     <MetadataInspectButton
-      metaId={metaId}
-      spaceId={spaceId}
-      environmentId={environmentId}
+      metaId={metaId ?? ""}
+      siteMetaConfigId={siteMetaConfigId}
+      strapiUrl={strapiUrl}
     />
   );
 }

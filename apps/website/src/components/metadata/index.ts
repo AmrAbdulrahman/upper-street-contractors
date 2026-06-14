@@ -1,4 +1,4 @@
-export { isContentfulInspectionBuildEnabled } from "./is-contentful-inspection-enabled";
+export { isStrapiInspectionBuildEnabled } from "./is-strapi-inspection-enabled";
 export { LocalBusinessJsonLd } from "./local-business-json-ld";
 export { MetadataInspectButton } from "./metadata-inspect-button";
 export type { MetadataInspectButtonProps } from "./metadata-inspect-button";

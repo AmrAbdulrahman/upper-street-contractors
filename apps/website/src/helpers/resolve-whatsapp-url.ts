@@ -4,7 +4,7 @@ import { getWhatsAppUrl } from "@/helpers/whatsapp-url";
 export function resolveWhatsAppUrl(
   config: SiteMetaConfigFragment | null,
 ): string | null {
-  const socialWhatsapp = config?.socialLinksCollection?.items?.find((item) =>
+  const socialWhatsapp = config?.socialLinks?.find((item) =>
     item?.socialNetworkName?.toLowerCase().includes("whatsapp"),
   )?.url;
 

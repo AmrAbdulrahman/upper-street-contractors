@@ -8,6 +8,7 @@ import {
   FALLBACK_SITE_URL,
   NOINDEX_ROBOTS,
 } from "@/lib/site-config";
+import { resolveStrapiMediaUrl } from "./strapi-media-url";
 
 export function normalizeSiteUrl(url: string | null | undefined): string {
   const value = url?.trim() || FALLBACK_SITE_URL;
@@ -21,12 +22,17 @@ function getOgImages(
     return undefined;
   }
 
+  const imageUrl = resolveStrapiMediaUrl(defaultImage.url);
+  if (!imageUrl) {
+    return undefined;
+  }
+
   return [
     {
-      url: defaultImage.url,
+      url: imageUrl,
       width: defaultImage.width ?? undefined,
       height: defaultImage.height ?? undefined,
-      alt: defaultImage.title ?? undefined,
+      alt: defaultImage.alternativeText ?? undefined,
     },
   ];
 }
@@ -89,7 +95,7 @@ export function buildBaseMetadata(
     },
     openGraph: {
       type: "website",
-      locale: config?.locale ?? "en_GB",
+      locale: "en_GB",
       url: siteUrl,
       siteName,
       title: config?.defaultMetaTitle ?? siteName,
