@@ -774,7 +774,7 @@ export interface ApiClientReviewInfoClientReviewInfo
 }
 
 export interface ApiHomeHeaderSectionHomeHeaderSection
-  extends Struct.SingleTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'home_header_sections';
   info: {
     displayName: 'homeHeroSection';
@@ -960,7 +960,10 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     meta: Schema.Attribute.Relation<'manyToOne', 'api::meta-data.meta-data'>;
     publishedAt: Schema.Attribute.DateTime;
-    sections: Schema.Attribute.JSON;
+    section_refs: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::section-ref.section-ref'
+    >;
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1072,6 +1075,42 @@ export interface ApiReviewCardReviewCard extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+  };
+}
+
+export interface ApiSectionRefSectionRef extends Struct.CollectionTypeSchema {
+  collectionName: 'section_refs';
+  info: {
+    displayName: 'SectionRef';
+    pluralName: 'section-refs';
+    singularName: 'section-ref';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    home_hero_section: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::home-header-section.home-header-section'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::section-ref.section-ref'
+    > &
+      Schema.Attribute.Private;
+    Name: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    who_we_are_section: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::who-we-are-section.who-we-are-section'
+    >;
   };
 }
 
@@ -1222,7 +1261,7 @@ export interface ApiWhatWeDoSectionWhatWeDoSection
 }
 
 export interface ApiWhoWeAreSectionWhoWeAreSection
-  extends Struct.SingleTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'who_we_are_sections';
   info: {
     displayName: 'whoWeAreSection';
@@ -1234,7 +1273,7 @@ export interface ApiWhoWeAreSectionWhoWeAreSection
   };
   attributes: {
     body: Schema.Attribute.Blocks;
-    buttons: Schema.Attribute.JSON;
+    buttons: Schema.Attribute.Relation<'manyToMany', 'api::button.button'>;
     contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1864,6 +1903,7 @@ declare module '@strapi/strapi' {
       'api::project-card.project-card': ApiProjectCardProjectCard;
       'api::recent-work-section.recent-work-section': ApiRecentWorkSectionRecentWorkSection;
       'api::review-card.review-card': ApiReviewCardReviewCard;
+      'api::section-ref.section-ref': ApiSectionRefSectionRef;
       'api::site-meta-config.site-meta-config': ApiSiteMetaConfigSiteMetaConfig;
       'api::social-link.social-link': ApiSocialLinkSocialLink;
       'api::static-step.static-step': ApiStaticStepStaticStep;

@@ -1,37 +1,29 @@
-import { ApolloLink, HttpLink } from '@apollo/client'
+import { HttpLink } from '@apollo/client'
 import {
   ApolloClient,
   InMemoryCache,
   registerApolloClient,
 } from '@apollo/client-integration-nextjs'
-import { createContentfulPreviewLink } from './apollo-preview-link'
-import {
-  getContentfulAccessToken,
-  isContentfulPreviewEnabled,
-} from '@/helpers'
 
-function getEndpoint() {
-  const spaceId = process.env.CONTENTFUL_SPACE_ID
-  if (!spaceId) throw new Error('CONTENTFUL_SPACE_ID is not set')
-  return `https://graphql.contentful.com/content/v1/spaces/${spaceId}`
+function getStrapiEndpoint() {
+  const url = process.env.STRAPI_URL || 'http://localhost:1337'
+  return `${url}/graphql`
+}
+
+function getStrapiToken() {
+  const token = process.env.STRAPI_API_TOKEN
+  if (!token) throw new Error('STRAPI_API_TOKEN is not set')
+  return token
 }
 
 export function makeServerClient() {
-  const preview = isContentfulPreviewEnabled()
-  const token = getContentfulAccessToken()
-
   return new ApolloClient({
     cache: new InMemoryCache(),
-    link: ApolloLink.from([
-      createContentfulPreviewLink(),
-      new HttpLink({
-        uri: getEndpoint(),
-        headers: { Authorization: `Bearer ${token}` },
-        fetchOptions: preview
-          ? { cache: 'no-store' }
-          : { cache: 'force-cache' },
-      }),
-    ]),
+    link: new HttpLink({
+      uri: getStrapiEndpoint(),
+      headers: { Authorization: `Bearer ${getStrapiToken()}` },
+      fetchOptions: { cache: 'force-cache' },
+    }),
   })
 }
 

@@ -1,46 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
-import {
-  getContentfulAccessToken,
-  isContentfulPreviewEnabled,
-  withContentfulPreviewVariables,
-} from '@/helpers'
 
-function getEndpoint() {
-  const spaceId = process.env.CONTENTFUL_SPACE_IDID;
-  if (!spaceId) throw new Error('CONTENTFUL_SPACE_ID is not set')
-  return `https://graphql.contentful.com/content/v1/spaces/${spaceId}`
+function getStrapiEndpoint() {
+  const url = process.env.STRAPI_URL || 'http://localhost:1337'
+  return `${url}/graphql`
 }
 
 export async function POST(request: NextRequest) {
-  let token: string
-
-  try {
-    token = getContentfulAccessToken()
-  } catch {
+  const token = process.env.STRAPI_API_TOKEN
+  if (!token) {
     return NextResponse.json(
-      { errors: [{ message: 'Contentful token is not configured' }] },
+      { errors: [{ message: 'STRAPI_API_TOKEN is not configured' }] },
       { status: 500 },
     )
   }
 
-  const preview = isContentfulPreviewEnabled()
-  const body = JSON.parse(await request.text()) as {
-    query: string
-    variables?: Record<string, unknown>
-    operationName?: string
-  }
+  const body = await request.text()
 
-  const response = await fetch(getEndpoint(), {
+  const response = await fetch(getStrapiEndpoint(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      ...body,
-      variables: withContentfulPreviewVariables(body.variables),
-    }),
-    cache: preview ? 'no-store' : 'force-cache',
+    body,
   })
 
   const data = await response.json()

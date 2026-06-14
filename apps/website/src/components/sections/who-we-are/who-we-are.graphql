@@ -1,26 +1,12 @@
-query GetWhoWeAreSectionById($id: String!, $preview: Boolean = false) {
-  whoWeAreSection(id: $id, preview: $preview) {
-    ...WhoWeAreSection
-  }
-}
-
 fragment WhoWeAreSection on WhoWeAreSection {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   overline
   title
-  body {
-    json
-  }
+  body
   imageContainer {
     ...ImageContainer
   }
-  buttonsCollection(preview: $preview) {
-    items {
-      ...Button
-    }
+  buttons {
+    ...Button
   }
 }

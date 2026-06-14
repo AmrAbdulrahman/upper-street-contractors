@@ -1,15 +1,10 @@
 fragment SiteMetaConfig on SiteMetaConfig {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   siteName
   siteUrl
   pageTitleTemplate
   defaultMetaTitle
   defaultMetaDescription
-  locale
   indexable
   legalName
   phoneNumber
@@ -17,28 +12,22 @@ fragment SiteMetaConfig on SiteMetaConfig {
   addressLine
   city
   postalCode
-  mapLocation {
-    lat
-    lon
-  }
+  mapLocation
   defaultImage {
     url
-    title
+    alternativeText
     width
     height
   }
-  socialLinksCollection(limit: 10, preview: $preview) {
-    items {
-      socialNetworkName
-      url
-    }
+  socialLinks {
+    documentId
+    socialNetworkName
+    url
   }
 }
 
-query GetSiteMetaConfig($preview: Boolean = false) {
-  siteMetaConfigCollection(limit: 1, preview: $preview) {
-    items {
-      ...SiteMetaConfig
-    }
+query GetSiteMetaConfig {
+  siteMetaConfig {
+    ...SiteMetaConfig
   }
 }

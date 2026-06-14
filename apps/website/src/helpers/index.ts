@@ -1,9 +1,9 @@
 export { buildContentfulEntryUrl } from "./contentful-entry-url";
 export {
-  getContentfulAccessToken,
-  isContentfulPreviewEnabled,
+  // getContentfulAccessToken,
+  isPreviewEnabled,
   withContentfulPreviewVariables,
-} from "./contentful-preview";
+} from "./preview-utils";
 export { formatAddress } from "./format-address";
 export { formatPhoneDisplay } from "./format-phone";
 export { iconData } from "./icon-data";

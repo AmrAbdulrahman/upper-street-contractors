@@ -1,13 +1,13 @@
 import type { CodegenConfig } from '@graphql-codegen/cli'
 import * as dotenv from 'dotenv'
 
-dotenv.config({ path: '.env.local' })
+dotenv.config({ path: 'apps/website/.env.local' })
 
-const spaceId = process.env.CONTENTFUL_SPACE_ID
-const token = process.env.CONTENTFUL_ACCESS_TOKEN
+const strapiUrl = process.env.STRAPI_URL || 'http://localhost:1337'
+const strapiToken = process.env.STRAPI_API_TOKEN
 
-if (!spaceId || !token) {
-  throw new Error('CONTENTFUL_SPACE_ID and CONTENTFUL_ACCESS_TOKEN must be set in .env.local')
+if (!strapiToken) {
+  throw new Error('STRAPI_API_TOKEN must be set in apps/website/.env.local')
 }
 
 const reactApolloPluginConfig = {
@@ -23,13 +23,14 @@ const reactApolloPluginConfig = {
 
 const config: CodegenConfig = {
   schema: {
-    [`https://graphql.contentful.com/content/v1/spaces/${spaceId}`]: {
+    [`${strapiUrl}/graphql`]: {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${strapiToken}`,
       },
     },
   },
   documents: 'apps/website/src/**/*.graphql',
+  // documents: 'apps/website/src/test.graphql',
   generates: {
     'apps/website/src/generated/graphql.ts': {
       plugins: [
@@ -39,6 +40,11 @@ const config: CodegenConfig = {
       ],
       config: {
         documentMode: 'documentNode',
+        scalars: {
+          JSON: 'unknown',
+          DateTime: 'string',
+          Upload: 'unknown',
+        },
       },
     },
     'apps/website/src/generated/apollo-hooks.ts': {
@@ -52,11 +58,11 @@ const config: CodegenConfig = {
       ],
     },
     'apps/website/src/generated/schema.graphql': {
-       plugins: ['schema-ast'],
-       config: {
-         includeDirectives: true
-       },
-     },
+      plugins: ['schema-ast'],
+      config: {
+        includeDirectives: true,
+      },
+    },
   },
 }
 

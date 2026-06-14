@@ -1,5 +1,5 @@
 {
-  "kind": "singleType",
+  "kind": "collectionType",
   "collectionName": "who_we_are_sections",
   "info": {
     "singularName": "who-we-are-section",
@@ -21,7 +21,9 @@
       "type": "blocks"
     },
     "buttons": {
-      "type": "json"
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::button.button"
     },
     "imageContainer": {
       "type": "relation",

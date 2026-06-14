@@ -1,9 +1,5 @@
 fragment Button on Button {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   action
   color
   href

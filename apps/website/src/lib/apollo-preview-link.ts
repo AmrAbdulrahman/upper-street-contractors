@@ -1,7 +1,7 @@
 import { ApolloLink } from '@apollo/client'
 import { withContentfulPreviewVariables } from '@/helpers'
 
-export function createContentfulPreviewLink(): ApolloLink {
+export function createPreviewLink(): ApolloLink {
   return new ApolloLink((operation, forward) => {
     operation.variables = withContentfulPreviewVariables(operation.variables)
 

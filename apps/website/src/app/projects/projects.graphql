@@ -1,7 +1,7 @@
 #import "../../components/ui/project-card/project-card.graphql"
 
-query GetProjects($preview: Boolean = false) {
-  projectCardCollection(limit: 50, preview: $preview) {
+query GetProjects($status: PublicationStatus = false) {
+  projectCardCollection(limit: 50, status: $status) {
     items {
       ...ProjectCard
     }

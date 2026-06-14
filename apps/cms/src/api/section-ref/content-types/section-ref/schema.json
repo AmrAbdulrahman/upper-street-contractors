@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "section_refs",
+  "info": {
+    "singularName": "section-ref",
+    "pluralName": "section-refs",
+    "displayName": "SectionRef"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Name": {
+      "type": "string"
+    },
+    "who_we_are_section": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::who-we-are-section.who-we-are-section"
+    },
+    "home_hero_section": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::home-header-section.home-header-section"
+    }
+  }
+}

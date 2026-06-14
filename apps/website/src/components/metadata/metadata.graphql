@@ -1,9 +1,5 @@
 fragment PageMetadata on MetaData {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   title
   description
 }

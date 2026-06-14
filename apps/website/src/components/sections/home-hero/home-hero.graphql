@@ -1,20 +1,10 @@
 fragment HomeHeroSection on HomeHeaderSection {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   subtitle
-  richTextTitle: title {
-    json
-  }
+  title
   overline
-  buttonsCollection(preview: $preview) {
-    items {
-      ...Button
-    }
-  }
-  footer {
-    json
+  footer
+  buttons {
+    ...Button
   }
 }

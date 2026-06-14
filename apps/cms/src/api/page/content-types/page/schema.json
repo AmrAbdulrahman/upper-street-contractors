@@ -20,9 +20,6 @@
     "description": {
       "type": "text"
     },
-    "sections": {
-      "type": "json"
-    },
     "meta": {
       "type": "relation",
       "relation": "manyToOne",
@@ -30,6 +27,11 @@
     },
     "contentfulId": {
       "type": "string"
+    },
+    "section_refs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::section-ref.section-ref"
     }
   }
 }

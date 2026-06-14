@@ -1,13 +1,7 @@
 fragment Banner on Banner {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   title
-  body {
-    json
-  }
+  body
   emoji
   variant
   hoverable

@@ -1,9 +1,5 @@
 fragment Accreditation on Accreditation {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   accreditationTitle
   icon {
     ...Icon

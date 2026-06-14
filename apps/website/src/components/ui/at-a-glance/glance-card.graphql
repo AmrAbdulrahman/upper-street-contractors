@@ -1,8 +1,5 @@
-fragment GlanceCard on AtAGlanceCard {
-  _id
-  sys {
-    id
-  }
+fragment GlanceCard on AtAglanceCard {
+  documentId
   label
   quantity
   unit

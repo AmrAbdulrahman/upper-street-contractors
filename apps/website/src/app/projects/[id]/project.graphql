@@ -1,7 +1,7 @@
 #import "../../components/ui/project-card/project-card.graphql"
 
-query GetProjectCard($id: String!, $preview: Boolean = false) {
-  projectCard(id: $id, preview: $preview) {
+query GetProjectCard($id: String!, $status: PublicationStatus = false) {
+  projectCard(id: $id, status: $status) {
     ...ProjectCard
   }
 }

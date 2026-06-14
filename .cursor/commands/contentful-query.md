@@ -22,7 +22,7 @@ Read `docs/agents/project-stack.md`. Use caveman mode.
 - Fragment name = PascalCase component name; type = Contentful `__typename`
 - Always include `_id`, `__typename`, `sys { id }` for inspection overlays
 - Compose shared fragments — don't duplicate field selections
-- Use `$preview` variable on collections when preview mode matters
+- Use `$status` variable on collections when preview mode matters
 - Import generated documents from `@/generated/graphql` (e.g. `GetHomePageDocument`)
 
 ## Steps

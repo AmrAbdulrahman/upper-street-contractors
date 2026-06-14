@@ -74,7 +74,7 @@ tsconfig.base.json          # Shared TypeScript config
 - **Colocated fragments**: each component/section has a sibling `.graphql` file with its fragment.
 - **Fragment naming**: `PascalCase` matching the component (e.g. `HomeHeroSection` on `HomeHeaderSection`).
 - **Required fields**: every fragment includes `_id`, `__typename`, `sys { id }` for Contentful inspection.
-- **Preview variable**: section queries use `$preview` where collections need it.
+- **Preview variable**: section queries use `$status` where collections need it.
 - **Shared fragments**: compose from `apps/website/src/components/ui/**/*.graphql` (e.g. `...Button`, `...Icon`).
 - **Codegen**: after any `.graphql` change, run `npm run codegen`. Generated hooks land in `apps/website/src/generated/apollo-hooks.ts`; types in `apps/website/src/generated/graphql.ts`.
 

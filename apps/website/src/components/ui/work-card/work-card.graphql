@@ -1,14 +1,8 @@
 fragment WorkCard on WorkCard {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   emoji
   title
-  body {
-    json
-  }
+  body
   priceLine
   linkText
   href

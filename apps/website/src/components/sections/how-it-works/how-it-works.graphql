@@ -1,20 +1,12 @@
 fragment HowItWorksSection on HowItWorksSection {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   overline
   title
-  sectionSummary {
-    json
+  sectionSummary
+  processList {
+    ...StaticStep
   }
-  processListCollection(preview: $preview) {
-    items {
-      ...StaticStep
-    }
-  }
-  sectionBanner(preview: $preview) {
+  sectionBanner {
     ...Banner
   }
 }

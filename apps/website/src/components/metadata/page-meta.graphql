@@ -1,9 +1,7 @@
-query GetPageMeta($key: String!, $preview: Boolean = false) {
-  pageCollection(limit: 1, preview: $preview, where: { key: $key }) {
-    items {
-      meta {
-        ...PageMetadata
-      }
+query GetPageMeta($key: String!) {
+  pages(filters: { key: { eq: $key } }, pagination: { limit: 1 }) {
+    meta {
+      ...PageMetadata
     }
   }
 }

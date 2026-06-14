@@ -1,20 +1,12 @@
 fragment WhatWeDoSection on WhatWeDoSection {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   overline
   title
-  body {
-    json
+  body
+  workCards {
+    ...WorkCard
   }
-  workCardsCollection(preview: $preview) {
-    items {
-      ...WorkCard
-    }
-  }
-  banner(preview: $preview) {
+  banner {
     ...Banner
   }
 }

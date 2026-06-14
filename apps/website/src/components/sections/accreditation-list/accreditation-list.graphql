@@ -1,12 +1,6 @@
 fragment AccreditationList on AccreditationList {
-  _id
-  __typename
-  sys {
-    id
-  }
-  listCollection(preview: $preview) {
-    items {
-      ...Accreditation
-    }
+  documentId
+  list {
+    ...Accreditation
   }
 }

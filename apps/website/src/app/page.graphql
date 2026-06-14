@@ -1,5 +1,5 @@
-query GetHomePage($preview: Boolean = false) {
-  pageCollection(limit: 1, preview: $preview, where: { key: "home" }) {
+query GetHomePage($status: PublicationStatus = false) {
+  pageCollection(limit: 1, status: $status, where: { key: "home" }) {
     items {
       _id
       __typename
@@ -11,7 +11,7 @@ query GetHomePage($preview: Boolean = false) {
       meta {
         ...PageMetadata
       }
-      sectionsCollection(limit: 10, preview: $preview) {
+      sectionsCollection(limit: 10, status: $status) {
         items {
           ... on HomeHeaderSection {
             ...HomeHeroSection

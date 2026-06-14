@@ -1,9 +1,5 @@
 fragment BulletList on BulletList {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   text
   listIcon {
     ...Icon

@@ -15,7 +15,7 @@ Read `docs/agents/project-stack.md` for conventions. Use caveman mode.
 1. **Fragment** — create `src/components/sections/<name>/<name>.graphql`:
    - `fragment <PascalName> on <ContentfulType> { _id __typename sys { id } ... }`
    - Compose shared fragments from `src/components/ui/` where needed (`...Button`, `...Icon`, etc.)
-   - Use `$preview` on collections when draft content matters
+   - Use `$status` on collections when draft content matters
 
 2. **Component** — create `src/components/sections/<name>/<name>.tsx`:
    - Import fragment type from `@/generated/graphql`

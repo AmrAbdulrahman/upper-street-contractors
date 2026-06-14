@@ -1,20 +1,10 @@
-
-query GetAtAGlance($preview: Boolean = false) {
-  atAGlanceCollection(limit: 1, preview: $preview) {
-    items {
-      _id
-      sys {
-        id
-      }
-      title
-      cardsCollection(preview: $preview) {
-        items {
-          ...GlanceCard
-        }
-      }
-      footer {
-        json
-      }
+query GetAtAGlance {
+  atAglance {
+    documentId
+    title
+    footer
+    cards {
+      ...GlanceCard
     }
   }
 }

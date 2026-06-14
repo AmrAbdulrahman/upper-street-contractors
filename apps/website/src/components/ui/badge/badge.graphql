@@ -1,9 +1,5 @@
 fragment Badge on Badge {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   text
   variant
   href

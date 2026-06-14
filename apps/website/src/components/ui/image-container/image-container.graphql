@@ -1,19 +1,12 @@
 fragment ImageContainer on ImageContainer {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   height
   width
   imageRadius
   imgDescription
   imageFile {
-    sys {
-      id
-    }
     url
-    title
+    alternativeText
     width
     height
   }

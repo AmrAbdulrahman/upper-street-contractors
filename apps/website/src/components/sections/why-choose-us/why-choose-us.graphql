@@ -1,24 +1,16 @@
 fragment WhyChooseUsSection on WhyChooseUsSection {
-  _id
-  __typename
-  sys {
-    id
-  }
+  documentId
   overline
-  listOfPointsCollection(preview: $preview) {
-    items {
-      ...BulletList
-    }
+  listOfPoints {
+    ...BulletList
   }
   cardImage {
     ...ImageContainer
   }
   cardTitle
   cardRole
-  cardParagraph {
-    json
-  }
-  cardBanner(preview: $preview) {
+  cardParagraph
+  cardBanner {
     ...Banner
   }
 }
