@@ -1,5 +1,5 @@
 {
-  "kind": "singleType",
+  "kind": "collectionType",
   "collectionName": "why_choose_us_sections",
   "info": {
     "singularName": "why-choose-us-section",
@@ -37,9 +37,6 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::banner.banner"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

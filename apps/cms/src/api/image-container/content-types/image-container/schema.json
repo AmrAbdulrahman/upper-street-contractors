@@ -31,9 +31,6 @@
     },
     "imageRadius": {
       "type": "string"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

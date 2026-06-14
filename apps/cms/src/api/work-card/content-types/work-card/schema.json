@@ -28,9 +28,6 @@
     },
     "href": {
       "type": "string"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "kind": "singleType",
+  "kind": "collectionType",
   "collectionName": "site_meta_configs",
   "info": {
     "singularName": "site-meta-config",
@@ -66,9 +66,6 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::social-link.social-link"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

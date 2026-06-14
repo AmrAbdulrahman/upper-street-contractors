@@ -18,9 +18,6 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::icon.icon"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "kind": "singleType",
+  "kind": "collectionType",
   "collectionName": "accreditation_lists",
   "info": {
     "singularName": "accreditation-list",
@@ -18,9 +18,6 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::accreditation.accreditation"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

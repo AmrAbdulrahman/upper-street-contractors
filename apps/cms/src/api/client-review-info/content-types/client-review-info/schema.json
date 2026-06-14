@@ -24,9 +24,6 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::image-container.image-container"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

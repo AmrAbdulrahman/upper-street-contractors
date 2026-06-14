@@ -21,9 +21,6 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::client-review-info.client-review-info"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

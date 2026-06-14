@@ -22,9 +22,6 @@
     },
     "borderRadius": {
       "type": "integer"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

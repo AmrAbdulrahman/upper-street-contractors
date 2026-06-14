@@ -19,9 +19,6 @@
     },
     "label": {
       "type": "string"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

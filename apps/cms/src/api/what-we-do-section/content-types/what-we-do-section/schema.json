@@ -1,5 +1,5 @@
 {
-  "kind": "singleType",
+  "kind": "collectionType",
   "collectionName": "what_we_do_sections",
   "info": {
     "singularName": "what-we-do-section",
@@ -29,9 +29,6 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::banner.banner"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

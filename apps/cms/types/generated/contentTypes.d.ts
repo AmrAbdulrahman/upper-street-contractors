@@ -114,43 +114,6 @@ export interface AdminApiTokenPermission extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface AdminAuditLog extends Struct.CollectionTypeSchema {
-  collectionName: 'strapi_audit_logs';
-  info: {
-    displayName: 'Audit Log';
-    pluralName: 'audit-logs';
-    singularName: 'audit-log';
-  };
-  options: {
-    draftAndPublish: false;
-    timestamps: false;
-  };
-  pluginOptions: {
-    'content-manager': {
-      visible: false;
-    };
-    'content-type-builder': {
-      visible: false;
-    };
-  };
-  attributes: {
-    action: Schema.Attribute.String & Schema.Attribute.Required;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    date: Schema.Attribute.DateTime & Schema.Attribute.Required;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'admin::audit-log'> &
-      Schema.Attribute.Private;
-    payload: Schema.Attribute.JSON;
-    publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    user: Schema.Attribute.Relation<'oneToOne', 'admin::user'>;
-  };
-}
-
 export interface AdminPermission extends Struct.CollectionTypeSchema {
   collectionName: 'admin_permissions';
   info: {
@@ -478,7 +441,7 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
 }
 
 export interface ApiAccreditationListAccreditationList
-  extends Struct.SingleTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'accreditation_lists';
   info: {
     displayName: 'Accreditation List';
@@ -489,7 +452,6 @@ export interface ApiAccreditationListAccreditationList
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -524,7 +486,6 @@ export interface ApiAccreditationAccreditation
   };
   attributes: {
     accreditationTitle: Schema.Attribute.String;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -554,7 +515,6 @@ export interface ApiAtAglanceCardAtAglanceCard
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -589,7 +549,6 @@ export interface ApiAtAglanceAtAglance extends Struct.SingleTypeSchema {
       'manyToMany',
       'api::at-aglance-card.at-aglance-card'
     >;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -620,7 +579,6 @@ export interface ApiBadgeBadge extends Struct.CollectionTypeSchema {
   };
   attributes: {
     borderRadius: Schema.Attribute.Integer;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -650,7 +608,6 @@ export interface ApiBannerBanner extends Struct.CollectionTypeSchema {
   attributes: {
     body: Schema.Attribute.Blocks;
     button: Schema.Attribute.Relation<'manyToOne', 'api::button.button'>;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -682,7 +639,6 @@ export interface ApiBulletListBulletList extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -715,7 +671,6 @@ export interface ApiButtonButton extends Struct.CollectionTypeSchema {
     action: Schema.Attribute.String;
     borderRadius: Schema.Attribute.Integer;
     color: Schema.Attribute.String;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -749,7 +704,6 @@ export interface ApiClientReviewInfoClientReviewInfo
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -786,7 +740,6 @@ export interface ApiHomeHeaderSectionHomeHeaderSection
   };
   attributes: {
     buttons: Schema.Attribute.Relation<'manyToMany', 'api::button.button'>;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -808,7 +761,7 @@ export interface ApiHomeHeaderSectionHomeHeaderSection
 }
 
 export interface ApiHowItWorksSectionHowItWorksSection
-  extends Struct.SingleTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'how_it_works_sections';
   info: {
     displayName: 'How It Works Section';
@@ -819,7 +772,6 @@ export interface ApiHowItWorksSectionHowItWorksSection
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -856,7 +808,6 @@ export interface ApiIconIcon extends Struct.CollectionTypeSchema {
   };
   attributes: {
     code: Schema.Attribute.String;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -882,7 +833,6 @@ export interface ApiImageContainerImageContainer
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -915,15 +865,10 @@ export interface ApiMetaDataMetaData extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
-    globalMetaConfig: Schema.Attribute.Relation<
-      'manyToOne',
-      'api::site-meta-config.site-meta-config'
-    >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -949,7 +894,6 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -982,7 +926,6 @@ export interface ApiProjectCardProjectCard extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1005,7 +948,7 @@ export interface ApiProjectCardProjectCard extends Struct.CollectionTypeSchema {
 }
 
 export interface ApiRecentWorkSectionRecentWorkSection
-  extends Struct.SingleTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'recent_work_sections';
   info: {
     displayName: 'Recent Work Section';
@@ -1016,7 +959,6 @@ export interface ApiRecentWorkSectionRecentWorkSection
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1060,7 +1002,6 @@ export interface ApiReviewCardReviewCard extends Struct.CollectionTypeSchema {
       'api::client-review-info.client-review-info'
     >;
     clientReview: Schema.Attribute.Blocks;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1089,12 +1030,20 @@ export interface ApiSectionRefSectionRef extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    accreditation_list: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::accreditation-list.accreditation-list'
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     home_hero_section: Schema.Attribute.Relation<
       'oneToOne',
       'api::home-header-section.home-header-section'
+    >;
+    how_it_works_section: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::how-it-works-section.how-it-works-section'
     >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -1103,19 +1052,32 @@ export interface ApiSectionRefSectionRef extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     Name: Schema.Attribute.String;
+    order: Schema.Attribute.Integer;
     publishedAt: Schema.Attribute.DateTime;
+    recent_work_section: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::recent-work-section.recent-work-section'
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    what_we_do_section: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::what-we-do-section.what-we-do-section'
+    >;
     who_we_are_section: Schema.Attribute.Relation<
       'oneToOne',
       'api::who-we-are-section.who-we-are-section'
+    >;
+    why_choose_us_section: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::why-choose-us-section.why-choose-us-section'
     >;
   };
 }
 
 export interface ApiSiteMetaConfigSiteMetaConfig
-  extends Struct.SingleTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'site_meta_configs';
   info: {
     displayName: 'Site Meta Config';
@@ -1128,7 +1090,6 @@ export interface ApiSiteMetaConfigSiteMetaConfig
   attributes: {
     addressLine: Schema.Attribute.String;
     city: Schema.Attribute.String;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1172,7 +1133,6 @@ export interface ApiSocialLinkSocialLink extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1203,7 +1163,6 @@ export interface ApiStaticStepStaticStep extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1224,7 +1183,7 @@ export interface ApiStaticStepStaticStep extends Struct.CollectionTypeSchema {
 }
 
 export interface ApiWhatWeDoSectionWhatWeDoSection
-  extends Struct.SingleTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'what_we_do_sections';
   info: {
     displayName: 'What we do section';
@@ -1237,7 +1196,6 @@ export interface ApiWhatWeDoSectionWhatWeDoSection
   attributes: {
     banner: Schema.Attribute.Relation<'manyToOne', 'api::banner.banner'>;
     body: Schema.Attribute.Blocks;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1274,7 +1232,6 @@ export interface ApiWhoWeAreSectionWhoWeAreSection
   attributes: {
     body: Schema.Attribute.Blocks;
     buttons: Schema.Attribute.Relation<'manyToMany', 'api::button.button'>;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1298,7 +1255,7 @@ export interface ApiWhoWeAreSectionWhoWeAreSection
 }
 
 export interface ApiWhyChooseUsSectionWhyChooseUsSection
-  extends Struct.SingleTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'why_choose_us_sections';
   info: {
     displayName: 'Why Choose Us Section';
@@ -1317,7 +1274,6 @@ export interface ApiWhyChooseUsSectionWhyChooseUsSection
     cardParagraph: Schema.Attribute.Blocks;
     cardRole: Schema.Attribute.String;
     cardTitle: Schema.Attribute.String;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1351,7 +1307,6 @@ export interface ApiWorkCardWorkCard extends Struct.CollectionTypeSchema {
   };
   attributes: {
     body: Schema.Attribute.Blocks;
-    contentfulId: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1878,7 +1833,6 @@ declare module '@strapi/strapi' {
     export interface ContentTypeSchemas {
       'admin::api-token': AdminApiToken;
       'admin::api-token-permission': AdminApiTokenPermission;
-      'admin::audit-log': AdminAuditLog;
       'admin::permission': AdminPermission;
       'admin::role': AdminRole;
       'admin::session': AdminSession;

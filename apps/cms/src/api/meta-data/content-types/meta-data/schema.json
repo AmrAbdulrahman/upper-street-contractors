@@ -16,14 +16,6 @@
     },
     "description": {
       "type": "text"
-    },
-    "globalMetaConfig": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::site-meta-config.site-meta-config"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

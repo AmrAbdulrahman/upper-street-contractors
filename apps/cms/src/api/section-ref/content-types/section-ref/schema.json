@@ -14,15 +14,43 @@
     "Name": {
       "type": "string"
     },
-    "who_we_are_section": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::who-we-are-section.who-we-are-section"
+    "order": {
+      "type": "integer"
     },
     "home_hero_section": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::home-header-section.home-header-section"
+    },
+    "who_we_are_section": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::who-we-are-section.who-we-are-section"
+    },
+    "accreditation_list": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::accreditation-list.accreditation-list"
+    },
+    "what_we_do_section": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::what-we-do-section.what-we-do-section"
+    },
+    "why_choose_us_section": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::why-choose-us-section.why-choose-us-section"
+    },
+    "how_it_works_section": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::how-it-works-section.how-it-works-section"
+    },
+    "recent_work_section": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::recent-work-section.recent-work-section"
     }
   }
 }

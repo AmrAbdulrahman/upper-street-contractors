@@ -25,9 +25,6 @@
       "relation": "manyToOne",
       "target": "api::meta-data.meta-data"
     },
-    "contentfulId": {
-      "type": "string"
-    },
     "section_refs": {
       "type": "relation",
       "relation": "oneToMany",

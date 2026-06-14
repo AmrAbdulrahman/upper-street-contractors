@@ -35,9 +35,6 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::badge.badge"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

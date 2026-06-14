@@ -1,5 +1,5 @@
 {
-  "kind": "singleType",
+  "kind": "collectionType",
   "collectionName": "recent_work_sections",
   "info": {
     "singularName": "recent-work-section",
@@ -29,9 +29,6 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::button.button"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }

@@ -21,9 +21,6 @@
     },
     "footer": {
       "type": "blocks"
-    },
-    "contentfulId": {
-      "type": "string"
     }
   }
 }
