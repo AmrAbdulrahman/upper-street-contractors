@@ -12,7 +12,7 @@
   "pluginOptions": {},
   "attributes": {
     "score": {
-      "type": "integer"
+      "type": "decimal"
     },
     "clientReview": {
       "type": "blocks"

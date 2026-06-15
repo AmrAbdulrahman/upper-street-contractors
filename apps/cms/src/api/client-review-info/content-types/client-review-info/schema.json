@@ -24,6 +24,9 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::image-container.image-container"
+    },
+    "reviewLink": {
+      "type": "string"
     }
   }
 }
