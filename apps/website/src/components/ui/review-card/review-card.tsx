@@ -130,8 +130,17 @@ function ReviewProfile({
 export function ReviewCard({ data }: ReviewCardProps) {
   const { score, clientReview, clientInfo } = data;
 
+  const cardClassName =
+    "flex h-full flex-col rounded-2xl border border-border bg-white p-6 shadow-sm transition-shadow";
+
   const card = (
-    <article className="flex h-full flex-col rounded-2xl border border-border bg-white p-6 shadow-sm">
+    <article
+      className={
+        clientInfo?.reviewLink
+          ? `${cardClassName} group-hover:shadow-md`
+          : cardClassName
+      }
+    >
       <StrapiEntryField field="score">
         <StarRating score={score} />
       </StrapiEntryField>
@@ -157,7 +166,7 @@ export function ReviewCard({ data }: ReviewCardProps) {
           href={clientInfo.reviewLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="group block h-full transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          className="group block h-full rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           aria-label={
             clientInfo.name
               ? `Read ${clientInfo.name}'s review on ${clientInfo.reviewSource ?? "external site"}`
