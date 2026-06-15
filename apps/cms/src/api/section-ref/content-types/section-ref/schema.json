@@ -51,6 +51,11 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::recent-work-section.recent-work-section"
+    },
+    "client_review_section": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::client-review-section.client-review-section"
     }
   }
 }

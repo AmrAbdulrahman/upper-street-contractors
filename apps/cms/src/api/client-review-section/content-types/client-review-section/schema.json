@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "client_review_sections",
+  "info": {
+    "singularName": "client-review-section",
+    "pluralName": "client-review-sections",
+    "displayName": "Client Review Section"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "overline": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "reviewCards": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::review-card.review-card"
+    },
+    "reviewLinks": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::button.button"
+    }
+  }
+}
