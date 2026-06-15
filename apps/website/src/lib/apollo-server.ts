@@ -22,7 +22,10 @@ export function makeServerClient() {
     link: new HttpLink({
       uri: getStrapiEndpoint(),
       headers: { Authorization: `Bearer ${getStrapiToken()}` },
-      fetchOptions: { cache: 'force-cache' },
+      fetchOptions: {
+        cache:
+          process.env.ENABLE_PREVIEW === 'true' ? 'no-store' : 'force-cache',
+      },
     }),
   })
 }
