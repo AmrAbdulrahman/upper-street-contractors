@@ -1,6 +1,7 @@
 import { ImageContainerFragment } from "@/generated/graphql";
 import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
-import Image from "next/image";import type { CSSProperties } from "react";
+import Image from "next/image";
+import type { CSSProperties } from "react";
 
 export const IMAGE_RADIUS_CLASSES = {
   none: "rounded-none",
@@ -8,8 +9,8 @@ export const IMAGE_RADIUS_CLASSES = {
   md: "rounded-md",
   lg: "rounded-lg",
   xl: "rounded-xl",
-  "2xl": "rounded-2xl",
-  "3xl": "rounded-3xl",
+  xl2: "rounded-2xl",
+  xl3: "rounded-3xl",
   full: "rounded-full",
 } as const;
 
@@ -22,8 +23,16 @@ export type ImageContainerProps = {
   placeholderLabel?: string;
 };
 
+const LEGACY_IMAGE_RADIUS_ALIASES: Record<string, ImageRadiusToken> = {
+  "2xl": "xl2",
+  "3xl": "xl3",
+};
+
 export function normalizeImageRadius(radius?: string | null): string {
-  const key = radius?.trim().toLowerCase() as ImageRadiusToken | undefined;
+  const raw = radius?.trim().toLowerCase();
+  const key = (raw && (LEGACY_IMAGE_RADIUS_ALIASES[raw] ?? raw)) as
+    | ImageRadiusToken
+    | undefined;
 
   if (key && key in IMAGE_RADIUS_CLASSES) {
     return IMAGE_RADIUS_CLASSES[key];

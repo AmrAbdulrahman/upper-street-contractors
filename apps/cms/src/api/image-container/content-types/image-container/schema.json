@@ -30,7 +30,9 @@
       "type": "integer"
     },
     "imageRadius": {
-      "type": "string"
+      "type": "enumeration",
+      "enum": ["none", "sm", "md", "lg", "xl", "xl2", "xl3", "full"],
+      "default": "xl"
     }
   }
 }

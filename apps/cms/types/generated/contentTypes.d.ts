@@ -591,7 +591,8 @@ export interface ApiBadgeBadge extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    variant: Schema.Attribute.String;
+    variant: Schema.Attribute.Enumeration<['light', 'dark']> &
+      Schema.Attribute.DefaultTo<'light'>;
   };
 }
 
@@ -624,7 +625,10 @@ export interface ApiBannerBanner extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    variant: Schema.Attribute.String;
+    variant: Schema.Attribute.Enumeration<
+      ['dark', 'light', 'note', 'transparent']
+    > &
+      Schema.Attribute.DefaultTo<'light'>;
   };
 }
 
@@ -668,15 +672,19 @@ export interface ApiButtonButton extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    action: Schema.Attribute.String;
+    action: Schema.Attribute.Enumeration<['whatsapp', 'contact_form']>;
     borderRadius: Schema.Attribute.Integer;
-    color: Schema.Attribute.String;
+    color: Schema.Attribute.Enumeration<
+      ['green', 'dark_blue', 'white', 'black']
+    > &
+      Schema.Attribute.DefaultTo<'green'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     href: Schema.Attribute.Text;
     icon: Schema.Attribute.Relation<'manyToOne', 'api::icon.icon'>;
-    iconPosition: Schema.Attribute.String;
+    iconPosition: Schema.Attribute.Enumeration<['start', 'end']> &
+      Schema.Attribute.DefaultTo<'start'>;
     label: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -688,7 +696,8 @@ export interface ApiButtonButton extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    variant: Schema.Attribute.String;
+    variant: Schema.Attribute.Enumeration<['contained', 'outlined', 'text']> &
+      Schema.Attribute.DefaultTo<'contained'>;
   };
 }
 
@@ -875,7 +884,10 @@ export interface ApiImageContainerImageContainer
       Schema.Attribute.Private;
     height: Schema.Attribute.Integer;
     imageFile: Schema.Attribute.Media<'images' | 'files' | 'videos'>;
-    imageRadius: Schema.Attribute.String;
+    imageRadius: Schema.Attribute.Enumeration<
+      ['none', 'sm', 'md', 'lg', 'xl', 'xl2', 'xl3', 'full']
+    > &
+      Schema.Attribute.DefaultTo<'xl'>;
     imgDescription: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<

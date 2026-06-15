@@ -1,6 +1,6 @@
 export const BUTTON_VARIANTS = ["contained", "outlined", "text"] as const;
-export const BUTTON_COLORS = ["green", "dark-blue", "white", "black"] as const;
-export const BUTTON_ACTIONS = ["whatsapp", "contact-form"] as const;
+export const BUTTON_COLORS = ["green", "dark_blue", "white", "black"] as const;
+export const BUTTON_ACTIONS = ["whatsapp", "contact_form"] as const;
 export const ICON_POSITIONS = ["start", "end"] as const;
 
 export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
@@ -11,7 +11,7 @@ export type IconPosition = (typeof ICON_POSITIONS)[number];
 export function normalizeButtonVariant(variant?: string | null): ButtonVariant {
   const key = variant?.toLowerCase();
 
-  if (key === "contained" || key === "primary" || key === "solid") {
+  if (key === "contained" || key === "primary" || key === "solid" || key === "filled") {
     return "contained";
   }
 
@@ -30,7 +30,7 @@ export function normalizeButtonColor(color?: string | null): ButtonColor {
   const key = color?.toLowerCase().replace(/_/g, "-");
 
   if (key === "green") return "green";
-  if (key === "dark-blue" || key === "dark") return "dark-blue";
+  if (key === "dark-blue" || key === "dark" || key === "dark_blue") return "dark_blue";
   if (key === "white") return "white";
   if (key === "black") return "black";
 
@@ -40,10 +40,10 @@ export function normalizeButtonColor(color?: string | null): ButtonColor {
 export function normalizeButtonAction(
   action?: string | null,
 ): ButtonAction | undefined {
-  const key = action?.toLowerCase();
+  const key = action?.toLowerCase().replace(/_/g, "-");
 
   if (key === "whatsapp") return "whatsapp";
-  if (key === "contact-form") return "contact-form";
+  if (key === "contact-form" || key === "contact_form") return "contact_form";
 
   return undefined;
 }

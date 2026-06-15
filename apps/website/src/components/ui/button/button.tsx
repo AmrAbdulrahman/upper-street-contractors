@@ -44,14 +44,14 @@ const baseClasses =
 const buttonStyles: Record<ButtonVariant, Record<ButtonColor, string>> = {
   contained: {
     green: "bg-whatsapp text-white hover:brightness-110",
-    "dark-blue": "bg-dark text-white hover:bg-dark/90",
+    dark_blue: "bg-dark text-white hover:bg-dark/90",
     white: "border border-border bg-white text-dark hover:bg-border-light",
     black: "bg-dark-2 text-white hover:bg-dark-2/90",
   },
   outlined: {
     green:
       "border border-whatsapp bg-transparent text-whatsapp hover:bg-whatsapp/10",
-    "dark-blue":
+    dark_blue:
       "border border-dark bg-transparent text-dark hover:bg-dark/5",
     white:
       "border border-white/35 bg-transparent text-white hover:border-white/50 hover:bg-white/5",
@@ -60,7 +60,7 @@ const buttonStyles: Record<ButtonVariant, Record<ButtonColor, string>> = {
   },
   text: {
     green: "bg-transparent text-whatsapp hover:bg-whatsapp/10",
-    "dark-blue": "bg-transparent text-dark hover:bg-dark/5",
+    dark_blue: "bg-transparent text-dark hover:bg-dark/5",
     white: "bg-transparent text-white hover:bg-white/10",
     black: "bg-transparent text-dark hover:bg-dark/5",
   },
@@ -70,7 +70,7 @@ const actionHandlers: Record<ButtonAction, () => void> = {
   whatsapp: () => {
     console.log("[Button] WhatsApp action — replace with wa.me link or deep link");
   },
-  "contact-form": () => {
+  contact_form: () => {
     console.log("[Button] Contact action — replace with navigation to contact form");
   },
 };

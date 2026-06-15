@@ -1,3 +1,5 @@
+import { migrateEnumFields } from './bootstrap/migrate-enum-fields';
+
 /**
  * Content types that should be readable by the public role without auth.
  * Collection types expose find + findOne; the single type exposes find only.
@@ -38,5 +40,6 @@ export default {
    */
   async bootstrap({ strapi }) {
     await grantPublicReadPermissions(strapi);
+    await migrateEnumFields(strapi);
   },
 };

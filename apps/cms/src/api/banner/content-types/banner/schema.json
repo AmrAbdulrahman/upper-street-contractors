@@ -12,7 +12,9 @@
   "pluginOptions": {},
   "attributes": {
     "variant": {
-      "type": "string"
+      "type": "enumeration",
+      "enum": ["dark", "light", "note", "transparent"],
+      "default": "light"
     },
     "emoji": {
       "type": "string"

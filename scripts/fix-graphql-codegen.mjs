@@ -14,13 +14,27 @@ for (const extra of ['schema-types.ts', 'operations.ts']) {
 let source = readFileSync(graphqlPath, 'utf8');
 const duplicateBlock =
   /\nexport type PublicationStatus =\n  \| 'DRAFT'\n  \| 'PUBLISHED';\n/g;
-const matches = [...source.matchAll(duplicateBlock)];
+const publicationMatches = [...source.matchAll(duplicateBlock)];
 
-if (matches.length > 1) {
-  const secondMatch = matches[1];
+if (publicationMatches.length > 1) {
+  const secondMatch = publicationMatches[1];
   source =
     source.slice(0, secondMatch.index) +
     source.slice(secondMatch.index + secondMatch[0].length);
+}
+
+const enumMarker = 'export type Enum_Badge_Variant';
+const firstEnumIdx = source.indexOf(enumMarker);
+const secondEnumIdx =
+  firstEnumIdx === -1 ? -1 : source.indexOf(enumMarker, firstEnumIdx + 1);
+const queryMarker = '\nexport type GetHomePageQueryVariables';
+
+if (secondEnumIdx !== -1) {
+  const queryIdx = source.indexOf(queryMarker, secondEnumIdx);
+
+  if (queryIdx !== -1) {
+    source = source.slice(0, secondEnumIdx) + source.slice(queryIdx);
+  }
 }
 
 writeFileSync(graphqlPath, source);
