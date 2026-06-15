@@ -1,0 +1,15 @@
+fragment ReviewCard on ReviewCard {
+  documentId
+  score
+  clientReview
+  clientInfo {
+    documentId
+    name
+    reviewSource
+    location
+    reviewLink
+    image {
+      ...ImageContainer
+    }
+  }
+}
