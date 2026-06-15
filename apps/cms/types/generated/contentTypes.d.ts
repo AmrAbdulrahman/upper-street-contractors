@@ -674,7 +674,7 @@ export interface ApiButtonButton extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    href: Schema.Attribute.String;
+    href: Schema.Attribute.Text;
     icon: Schema.Attribute.Relation<'manyToOne', 'api::icon.icon'>;
     iconPosition: Schema.Attribute.String;
     label: Schema.Attribute.String;
