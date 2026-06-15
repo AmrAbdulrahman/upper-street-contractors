@@ -1,5 +1,6 @@
 import {
   type AccreditationListFragment,
+  type ClientReviewSectionFragment,
   type HomeHeroSectionFragment,
   type HowItWorksSectionFragment,
   type RecentWorkSectionFragment,
@@ -8,6 +9,7 @@ import {
   type WhyChooseUsSectionFragment,
 } from "@/generated/graphql";
 import { AccreditationList } from "./accreditation-list";
+import { ClientReviewsSection } from "./client-reviews";
 import { HeroHeroSection } from "./home-hero";
 import { HowItWorksSection } from "./how-it-works";
 import { RecentWorkSection } from "./recent-work";
@@ -23,6 +25,7 @@ export type PageSectionData = (
   | WhyChooseUsSectionFragment
   | HowItWorksSectionFragment
   | RecentWorkSectionFragment
+  | ClientReviewSectionFragment
 ) & { __typename?: string };
 
 export function PageSection({ section }: { section: PageSectionData }) {
@@ -47,6 +50,11 @@ export function PageSection({ section }: { section: PageSectionData }) {
 
     case "RecentWorkSection":
       return <RecentWorkSection data={section as RecentWorkSectionFragment} />;
+
+    case "ClientReviewSection":
+      return (
+        <ClientReviewsSection data={section as ClientReviewSectionFragment} />
+      );
 
     default:
       return null;

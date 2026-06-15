@@ -12,7 +12,8 @@ type RichTextVariant =
   | "what-we-do-body"
   | "banner-body-dark"
   | "banner-body-light"
-  | "banner-body-inline";
+  | "banner-body-inline"
+  | "review-card-body";
 
 type RichTextElement = "div" | "h1" | "h2" | "p";
 
@@ -35,6 +36,7 @@ const paragraphClasses: Record<RichTextVariant, string> = {
   "banner-body-dark": "text-sm leading-relaxed text-subtle",
   "banner-body-light": "text-sm leading-relaxed text-muted",
   "banner-body-inline": "text-sm leading-relaxed text-inherit",
+  "review-card-body": "italic text-[15px] leading-relaxed text-muted",
 };
 
 const headingClasses: Record<RichTextVariant, string> = {
@@ -49,6 +51,7 @@ const headingClasses: Record<RichTextVariant, string> = {
   "banner-body-dark": "text-sm leading-relaxed text-subtle",
   "banner-body-light": "text-sm leading-relaxed text-muted",
   "banner-body-inline": "text-sm leading-relaxed text-inherit",
+  "review-card-body": "italic text-[15px] leading-relaxed text-muted",
 };
 
 function isBlocksContent(value: unknown): value is Parameters<typeof BlocksRenderer>[0]["content"] {

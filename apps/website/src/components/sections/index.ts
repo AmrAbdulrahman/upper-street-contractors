@@ -1,4 +1,5 @@
 export { AccreditationList } from "./accreditation-list";
+export { ClientReviewsSection } from "./client-reviews";
 export { HeroHeroSection } from "./home-hero";
 export { HowItWorksSection } from "./how-it-works";
 export { RecentWorkSection } from "./recent-work";

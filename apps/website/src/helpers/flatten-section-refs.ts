@@ -20,6 +20,7 @@ export function flattenSectionRefs(
         ref.why_choose_us_section ??
         ref.how_it_works_section ??
         ref.recent_work_section ??
+        ref.client_review_section ??
         null;
 
       return section as PageSectionData | null;

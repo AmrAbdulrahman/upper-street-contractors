@@ -1,0 +1,12 @@
+fragment ClientReviewSection on ClientReviewSection {
+  documentId
+  overline
+  title
+  description
+  reviewCards {
+    ...ReviewCard
+  }
+  reviewLinks {
+    ...Button
+  }
+}
