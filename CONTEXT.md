@@ -31,3 +31,15 @@ _Avoid_: Tab bar, filter pills (UI class names only)
 **Badge**:
 The reusable pill component that renders category tags and meta chips from variant, radius, href, and text props.
 _Avoid_: Tag, chip, label
+
+**Client Review section**:
+The home page section that surfaces homeowner testimonials with star ratings and links to individual reviews on Trustpilot or Google.
+_Avoid_: Testimonials section, reviews block, social proof
+
+**Review card**:
+A single testimonial tile showing a star score, quoted review text, and the reviewer's profile.
+_Avoid_: Testimonial card, quote card, feedback tile
+
+**Review profile**:
+The reviewer identity on a Review card: avatar, name, review source, location, and link to the original review. Stored as `client-review-info` in Strapi.
+_Avoid_: Author, user profile, client info (implementation name only)
