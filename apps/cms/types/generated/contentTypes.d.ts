@@ -114,43 +114,6 @@ export interface AdminApiTokenPermission extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface AdminAuditLog extends Struct.CollectionTypeSchema {
-  collectionName: 'strapi_audit_logs';
-  info: {
-    displayName: 'Audit Log';
-    pluralName: 'audit-logs';
-    singularName: 'audit-log';
-  };
-  options: {
-    draftAndPublish: false;
-    timestamps: false;
-  };
-  pluginOptions: {
-    'content-manager': {
-      visible: false;
-    };
-    'content-type-builder': {
-      visible: false;
-    };
-  };
-  attributes: {
-    action: Schema.Attribute.String & Schema.Attribute.Required;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    date: Schema.Attribute.DateTime & Schema.Attribute.Required;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'admin::audit-log'> &
-      Schema.Attribute.Private;
-    payload: Schema.Attribute.JSON;
-    publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    user: Schema.Attribute.Relation<'oneToOne', 'admin::user'>;
-  };
-}
-
 export interface AdminPermission extends Struct.CollectionTypeSchema {
   collectionName: 'admin_permissions';
   info: {
@@ -757,7 +720,44 @@ export interface ApiClientReviewInfoClientReviewInfo
     location: Schema.Attribute.String;
     name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    reviewLink: Schema.Attribute.String;
     reviewSource: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiClientReviewSectionClientReviewSection
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'client_review_sections';
+  info: {
+    displayName: 'Client Review Section';
+    pluralName: 'client-review-sections';
+    singularName: 'client-review-section';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::client-review-section.client-review-section'
+    > &
+      Schema.Attribute.Private;
+    overline: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    reviewCards: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::review-card.review-card'
+    >;
+    reviewLinks: Schema.Attribute.Relation<'manyToMany', 'api::button.button'>;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1049,7 +1049,7 @@ export interface ApiReviewCardReviewCard extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    score: Schema.Attribute.Integer;
+    score: Schema.Attribute.Decimal;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1070,6 +1070,10 @@ export interface ApiSectionRefSectionRef extends Struct.CollectionTypeSchema {
     accreditation_list: Schema.Attribute.Relation<
       'oneToOne',
       'api::accreditation-list.accreditation-list'
+    >;
+    client_review_section: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::client-review-section.client-review-section'
     >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1870,7 +1874,6 @@ declare module '@strapi/strapi' {
     export interface ContentTypeSchemas {
       'admin::api-token': AdminApiToken;
       'admin::api-token-permission': AdminApiTokenPermission;
-      'admin::audit-log': AdminAuditLog;
       'admin::permission': AdminPermission;
       'admin::role': AdminRole;
       'admin::session': AdminSession;
@@ -1886,6 +1889,7 @@ declare module '@strapi/strapi' {
       'api::bullet-list.bullet-list': ApiBulletListBulletList;
       'api::button.button': ApiButtonButton;
       'api::client-review-info.client-review-info': ApiClientReviewInfoClientReviewInfo;
+      'api::client-review-section.client-review-section': ApiClientReviewSectionClientReviewSection;
       'api::home-header-section.home-header-section': ApiHomeHeaderSectionHomeHeaderSection;
       'api::how-it-works-section.how-it-works-section': ApiHowItWorksSectionHowItWorksSection;
       'api::icon.icon': ApiIconIcon;
