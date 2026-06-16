@@ -1,5 +1,38 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment setup
+
+Website env vars live in a **single root file** — no per-app duplication.
+
+1. **Install [direnv](https://direnv.net/)** and hook it into your shell ([setup guide](https://direnv.net/docs/hook.html)).
+2. **Create secrets file** at the repo root:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Edit `.env.local` and fill in `STRAPI_API_TOKEN` and any other values.
+3. **Allow direnv** (once per machine):
+   ```bash
+   direnv allow          # repo root — loads .env.local via .envrc
+   cd apps/website && direnv allow   # inherits root via source_up
+   ```
+4. **Run the website** from the repo root:
+   ```bash
+   npm run dev
+   ```
+
+### How it works
+
+| File | Purpose |
+| ---- | ------- |
+| `.env.example` | Committed template — copy to `.env.local` |
+| `.env.local` | Your secrets (gitignored) |
+| `.envrc` | Root direnv loader: `dotenv .env.local` |
+| `apps/website/.envrc` | `source_up` — walks up to root `.envrc` |
+
+When you `cd` into `apps/website`, direnv loads the same vars as at the repo root. Next.js, codegen, and Nx scripts all read `process.env` from the shell.
+
+**CMS is separate:** Strapi uses its own `apps/cms/.env` (HOST, APP_KEYS, JWT secrets, etc.). See `apps/cms/.env.example`.
+
 ## Getting Started
 
 First, run the development server:
