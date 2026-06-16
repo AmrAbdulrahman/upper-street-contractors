@@ -45,6 +45,10 @@ query GetHomePage($status: PublicationStatus = PUBLISHED) {
         __typename
         ...ClientReviewSection
       }
+      planning_renovation_section {
+        __typename
+        ...PlanningRenovationSection
+      }
     }
   }
 }

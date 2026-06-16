@@ -21,6 +21,7 @@ export function flattenSectionRefs(
         ref.how_it_works_section ??
         ref.recent_work_section ??
         ref.client_review_section ??
+        ref.planning_renovation_section ??
         null;
 
       return section as PageSectionData | null;

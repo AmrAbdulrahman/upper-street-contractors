@@ -3,6 +3,7 @@ import {
   type ClientReviewSectionFragment,
   type HomeHeroSectionFragment,
   type HowItWorksSectionFragment,
+  type PlanningRenovationSectionFragment,
   type RecentWorkSectionFragment,
   type WhatWeDoSectionFragment,
   type WhoWeAreSectionFragment,
@@ -12,6 +13,7 @@ import { AccreditationList } from "./accreditation-list";
 import { ClientReviewsSection } from "./client-reviews";
 import { HeroHeroSection } from "./home-hero";
 import { HowItWorksSection } from "./how-it-works";
+import { PlanningRenovationSection } from "./planning-renovation";
 import { RecentWorkSection } from "./recent-work";
 import { WhatWeDoSection } from "./what-we-do";
 import { WhoWeAreSection } from "./who-we-are";
@@ -26,6 +28,7 @@ export type PageSectionData = (
   | HowItWorksSectionFragment
   | RecentWorkSectionFragment
   | ClientReviewSectionFragment
+  | PlanningRenovationSectionFragment
 ) & { __typename?: string };
 
 export function PageSection({ section }: { section: PageSectionData }) {
@@ -54,6 +57,13 @@ export function PageSection({ section }: { section: PageSectionData }) {
     case "ClientReviewSection":
       return (
         <ClientReviewsSection data={section as ClientReviewSectionFragment} />
+      );
+
+    case "PlanningRenovationSection":
+      return (
+        <PlanningRenovationSection
+          data={section as PlanningRenovationSectionFragment}
+        />
       );
 
     default:

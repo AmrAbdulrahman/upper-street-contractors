@@ -1,0 +1,10 @@
+fragment PlanningRenovationSection on PlanningRenovationSection {
+  documentId
+  overline
+  title
+  description
+  footer
+  buttons {
+    ...Button
+  }
+}
