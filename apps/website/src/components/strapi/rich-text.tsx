@@ -13,7 +13,8 @@ type RichTextVariant =
   | "banner-body-dark"
   | "banner-body-light"
   | "banner-body-inline"
-  | "review-card-body";
+  | "review-card-body"
+  | "planning-renovation-footer";
 
 type RichTextElement = "div" | "h1" | "h2" | "p";
 
@@ -37,6 +38,7 @@ const paragraphClasses: Record<RichTextVariant, string> = {
   "banner-body-light": "text-sm leading-relaxed text-muted",
   "banner-body-inline": "text-sm leading-relaxed text-inherit",
   "review-card-body": "italic text-[15px] leading-relaxed text-muted",
+  "planning-renovation-footer": "text-[13px] leading-relaxed text-white/40",
 };
 
 const headingClasses: Record<RichTextVariant, string> = {
@@ -52,6 +54,7 @@ const headingClasses: Record<RichTextVariant, string> = {
   "banner-body-light": "text-sm leading-relaxed text-muted",
   "banner-body-inline": "text-sm leading-relaxed text-inherit",
   "review-card-body": "italic text-[15px] leading-relaxed text-muted",
+  "planning-renovation-footer": "text-[13px] leading-relaxed text-white/40",
 };
 
 function isBlocksContent(value: unknown): value is Parameters<typeof BlocksRenderer>[0]["content"] {
@@ -105,6 +108,18 @@ export function RichText({
             <blockquote className="mb-4 border-l-4 border-gold pl-4 italic text-muted">
               {children}
             </blockquote>
+          ),
+          link: ({ children, url }) => (
+            <a
+              href={url}
+              className={
+                variant === "planning-renovation-footer"
+                  ? "text-white/65 underline hover:text-white/80"
+                  : "text-gold underline hover:text-gold-mid"
+              }
+            >
+              {children}
+            </a>
           ),
         }}
         modifiers={{
