@@ -964,6 +964,39 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiPlanningRenovationSectionPlanningRenovationSection
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'planning_renovation_sections';
+  info: {
+    displayName: 'Planning Renovation Section';
+    pluralName: 'planning-renovation-sections';
+    singularName: 'planning-renovation-section';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    buttons: Schema.Attribute.Relation<'manyToMany', 'api::button.button'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.String;
+    footer: Schema.Attribute.Blocks;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::planning-renovation-section.planning-renovation-section'
+    > &
+      Schema.Attribute.Private;
+    overline: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiProjectCardProjectCard extends Struct.CollectionTypeSchema {
   collectionName: 'project_cards';
   info: {
@@ -1106,6 +1139,10 @@ export interface ApiSectionRefSectionRef extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     Name: Schema.Attribute.String;
     order: Schema.Attribute.Integer;
+    planning_renovation_section: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::planning-renovation-section.planning-renovation-section'
+    >;
     publishedAt: Schema.Attribute.DateTime;
     recent_work_section: Schema.Attribute.Relation<
       'oneToOne',
@@ -1908,6 +1945,7 @@ declare module '@strapi/strapi' {
       'api::image-container.image-container': ApiImageContainerImageContainer;
       'api::meta-data.meta-data': ApiMetaDataMetaData;
       'api::page.page': ApiPagePage;
+      'api::planning-renovation-section.planning-renovation-section': ApiPlanningRenovationSectionPlanningRenovationSection;
       'api::project-card.project-card': ApiProjectCardProjectCard;
       'api::recent-work-section.recent-work-section': ApiRecentWorkSectionRecentWorkSection;
       'api::review-card.review-card': ApiReviewCardReviewCard;

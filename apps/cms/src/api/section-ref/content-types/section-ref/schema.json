@@ -56,6 +56,11 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::client-review-section.client-review-section"
+    },
+    "planning_renovation_section": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::planning-renovation-section.planning-renovation-section"
     }
   }
 }
