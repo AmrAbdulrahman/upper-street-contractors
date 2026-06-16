@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-function getStrapiEndpoint() {
-  const url = process.env.STRAPI_URL || 'http://localhost:1337'
-  return `${url}/graphql`
-}
+import { getStrapiAuthHeaders, getStrapiGraphqlEndpoint } from '@/lib/strapi-auth'
 
 export async function POST(request: NextRequest) {
-  const token = process.env.STRAPI_API_TOKEN
-  if (!token) {
+  let headers: Record<string, string>;
+
+  try {
+    headers = getStrapiAuthHeaders();
+  } catch {
     return NextResponse.json(
       { errors: [{ message: 'STRAPI_API_TOKEN is not configured' }] },
       { status: 500 },
@@ -16,11 +15,11 @@ export async function POST(request: NextRequest) {
 
   const body = await request.text()
 
-  const response = await fetch(getStrapiEndpoint(), {
+  const response = await fetch(getStrapiGraphqlEndpoint(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      ...headers,
     },
     body,
   })
