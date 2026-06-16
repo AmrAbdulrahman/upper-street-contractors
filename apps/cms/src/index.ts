@@ -1,4 +1,5 @@
 import { migrateEnumFields } from './bootstrap/migrate-enum-fields';
+import { ensureLocalApiToken } from './bootstrap/ensure-local-api-token';
 
 /**
  * Content types that should be readable by the public role without auth.
@@ -41,5 +42,6 @@ export default {
   async bootstrap({ strapi }) {
     await grantPublicReadPermissions(strapi);
     await migrateEnumFields(strapi);
+    await ensureLocalApiToken(strapi);
   },
 };
