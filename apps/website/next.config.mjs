@@ -21,6 +21,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "satisfying-beauty-a75f179112.strapiapp.com",
+      },
+      {
+        protocol: "https",
         hostname: "images.ctfassets.net",
       },
       {
