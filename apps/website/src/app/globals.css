@@ -84,4 +84,134 @@
     pointer-events: none;
     z-index: 0;
   }
+
+  .cold-start-overlay {
+    transition: opacity 400ms ease;
+  }
+
+  .cold-start-overlay--exiting {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cold-start-scene svg .cold-start-ground {
+    fill: var(--color-border);
+  }
+
+  .cold-start-scene svg .cold-start-foundation {
+    fill: var(--color-muted);
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: cold-start-rise 0.6s ease-out both;
+  }
+
+  .cold-start-scene svg .cold-start-wall-left,
+  .cold-start-scene svg .cold-start-wall-right {
+    fill: var(--color-dark);
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: cold-start-rise 0.7s ease-out 0.5s both;
+  }
+
+  .cold-start-scene svg .cold-start-door {
+    fill: var(--color-gold);
+    opacity: 0;
+    animation: cold-start-fade-in 0.4s ease-out 1.2s both;
+  }
+
+  .cold-start-scene svg .cold-start-window {
+    fill: var(--color-gold-light);
+    opacity: 0;
+    animation: cold-start-fade-in 0.4s ease-out 1.3s both;
+  }
+
+  .cold-start-scene svg .cold-start-roof {
+    fill: var(--color-gold);
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: cold-start-roof-drop 0.8s ease-out 1s both;
+  }
+
+  .cold-start-scene svg .cold-start-chimney {
+    fill: var(--color-dark-2);
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: cold-start-rise 0.5s ease-out 1.5s both;
+  }
+
+  .cold-start-scene svg .cold-start-crane {
+    transform-box: fill-box;
+    transform-origin: 165px 130px;
+    animation: cold-start-crane-sway 2.4s ease-in-out infinite;
+  }
+
+  .cold-start-scene svg .cold-start-crane line {
+    stroke: var(--color-subtle);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .cold-start-scene svg .cold-start-crane line:last-child {
+    stroke-width: 2;
+  }
+
+  @keyframes cold-start-rise {
+    from {
+      opacity: 0;
+      transform: scaleY(0);
+    }
+
+    to {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes cold-start-roof-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-24px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes cold-start-fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes cold-start-crane-sway {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+
+    50% {
+      transform: rotate(-4deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cold-start-scene svg .cold-start-foundation,
+    .cold-start-scene svg .cold-start-wall-left,
+    .cold-start-scene svg .cold-start-wall-right,
+    .cold-start-scene svg .cold-start-door,
+    .cold-start-scene svg .cold-start-window,
+    .cold-start-scene svg .cold-start-roof,
+    .cold-start-scene svg .cold-start-chimney,
+    .cold-start-scene svg .cold-start-crane {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
