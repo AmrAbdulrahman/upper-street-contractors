@@ -1,11 +1,7 @@
 export { buildStrapiEntryUrl } from "./strapi-entry-url";
 export { resolveStrapiMediaUrl } from "./strapi-media-url";
 export { flattenSectionRefs } from "./flatten-section-refs";
-export {
-  // getContentfulAccessToken,
-  isPreviewEnabled,
-  withPreviewVariables,
-} from "./preview-utils";
+export { isPreviewEnabled, withPreviewVariables } from "./preview-utils";
 export { formatAddress } from "./format-address";
 export { formatPhoneDisplay } from "./format-phone";
 export { iconData } from "./icon-data";

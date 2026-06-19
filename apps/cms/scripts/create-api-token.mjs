@@ -62,7 +62,7 @@ async function main() {
     '/admin/api-tokens',
     {
       name: `${TOKEN_NAME}-${Date.now()}`,
-      description: 'Full-access token for the Contentful -> Strapi migration',
+      description: 'Full-access token for local development and CI',
       type: 'full-access',
       lifespan: null,
     },
