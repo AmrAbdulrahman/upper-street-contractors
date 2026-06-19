@@ -1,6 +1,7 @@
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
+import { pingStrapiGraphql } from './strapi-health.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
@@ -22,62 +23,22 @@ const heartbeatIntervalMs = Number(
   process.env.WAIT_FOR_GRAPHQL_HEARTBEAT_MS ?? 5_000,
 );
 
-const HEALTH_QUERY = 'query { __typename }';
-
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function isHtmlResponse(text) {
-  const trimmed = text.trimStart();
-  return trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html');
-}
-
-function isGraphqlResponse(body) {
-  return (
-    typeof body === 'object' &&
-    body !== null &&
-    ('data' in body || Array.isArray(body.errors))
-  );
-}
-
 async function pingGraphql() {
-  const headers = {
-    'Content-Type': 'application/json',
-  };
+  const headers = {};
 
   if (strapiToken) {
     headers.Authorization = `Bearer ${strapiToken}`;
   }
 
-  const response = await fetch(graphqlUrl, {
-    method: 'POST',
+  return pingStrapiGraphql({
+    endpoint: graphqlUrl,
     headers,
-    body: JSON.stringify({ query: HEALTH_QUERY }),
     signal: AbortSignal.timeout(requestTimeoutMs),
   });
-
-  const text = await response.text();
-
-  if (isHtmlResponse(text)) {
-    return {
-      ready: false,
-      reason: `HTTP ${response.status} HTML response (server likely waking up)`,
-    };
-  }
-
-  let body;
-  try {
-    body = JSON.parse(text);
-  } catch {
-    return { ready: false, reason: 'Non-JSON response' };
-  }
-
-  if (isGraphqlResponse(body)) {
-    return { ready: true };
-  }
-
-  return { ready: false, reason: 'Unexpected GraphQL response shape' };
 }
 
 async function waitForGraphqlServer() {
