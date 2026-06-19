@@ -6,11 +6,16 @@ import {
 import { getClient } from "@/lib/apollo-server";
 
 async function fetchSiteMetaConfig(): Promise<SiteMetaConfigFragment | null> {
-  const { data } = await getClient().query({
-    query: GetSiteMetaConfigDocument,
-  });
+  try {
+    const { data } = await getClient().query({
+      query: GetSiteMetaConfigDocument,
+      errorPolicy: "ignore",
+    });
 
-  return data?.siteMetaConfigs?.at(0) ?? null;
+    return data?.siteMetaConfigs?.at(0) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export const getSiteMetaConfig = cache(fetchSiteMetaConfig);

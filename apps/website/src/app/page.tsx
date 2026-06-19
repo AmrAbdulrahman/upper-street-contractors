@@ -6,27 +6,44 @@ import { flattenSectionRefs } from "@/helpers/flatten-section-refs";
 import { GetHomePageDocument } from "@/generated/graphql";
 import { getClient } from "@/lib/apollo-server";
 
+async function getHomeSections() {
+  try {
+    const { data } = await getClient().query({
+      query: GetHomePageDocument,
+      errorPolicy: "ignore",
+    });
+
+    const page = data?.pages?.at(0);
+    return flattenSectionRefs(page?.section_refs);
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata(): Promise<Metadata> {
-  const [siteMetaConfig, { data }] = await Promise.all([
-    getSiteMetaConfig(),
-    getClient().query({ query: GetHomePageDocument }),
-  ]);
+  try {
+    const [siteMetaConfig, { data }] = await Promise.all([
+      getSiteMetaConfig(),
+      getClient().query({ query: GetHomePageDocument, errorPolicy: "ignore" }),
+    ]);
 
-  const page = data?.pages?.at(0);
+    const page = data?.pages?.at(0);
 
-  return pageMetaToMetadata(page?.meta, {
-    path: "/",
-    siteName: siteMetaConfig?.siteName ?? undefined,
-  });
+    return pageMetaToMetadata(page?.meta, {
+      path: "/",
+      siteName: siteMetaConfig?.siteName ?? undefined,
+    });
+  } catch {
+    const siteMetaConfig = await getSiteMetaConfig();
+    return pageMetaToMetadata(null, {
+      path: "/",
+      siteName: siteMetaConfig?.siteName ?? undefined,
+    });
+  }
 }
 
 export default async function Home() {
-  const { data } = await getClient().query({
-    query: GetHomePageDocument,
-  });
-
-  const page = data?.pages?.at(0);
-  const sections = flattenSectionRefs(page?.section_refs);
+  const sections = await getHomeSections();
 
   return (
     <>
