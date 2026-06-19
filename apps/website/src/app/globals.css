@@ -94,6 +94,10 @@
     pointer-events: none;
   }
 
+  .cold-start-scene {
+    --cold-start-cycle: 4s;
+  }
+
   .cold-start-scene svg .cold-start-ground {
     fill: var(--color-border);
   }
@@ -102,7 +106,7 @@
     fill: var(--color-muted);
     transform-box: fill-box;
     transform-origin: center bottom;
-    animation: cold-start-rise 0.6s ease-out both;
+    animation: cold-start-foundation-loop var(--cold-start-cycle) ease-out infinite;
   }
 
   .cold-start-scene svg .cold-start-wall-left,
@@ -110,33 +114,33 @@
     fill: var(--color-dark);
     transform-box: fill-box;
     transform-origin: center bottom;
-    animation: cold-start-rise 0.7s ease-out 0.5s both;
+    animation: cold-start-walls-loop var(--cold-start-cycle) ease-out infinite;
   }
 
   .cold-start-scene svg .cold-start-door {
     fill: var(--color-gold);
     opacity: 0;
-    animation: cold-start-fade-in 0.4s ease-out 1.2s both;
+    animation: cold-start-door-loop var(--cold-start-cycle) ease-out infinite;
   }
 
   .cold-start-scene svg .cold-start-window {
     fill: var(--color-gold-light);
     opacity: 0;
-    animation: cold-start-fade-in 0.4s ease-out 1.3s both;
+    animation: cold-start-window-loop var(--cold-start-cycle) ease-out infinite;
   }
 
   .cold-start-scene svg .cold-start-roof {
     fill: var(--color-gold);
     transform-box: fill-box;
     transform-origin: center bottom;
-    animation: cold-start-roof-drop 0.8s ease-out 1s both;
+    animation: cold-start-roof-loop var(--cold-start-cycle) ease-out infinite;
   }
 
   .cold-start-scene svg .cold-start-chimney {
     fill: var(--color-dark-2);
     transform-box: fill-box;
     transform-origin: center bottom;
-    animation: cold-start-rise 0.5s ease-out 1.5s both;
+    animation: cold-start-chimney-loop var(--cold-start-cycle) ease-out infinite;
   }
 
   .cold-start-scene svg .cold-start-crane {
@@ -155,37 +159,88 @@
     stroke-width: 2;
   }
 
-  @keyframes cold-start-rise {
-    from {
+  @keyframes cold-start-foundation-loop {
+    0%,
+    100% {
       opacity: 0;
       transform: scaleY(0);
     }
 
-    to {
+    15%,
+    80% {
       opacity: 1;
       transform: scaleY(1);
     }
   }
 
-  @keyframes cold-start-roof-drop {
-    from {
+  @keyframes cold-start-walls-loop {
+    0%,
+    12.5%,
+    100% {
+      opacity: 0;
+      transform: scaleY(0);
+    }
+
+    30%,
+    80% {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes cold-start-roof-loop {
+    0%,
+    25%,
+    100% {
       opacity: 0;
       transform: translateY(-24px);
     }
 
-    to {
+    45%,
+    80% {
       opacity: 1;
       transform: translateY(0);
     }
   }
 
-  @keyframes cold-start-fade-in {
-    from {
+  @keyframes cold-start-door-loop {
+    0%,
+    30%,
+    100% {
       opacity: 0;
     }
 
-    to {
+    40%,
+    80% {
       opacity: 1;
+    }
+  }
+
+  @keyframes cold-start-window-loop {
+    0%,
+    32.5%,
+    100% {
+      opacity: 0;
+    }
+
+    42.5%,
+    80% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes cold-start-chimney-loop {
+    0%,
+    37.5%,
+    100% {
+      opacity: 0;
+      transform: scaleY(0);
+    }
+
+    50%,
+    80% {
+      opacity: 1;
+      transform: scaleY(1);
     }
   }
 
