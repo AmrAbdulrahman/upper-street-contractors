@@ -6,8 +6,8 @@ query GetProjectCard($documentId: ID!, $status: PublicationStatus = PUBLISHED) {
   }
 }
 
-query GetProjectCardIds {
-  projectCards(pagination: { limit: 100 }) {
+query GetProjectCardIds($status: PublicationStatus = PUBLISHED) {
+  projectCards(pagination: { limit: 100 }, status: $status) {
     documentId
   }
 }

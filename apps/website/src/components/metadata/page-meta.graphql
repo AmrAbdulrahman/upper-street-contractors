@@ -1,5 +1,5 @@
-query GetPageMeta($key: String!) {
-  pages(filters: { key: { eq: $key } }, pagination: { limit: 1 }) {
+query GetPageMeta($key: String!, $status: PublicationStatus = PUBLISHED) {
+  pages(filters: { key: { eq: $key } }, pagination: { limit: 1 }, status: $status) {
     meta {
       ...PageMetadata
     }

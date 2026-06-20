@@ -101,12 +101,12 @@ function useClearInspectHoverOnPointerExit(
 
 function StrapiInspectEditButton({
   anchor,
-  editUrl,
+  onEdit,
   editAriaLabel,
   onDismiss,
 }: {
   anchor: HTMLElement;
-  editUrl: string;
+  onEdit: () => void;
   editAriaLabel: string;
   onDismiss: () => void;
 }) {
@@ -150,7 +150,7 @@ function StrapiInspectEditButton({
       }}
       onClick={(event) => {
         event.stopPropagation();
-        window.open(editUrl, "_blank", "noopener,noreferrer");
+        onEdit();
       }}
     >
       <PencilIcon className="h-4 w-4" />
@@ -164,14 +164,14 @@ function StrapiInspectClone({
   inspectClassName,
   hovered,
   setHovered,
-  editUrl,
+  onEdit,
   editAriaLabel,
 }: {
   child: InspectableChild;
   inspectClassName: string;
   hovered: boolean;
   setHovered: (hovered: boolean) => void;
-  editUrl: string;
+  onEdit: () => void;
   editAriaLabel: string;
 }) {
   const [hostNode, setHostNode] = useState<HTMLElement | null>(null);
@@ -227,7 +227,7 @@ function StrapiInspectClone({
       {hovered && hostNode ? (
         <StrapiInspectEditButton
           anchor={hostNode}
-          editUrl={editUrl}
+          onEdit={onEdit}
           editAriaLabel={editAriaLabel}
           onDismiss={() => setHovered(false)}
         />
@@ -242,7 +242,7 @@ export function StrapiInspectHost({
   inspectClassName,
   hovered,
   setHovered,
-  editUrl,
+  onEdit,
   editAriaLabel,
   as: Tag = "div",
 }: {
@@ -251,7 +251,7 @@ export function StrapiInspectHost({
   inspectClassName: string;
   hovered: boolean;
   setHovered: (hovered: boolean) => void;
-  editUrl: string;
+  onEdit: () => void;
   editAriaLabel: string;
   as?: "div" | "span";
 }) {
@@ -278,7 +278,7 @@ export function StrapiInspectHost({
       {hovered && hostNode ? (
         <StrapiInspectEditButton
           anchor={hostNode}
-          editUrl={editUrl}
+          onEdit={onEdit}
           editAriaLabel={editAriaLabel}
           onDismiss={() => setHovered(false)}
         />
@@ -292,7 +292,7 @@ export function cloneWithStrapiInspect({
   inspectClassName,
   hovered,
   setHovered,
-  editUrl,
+  onEdit,
   editAriaLabel,
 }: {
   children: ReactNode;
@@ -300,7 +300,7 @@ export function cloneWithStrapiInspect({
   inspectClassName: string;
   hovered: boolean;
   setHovered: (hovered: boolean) => void;
-  editUrl: string;
+  onEdit: () => void;
   editAriaLabel: string;
 }): ReactNode {
   if (Children.count(children) !== 1 || !isValidElement(children)) {
@@ -315,7 +315,7 @@ export function cloneWithStrapiInspect({
       inspectClassName={inspectClassName}
       hovered={hovered}
       setHovered={setHovered}
-      editUrl={editUrl}
+      onEdit={onEdit}
       editAriaLabel={editAriaLabel}
     />
   );
@@ -327,7 +327,7 @@ export function wrapWithStrapiInspect({
   inspectClassName,
   hovered,
   setHovered,
-  editUrl,
+  onEdit,
   editAriaLabel,
   as = "div",
 }: {
@@ -336,7 +336,7 @@ export function wrapWithStrapiInspect({
   inspectClassName: string;
   hovered: boolean;
   setHovered: (hovered: boolean) => void;
-  editUrl: string;
+  onEdit: () => void;
   editAriaLabel: string;
   as?: "div" | "span";
 }): ReactNode {
@@ -350,7 +350,7 @@ export function wrapWithStrapiInspect({
           inspectClassName={inspectClassName}
           hovered={hovered}
           setHovered={setHovered}
-          editUrl={editUrl}
+          onEdit={onEdit}
           editAriaLabel={editAriaLabel}
         />
       );
@@ -364,7 +364,7 @@ export function wrapWithStrapiInspect({
       inspectClassName={inspectClassName}
       hovered={hovered}
       setHovered={setHovered}
-      editUrl={editUrl}
+      onEdit={onEdit}
       editAriaLabel={editAriaLabel}
     >
       {children}

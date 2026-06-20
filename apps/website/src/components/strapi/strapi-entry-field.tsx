@@ -1,6 +1,6 @@
 "use client";
 
-import { buildStrapiEntryUrl } from "@/helpers/strapi-entry-url";
+import { openEditDrawer } from "@/components/edit-drawer/edit-drawer-store";
 import { useState, type ReactElement } from "react";
 import { useStrapiEntry } from "./strapi-entry-context";
 import { useStrapiInspection } from "./strapi-inspection-provider";
@@ -30,13 +30,6 @@ export function StrapiEntryField({
     return children;
   }
 
-  const editUrl = buildStrapiEntryUrl({
-    strapiUrl,
-    documentId: entryContext.entryId,
-    typename: entryContext.typename,
-    focusedField: field,
-  });
-
   const inspectClassName = mergeClassNames(
     "relative isolate outline outline-1 outline-dashed outline-offset-2 transition-[outline-color]",
     "before:pointer-events-none before:absolute before:inset-0 before:z-[1] before:content-['']",
@@ -53,7 +46,13 @@ export function StrapiEntryField({
       inspectClassName={inspectClassName}
       hovered={hovered}
       setHovered={setHovered}
-      editUrl={editUrl}
+      onEdit={() =>
+        openEditDrawer({
+          documentId: entryContext.entryId,
+          typename: entryContext.typename ?? null,
+          focusedField: field,
+        })
+      }
       editAriaLabel={`Edit ${field} in Strapi`}
     >
       {children}

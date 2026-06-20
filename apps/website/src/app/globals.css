@@ -58,6 +58,15 @@
     font-family: var(--font-dm-serif-display), serif;
     font-weight: 400;
   }
+
+  /* Tailwind v4 Preflight makes buttons use the default cursor — restore pointer. */
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
 }
 
 @layer components {
@@ -268,5 +277,75 @@
       opacity: 1;
       transform: none;
     }
+  }
+}
+
+/* Inspect-mode edit drawer (enter + exit animations) */
+@keyframes edit-drawer-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes edit-drawer-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.edit-drawer-panel {
+  width: 100%;
+  animation: edit-drawer-slide-in 300ms ease-out;
+}
+
+/* Cap the drawer at 35% of the viewport on larger screens; full-width on mobile. */
+@media (min-width: 640px) {
+  .edit-drawer-panel {
+    max-width: 35vw;
+  }
+}
+
+.edit-drawer-backdrop {
+  animation: edit-drawer-fade-in 300ms ease-out;
+}
+
+@keyframes edit-drawer-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes edit-drawer-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.edit-drawer-panel--closing {
+  animation: edit-drawer-slide-out 300ms ease-in forwards;
+}
+
+.edit-drawer-backdrop--closing {
+  animation: edit-drawer-fade-out 300ms ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edit-drawer-panel,
+  .edit-drawer-backdrop,
+  .edit-drawer-panel--closing,
+  .edit-drawer-backdrop--closing {
+    animation: none;
   }
 }

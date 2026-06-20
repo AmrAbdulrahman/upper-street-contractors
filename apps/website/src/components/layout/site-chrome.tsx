@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { EditDrawerMount } from "@/components/edit-drawer";
 import { StrapiInspectionProvider } from "@/components/strapi";
 import { Footer, Header } from "@/components/layout";
 import {
@@ -43,6 +44,7 @@ async function SiteChromeContent({ children }: SiteChromeProps) {
         <Suspense fallback={body}>
           <StrapiInspectionProvider strapiUrl={strapiUrl}>
             {body}
+            <EditDrawerMount />
           </StrapiInspectionProvider>
         </Suspense>
       ) : (

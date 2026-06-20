@@ -143,6 +143,12 @@ export function RichText({
             }
             return <em>{children}</em>;
           },
+          strikethrough: ({ children }) => <s>{children}</s>,
+          code: ({ children }) => (
+            <code className="rounded bg-surface px-1 py-0.5 text-[0.9em] text-foreground">
+              {children}
+            </code>
+          ),
         }}
       />
     </Tag>
