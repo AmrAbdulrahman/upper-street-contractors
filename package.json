@@ -15,7 +15,8 @@
     "codegen": "graphql-codegen --config apps/website/codegen.ts && node scripts/fix-graphql-codegen.mjs",
     "codegen:watch": "graphql-codegen --config apps/website/codegen.ts --watch",
     "cms:push": "node scripts/strapi-transfer.mjs push",
-    "cms:pull": "node scripts/strapi-transfer.mjs pull"
+    "cms:pull": "node scripts/strapi-transfer.mjs pull",
+    "sync:claude-cli": "node scripts/sync-claude-cli.mjs"
   },
   "dependencies": {
     "@apollo/client": "^4.2.0",

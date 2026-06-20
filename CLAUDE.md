@@ -28,7 +28,17 @@ Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agen
 
 ### Project stack
 
-Next.js 16 + Strapi + Apollo + colocated GraphQL. See `docs/agents/project-stack.md`. Use stack-specific slash commands in `.cursor/commands/`.
+Next.js 16 + Strapi + Apollo + colocated GraphQL. See `docs/agents/project-stack.md`. Use stack-specific slash commands in `.cursor/commands/` (Cursor) or `.claude/commands/` (Claude CLI).
+
+### Claude CLI parity
+
+Run `npm run sync:claude-cli` after changing skills, commands, or MCP config. This syncs:
+
+- `.agents/skills/` → `.claude/skills/`
+- `.cursor/commands/` → `.claude/commands/`
+- `~/.cursor/mcp.json` → `.mcp.json` (plus GitKraken if `gk` CLI is installed)
+
+User-level Cursor skills (`~/.cursor/skills-cursor/`) sync to `~/.claude/skills/cursor-*` with the same command.
 
 ### Quality standards
 
