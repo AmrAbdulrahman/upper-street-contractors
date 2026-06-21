@@ -2,6 +2,7 @@ import {
   AddStrapiEntry,
   StrapiEntry,
   StrapiEntryField,
+  StrapiRelationEntry,
 } from "@/components/strapi";
 import { Button } from "@/components/ui/button";
 import { ProjectCard } from "@/components/ui/project-card";
@@ -59,9 +60,9 @@ export function RecentWorkSection({ data }: RecentWorkSectionProps) {
 
           {viewAllProjects ? (
             <div className="mt-9 flex justify-center">
-              <StrapiEntryField field="viewAllProjects">
+              <StrapiRelationEntry entry={viewAllProjects} field="viewAllProjects">
                 <Button data={viewAllProjects} />
-              </StrapiEntryField>
+              </StrapiRelationEntry>
             </div>
           ) : null}
         </div>

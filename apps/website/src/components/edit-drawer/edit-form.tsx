@@ -11,20 +11,40 @@ import { updateEntryFields } from "@/lib/entry-editor/actions";
 import type {
   EntryFieldDescriptor,
   EntryFormDescriptor,
+  MediaFileRef,
+  RelationRef,
 } from "@/lib/entry-editor/types";
 import { recordChangedEntry } from "./changed-entries-store";
 import { BooleanField } from "./fields/boolean-field";
+import { EnumField } from "./fields/enum-field";
 import { FieldRow } from "./fields/field-row";
+import { JsonField } from "./fields/json-field";
+import { MediaField } from "./fields/media-field";
 import { NumberField } from "./fields/number-field";
+import { RelationField } from "./fields/relation-field";
 import { TextField } from "./fields/text-field";
 import { UnsupportedField } from "./fields/unsupported-field";
-import { humanizeFieldName, type FormValues } from "./ui";
+import {
+  flatJsonKeys,
+  humanizeFieldName,
+  isFlatScalarObject,
+  jsonIsFlat,
+  reconstructFlatJson,
+  type FormValues,
+} from "./ui";
 
 // HugeRTE is heavy — load it only when a richtext field is rendered.
 const RichTextField = dynamic(() => import("./fields/rich-text-field"), {
   ssr: false,
   loading: () => <div className="h-40 animate-pulse rounded-md bg-surface" />,
 });
+
+function isMultiRelation(field: EntryFieldDescriptor): boolean {
+  return (
+    field.relationCardinality === "oneToMany" ||
+    field.relationCardinality === "manyToMany"
+  );
+}
 
 // Richtext is compared by its converted blocks (normalised through the same
 // round-trip), so HugeRTE re-normalising the seeded HTML on init doesn't read
@@ -44,6 +64,46 @@ function fieldChanged(
       return String(current ?? "") !== String(defaultValue ?? "");
     case "boolean":
       return Boolean(current) !== Boolean(defaultValue);
+    case "media":
+      return (
+        ((current as MediaFileRef | null)?.id ?? null) !==
+        ((defaultValue as MediaFileRef | null)?.id ?? null)
+      );
+    case "relation":
+      if (isMultiRelation(field)) {
+        const currentIds = ((current as RelationRef[] | undefined) ?? []).map(
+          (ref) => ref.documentId,
+        );
+        const defaultIds = (
+          (defaultValue as RelationRef[] | undefined) ?? []
+        ).map((ref) => ref.documentId);
+        return JSON.stringify(currentIds) !== JSON.stringify(defaultIds);
+      }
+      return (
+        ((current as RelationRef | null)?.documentId ?? null) !==
+        ((defaultValue as RelationRef | null)?.documentId ?? null)
+      );
+    case "json":
+      if (jsonIsFlat(field.value)) {
+        return (
+          JSON.stringify(
+            reconstructFlatJson(
+              current as Record<string, unknown> | undefined,
+              field.value,
+              field.jsonKeys,
+            ),
+          ) !==
+          JSON.stringify(
+            reconstructFlatJson(
+              defaultValue as Record<string, unknown> | undefined,
+              field.value,
+              field.jsonKeys,
+            ),
+          )
+        );
+      }
+      return String(current ?? "") !== String(defaultValue ?? "");
+    case "enumeration":
     case "text":
       return (current ?? "") !== (defaultValue ?? "");
     default:
@@ -75,6 +135,44 @@ export function EditForm({
         case "number":
           values[field.name] = field.value == null ? "" : String(field.value);
           break;
+        case "json": {
+          const original = field.value;
+          if (jsonIsFlat(original)) {
+            const source = isFlatScalarObject(original) ? original : {};
+            const obj: Record<string, unknown> = {};
+            for (const key of flatJsonKeys(original, field.jsonKeys)) {
+              const value = source[key];
+              obj[key] =
+                typeof value === "boolean"
+                  ? value
+                  : value == null
+                    ? ""
+                    : String(value);
+            }
+            values[field.name] = obj;
+          } else {
+            values[field.name] = JSON.stringify(original, null, 2);
+          }
+          break;
+        }
+        case "relation":
+          values[field.name] = isMultiRelation(field)
+            ? ((field.value as RelationRef[]) ?? [])
+            : ((field.value as RelationRef | null) ?? null);
+          break;
+        case "media": {
+          const media = field.value as MediaFileRef | null;
+          values[field.name] = media?.id
+            ? {
+                id: media.id,
+                name: media.name,
+                url: media.url,
+                mime: media.mime,
+              }
+            : null;
+          break;
+        }
+        case "enumeration":
         case "text":
           values[field.name] = (field.value as string) ?? "";
           break;
@@ -119,6 +217,7 @@ export function EditForm({
 
     const changes: Record<string, unknown> = {};
     const invalid: string[] = [];
+    const jsonInvalid: string[] = [];
 
     for (const field of descriptor.fields) {
       if (field.supportedKind === "unsupported") continue;
@@ -143,13 +242,52 @@ export function EditForm({
         }
       } else if (field.supportedKind === "boolean") {
         changes[field.name] = Boolean(raw);
+      } else if (field.supportedKind === "enumeration") {
+        // Empty selection clears the (nullable) enum.
+        changes[field.name] = raw === "" || raw == null ? null : String(raw);
+      } else if (field.supportedKind === "media") {
+        // Single media → write the file id (or null to clear).
+        changes[field.name] = (raw as MediaFileRef | null)?.id ?? null;
+      } else if (field.supportedKind === "relation") {
+        // `set` replaces the whole relation in the given order (handles
+        // connect/disconnect + ordering in one go). Empty array clears it.
+        const ids = isMultiRelation(field)
+          ? ((raw as RelationRef[] | undefined) ?? []).map((ref) => ref.documentId)
+          : (raw as RelationRef | null)
+            ? [(raw as RelationRef).documentId]
+            : [];
+        changes[field.name] = { set: ids };
+      } else if (field.supportedKind === "json") {
+        if (jsonIsFlat(field.value)) {
+          const obj = reconstructFlatJson(
+            raw as Record<string, unknown> | undefined,
+            field.value,
+            field.jsonKeys,
+          );
+          const hasBadNumber = Object.values(obj).some(
+            (value) => typeof value === "number" && Number.isNaN(value),
+          );
+          if (hasBadNumber) jsonInvalid.push(field.name);
+          else changes[field.name] = obj;
+        } else {
+          try {
+            changes[field.name] = JSON.parse(String(raw ?? "null"));
+          } catch {
+            jsonInvalid.push(field.name);
+          }
+        }
       } else {
         changes[field.name] = (raw as string) ?? "";
       }
     }
 
-    if (invalid.length) {
-      const message = `Enter a valid number for: ${invalid.join(", ")}`;
+    if (invalid.length || jsonInvalid.length) {
+      const message = [
+        invalid.length ? `Enter a valid number for: ${invalid.join(", ")}` : "",
+        jsonInvalid.length ? `Fix the JSON value for: ${jsonInvalid.join(", ")}` : "",
+      ]
+        .filter(Boolean)
+        .join(". ");
       setError(message);
       toast.error(message);
       return;
@@ -203,6 +341,18 @@ export function EditForm({
               )}
               {field.supportedKind === "boolean" && (
                 <BooleanField field={field} control={control} autoFocus={focused} />
+              )}
+              {field.supportedKind === "enumeration" && (
+                <EnumField field={field} control={control} autoFocus={focused} />
+              )}
+              {field.supportedKind === "json" && (
+                <JsonField field={field} control={control} autoFocus={focused} />
+              )}
+              {field.supportedKind === "media" && (
+                <MediaField field={field} control={control} autoFocus={focused} />
+              )}
+              {field.supportedKind === "relation" && (
+                <RelationField field={field} control={control} autoFocus={focused} />
               )}
               {field.supportedKind === "richtext" && (
                 <RichTextField field={field} control={control} />

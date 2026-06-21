@@ -8,10 +8,7 @@ import {
   useStrapiEntry,
 } from "./strapi-entry-context";
 import { useStrapiInspection } from "./strapi-inspection-provider";
-import {
-  cloneWithStrapiInspect,
-  mergeClassNames,
-} from "./strapi-inspect-clone";
+import { mergeClassNames, wrapWithStrapiInspect } from "./strapi-inspect-clone";
 
 export type StrapiEntryProps<T extends StrapiEntryRef> = {
   entry: T;
@@ -39,7 +36,11 @@ function StrapiEntryInspect({
     hovered ? "outline-blue-500" : "outline-transparent",
   );
 
-  return cloneWithStrapiInspect({
+  // Clone the child as the hover host when it's a plain DOM element (preserves
+  // structure — e.g. <li>, <section>). For client-component children (Button,
+  // ImageContainer) the ref is dropped across the RSC boundary, so wrap them in
+  // a host element instead — otherwise no edit affordance ever appears.
+  return wrapWithStrapiInspect({
     children,
     inspectClassName,
     hovered,

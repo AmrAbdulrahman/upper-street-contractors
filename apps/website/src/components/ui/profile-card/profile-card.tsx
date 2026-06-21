@@ -1,4 +1,4 @@
-import { StrapiEntryField } from "@/components/strapi";
+import { StrapiEntryField, StrapiRelationEntry } from "@/components/strapi";
 import { RichText } from "@/components/strapi/rich-text";
 import { Banner } from "@/components/ui/banner";
 import { ImageContainer } from "@/components/ui/image-container";
@@ -23,7 +23,7 @@ export function ProfileCard({
 }: ProfileCardProps) {
   return (
     <div className="rounded-3xl bg-dark px-8 py-9 text-white">
-      <StrapiEntryField field="cardImage">
+      <StrapiRelationEntry entry={image} field="cardImage">
         <div className="mb-[18px] size-[72px] shrink-0 overflow-hidden rounded-full border-2 border-white/10">
           <ImageContainer
             data={image}
@@ -32,7 +32,7 @@ export function ProfileCard({
             className="!size-[72px] !h-[72px] !w-[72px] rounded-full"
           />
         </div>
-      </StrapiEntryField>
+      </StrapiRelationEntry>
 
       {title ? (
         <StrapiEntryField field="cardTitle">
@@ -56,11 +56,9 @@ export function ProfileCard({
         </StrapiEntryField>
       ) : null}
 
-      {banner ? (
-        <StrapiEntryField field="cardBanner">
-          <Banner data={banner} className="mt-8" />
-        </StrapiEntryField>
-      ) : null}
+      {/* Banner self-wraps in its own StrapiEntry → clicking it opens the
+          banner entry directly. */}
+      {banner ? <Banner data={banner} className="mt-8" /> : null}
     </div>
   );
 }

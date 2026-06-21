@@ -3,13 +3,50 @@ export type SupportedKind =
   | "richtext"
   | "number"
   | "boolean"
+  | "enumeration"
+  | "json"
+  | "media"
+  | "relation"
   | "unsupported";
+
+export type RelationCardinality =
+  | "oneToOne"
+  | "oneToMany"
+  | "manyToOne"
+  | "manyToMany";
 
 export type SchemaFieldDescriptor = {
   name: string;
   /** Raw Strapi attribute type, e.g. "string", "blocks", "integer", "relation". */
   strapiType: string;
   supportedKind: SupportedKind;
+  /** Allowed values for `enumeration` fields (from `attr.enum`). */
+  enumOptions?: string[];
+  /** Keys to seed for an empty (null) flat-object `json` field, e.g. lat/lon. */
+  jsonKeys?: string[];
+  /** `media` only: whether the field accepts multiple files (from `attr.multiple`). */
+  mediaMultiple?: boolean;
+  /** `media` only: allowed upload kinds, e.g. ["images"] (from `attr.allowedTypes`). */
+  mediaAllowedTypes?: string[];
+  /** `relation` only: cardinality (from `attr.relation`). */
+  relationCardinality?: RelationCardinality;
+  /** `relation` only: target content-type singular, e.g. "button". */
+  relationTargetSingular?: string;
+};
+
+/** Minimal shape of a Strapi media file used by the media field + picker. */
+export type MediaFileRef = {
+  id: number;
+  name: string;
+  /** Strapi-relative URL, e.g. "/uploads/foo.jpg". */
+  url: string;
+  mime?: string;
+};
+
+/** A related entry reduced to its documentId + a display label. */
+export type RelationRef = {
+  documentId: string;
+  label: string;
 };
 
 export type SchemaDescriptor = {

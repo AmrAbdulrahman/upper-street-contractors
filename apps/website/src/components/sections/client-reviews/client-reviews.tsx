@@ -2,6 +2,7 @@ import {
   AddStrapiEntry,
   StrapiEntry,
   StrapiEntryField,
+  StrapiRelationEntry,
 } from "@/components/strapi";
 import { Button } from "@/components/ui/button";
 import { ReviewCard } from "@/components/ui/review-card";
@@ -60,9 +61,13 @@ export function ClientReviewsSection({ data }: ClientReviewsSectionProps) {
             <div className="mt-9 flex flex-wrap justify-center gap-3">
               {links.map((link) =>
                 link ? (
-                  <StrapiEntryField key={link.documentId} field="reviewLinks">
+                  <StrapiRelationEntry
+                    key={link.documentId}
+                    entry={link}
+                    field="reviewLinks"
+                  >
                     <Button data={link} />
-                  </StrapiEntryField>
+                  </StrapiRelationEntry>
                 ) : null,
               )}
             </div>

@@ -1,4 +1,9 @@
-import { AddStrapiEntry, StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import {
+  AddStrapiEntry,
+  StrapiEntry,
+  StrapiEntryField,
+  StrapiRelationEntry,
+} from "@/components/strapi";
 import { RichText } from "@/components/strapi/rich-text";
 import { Button } from "@/components/ui/button";
 import { ImageContainer } from "@/components/ui/image-container";
@@ -56,13 +61,15 @@ export function WhoWeAreSection({ data }: WhoWeAreSectionProps) {
             ) : null}
           </div>
 
-          <StrapiEntryField field="imageContainer">
-            <ImageContainer
-              data={imageContainer}
-              alt={imageContainer?.imgDescription ?? title ?? "Team photo"}
-              placeholderLabel="Team photo placeholder"
-            />
-          </StrapiEntryField>
+          <StrapiRelationEntry entry={imageContainer} field="imageContainer">
+            <div className="min-w-0">
+              <ImageContainer
+                data={imageContainer}
+                alt={imageContainer?.imgDescription ?? title ?? "Team photo"}
+                placeholderLabel="Team photo placeholder"
+              />
+            </div>
+          </StrapiRelationEntry>
         </div>
       </section>
     </StrapiEntry>

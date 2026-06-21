@@ -7,13 +7,20 @@ import {
 } from "@/helpers/strapi-entry-url";
 import { getStrapiAuthHeaders, getStrapiUrl } from "@/lib/strapi-auth";
 import { readSchemaDescriptor } from "./read-schema";
+import { pickEntryLabel } from "./relation-label";
 import type {
   EntryFieldDescriptor,
   EntryFormDescriptor,
+  MediaFileRef,
+  RelationRef,
   PublishResult,
   PublishTarget,
   UpdateResult,
 } from "./types";
+
+function isMultiRelation(cardinality: string | undefined): boolean {
+  return cardinality === "oneToMany" || cardinality === "manyToMany";
+}
 
 // Public (browser-clickable) admin URL — defaults to NEXT_PUBLIC_STRAPI_URL.
 function cmsUrl(
@@ -91,10 +98,21 @@ export async function getEntryFormDescriptor(args: {
     return unavailableDescriptor(typename, documentId, focusedField);
   }
 
+  // Media + relations come back empty without populate. Populate those fields by
+  // name (not populate=*) to keep the payload focused.
+  const populateFields = schema.fields.filter(
+    (field) =>
+      field.supportedKind === "media" || field.supportedKind === "relation",
+  );
+  const populateQuery = populateFields
+    .map((field) => `&populate[${field.name}]=true`)
+    .join("");
+
   let data: Record<string, unknown> = {};
   try {
     const res = await fetch(
-      restEntryUrl(schema.kind, schema.singularName, schema.pluralName, documentId),
+      restEntryUrl(schema.kind, schema.singularName, schema.pluralName, documentId) +
+        populateQuery,
       { headers, cache: "no-store" },
     );
     if (!res.ok) {
@@ -111,11 +129,39 @@ export async function getEntryFormDescriptor(args: {
   const resolvedDocumentId =
     (typeof data?.documentId === "string" ? data.documentId : null) ?? documentId;
 
-  const fields: EntryFieldDescriptor[] = schema.fields.map((field) => ({
-    ...field,
-    value: data?.[field.name] ?? null,
-    cmsUrl: cmsUrl(typename, resolvedDocumentId, field.name),
-  }));
+  const toRelationRef = (
+    entry: unknown,
+    singular: string,
+  ): RelationRef | null => {
+    if (!entry || typeof entry !== "object") return null;
+    const record = entry as Record<string, unknown>;
+    const documentId = typeof record.documentId === "string" ? record.documentId : "";
+    if (!documentId) return null;
+    return { documentId, label: pickEntryLabel(record, singular) };
+  };
+
+  const fields: EntryFieldDescriptor[] = schema.fields.map((field) => {
+    let value: unknown = data?.[field.name] ?? null;
+
+    if (field.supportedKind === "relation" && field.relationTargetSingular) {
+      const singular = field.relationTargetSingular;
+      if (isMultiRelation(field.relationCardinality)) {
+        value = Array.isArray(value)
+          ? value
+              .map((entry) => toRelationRef(entry, singular))
+              .filter((ref): ref is RelationRef => ref !== null)
+          : [];
+      } else {
+        value = toRelationRef(value, singular);
+      }
+    }
+
+    return {
+      ...field,
+      value,
+      cmsUrl: cmsUrl(typename, resolvedDocumentId, field.name),
+    };
+  });
 
   return {
     available: true,
@@ -127,6 +173,96 @@ export async function getEntryFormDescriptor(args: {
     entryCmsUrl: cmsUrl(typename, resolvedDocumentId),
     fields,
   };
+}
+
+export async function listMediaFiles(
+  search?: string,
+): Promise<MediaFileRef[]> {
+  if (!isStrapiInspectionBuildEnabled()) return [];
+
+  let headers: Record<string, string>;
+  try {
+    headers = getStrapiAuthHeaders();
+  } catch {
+    return [];
+  }
+
+  const baseUrl = getStrapiUrl().replace(/\/$/, "");
+  const params = new URLSearchParams({
+    sort: "createdAt:desc",
+    "pagination[pageSize]": "100",
+  });
+  if (search?.trim()) {
+    params.set("filters[name][$containsi]", search.trim());
+  }
+
+  try {
+    const res = await fetch(`${baseUrl}/api/upload/files?${params.toString()}`, {
+      headers,
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    // The upload plugin returns a bare array, not the `{ data }` envelope.
+    const files = (await res.json()) as Array<{
+      id: number;
+      name: string;
+      url: string;
+      mime?: string;
+    }>;
+    if (!Array.isArray(files)) return [];
+    return files.map((file) => ({
+      id: file.id,
+      name: file.name,
+      url: file.url,
+      mime: file.mime,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function listEntries(
+  targetSingular: string,
+): Promise<RelationRef[]> {
+  if (!isStrapiInspectionBuildEnabled()) return [];
+
+  const schema = readSchemaDescriptor(targetSingular);
+  if (!schema) return [];
+
+  let headers: Record<string, string>;
+  try {
+    headers = getStrapiAuthHeaders();
+  } catch {
+    return [];
+  }
+
+  const baseUrl = getStrapiUrl().replace(/\/$/, "");
+  const path =
+    schema.kind === "singleType"
+      ? `/api/${schema.singularName}`
+      : `/api/${schema.pluralName}`;
+
+  try {
+    const res = await fetch(
+      `${baseUrl}${path}?status=draft&pagination[pageSize]=200&sort=updatedAt:desc`,
+      { headers, cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    const json = (await res.json()) as {
+      data?: Record<string, unknown> | Record<string, unknown>[] | null;
+    };
+    const data = json?.data;
+    const list = Array.isArray(data) ? data : data ? [data] : [];
+    return list
+      .map((entry) => ({
+        documentId:
+          typeof entry.documentId === "string" ? entry.documentId : "",
+        label: pickEntryLabel(entry, targetSingular),
+      }))
+      .filter((ref) => ref.documentId);
+  } catch {
+    return [];
+  }
 }
 
 export async function updateEntryFields(args: {

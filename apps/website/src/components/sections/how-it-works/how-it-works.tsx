@@ -55,11 +55,10 @@ export function HowItWorksSection({ data }: HowItWorksSectionProps) {
             </div>
           ) : null}
 
+          {/* Banner self-wraps in its own StrapiEntry → opens the banner entry. */}
           {sectionBanner ? (
             <div className="mt-10">
-              <StrapiEntryField field="sectionBanner">
-                <Banner data={sectionBanner} />
-              </StrapiEntryField>
+              <Banner data={sectionBanner} />
             </div>
           ) : null}
         </div>

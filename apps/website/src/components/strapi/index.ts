@@ -4,6 +4,8 @@ export { StrapiEntry } from "./strapi-entry";
 export type { StrapiEntryProps } from "./strapi-entry";
 export { StrapiEntryField } from "./strapi-entry-field";
 export type { StrapiEntryFieldProps } from "./strapi-entry-field";
+export { StrapiRelationEntry } from "./strapi-relation-entry";
+export type { StrapiRelationEntryProps } from "./strapi-relation-entry";
 export {
   StrapiEntryProvider,
   getStrapiEntryId,

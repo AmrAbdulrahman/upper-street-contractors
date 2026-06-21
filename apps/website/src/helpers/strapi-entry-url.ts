@@ -6,6 +6,7 @@ const GRAPHQL_TO_STRAPI_SINGULAR: Record<string, string> = {
   WhyChooseUsSection: "why-choose-us-section",
   HowItWorksSection: "how-it-works-section",
   RecentWorkSection: "recent-work-section",
+  PlanningRenovationSection: "planning-renovation-section",
   Button: "button",
   Badge: "badge",
   Banner: "banner",

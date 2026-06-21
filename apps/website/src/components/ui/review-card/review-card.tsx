@@ -1,4 +1,8 @@
-import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import {
+  StrapiEntry,
+  StrapiEntryField,
+  StrapiRelationEntry,
+} from "@/components/strapi";
 import { RichText } from "@/components/strapi/rich-text";
 import { ImageContainer } from "@/components/ui/image-container";
 import { ReviewCardFragment } from "@/generated/graphql";
@@ -91,39 +95,46 @@ function StarRating({ score }: { score?: number | null }) {
 }
 
 function ReviewProfile({
-  name,
-  reviewSource,
-  location,
-  image,
-}: NonNullable<ReviewCardFragment["clientInfo"]>) {
+  clientInfo,
+}: {
+  clientInfo: NonNullable<ReviewCardFragment["clientInfo"]>;
+}) {
+  const { name, reviewSource, location, image } = clientInfo;
   const meta =
     [reviewSource, location].filter(Boolean).join(" · ") || null;
 
+  // Wrap in the clientInfo entry's own StrapiEntry so clicking the reviewer
+  // block opens the Client Review Info entry (its name/source/image fields)
+  // rather than the parent review card. Inner fields are now relative to it.
   return (
-    <div className="mt-auto flex items-center gap-3 pt-6">
-      <div className="size-10 shrink-0 overflow-hidden rounded-full">
-        <ImageContainer
-          data={image}
-          alt={name ?? "Reviewer"}
-          placeholderLabel={name?.charAt(0)?.toUpperCase() ?? "?"}
-          className="!size-10 !h-10 !w-10 rounded-full"
-        />
-      </div>
+    <StrapiEntry entry={clientInfo}>
+      <div className="mt-auto flex items-center gap-3 pt-6">
+        <StrapiRelationEntry entry={image} field="image">
+          <div className="size-10 shrink-0 overflow-hidden rounded-full">
+            <ImageContainer
+              data={image}
+              alt={name ?? "Reviewer"}
+              placeholderLabel={name?.charAt(0)?.toUpperCase() ?? "?"}
+              className="!size-10 !h-10 !w-10 rounded-full"
+            />
+          </div>
+        </StrapiRelationEntry>
 
-      <div className="min-w-0">
-        {name ? (
-          <StrapiEntryField field="clientInfo.name">
-            <p className="truncate text-sm font-bold text-dark">{name}</p>
-          </StrapiEntryField>
-        ) : null}
+        <div className="min-w-0">
+          {name ? (
+            <StrapiEntryField field="name">
+              <p className="truncate text-sm font-bold text-dark">{name}</p>
+            </StrapiEntryField>
+          ) : null}
 
-        {meta ? (
-          <StrapiEntryField field="clientInfo.reviewSource">
-            <p className="truncate text-xs text-subtle">{meta}</p>
-          </StrapiEntryField>
-        ) : null}
+          {meta ? (
+            <StrapiEntryField field="reviewSource">
+              <p className="truncate text-xs text-subtle">{meta}</p>
+            </StrapiEntryField>
+          ) : null}
+        </div>
       </div>
-    </div>
+    </StrapiEntry>
   );
 }
 
@@ -155,7 +166,7 @@ export function ReviewCard({ data }: ReviewCardProps) {
         </StrapiEntryField>
       ) : null}
 
-      {clientInfo ? <ReviewProfile {...clientInfo} /> : null}
+      {clientInfo ? <ReviewProfile clientInfo={clientInfo} /> : null}
     </article>
   );
 

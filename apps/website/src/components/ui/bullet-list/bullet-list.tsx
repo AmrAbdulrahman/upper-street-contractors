@@ -1,4 +1,8 @@
-import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import {
+  StrapiEntry,
+  StrapiEntryField,
+  StrapiRelationEntry,
+} from "@/components/strapi";
 import { Icon } from "@/components/ui/icon";
 import { BulletListFragment } from "@/generated/graphql";
 
@@ -12,7 +16,7 @@ export function BulletList({ data }: BulletListProps) {
   return (
     <StrapiEntry entry={data}>
       <li className="flex items-start gap-3">
-        <StrapiEntryField field="listIcon" as="span">
+        <StrapiRelationEntry entry={listIcon} field="listIcon" as="span">
           <span
             aria-hidden
             className="mt-0.5 flex size-[22px] shrink-0 items-center justify-center rounded-full bg-gold text-white"
@@ -23,7 +27,7 @@ export function BulletList({ data }: BulletListProps) {
               <span className="text-[11px] leading-none">✓</span>
             )}
           </span>
-        </StrapiEntryField>
+        </StrapiRelationEntry>
 
         {text ? (
           <StrapiEntryField field="text" as="span">

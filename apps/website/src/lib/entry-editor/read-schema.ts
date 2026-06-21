@@ -1,10 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
+import { targetUidToSingular } from "./relation-label";
 import type {
   SchemaDescriptor,
   SchemaFieldDescriptor,
   SupportedKind,
 } from "./types";
+
+// Seed keys for known empty (null) flat-object `json` fields so the user gets
+// labelled inputs instead of a blank form. Values present in the entry override
+// these (keys are read from the value itself).
+const JSON_FIELD_SEED_KEYS: Record<string, string[]> = {
+  mapLocation: ["lat", "lon"],
+};
 
 // System/managed attributes never edited through the drawer.
 const SYSTEM_FIELDS = new Set([
@@ -33,6 +41,14 @@ function classify(strapiType: string): SupportedKind {
       return "number";
     case "boolean":
       return "boolean";
+    case "enumeration":
+      return "enumeration";
+    case "json":
+      return "json";
+    case "media":
+      return "media";
+    case "relation":
+      return "relation";
     default:
       return "unsupported";
   }
@@ -75,7 +91,17 @@ export function readSchemaDescriptor(singular: string): SchemaDescriptor | null 
     const raw = JSON.parse(fs.readFileSync(schemaPath, "utf8")) as {
       kind?: string;
       info?: { singularName?: string; pluralName?: string };
-      attributes?: Record<string, { type?: string }>;
+      attributes?: Record<
+        string,
+        {
+          type?: string;
+          enum?: string[];
+          multiple?: boolean;
+          allowedTypes?: string[];
+          relation?: string;
+          target?: string;
+        }
+      >;
     };
 
     const attributes = raw.attributes ?? {};
@@ -83,7 +109,40 @@ export function readSchemaDescriptor(singular: string): SchemaDescriptor | null 
       .filter(([name]) => !SYSTEM_FIELDS.has(name))
       .map(([name, attr]) => {
         const strapiType = attr?.type ?? "unknown";
-        return { name, strapiType, supportedKind: classify(strapiType) };
+        const supportedKind = classify(strapiType);
+        return {
+          name,
+          strapiType,
+          supportedKind,
+          ...(supportedKind === "enumeration" && Array.isArray(attr?.enum)
+            ? { enumOptions: attr.enum }
+            : {}),
+          ...(supportedKind === "json" && JSON_FIELD_SEED_KEYS[name]
+            ? { jsonKeys: JSON_FIELD_SEED_KEYS[name] }
+            : {}),
+          ...(supportedKind === "media"
+            ? {
+                mediaMultiple: Boolean(attr?.multiple),
+                ...(Array.isArray(attr?.allowedTypes)
+                  ? { mediaAllowedTypes: attr.allowedTypes }
+                  : {}),
+              }
+            : {}),
+          ...(supportedKind === "relation"
+            ? {
+                ...(attr?.relation
+                  ? { relationCardinality: attr.relation as never }
+                  : {}),
+                ...(targetUidToSingular(attr?.target)
+                  ? {
+                      relationTargetSingular: targetUidToSingular(
+                        attr?.target,
+                      ) as string,
+                    }
+                  : {}),
+              }
+            : {}),
+        };
       });
 
     const descriptor: SchemaDescriptor = {
