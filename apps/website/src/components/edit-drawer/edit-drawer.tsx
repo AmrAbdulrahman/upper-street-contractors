@@ -112,7 +112,7 @@ function EntryPublishToggle({
       <span
         className={`text-xs font-medium ${published ? "text-whatsapp" : "text-red-600"}`}
       >
-        {published ? "Live" : "Draft"}
+        {published ? "Published" : "Draft"}
       </span>
       <button
         type="button"

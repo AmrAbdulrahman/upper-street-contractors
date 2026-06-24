@@ -30,7 +30,7 @@ export function PublishAllButton() {
   if (entries.length === 0) {
     return (
       <button type="button" disabled className={CLASS_NAME}>
-        All content matching production
+        No Changes To Publish
       </button>
     );
   }

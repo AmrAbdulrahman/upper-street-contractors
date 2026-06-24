@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -32,6 +32,10 @@ import {
   reconstructFlatJson,
   type FormValues,
 } from "./ui";
+
+// Delay before an idle edit is auto-saved, and how often the countdown ticks.
+const AUTOSAVE_DELAY_MS = 1500;
+const AUTOSAVE_TICK_MS = 100;
 
 // HugeRTE is heavy — load it only when a richtext field is rendered.
 const RichTextField = dynamic(() => import("./fields/rich-text-field"), {
@@ -183,8 +187,19 @@ export function EditForm({
     return values;
   }, [descriptor]);
 
-  const { control, handleSubmit } = useForm<FormValues>({ defaultValues });
+  const { control, handleSubmit, getValues } = useForm<FormValues>({
+    defaultValues,
+  });
   const watched = useWatch({ control });
+
+  const [autoSave, setAutoSave] = useState(true);
+  // Seconds remaining until the pending autosave fires (null = none pending).
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  // Guards against manual + auto saves racing, and re-saving identical content.
+  const savingRef = useRef(false);
+  const lastSavedRef = useRef<string>("");
+  const deadlineRef = useRef<number | null>(null);
 
   const isDirty = descriptor.fields.some(
     (field) =>
@@ -211,10 +226,9 @@ export function EditForm({
 
   const blockSave = richtextIssues.length > 0;
 
-  const onSubmit = handleSubmit((values) => {
-    // A disabled submit button still allows Enter-to-submit in some browsers.
-    if (blockSave) return;
-
+  // Collect changed fields into a Strapi update payload, flagging invalid
+  // number/JSON values. Shared by manual Save and autosave.
+  const buildChanges = (values: FormValues) => {
     const changes: Record<string, unknown> = {};
     const invalid: string[] = [];
     const jsonInvalid: string[] = [];
@@ -281,6 +295,15 @@ export function EditForm({
       }
     }
 
+    return { changes, invalid, jsonInvalid };
+  };
+
+  const onSubmit = handleSubmit((values) => {
+    // A disabled submit button still allows Enter-to-submit in some browsers.
+    if (blockSave) return;
+
+    const { changes, invalid, jsonInvalid } = buildChanges(values);
+
     if (invalid.length || jsonInvalid.length) {
       const message = [
         invalid.length ? `Enter a valid number for: ${invalid.join(", ")}` : "",
@@ -315,6 +338,72 @@ export function EditForm({
       }
     });
   });
+
+  // Autosave: persists the draft 1.5s after edits settle, without closing the
+  // drawer. Stays silent on validation errors (manual Save surfaces those) and
+  // skips re-saving identical content to avoid loops.
+  const runAutoSave = () => {
+    if (!autoSave || blockSave || pending || savingRef.current) return;
+
+    const { changes, invalid, jsonInvalid } = buildChanges(getValues());
+    if (invalid.length || jsonInvalid.length) return;
+    if (Object.keys(changes).length === 0) return;
+
+    const signature = JSON.stringify(changes);
+    if (signature === lastSavedRef.current) return;
+
+    savingRef.current = true;
+    setIsAutoSaving(true);
+    updateEntryFields({
+      typename: descriptor.typename,
+      documentId: descriptor.documentId,
+      changes,
+    }).then((result) => {
+      savingRef.current = false;
+      setIsAutoSaving(false);
+      if (result.ok) {
+        lastSavedRef.current = signature;
+        refreshChangedEntries();
+        router.refresh();
+        toast.success("Auto-saved");
+      }
+    });
+  };
+
+  // Arm/disarm the autosave deadline whenever eligibility or the edited values
+  // change (each edit pushes the deadline out — debounce semantics). Ref writes
+  // only; the ticker below owns every state update.
+  const watchedSignature = JSON.stringify(watched ?? {});
+  useEffect(() => {
+    deadlineRef.current =
+      !autoSave || !isDirty || blockSave || pending
+        ? null
+        : Date.now() + AUTOSAVE_DELAY_MS;
+  }, [watchedSignature, autoSave, isDirty, blockSave, pending]);
+
+  // While autosave is on, tick: surface the remaining seconds and fire the save
+  // once the deadline passes.
+  useEffect(() => {
+    if (!autoSave) return;
+    const id = window.setInterval(() => {
+      const deadline = deadlineRef.current;
+      if (deadline === null) {
+        setSecondsLeft(null);
+        return;
+      }
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) {
+        deadlineRef.current = null;
+        setSecondsLeft(null);
+        runAutoSave();
+        return;
+      }
+      setSecondsLeft(Number((remainingMs / 1000).toFixed(1)));
+    }, AUTOSAVE_TICK_MS);
+    return () => window.clearInterval(id);
+    // runAutoSave reads fresh values via getValues()/refs when it fires.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSave]);
 
   return (
     <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
@@ -387,11 +476,29 @@ export function EditForm({
           </button>
           <button
             type="submit"
-            disabled={!isDirty || pending || blockSave}
+            disabled={autoSave || !isDirty || pending || blockSave}
             className="flex-1 rounded-md bg-dark px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
           >
             {pending ? "Saving…" : "Save"}
           </button>
+        </div>
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <label className="inline-flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={autoSave}
+              onChange={(event) => setAutoSave(event.target.checked)}
+              className="h-4 w-4 accent-gold"
+            />
+            <span className="text-sm text-muted">Auto-save changes</span>
+          </label>
+          {autoSave && (isAutoSaving || secondsLeft !== null) ? (
+            <span className="text-xs text-subtle" aria-live="polite">
+              {isAutoSaving
+                ? "Auto-saving…"
+                : `Auto-saving in ${(secondsLeft ?? 0).toFixed(1)}s`}
+            </span>
+          ) : null}
         </div>
       </footer>
     </form>

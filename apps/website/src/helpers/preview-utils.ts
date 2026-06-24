@@ -6,12 +6,3 @@ export function isPreviewEnabled(): boolean {
 export function isColdStartGateBuildEnabled(): boolean {
   return isPreviewEnabled();
 }
-
-export function withPreviewVariables(
-  variables: Record<string, unknown> = {},
-): Record<string, unknown> {
-  return {
-    ...variables,
-    status: isPreviewEnabled() ? "DRAFT" : "PUBLISHED",
-  };
-}

@@ -28,6 +28,8 @@ export function MediaField({
   const { strapiUrl } = useStrapiInspection();
   const label = humanizeFieldName(field.name);
 
+  const uploadHref = `${strapiUrl.replace(/\/$/, "")}/admin/plugins/upload?sort=createdAt:DESC&page=1&pageSize=10`;
+
   const [pickerOpen, setPickerOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [files, setFiles] = useState<MediaFileRef[]>([]);
@@ -112,7 +114,7 @@ export function MediaField({
                     className={FIELD_INPUT_CLASS}
                   />
                   <a
-                    href={`${strapiUrl.replace(/\/$/, "")}/admin/plugins/upload?sort=createdAt:DESC&page=1&pageSize=10&folder=3&folderPath=/1`}
+                    href={uploadHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground hover:bg-surface"
