@@ -93,7 +93,7 @@ export function AdminBanner({ siteMetaConfigId }: AdminBannerProps) {
   return (
     <>
       <div
-        className="fixed inset-x-0 top-0 z-50 flex h-9 items-center justify-end gap-3 border-b border-white/20 px-3 text-white sm:px-4"
+        className="fixed inset-x-0 top-0 z-100 flex h-9 items-center justify-end gap-3 border-b border-white/20 px-3 text-white sm:px-4"
         style={{ backgroundColor: ADMIN_BANNER_BG }}
         role="region"
         aria-label="Preview admin"

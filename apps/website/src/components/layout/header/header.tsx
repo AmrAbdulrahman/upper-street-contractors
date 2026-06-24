@@ -22,7 +22,7 @@ export function Header({ config }: HeaderProps) {
 
   return (
     <header
-      className="sticky top-[var(--admin-banner-offset,0px)] z-40 w-full border-b border-border bg-white"
+      className="sticky top-[var(--admin-banner-offset,0px)] z-100 w-full border-b border-border bg-white"
     >
       <div className="relative mx-auto w-full max-w-[1320px] px-6 py-4 lg:px-10">
         <div className="flex items-center justify-between gap-4 lg:hidden">
