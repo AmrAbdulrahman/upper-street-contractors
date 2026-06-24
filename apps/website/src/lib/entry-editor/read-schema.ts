@@ -58,6 +58,43 @@ function classify(strapiType: string): SupportedKind {
 // missing schema (e.g. prod without apps/cms) isn't re-resolved on every call.
 const cache = new Map<string, SchemaDescriptor | null>();
 
+function resolveApiRoot(): string | null {
+  const candidates = [
+    path.resolve(process.cwd(), "../cms/src/api"),
+    path.resolve(process.cwd(), "apps/cms/src/api"),
+    path.resolve(process.cwd(), "src/api"),
+  ];
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? null;
+}
+
+function isDraftPublishable(singular: string): boolean {
+  const schemaPath = resolveSchemaPath(singular);
+  if (!schemaPath) return false;
+
+  try {
+    const raw = JSON.parse(fs.readFileSync(schemaPath, "utf8")) as {
+      options?: { draftAndPublish?: boolean };
+    };
+    return raw.options?.draftAndPublish === true;
+  } catch {
+    return false;
+  }
+}
+
+/** Content types with draft & publish enabled (for listing unpublished drafts). */
+export function listDraftPublishableSchemas(): SchemaDescriptor[] {
+  const apiRoot = resolveApiRoot();
+  if (!apiRoot) return [];
+
+  return fs
+    .readdirSync(apiRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== "inspect")
+    .map((entry) => readSchemaDescriptor(entry.name))
+    .filter(
+      (schema): schema is SchemaDescriptor =>
+        schema !== null && isDraftPublishable(schema.singular),
+    );
+}
 function resolveSchemaPath(singular: string): string | null {
   const rel = path.join(
     "api",

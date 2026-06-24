@@ -9,11 +9,13 @@ import { MetadataInspectButton } from "./metadata-inspect-button";
 type PageMetadataInspectButtonClientProps = {
   strapiUrl: string;
   siteMetaConfigId?: string | null;
+  placement?: "floating" | "banner";
 };
 
 export function PageMetadataInspectButtonClient({
   strapiUrl,
   siteMetaConfigId,
+  placement = "floating",
 }: PageMetadataInspectButtonClientProps) {
   const pathname = usePathname();
   const [metaId, setMetaId] = useState<string | null>(null);
@@ -42,6 +44,7 @@ export function PageMetadataInspectButtonClient({
       metaId={metaId ?? ""}
       siteMetaConfigId={siteMetaConfigId}
       strapiUrl={strapiUrl}
+      placement={placement}
     />
   );
 }

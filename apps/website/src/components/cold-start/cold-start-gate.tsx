@@ -39,7 +39,7 @@ function ColdStartGateInner({ children }: ColdStartGateProps) {
   const strapiUrl = getPublicStrapiGraphqlEndpoint().replace(/\/graphql$/, "");
   const gateEnabled = shouldEnableColdStartGate(strapiUrl, emulateColdStart);
 
-  const { isReady, attemptCount, elapsedMs } = useStrapiHealthPoll(gateEnabled);
+  const { isReady, elapsedMs } = useStrapiHealthPoll(gateEnabled);
   const [minDelayElapsed, setMinDelayElapsed] = useState(!emulateColdStart);
   const [phase, setPhase] = useState<GatePhase>(gateEnabled ? "loading" : "done");
 
@@ -82,7 +82,6 @@ function ColdStartGateInner({ children }: ColdStartGateProps) {
     <>
       {phase !== "done" ? (
         <ColdStartOverlay
-          attemptCount={attemptCount}
           elapsedMs={elapsedMs}
           isBusy={!canDismiss}
           isExiting={phase === "exiting"}

@@ -1,12 +1,10 @@
 "use client";
 
 type HouseBuildingAnimationProps = {
-  attemptCount?: number;
   elapsedMs?: number;
 };
 
 export function HouseBuildingAnimation({
-  attemptCount = 0,
   elapsedMs = 0,
 }: HouseBuildingAnimationProps) {
   const elapsedSeconds = Math.max(0, Math.floor(elapsedMs / 1000));
@@ -114,7 +112,6 @@ export function HouseBuildingAnimation({
         <p className="text-sm text-muted">
           Waking up our content server
           {elapsedSeconds > 0 ? ` · ${elapsedSeconds}s` : ""}
-          {attemptCount > 1 ? ` · attempt ${attemptCount}` : ""}
         </p>
       </div>
     </div>

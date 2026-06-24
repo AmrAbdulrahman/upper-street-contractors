@@ -8,6 +8,15 @@
 export default {
   routes: [
     {
+      method: 'GET',
+      path: '/inspect/drafts',
+      handler: 'inspect.listDrafts',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
       method: 'POST',
       path: '/inspect/publish',
       handler: 'inspect.publishBatch',

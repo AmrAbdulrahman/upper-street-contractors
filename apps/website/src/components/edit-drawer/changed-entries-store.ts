@@ -1,19 +1,19 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import {
+  listChangedEntries,
+  type ChangedEntry,
+} from "@/lib/entry-editor/actions";
 
-/** An entry that was edited (draft saved) during this browser session. */
-export type ChangedEntry = {
-  documentId: string;
-  typename: string | null;
-};
+export type { ChangedEntry };
 
-// Session-scoped, in-memory only. Survives router.refresh() (soft) but a hard
-// reload clears it — the drafts still exist in Strapi, they're just no longer
-// listed for one-click publish.
-let entries: ChangedEntry[] = [];
 const EMPTY: ChangedEntry[] = [];
 const listeners = new Set<() => void>();
+
+let entries: ChangedEntry[] = [];
+let loading = false;
+let loaded = false;
 
 function emit(): void {
   for (const listener of listeners) {
@@ -21,41 +21,41 @@ function emit(): void {
   }
 }
 
-function keyOf(entry: ChangedEntry): string {
-  return `${entry.typename ?? ""}:${entry.documentId}`;
+async function fetchEntries(): Promise<void> {
+  if (loading) return;
+
+  loading = true;
+  try {
+    entries = await listChangedEntries();
+    loaded = true;
+  } catch {
+    entries = [];
+  } finally {
+    loading = false;
+    emit();
+  }
 }
 
-export function recordChangedEntry(entry: ChangedEntry): void {
-  const key = keyOf(entry);
-  if (entries.some((existing) => keyOf(existing) === key)) {
-    return;
-  }
-  entries = [...entries, entry];
-  emit();
-}
-
-export function removeChangedEntry(entry: ChangedEntry): void {
-  const key = keyOf(entry);
-  const next = entries.filter((existing) => keyOf(existing) !== key);
-  if (next.length === entries.length) {
-    return;
-  }
-  entries = next;
-  emit();
-}
-
-export function clearChangedEntries(): void {
-  if (entries.length === 0) {
-    return;
-  }
-  entries = [];
-  emit();
+export function refreshChangedEntries(): void {
+  loaded = false;
+  void fetchEntries();
 }
 
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
+
+  if (!loaded && !loading) {
+    void fetchEntries();
+  }
+
+  const onFocus = () => {
+    void fetchEntries();
+  };
+  window.addEventListener("focus", onFocus);
+
   return () => {
     listeners.delete(listener);
+    window.removeEventListener("focus", onFocus);
   };
 }
 

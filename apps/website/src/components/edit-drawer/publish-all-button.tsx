@@ -5,8 +5,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import { publishEntries } from "@/lib/entry-editor/actions";
 import {
-  clearChangedEntries,
-  removeChangedEntry,
+  refreshChangedEntries,
   useChangedEntries,
 } from "./changed-entries-store";
 
@@ -26,15 +25,7 @@ export function PublishAllButton() {
         })),
       );
 
-      for (const published of result.published) {
-        removeChangedEntry({
-          typename: published.typename,
-          documentId: published.documentId,
-        });
-      }
-
       if (result.ok) {
-        clearChangedEntries();
         const count = result.published.length;
         toast.success(`Published ${count} change${count === 1 ? "" : "s"}`);
       } else {
@@ -44,9 +35,16 @@ export function PublishAllButton() {
             .join("; ")}`,
         );
       }
+      refreshChangedEntries();
       router.refresh();
     });
   };
+
+  const label = pending
+    ? "Publishing…"
+    : `Publish (${entries.length}) changes`;
+
+  const className = "inline-flex h-7 items-center rounded-md bg-whatsapp px-3 text-xs font-semibold text-white transition-[filter,opacity] hover:brightness-110 disabled:opacity-60";
 
   return (
     <button
@@ -54,9 +52,9 @@ export function PublishAllButton() {
       onClick={handlePublish}
       disabled={pending}
       aria-live="polite"
-      className="fixed bottom-6 left-1/2 z-[100] inline-flex h-12 -translate-x-1/2 items-center gap-2 rounded-xl bg-whatsapp px-5 text-sm font-semibold text-white shadow-lg transition-[filter,opacity] hover:brightness-110 disabled:opacity-60"
+      className={className}
     >
-      {pending ? "Publishing…" : `Publish all changes (${entries.length})`}
+      {label}
     </button>
   );
 }

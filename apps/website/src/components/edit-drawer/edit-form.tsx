@@ -14,7 +14,7 @@ import type {
   MediaFileRef,
   RelationRef,
 } from "@/lib/entry-editor/types";
-import { recordChangedEntry } from "./changed-entries-store";
+import { refreshChangedEntries } from "./changed-entries-store";
 import { BooleanField } from "./fields/boolean-field";
 import { EnumField } from "./fields/enum-field";
 import { FieldRow } from "./fields/field-row";
@@ -304,12 +304,7 @@ export function EditForm({
       });
 
       if (result.ok) {
-        if (descriptor.documentId) {
-          recordChangedEntry({
-            typename: descriptor.typename,
-            documentId: descriptor.documentId,
-          });
-        }
+        refreshChangedEntries();
         toast.success("Draft saved");
         router.refresh();
         onClose();

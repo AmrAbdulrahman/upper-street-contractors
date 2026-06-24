@@ -1,11 +1,12 @@
 import { Suspense } from "react";
+import { AdminBanner } from "@/components/admin-banner";
 import { EditDrawerMount } from "@/components/edit-drawer";
 import { StrapiInspectionProvider } from "@/components/strapi";
+import { isPreviewEnabled } from "@/helpers/preview-utils";
 import { Footer, Header } from "@/components/layout";
 import {
   isStrapiInspectionBuildEnabled,
   LocalBusinessJsonLd,
-  PageMetadataInspectButton,
 } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 
@@ -28,7 +29,13 @@ async function SiteChromeContent({ children }: SiteChromeProps) {
       >
         Skip to content
       </a>
-      {isStrapiInspectionBuildEnabled() ? <PageMetadataInspectButton /> : null}
+      {isPreviewEnabled() ? (
+        <Suspense fallback={null}>
+          <AdminBanner
+            siteMetaConfigId={siteMetaConfig?.documentId ?? null}
+          />
+        </Suspense>
+      ) : null}
       <Header config={siteMetaConfig} />
       <main id="main" className="flex flex-1 flex-col">
         {children}

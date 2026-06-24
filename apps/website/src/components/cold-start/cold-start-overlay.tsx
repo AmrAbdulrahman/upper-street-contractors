@@ -3,14 +3,12 @@
 import { HouseBuildingAnimation } from "./house-building-animation";
 
 type ColdStartOverlayProps = {
-  attemptCount?: number;
   elapsedMs?: number;
   isBusy?: boolean;
   isExiting?: boolean;
 };
 
 export function ColdStartOverlay({
-  attemptCount,
   elapsedMs,
   isBusy = true,
   isExiting = false,
@@ -24,7 +22,7 @@ export function ColdStartOverlay({
       aria-live="polite"
       aria-busy={isBusy}
     >
-      <HouseBuildingAnimation attemptCount={attemptCount} elapsedMs={elapsedMs} />
+      <HouseBuildingAnimation elapsedMs={elapsedMs} />
     </div>
   );
 }

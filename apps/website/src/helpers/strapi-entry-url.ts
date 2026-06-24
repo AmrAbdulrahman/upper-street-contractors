@@ -37,6 +37,26 @@ export function graphqlTypenameToStrapiSingular(
   return GRAPHQL_TO_STRAPI_SINGULAR[typename] ?? null;
 }
 
+const STRAPI_SINGULAR_TO_GRAPHQL: Record<string, string> = Object.fromEntries(
+  Object.entries(GRAPHQL_TO_STRAPI_SINGULAR).map(([typename, singular]) => [
+    singular,
+    typename,
+  ]),
+);
+
+export function strapiSingularToGraphqlTypename(
+  singular: string | null | undefined,
+): string | null {
+  if (!singular) return null;
+  return STRAPI_SINGULAR_TO_GRAPHQL[singular] ?? null;
+}
+
+export function strapiUidToSingular(uid: string | null | undefined): string | null {
+  if (!uid) return null;
+  const match = /^api::([^.]+)\./.exec(uid);
+  return match?.[1] ?? null;
+}
+
 export function isStrapiSingleType(
   typename: string | null | undefined,
 ): boolean {

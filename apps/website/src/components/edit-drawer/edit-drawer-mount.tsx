@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { Toaster } from "sonner";
 import { useEditDrawerTarget } from "./edit-drawer-store";
-import { PublishAllButton } from "./publish-all-button";
 
 // Heavy drawer (+ HugeRTE) loads only once something opens it.
 const EditDrawer = dynamic(() => import("./edit-drawer"), { ssr: false });
@@ -19,7 +18,6 @@ export function EditDrawerMount() {
   return (
     <>
       {target !== null ? <EditDrawer /> : null}
-      <PublishAllButton />
       <Toaster position="bottom-right" richColors />
     </>
   );

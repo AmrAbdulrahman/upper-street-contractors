@@ -4,9 +4,13 @@ import { isStrapiInspectionBuildEnabled } from "@/components/metadata";
 import {
   buildStrapiEntryUrl,
   graphqlTypenameToStrapiSingular,
+  strapiSingularToGraphqlTypename,
 } from "@/helpers/strapi-entry-url";
 import { getStrapiAuthHeaders, getStrapiUrl } from "@/lib/strapi-auth";
-import { readSchemaDescriptor } from "./read-schema";
+import {
+  listDraftPublishableSchemas,
+  readSchemaDescriptor,
+} from "./read-schema";
 import { pickEntryLabel } from "./relation-label";
 import type {
   EntryFieldDescriptor,
@@ -15,6 +19,7 @@ import type {
   RelationRef,
   PublishResult,
   PublishTarget,
+  SchemaDescriptor,
   UpdateResult,
 } from "./types";
 
@@ -305,6 +310,138 @@ export async function updateEntryFields(args: {
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Request failed" };
   }
+}
+
+export type ChangedEntry = {
+  documentId: string;
+  typename: string | null;
+};
+
+type RestDocument = {
+  documentId?: string;
+  updatedAt?: string;
+};
+
+function restCollectionPath(schema: SchemaDescriptor): string {
+  return schema.kind === "singleType"
+    ? `/api/${schema.singularName}`
+    : `/api/${schema.pluralName}`;
+}
+
+function hasUnpublishedDraftChanges(
+  draft: RestDocument,
+  published: RestDocument | null,
+): boolean {
+  if (!draft.documentId) return false;
+  if (!published?.documentId) return true;
+
+  const draftTime = new Date(draft.updatedAt ?? 0).getTime();
+  const publishedTime = new Date(published.updatedAt ?? 0).getTime();
+  return draftTime > publishedTime;
+}
+
+async function fetchRestDocuments(
+  url: string,
+  headers: Record<string, string>,
+): Promise<RestDocument[]> {
+  const res = await fetch(url, { headers, cache: "no-store" });
+  if (!res.ok) return [];
+
+  const json = (await res.json()) as {
+    data?: RestDocument | RestDocument[] | null;
+  };
+  const data = json.data;
+  if (!data) return [];
+  return Array.isArray(data) ? data : [data];
+}
+
+async function fetchDraftDocuments(
+  schema: SchemaDescriptor,
+  baseUrl: string,
+  headers: Record<string, string>,
+): Promise<RestDocument[]> {
+  const path = restCollectionPath(schema);
+  return fetchRestDocuments(
+    `${baseUrl}${path}?status=draft&pagination[pageSize]=200`,
+    headers,
+  );
+}
+
+async function fetchPublishedDocument(
+  schema: SchemaDescriptor,
+  documentId: string,
+  baseUrl: string,
+  headers: Record<string, string>,
+): Promise<RestDocument | null> {
+  const path =
+    schema.kind === "singleType"
+      ? restCollectionPath(schema)
+      : `${restCollectionPath(schema)}/${documentId}`;
+
+  const res = await fetch(`${baseUrl}${path}?status=published`, {
+    headers,
+    cache: "no-store",
+  });
+
+  if (res.status === 404) return null;
+  if (!res.ok) return null;
+
+  const json = (await res.json()) as { data?: RestDocument | null };
+  return json.data ?? null;
+}
+
+async function listUnpublishedDraftsForSchema(
+  schema: SchemaDescriptor,
+  baseUrl: string,
+  headers: Record<string, string>,
+): Promise<ChangedEntry[]> {
+  const drafts = await fetchDraftDocuments(schema, baseUrl, headers);
+  const typename = strapiSingularToGraphqlTypename(schema.singular);
+  const entries: ChangedEntry[] = [];
+
+  for (const draft of drafts) {
+    if (!draft.documentId) continue;
+
+    const published = await fetchPublishedDocument(
+      schema,
+      draft.documentId,
+      baseUrl,
+      headers,
+    );
+
+    if (!hasUnpublishedDraftChanges(draft, published)) continue;
+
+    entries.push({
+      documentId: draft.documentId,
+      typename,
+    });
+  }
+
+  return entries;
+}
+
+export async function listChangedEntries(): Promise<ChangedEntry[]> {
+  if (!isStrapiInspectionBuildEnabled()) return [];
+
+  let headers: Record<string, string>;
+  try {
+    headers = getStrapiAuthHeaders();
+  } catch {
+    return [];
+  }
+
+  const baseUrl = getStrapiUrl().replace(/\/$/, "");
+  const schemas = listDraftPublishableSchemas();
+
+  const results = await Promise.all(
+    schemas.map((schema) =>
+      listUnpublishedDraftsForSchema(schema, baseUrl, headers).catch(
+        () => [] as ChangedEntry[],
+      ),
+    ),
+  );
+
+  return results.flat();
 }
 
 export async function publishEntries(
