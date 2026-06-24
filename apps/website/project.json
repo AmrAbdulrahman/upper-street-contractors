@@ -6,7 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "dependsOn": ["codegen"]
+      "dependsOn": ["codegen"],
+      "inputs": [
+        "default",
+        "^default",
+        "{projectRoot}/env.mjs",
+        { "externalDependencies": ["next"] },
+        { "dependentTasksOutputFiles": "**/*.d.ts", "transitive": true },
+        { "env": "ENABLE_PREVIEW" },
+        { "env": "STRAPI_URL" },
+        { "env": "NEXT_PUBLIC_STRAPI_URL" },
+        { "env": "NEXT_PUBLIC_STRAPI_INSPECTION_MODE" },
+        { "env": "STRAPI_API_TOKEN" }
+      ]
     },
     "codegen": {}
   }
