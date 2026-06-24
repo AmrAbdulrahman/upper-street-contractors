@@ -8,6 +8,7 @@ import {
 } from "@/helpers/strapi-entry-url";
 import { getStrapiAuthHeaders, getStrapiUrl } from "@/lib/strapi-auth";
 import {
+  isDraftPublishable,
   listDraftPublishableSchemas,
   readSchemaDescriptor,
 } from "./read-schema";
@@ -53,6 +54,8 @@ function unavailableDescriptor(
     documentId,
     focusedField,
     entryCmsUrl: cmsUrl(typename, documentId),
+    draftPublish: false,
+    published: false,
     fields: [],
   };
 }
@@ -168,6 +171,22 @@ export async function getEntryFormDescriptor(args: {
     };
   });
 
+  // Entry-level publish state for the drawer-header "shown on live" toggle. Only
+  // meaningful for draft & publish content types; a draft-status fetch can't tell
+  // us if a published version exists, so resolve it with a dedicated query.
+  const draftPublish = isDraftPublishable(singular);
+  let published = false;
+  if (draftPublish && resolvedDocumentId) {
+    const baseUrl = getStrapiUrl().replace(/\/$/, "");
+    const publishedDoc = await fetchPublishedDocument(
+      schema,
+      resolvedDocumentId,
+      baseUrl,
+      headers,
+    ).catch(() => null);
+    published = Boolean(publishedDoc?.documentId);
+  }
+
   return {
     available: true,
     typename,
@@ -176,6 +195,8 @@ export async function getEntryFormDescriptor(args: {
     documentId: resolvedDocumentId,
     focusedField,
     entryCmsUrl: cmsUrl(typename, resolvedDocumentId),
+    draftPublish,
+    published,
     fields,
   };
 }
@@ -444,9 +465,11 @@ export async function listChangedEntries(): Promise<ChangedEntry[]> {
   return results.flat();
 }
 
-export async function publishEntries(
+async function runPublishBatch(
   targets: PublishTarget[],
+  action: "publish" | "unpublish",
 ): Promise<PublishResult> {
+  const verb = action === "publish" ? "Publish" : "Unpublish";
   const failAll = (message: string): PublishResult => ({
     ok: false,
     published: [],
@@ -481,7 +504,7 @@ export async function publishEntries(
 
   const baseUrl = getStrapiUrl().replace(/\/$/, "");
   try {
-    const res = await fetch(`${baseUrl}/api/inspect/publish`, {
+    const res = await fetch(`${baseUrl}/api/inspect/${action}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...headers },
       cache: "no-store",
@@ -503,22 +526,19 @@ export async function publishEntries(
     }
 
     const json = (await res.json()) as {
-      published?: { documentId: string }[];
       errors?: { documentId: string; error: string }[];
     };
-    const publishedIds = new Set((json.published ?? []).map((item) => item.documentId));
     const errorById = new Map(
       (json.errors ?? []).map((item) => [item.documentId, item.error] as const),
     );
 
+    // `published` here is the list that succeeded (whichever action ran). The
+    // controller may not echo ids back, so absence of an error means success.
     const published: PublishTarget[] = [];
     for (const item of resolved) {
       const id = item.target.documentId;
       if (errorById.has(id)) {
-        errors.push({ ...item.target, error: errorById.get(id) ?? "Publish failed" });
-      } else if (publishedIds.has(id) || publishedIds.size === 0) {
-        // The controller may not echo ids back; absence of an error means success.
-        published.push(item.target);
+        errors.push({ ...item.target, error: errorById.get(id) ?? `${verb} failed` });
       } else {
         published.push(item.target);
       }
@@ -538,4 +558,16 @@ export async function publishEntries(
       ],
     };
   }
+}
+
+export async function publishEntries(
+  targets: PublishTarget[],
+): Promise<PublishResult> {
+  return runPublishBatch(targets, "publish");
+}
+
+export async function unpublishEntries(
+  targets: PublishTarget[],
+): Promise<PublishResult> {
+  return runPublishBatch(targets, "unpublish");
 }

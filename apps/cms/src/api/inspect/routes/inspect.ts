@@ -25,5 +25,14 @@ export default {
         middlewares: [],
       },
     },
+    {
+      method: 'POST',
+      path: '/inspect/unpublish',
+      handler: 'inspect.unpublishBatch',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
   ],
 };

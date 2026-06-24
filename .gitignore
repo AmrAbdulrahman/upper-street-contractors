@@ -46,6 +46,9 @@ apps/website/src/generated/*
 # vercel
 .vercel
 
+# hugerte editor skins (copied from node_modules by scripts/copy-hugerte-skins.mjs)
+/apps/website/public/hugerte/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

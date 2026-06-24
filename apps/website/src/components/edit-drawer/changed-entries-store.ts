@@ -8,43 +8,58 @@ import {
 
 export type { ChangedEntry };
 
+export type ChangedEntriesState = {
+  entries: ChangedEntry[];
+  loading: boolean;
+  /** True once the first fetch has settled (success or failure). */
+  loaded: boolean;
+};
+
 const EMPTY: ChangedEntry[] = [];
+const SERVER_STATE: ChangedEntriesState = {
+  entries: EMPTY,
+  loading: false,
+  loaded: false,
+};
+
 const listeners = new Set<() => void>();
 
-let entries: ChangedEntry[] = [];
-let loading = false;
-let loaded = false;
+// Single cached snapshot object — reassigned (new ref) only on real transitions
+// so useSyncExternalStore sees a stable reference between emits.
+let state: ChangedEntriesState = {
+  entries: EMPTY,
+  loading: false,
+  loaded: false,
+};
 
-function emit(): void {
+function setState(next: Partial<ChangedEntriesState>): void {
+  state = { ...state, ...next };
   for (const listener of listeners) {
     listener();
   }
 }
 
 async function fetchEntries(): Promise<void> {
-  if (loading) return;
+  if (state.loading) return;
 
-  loading = true;
+  setState({ loading: true });
   try {
-    entries = await listChangedEntries();
-    loaded = true;
+    setState({ entries: await listChangedEntries(), loaded: true, loading: false });
   } catch {
-    entries = [];
-  } finally {
-    loading = false;
-    emit();
+    setState({ entries: EMPTY, loaded: true, loading: false });
   }
 }
 
+// Refetch in the background. `loaded` stays true so the button keeps showing the
+// current count instead of flashing back to "Checking…" after a save/toggle.
 export function refreshChangedEntries(): void {
-  loaded = false;
   void fetchEntries();
 }
 
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
 
-  if (!loaded && !loading) {
+  if (!state.loaded && !state.loading) {
     void fetchEntries();
   }
 
@@ -59,14 +74,18 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
-function getSnapshot(): ChangedEntry[] {
-  return entries;
+function getSnapshot(): ChangedEntriesState {
+  return state;
 }
 
-function getServerSnapshot(): ChangedEntry[] {
-  return EMPTY;
+function getServerSnapshot(): ChangedEntriesState {
+  return SERVER_STATE;
+}
+
+export function useChangedEntriesState(): ChangedEntriesState {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 export function useChangedEntries(): ChangedEntry[] {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return useChangedEntriesState().entries;
 }

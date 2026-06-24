@@ -1,6 +1,6 @@
 "use client";
 
-import { buildStrapiEntryUrl } from "@/helpers/strapi-entry-url";
+import { openEditDrawer } from "@/components/edit-drawer/edit-drawer-store";
 import { useRef } from "react";
 import { useStrapiEntry } from "./strapi-entry-context";
 import { useStrapiInspection } from "./strapi-inspection-provider";
@@ -41,13 +41,6 @@ export function AddStrapiEntry({
     return children ?? null;
   }
 
-  const addUrl = buildStrapiEntryUrl({
-    strapiUrl,
-    documentId: parentEntry.entryId,
-    typename: parentEntry.typename,
-    focusedField: field,
-  });
-
   return (
     <button
       ref={buttonRef}
@@ -64,7 +57,11 @@ export function AddStrapiEntry({
         .filter(Boolean)
         .join(" ")}
       onClick={() => {
-        window.open(addUrl, "_blank", "noopener,noreferrer");
+        openEditDrawer({
+          documentId: parentEntry.entryId,
+          typename: parentEntry.typename,
+          focusedField: field,
+        });
       }}
     >
       <PlusIcon className="h-5 w-5 shrink-0" />

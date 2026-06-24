@@ -8,8 +8,6 @@ import "hugerte";
 import "hugerte/models/dom";
 import "hugerte/themes/silver";
 import "hugerte/icons/default";
-import "hugerte/skins/ui/oxide/skin.js";
-import "hugerte/skins/content/default/content.js";
 import "hugerte/plugins/lists";
 import "hugerte/plugins/link";
 
@@ -33,7 +31,11 @@ const INIT = {
   plugins: "lists link",
   toolbar: TOOLBAR,
   block_formats: "Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3",
-  content_css: "default",
+  // Skins are served from /public (copied by scripts/copy-hugerte-skins.mjs) and
+  // loaded by URL — avoids HugeRTE fetching them under the Turbopack chunk path
+  // (which 404s). skin_url covers the toolbar + iframe content skin.
+  skin_url: "/hugerte/skins/ui/oxide",
+  content_css: "/hugerte/skins/content/default/content.min.css",
   formats: { inlinecode: { inline: "code" } },
   setup: (editor: HugeRTEEditor) => {
     editor.ui.registry.addToggleButton("inlinecode", {

@@ -147,4 +147,58 @@ export default {
 
     ctx.body = { published, errors };
   },
+
+  /**
+   * Inverse of publishBatch: reverts each entry to draft-only (unpublished), so
+   * it stops rendering on the live site. Same `{ entries: [{ uid, documentId }] }`
+   * shape, same allow-list and per-entry error isolation.
+   */
+  async unpublishBatch(ctx) {
+    const entries = ctx.request.body?.entries;
+
+    if (!Array.isArray(entries)) {
+      return ctx.badRequest('`entries` must be an array of { uid, documentId }.');
+    }
+
+    const unpublished: { documentId: string }[] = [];
+    const errors: { documentId: string | null; error: string }[] = [];
+
+    for (const entry of entries) {
+      const uid = entry?.uid;
+      const documentId = entry?.documentId;
+
+      if (typeof uid !== 'string' || typeof documentId !== 'string') {
+        errors.push({
+          documentId: typeof documentId === 'string' ? documentId : null,
+          error: 'Each entry needs a uid and documentId.',
+        });
+        continue;
+      }
+
+      // Allow-list: only genuine api:: content types (no admin/plugin internals).
+      if (!uid.startsWith('api::') || !strapi.contentTypes[uid]) {
+        errors.push({ documentId, error: `Unknown content type: ${uid}` });
+        continue;
+      }
+
+      try {
+        // `unpublish` only exists on draft-and-publish content types, so the
+        // generically-typed document service doesn't surface it — narrow here.
+        const documents = strapi.documents(
+          uid as Parameters<typeof strapi.documents>[0],
+        ) as unknown as {
+          unpublish: (params: { documentId: string }) => Promise<unknown>;
+        };
+        await documents.unpublish({ documentId });
+        unpublished.push({ documentId });
+      } catch (error) {
+        errors.push({
+          documentId,
+          error: error instanceof Error ? error.message : 'Unpublish failed.',
+        });
+      }
+    }
+
+    ctx.body = { unpublished, errors };
+  },
 };

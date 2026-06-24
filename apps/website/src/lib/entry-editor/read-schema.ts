@@ -67,7 +67,7 @@ function resolveApiRoot(): string | null {
   return candidates.find((candidate) => fs.existsSync(candidate)) ?? null;
 }
 
-function isDraftPublishable(singular: string): boolean {
+export function isDraftPublishable(singular: string): boolean {
   const schemaPath = resolveSchemaPath(singular);
   if (!schemaPath) return false;
 
