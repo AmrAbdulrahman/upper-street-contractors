@@ -33,6 +33,19 @@ When you `cd` into `apps/website`, direnv loads the same vars as at the repo roo
 
 **CMS is separate:** Strapi uses its own `apps/cms/.env` (HOST, APP_KEYS, JWT secrets, etc.). See `apps/cms/.env.example`.
 
+## CMS data transfer
+
+```bash
+npm run cms:push    # LOCAL  → CLOUD
+npm run cms:pull    # CLOUD  → LOCAL
+```
+
+> [!WARNING]
+> These do a **full, destructive database mirror** — not a content-only sync. Each run overwrites
+> the target with the source, including **admin users/roles, U&P roles, webhooks, and auth
+> providers**. No merge, no undo. See [`docs/cms-transfer.md`](docs/cms-transfer.md) for exactly
+> what moves and the footguns (admin lockout, wiped webhooks, traveling secrets).
+
 ## Getting Started
 
 First, run the development server:
