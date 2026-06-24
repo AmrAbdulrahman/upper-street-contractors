@@ -8,6 +8,10 @@ export function isStrapiInspectionBuildEnabled(): boolean {
 }
 
 export async function isStrapiInspectionEnabled(): Promise<boolean> {
+  // if (process.env.NODE_ENV === "production") {
+  //   return false;
+  // }
+
   if (process.env.NEXT_PUBLIC_STRAPI_INSPECTION_MODE === "true") {
     return true;
   }

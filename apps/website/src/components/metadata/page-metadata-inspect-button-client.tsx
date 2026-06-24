@@ -19,7 +19,7 @@ export function PageMetadataInspectButtonClient({
 }: PageMetadataInspectButtonClientProps) {
   const pathname = usePathname();
   const [metaId, setMetaId] = useState<string | null>(null);
-
+  
   useEffect(() => {
     let cancelled = false;
     const key = pathnameToPageKey(pathname);

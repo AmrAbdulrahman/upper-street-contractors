@@ -1,5 +1,6 @@
 "use client";
 
+import { PencilIcon } from "@/components/strapi/pencil-icon";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const envInspectLocked =
@@ -7,6 +8,22 @@ const envInspectLocked =
 
 function isInspectSearchParamEnabled(searchParams: URLSearchParams): boolean {
   return searchParams.get("inspect") === "true";
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      className="h-3.5 w-3.5 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
+      <path d="M4 4l8 8M12 4l-8 8" />
+    </svg>
+  );
 }
 
 export function InspectModeToggle() {
@@ -45,11 +62,17 @@ export function InspectModeToggle() {
           : "border-white/60 bg-transparent hover:bg-white/15"
       } disabled:cursor-default disabled:opacity-80`}
     >
-      <span
-        aria-hidden="true"
-        className={`h-1.5 w-1.5 rounded-full ${enabled ? "bg-white" : "bg-white/60"}`}
-      />
-      {enabled ? "Turn off edit mode" : "Turn on edit mode"}
+      {enabled ? (
+        <>
+          <CloseIcon />
+          <span>Turn off edit mode</span>
+        </>
+      ) : (
+        <>
+          <PencilIcon className="h-3.5 w-3.5 shrink-0" />
+          <span>Turn on edit mode</span>
+        </>
+      )}
     </button>
   );
 }
