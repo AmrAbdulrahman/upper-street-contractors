@@ -5,18 +5,8 @@ import { getStrapiAuthHeaders, getStrapiGraphqlEndpoint } from "@/lib/strapi-aut
 const REQUEST_TIMEOUT_MS = 15_000;
 
 export async function GET() {
-  let headers: Record<string, string>;
-
   try {
-    headers = getStrapiAuthHeaders();
-  } catch {
-    return NextResponse.json(
-      { ready: false, reason: "STRAPI_API_TOKEN is not configured" },
-      { status: 503 },
-    );
-  }
-
-  try {
+    const headers = await getStrapiAuthHeaders();
     const result = await pingStrapiGraphql({
       endpoint: getStrapiGraphqlEndpoint(),
       headers,

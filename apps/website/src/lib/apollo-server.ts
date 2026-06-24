@@ -5,10 +5,8 @@ import {
   registerApolloClient,
 } from '@apollo/client-integration-nextjs'
 import { createPreviewLink } from '@/lib/apollo-preview-link'
-import {
-  getStrapiAuthHeaders,
-  getStrapiGraphqlEndpoint,
-} from '@/lib/strapi-auth'
+import { createAuthLink } from '@/lib/apollo-auth-link'
+import { getStrapiGraphqlEndpoint } from '@/lib/strapi-auth'
 
 export function makeServerClient() {
   return new ApolloClient({
@@ -19,9 +17,9 @@ export function makeServerClient() {
     // HttpLink.
     link: ApolloLink.from([
       createPreviewLink(),
+      createAuthLink(),
       new HttpLink({
         uri: getStrapiGraphqlEndpoint(),
-        headers: getStrapiAuthHeaders(),
         fetchOptions: {
           cache:
             process.env.ENABLE_PREVIEW === 'true' ? 'no-store' : 'force-cache',

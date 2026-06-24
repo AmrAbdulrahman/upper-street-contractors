@@ -73,3 +73,21 @@ _Avoid_: Editable field (ambiguous)
 **Publish all changes**:
 The action (green bottom-center button) that publishes every Entry whose draft was changed in the current Inspect-mode session, draft → published.
 _Avoid_: Save all, deploy, go live
+
+## Editor access
+
+**Editor**:
+A Strapi Users & Permissions user (Editor role) who logs into the website to edit content in Inspect mode, using their own token.
+_Avoid_: Admin user (the Strapi `/admin` panel account — a separate account system the website does not use)
+
+**Editor session**:
+The logged-in state of an Editor, carried by the access + refresh tokens stored as httpOnly cookies on the website domain.
+_Avoid_: Login, auth state
+
+**Login gate**:
+The staging-only server shell that renders the Login screen instead of the site until a valid Editor session exists. Mirrors the cold-start gate.
+_Avoid_: Auth wall, paywall, splash
+
+**Read-only service token**:
+The server-side-only Strapi token used to render published content for anonymous visitors (production) and builds. Never reaches the browser; distinct from an Editor's token.
+_Avoid_: Public API, anon key, API key

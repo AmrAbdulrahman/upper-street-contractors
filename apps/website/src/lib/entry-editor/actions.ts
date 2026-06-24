@@ -6,7 +6,8 @@ import {
   graphqlTypenameToStrapiSingular,
   strapiSingularToGraphqlTypename,
 } from "@/helpers/strapi-entry-url";
-import { getStrapiAuthHeaders, getStrapiUrl } from "@/lib/strapi-auth";
+import { getStrapiUrl } from "@/lib/strapi-auth";
+import { strapiFetch } from "@/lib/auth/strapi-fetch";
 import {
   isDraftPublishable,
   listDraftPublishableSchemas,
@@ -99,13 +100,6 @@ export async function getEntryFormDescriptor(args: {
   const schema = readSchemaDescriptor(singular);
   if (!schema) return unavailableDescriptor(typename, documentId, focusedField);
 
-  let headers: Record<string, string>;
-  try {
-    headers = getStrapiAuthHeaders();
-  } catch {
-    return unavailableDescriptor(typename, documentId, focusedField);
-  }
-
   // Media + relations come back empty without populate. Populate those fields by
   // name (not populate=*) to keep the payload focused.
   const populateFields = schema.fields.filter(
@@ -118,10 +112,10 @@ export async function getEntryFormDescriptor(args: {
 
   let data: Record<string, unknown> = {};
   try {
-    const res = await fetch(
+    const res = await strapiFetch(
       restEntryUrl(schema.kind, schema.singularName, schema.pluralName, documentId) +
         populateQuery,
-      { headers, cache: "no-store" },
+      { cache: "no-store" },
     );
     if (!res.ok) {
       return unavailableDescriptor(typename, documentId, focusedField);
@@ -182,7 +176,6 @@ export async function getEntryFormDescriptor(args: {
       schema,
       resolvedDocumentId,
       baseUrl,
-      headers,
     ).catch(() => null);
     published = Boolean(publishedDoc?.documentId);
   }
@@ -206,13 +199,6 @@ export async function listMediaFiles(
 ): Promise<MediaFileRef[]> {
   if (!isStrapiInspectionBuildEnabled()) return [];
 
-  let headers: Record<string, string>;
-  try {
-    headers = getStrapiAuthHeaders();
-  } catch {
-    return [];
-  }
-
   const baseUrl = getStrapiUrl().replace(/\/$/, "");
   const params = new URLSearchParams({
     sort: "createdAt:desc",
@@ -223,8 +209,7 @@ export async function listMediaFiles(
   }
 
   try {
-    const res = await fetch(`${baseUrl}/api/upload/files?${params.toString()}`, {
-      headers,
+    const res = await strapiFetch(`${baseUrl}/api/upload/files?${params.toString()}`, {
       cache: "no-store",
     });
     if (!res.ok) return [];
@@ -255,13 +240,6 @@ export async function listEntries(
   const schema = readSchemaDescriptor(targetSingular);
   if (!schema) return [];
 
-  let headers: Record<string, string>;
-  try {
-    headers = getStrapiAuthHeaders();
-  } catch {
-    return [];
-  }
-
   const baseUrl = getStrapiUrl().replace(/\/$/, "");
   const path =
     schema.kind === "singleType"
@@ -269,9 +247,9 @@ export async function listEntries(
       : `/api/${schema.pluralName}`;
 
   try {
-    const res = await fetch(
+    const res = await strapiFetch(
       `${baseUrl}${path}?status=draft&pagination[pageSize]=200&sort=updatedAt:desc`,
-      { headers, cache: "no-store" },
+      { cache: "no-store" },
     );
     if (!res.ok) return [];
     const json = (await res.json()) as {
@@ -307,19 +285,12 @@ export async function updateEntryFields(args: {
   const schema = readSchemaDescriptor(singular);
   if (!schema) return { ok: false, error: `Schema not found for "${singular}"` };
 
-  let headers: Record<string, string>;
   try {
-    headers = getStrapiAuthHeaders();
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Auth failed" };
-  }
-
-  try {
-    const res = await fetch(
+    const res = await strapiFetch(
       restEntryUrl(schema.kind, schema.singularName, schema.pluralName, documentId),
       {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...headers },
+        headers: { "Content-Type": "application/json" },
         cache: "no-store",
         body: JSON.stringify({ data: changes }),
       },
@@ -363,11 +334,8 @@ function hasUnpublishedDraftChanges(
   return draftTime > publishedTime;
 }
 
-async function fetchRestDocuments(
-  url: string,
-  headers: Record<string, string>,
-): Promise<RestDocument[]> {
-  const res = await fetch(url, { headers, cache: "no-store" });
+async function fetchRestDocuments(url: string): Promise<RestDocument[]> {
+  const res = await strapiFetch(url, { cache: "no-store" });
   if (!res.ok) return [];
 
   const json = (await res.json()) as {
@@ -381,12 +349,10 @@ async function fetchRestDocuments(
 async function fetchDraftDocuments(
   schema: SchemaDescriptor,
   baseUrl: string,
-  headers: Record<string, string>,
 ): Promise<RestDocument[]> {
   const path = restCollectionPath(schema);
   return fetchRestDocuments(
     `${baseUrl}${path}?status=draft&pagination[pageSize]=200`,
-    headers,
   );
 }
 
@@ -394,15 +360,13 @@ async function fetchPublishedDocument(
   schema: SchemaDescriptor,
   documentId: string,
   baseUrl: string,
-  headers: Record<string, string>,
 ): Promise<RestDocument | null> {
   const path =
     schema.kind === "singleType"
       ? restCollectionPath(schema)
       : `${restCollectionPath(schema)}/${documentId}`;
 
-  const res = await fetch(`${baseUrl}${path}?status=published`, {
-    headers,
+  const res = await strapiFetch(`${baseUrl}${path}?status=published`, {
     cache: "no-store",
   });
 
@@ -416,9 +380,8 @@ async function fetchPublishedDocument(
 async function listUnpublishedDraftsForSchema(
   schema: SchemaDescriptor,
   baseUrl: string,
-  headers: Record<string, string>,
 ): Promise<ChangedEntry[]> {
-  const drafts = await fetchDraftDocuments(schema, baseUrl, headers);
+  const drafts = await fetchDraftDocuments(schema, baseUrl);
   const typename = strapiSingularToGraphqlTypename(schema.singular);
   const entries: ChangedEntry[] = [];
 
@@ -429,7 +392,6 @@ async function listUnpublishedDraftsForSchema(
       schema,
       draft.documentId,
       baseUrl,
-      headers,
     );
 
     if (!hasUnpublishedDraftChanges(draft, published)) continue;
@@ -447,19 +409,12 @@ async function listUnpublishedDraftsForSchema(
 export async function listChangedEntries(): Promise<ChangedEntry[]> {
   if (!isStrapiInspectionBuildEnabled()) return [];
 
-  let headers: Record<string, string>;
-  try {
-    headers = getStrapiAuthHeaders();
-  } catch {
-    return [];
-  }
-
   const baseUrl = getStrapiUrl().replace(/\/$/, "");
   const schemas = listDraftPublishableSchemas();
 
   const results = await Promise.all(
     schemas.map((schema) =>
-      listUnpublishedDraftsForSchema(schema, baseUrl, headers).catch(
+      listUnpublishedDraftsForSchema(schema, baseUrl).catch(
         () => [] as ChangedEntry[],
       ),
     ),
@@ -483,13 +438,6 @@ async function runPublishBatch(
     return failAll("Inspection mode is not enabled.");
   }
 
-  let headers: Record<string, string>;
-  try {
-    headers = getStrapiAuthHeaders();
-  } catch (error) {
-    return failAll(error instanceof Error ? error.message : "Auth failed");
-  }
-
   const errors: (PublishTarget & { error: string })[] = [];
   const resolved: { target: PublishTarget; uid: string }[] = [];
   for (const target of targets) {
@@ -507,9 +455,9 @@ async function runPublishBatch(
 
   const baseUrl = getStrapiUrl().replace(/\/$/, "");
   try {
-    const res = await fetch(`${baseUrl}/api/inspect/${action}`, {
+    const res = await strapiFetch(`${baseUrl}/api/inspect/${action}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...headers },
+      headers: { "Content-Type": "application/json" },
       cache: "no-store",
       body: JSON.stringify({
         entries: resolved.map((item) => ({

@@ -10,6 +10,7 @@ import {
   ADMIN_BANNER_OFFSET_VAR,
 } from "./constants";
 import { InspectModeToggle } from "./inspect-mode-toggle";
+import { LogoutButton } from "@/components/auth/logout-button";
 import { PageMetadataInspectButtonClient } from "../metadata/page-metadata-inspect-button-client";
 
 type AdminBannerProps = {
@@ -106,6 +107,7 @@ export function AdminBanner({ siteMetaConfigId }: AdminBannerProps) {
           />
           <InspectModeToggle />
           <PublishAllButton />
+          <LogoutButton />
         </div>
 
         <button
