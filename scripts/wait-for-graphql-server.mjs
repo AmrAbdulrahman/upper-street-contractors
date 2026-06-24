@@ -86,7 +86,15 @@ async function waitForGraphqlServer() {
   }
 }
 
-waitForGraphqlServer().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+export { waitForGraphqlServer };
+
+const isMain =
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === process.argv[1];
+
+if (isMain) {
+  waitForGraphqlServer().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

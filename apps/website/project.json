@@ -5,8 +5,23 @@
   "projectType": "application",
   "tags": [],
   "targets": {
+    "wait-for-cms": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/wait-for-cms-before-build.mjs",
+        "cwd": "{workspaceRoot}"
+      },
+      "inputs": [
+        "{workspaceRoot}/scripts/wait-for-cms-before-build.mjs",
+        "{workspaceRoot}/scripts/wait-for-graphql-server.mjs",
+        "{workspaceRoot}/scripts/strapi-health.mjs",
+        { "env": "ENABLE_PREVIEW" },
+        { "env": "STRAPI_URL" },
+        { "env": "STRAPI_API_TOKEN" }
+      ]
+    },
     "build": {
-      "dependsOn": ["codegen"],
+      "dependsOn": ["wait-for-cms", "codegen"],
       "inputs": [
         "default",
         "^default",
