@@ -53,9 +53,13 @@ export async function getStrapiAuthHeaders(): Promise<Record<string, string>> {
   }
 
   if (isEditorSessionPossible()) {
-    const accessToken = await getAccessToken();
-    if (accessToken) {
-      return { Authorization: `Bearer ${accessToken}` };
+    try {
+      const accessToken = await getAccessToken();
+      if (accessToken) {
+        return { Authorization: `Bearer ${accessToken}` };
+      }
+    } catch {
+      // build time (generateStaticParams) — cookies() throws, fall through to service token
     }
   }
 

@@ -22,7 +22,11 @@ export async function isStrapiInspectionEnabled(): Promise<boolean> {
     return false;
   }
 
-  const headersList = await headers();
-
-  return headersList.get("x-inspect") === "true";
+  try {
+    const headersList = await headers();
+    return headersList.get("x-inspect") === "true";
+  } catch {
+    // build time (generateStaticParams) — no request context, default PUBLISHED
+    return false;
+  }
 }
