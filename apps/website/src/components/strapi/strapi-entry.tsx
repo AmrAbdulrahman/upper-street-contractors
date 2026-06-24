@@ -1,5 +1,6 @@
 "use client";
 
+import { useChangedEntries } from "@/components/edit-drawer/changed-entries-store";
 import { openEditDrawer } from "@/components/edit-drawer/edit-drawer-store";
 import { useState } from "react";
 import {
@@ -23,7 +24,6 @@ function StrapiEntryInspect({
 }) {
   const { enabled, strapiUrl } = useStrapiInspection();
   const entryContext = useStrapiEntry();
-  const [hovered, setHovered] = useState(false);
 
   const entryId = entryContext?.entryId ?? "";
 
@@ -31,15 +31,46 @@ function StrapiEntryInspect({
     return children;
   }
 
-  const inspectClassName = mergeClassNames(
-    "relative outline outline-2 outline-offset-2 transition-[outline-color]",
-    hovered ? "outline-blue-500" : "outline-transparent",
+  return (
+    <StrapiEntryInspectActive
+      entryId={entryId}
+      typename={entryContext?.typename ?? null}
+    >
+      {children}
+    </StrapiEntryInspectActive>
+  );
+}
+
+// Split out so the changed-entries store (which fetches from Strapi) is only
+// ever subscribed in inspect mode — never on the live site.
+function StrapiEntryInspectActive({
+  entryId,
+  typename,
+  children,
+}: {
+  entryId: string;
+  typename: string | null;
+  children: React.ReactNode;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const changed = useChangedEntries();
+
+  // "Not shown on live" = a draft-only entry (no published version).
+  const notLive = changed.some(
+    (entry) => entry.documentId === entryId && entry.published === false,
   );
 
-  // Clone the child as the hover host when it's a plain DOM element (preserves
-  // structure — e.g. <li>, <section>). For client-component children (Button,
-  // ImageContainer) the ref is dropped across the RSC boundary, so wrap them in
-  // a host element instead — otherwise no edit affordance ever appears.
+  const stateClassName = notLive
+    ? "opacity-50 outline-dashed outline-red-500"
+    : hovered
+      ? "outline-blue-500"
+      : "outline-transparent";
+
+  const inspectClassName = mergeClassNames(
+    "relative outline outline-2 outline-offset-2 transition-[outline-color,opacity]",
+    stateClassName,
+  );
+
   return wrapWithStrapiInspect({
     children,
     inspectClassName,
@@ -48,7 +79,7 @@ function StrapiEntryInspect({
     onEdit: () =>
       openEditDrawer({
         documentId: entryId,
-        typename: entryContext?.typename ?? null,
+        typename,
         focusedField: null,
       }),
     editAriaLabel: "Edit entry in Strapi",

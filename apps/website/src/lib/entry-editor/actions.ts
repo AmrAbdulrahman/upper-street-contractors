@@ -336,6 +336,8 @@ export async function updateEntryFields(args: {
 export type ChangedEntry = {
   documentId: string;
   typename: string | null;
+  /** Whether a published version exists (i.e. the entry is shown on the live site). */
+  published: boolean;
 };
 
 type RestDocument = {
@@ -435,6 +437,7 @@ async function listUnpublishedDraftsForSchema(
     entries.push({
       documentId: draft.documentId,
       typename,
+      published: Boolean(published?.documentId),
     });
   }
 

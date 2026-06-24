@@ -112,7 +112,7 @@ export function MediaField({
                     className={FIELD_INPUT_CLASS}
                   />
                   <a
-                    href={`${strapiUrl.replace(/\/$/, "")}/admin/plugins/upload?sort=createdAt:DESC&page=1&pageSize=10&folder=2&folderPath=/1`}
+                    href={`${strapiUrl.replace(/\/$/, "")}/admin/plugins/upload?sort=createdAt:DESC&page=1&pageSize=10&folder=3&folderPath=/1`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground hover:bg-surface"
