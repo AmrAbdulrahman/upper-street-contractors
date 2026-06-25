@@ -32,6 +32,10 @@ let state: ChangedEntriesState = {
   loaded: false,
 };
 
+// Set when refreshChangedEntries() is called while a fetch is in-flight.
+// The in-flight fetch replays once it settles so the caller's mutation is reflected.
+let pendingRefresh = false;
+
 function setState(next: Partial<ChangedEntriesState>): void {
   state = { ...state, ...next };
   for (const listener of listeners) {
@@ -40,13 +44,21 @@ function setState(next: Partial<ChangedEntriesState>): void {
 }
 
 async function fetchEntries(): Promise<void> {
-  if (state.loading) return;
+  if (state.loading) {
+    pendingRefresh = true;
+    return;
+  }
 
+  pendingRefresh = false;
   setState({ loading: true });
   try {
     setState({ entries: await listChangedEntries(), loaded: true, loading: false });
   } catch {
     setState({ entries: EMPTY, loaded: true, loading: false });
+  }
+
+  if (pendingRefresh) {
+    void fetchEntries();
   }
 }
 
