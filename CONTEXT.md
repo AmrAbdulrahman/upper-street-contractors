@@ -91,3 +91,17 @@ _Avoid_: Auth wall, paywall, splash
 **Read-only service token**:
 The server-side-only Strapi token used to render published content for anonymous visitors (production) and builds. Never reaches the browser; distinct from an Editor's token.
 _Avoid_: Public API, anon key, API key
+
+## Dev tooling
+
+**CMS Call Meter**:
+The local-dev-only pill showing how many times the site has hit the Strapi CMS this session. Lives at the left of the Preview admin bar, and on the Login gate + cold-start screens so it stays visible in every gate state. Renders only on `next dev` (gated on `NODE_ENV` at each mount site), never on any deployed env — including staging, where the Preview admin bar itself still shows. Clicking it opens the CMS Call panel.
+_Avoid_: Badge (a different, content concept), counter, widget
+
+**CMS Call panel**:
+The window the CMS Call Meter opens. Two tabs: Analytics (which parts use the CMS most, request totals, real-HTTP-vs-cached split, durations) and Details (the live, grouped, paginated call log for the session). Fed by polling the dev-only `/api/dev/cms-calls` route.
+_Avoid_: Modal, dialog, drawer, inspector
+
+**Real HTTP vs cached call**:
+A recorded CMS call is _real HTTP_ when it actually reached Strapi, or _cached_ when Next `unstable_cache` served it without a network hit. The CMS Call panel can filter by either.
+_Avoid_: Hit/miss (ambiguous), live call

@@ -1,17 +1,14 @@
 import { cache } from "react";
 import {
   GetSiteMetaConfigDocument,
+  type GetSiteMetaConfigQuery,
   type SiteMetaConfigFragment,
 } from "@/generated/graphql";
-import { getClient } from "@/lib/apollo-server";
+import { strapiRead } from "@/lib/strapi-read";
 
 async function fetchSiteMetaConfig(): Promise<SiteMetaConfigFragment | null> {
   try {
-    const { data } = await getClient().query({
-      query: GetSiteMetaConfigDocument,
-      errorPolicy: "ignore",
-    });
-
+    const data = await strapiRead<GetSiteMetaConfigQuery>(GetSiteMetaConfigDocument);
     return data?.siteMetaConfigs?.at(0) ?? null;
   } catch {
     return null;

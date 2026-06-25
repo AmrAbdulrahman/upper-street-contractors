@@ -4,8 +4,10 @@ import { getSiteMetaConfig } from "@/components/site-meta-config";
 import {
   GetProjectCardDocument,
   GetProjectCardIdsDocument,
+  type GetProjectCardQuery,
 } from "@/generated/graphql";
 import { getClient } from "@/lib/apollo-server";
+import { strapiRead } from "@/lib/strapi-read";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -30,12 +32,9 @@ export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
   const { id } = await params;
-  const [siteMetaConfig, { data }] = await Promise.all([
+  const [siteMetaConfig, data] = await Promise.all([
     getSiteMetaConfig(),
-    getClient().query({
-      query: GetProjectCardDocument,
-      variables: { documentId: id },
-    }),
+    strapiRead<GetProjectCardQuery>(GetProjectCardDocument, { documentId: id }),
   ]);
 
   const project = data?.projectCard;
@@ -65,9 +64,8 @@ export async function generateMetadata({
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { id } = await params;
 
-  const { data } = await getClient().query({
-    query: GetProjectCardDocument,
-    variables: { documentId: id },
+  const data = await strapiRead<GetProjectCardQuery>(GetProjectCardDocument, {
+    documentId: id,
   });
 
   const project = data?.projectCard;

@@ -1,8 +1,8 @@
 import { AddStrapiEntry, StrapiEntry, StrapiEntryField } from "@/components/strapi";
 import { RichText } from "@/components/strapi/rich-text";
 import { Icon } from "@/components/ui/icon";
-import { GetAtAGlanceDocument } from "@/generated/graphql";
-import { getClient } from "@/lib/apollo-server";
+import { GetAtAGlanceDocument, type GetAtAGlanceQuery } from "@/generated/graphql";
+import { strapiRead } from "@/lib/strapi-read";
 import { GlanceCard } from "./glance-card";
 
 function formatGlanceValue(quantity: number | null | undefined): string {
@@ -14,10 +14,7 @@ function formatGlanceValue(quantity: number | null | undefined): string {
 }
 
 export default async function AtAGlance() {
-  const { data } = await getClient().query({
-    query: GetAtAGlanceDocument,
-  });
-
+  const data = await strapiRead<GetAtAGlanceQuery>(GetAtAGlanceDocument);
   const glance = data?.atAglance ?? null;
 
   if (!glance) {

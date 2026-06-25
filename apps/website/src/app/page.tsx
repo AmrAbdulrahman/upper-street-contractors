@@ -3,16 +3,12 @@ import { PageSection } from "@/components/sections";
 import { pageMetaToMetadata } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { flattenSectionRefs } from "@/helpers/flatten-section-refs";
-import { GetHomePageDocument } from "@/generated/graphql";
-import { getClient } from "@/lib/apollo-server";
+import { GetHomePageDocument, type GetHomePageQuery } from "@/generated/graphql";
+import { strapiRead } from "@/lib/strapi-read";
 
 async function getHomeSections() {
   try {
-    const { data } = await getClient().query({
-      query: GetHomePageDocument,
-      errorPolicy: "ignore",
-    });
-
+    const data = await strapiRead<GetHomePageQuery>(GetHomePageDocument);
     const page = data?.pages?.at(0);
     return flattenSectionRefs(page?.section_refs);
   } catch {
@@ -22,9 +18,9 @@ async function getHomeSections() {
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const [siteMetaConfig, { data }] = await Promise.all([
+    const [siteMetaConfig, data] = await Promise.all([
       getSiteMetaConfig(),
-      getClient().query({ query: GetHomePageDocument, errorPolicy: "ignore" }),
+      strapiRead<GetHomePageQuery>(GetHomePageDocument),
     ]);
 
     const page = data?.pages?.at(0);

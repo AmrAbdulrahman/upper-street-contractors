@@ -261,7 +261,7 @@ async function repairAncestorRelations(publishedChildren: DocRef[]): Promise<voi
  */
 export default {
   async listDrafts(ctx) {
-    const entries: { uid: string; documentId: string }[] = [];
+    const entries: { uid: string; documentId: string; published: boolean }[] = [];
 
     for (const [uid, schema] of Object.entries(strapi.contentTypes)) {
       if (!uid.startsWith('api::') || !schema.options?.draftAndPublish) {
@@ -278,15 +278,12 @@ export default {
         );
 
         for (const draft of drafts) {
-          if (
-            hasUnpublishedDraft(
-              draft,
-              publishedById.get(draft.documentId as string),
-            )
-          ) {
+          const publishedEntry = publishedById.get(draft.documentId as string);
+          if (hasUnpublishedDraft(draft, publishedEntry)) {
             entries.push({
               uid,
               documentId: draft.documentId as string,
+              published: Boolean(publishedEntry),
             });
           }
         }

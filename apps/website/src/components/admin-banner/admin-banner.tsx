@@ -12,6 +12,11 @@ import {
 import { InspectModeToggle } from "./inspect-mode-toggle";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { PageMetadataInspectButtonClient } from "../metadata/page-metadata-inspect-button-client";
+import { CmsCallMeter } from "@/components/dev/cms-call-meter";
+
+// Local-dev only. `process.env.NODE_ENV` is statically replaced at build time, so
+// deployed builds (incl. staging, where this banner DOES render) drop the meter.
+const isDev = process.env.NODE_ENV === "development";
 
 type AdminBannerProps = {
   siteMetaConfigId?: string | null;
@@ -99,6 +104,8 @@ export function AdminBanner({ siteMetaConfigId }: AdminBannerProps) {
         role="region"
         aria-label="Preview admin"
       >
+        {isDev ? <CmsCallMeter variant="dark" className="mr-auto" /> : null}
+
         <div className="flex min-w-0 items-center gap-2">
           <PageMetadataInspectButtonClient
             strapiUrl={strapiUrl}

@@ -75,14 +75,8 @@ function subscribe(listener: () => void): () => void {
     void fetchEntries();
   }
 
-  const onFocus = () => {
-    void fetchEntries();
-  };
-  window.addEventListener("focus", onFocus);
-
   return () => {
     listeners.delete(listener);
-    window.removeEventListener("focus", onFocus);
   };
 }
 

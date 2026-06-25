@@ -5,6 +5,10 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { CmsCallMeter } from "@/components/dev/cms-call-meter";
+
+// Local-dev only (statically dropped from deployed builds).
+const isDev = process.env.NODE_ENV === "development";
 
 const schema = z.object({
   identifier: z.string().trim().min(1, "Enter your email or username."),
@@ -62,7 +66,13 @@ export function LoginScreen() {
   });
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-surface px-4 py-12">
+    <>
+      {isDev ? (
+        <div className="fixed left-4 top-4 z-50">
+          <CmsCallMeter />
+        </div>
+      ) : null}
+      <main className="flex min-h-dvh items-center justify-center bg-surface px-4 py-12">
       <div className="w-full max-w-sm rounded-xl border border-border bg-white p-6 shadow-sm">
         <h1 className="text-xl font-semibold text-foreground">Editor sign in</h1>
         <p className="mt-1 text-sm text-muted">
@@ -118,6 +128,7 @@ export function LoginScreen() {
           </button>
         </form>
       </div>
-    </main>
+      </main>
+    </>
   );
 }

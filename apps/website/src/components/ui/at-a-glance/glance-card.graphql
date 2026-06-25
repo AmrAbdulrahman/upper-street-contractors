@@ -1,4 +1,5 @@
 fragment GlanceCard on AtAglanceCard {
+  __typename
   documentId
   label
   quantity

@@ -3,8 +3,8 @@ import {
   ProjectsView,
 } from "@/components/sections/projects";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
-import { GetProjectsDocument } from "@/generated/graphql";
-import { getClient } from "@/lib/apollo-server";
+import { GetProjectsDocument, type GetProjectsQuery } from "@/generated/graphql";
+import { strapiRead } from "@/lib/strapi-read";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,9 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProjectsPage() {
-  const { data } = await getClient().query({
-    query: GetProjectsDocument,
-  });
+  const data = await strapiRead<GetProjectsQuery>(GetProjectsDocument);
 
   const projects =
     data?.projectCards?.filter((item): item is NonNullable<typeof item> =>

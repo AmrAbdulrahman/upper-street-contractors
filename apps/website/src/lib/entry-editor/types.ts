@@ -81,6 +81,10 @@ export type EntryFormDescriptor = {
 
 export type UpdateResult = { ok: true } | { ok: false; error: string };
 
+export type UploadResult =
+  | { ok: true; file: MediaFileRef }
+  | { ok: false; error: string };
+
 export type PublishTarget = {
   documentId: string;
   typename: string | null;

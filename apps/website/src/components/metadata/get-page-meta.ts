@@ -1,15 +1,10 @@
 import { cache } from "react";
-import { GetPageMetaDocument } from "@/generated/graphql";
-import { getClient } from "@/lib/apollo-server";
+import { GetPageMetaDocument, type GetPageMetaQuery } from "@/generated/graphql";
+import { strapiRead } from "@/lib/strapi-read";
 
 async function fetchPageMeta(key: string): Promise<string | null> {
-  const { data } = await getClient().query({
-    query: GetPageMetaDocument,
-    variables: { key },
-  });
-
+  const data = await strapiRead<GetPageMetaQuery>(GetPageMetaDocument, { key });
   const meta = data?.pages?.at(0)?.meta;
-
   return meta?.documentId ?? null;
 }
 

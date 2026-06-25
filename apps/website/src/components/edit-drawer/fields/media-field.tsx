@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { Controller, type Control } from "react-hook-form";
-import { listMediaFiles } from "@/lib/entry-editor/actions";
+import { listMediaFiles, uploadMediaFile } from "@/lib/entry-editor/actions";
 import type { EntryFieldDescriptor, MediaFileRef } from "@/lib/entry-editor/types";
 import { useStrapiInspection } from "@/components/strapi/strapi-inspection-provider";
 import { FIELD_INPUT_CLASS, humanizeFieldName, type FormValues } from "../ui";
@@ -16,6 +16,19 @@ function isImage(file: { mime?: string }): boolean {
   return Boolean(file.mime?.startsWith("image/"));
 }
 
+// Map Strapi `allowedTypes` (images/videos/audios/files) to an <input accept>.
+// "files" means any type, so it leaves the picker unrestricted.
+function acceptAttr(allowedTypes?: string[]): string | undefined {
+  if (!allowedTypes?.length || allowedTypes.includes("files")) return undefined;
+  const map: Record<string, string> = {
+    images: "image/*",
+    videos: "video/*",
+    audios: "audio/*",
+  };
+  const accepts = allowedTypes.map((type) => map[type]).filter(Boolean);
+  return accepts.length ? accepts.join(",") : undefined;
+}
+
 export function MediaField({
   field,
   control,
@@ -27,13 +40,15 @@ export function MediaField({
 }) {
   const { strapiUrl } = useStrapiInspection();
   const label = humanizeFieldName(field.name);
-
-  const uploadHref = `${strapiUrl.replace(/\/$/, "")}/admin/plugins/upload?sort=createdAt:DESC&page=1&pageSize=10`;
+  const accept = acceptAttr(field.mediaAllowedTypes);
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [files, setFiles] = useState<MediaFileRef[]>([]);
   const [loading, startLoad] = useTransition();
+  const [uploading, startUpload] = useTransition();
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadFiles = (term: string) =>
     startLoad(async () => {
@@ -55,6 +70,24 @@ export function MediaField({
         const choose = (file: MediaFileRef) => {
           f.onChange(file);
           setPickerOpen(false);
+        };
+
+        const onPickFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+          const file = event.target.files?.[0];
+          // Reset so picking the same file again still fires onChange.
+          event.target.value = "";
+          if (!file) return;
+          setUploadError(null);
+          startUpload(async () => {
+            const body = new FormData();
+            body.append("file", file);
+            const result = await uploadMediaFile(body);
+            if (result.ok) {
+              choose(result.file);
+            } else {
+              setUploadError("error" in result ? result.error : "Upload failed");
+            }
+          });
         };
 
         return (
@@ -89,15 +122,41 @@ export function MediaField({
               <p className="text-sm text-subtle">No image selected.</p>
             )}
 
-            <button
-              type="button"
-              onClick={openPicker}
-              autoFocus={autoFocus}
-              aria-label={`Choose ${label} from media library`}
-              className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface"
-            >
-              Choose from library
-            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={accept}
+              onChange={onPickFile}
+              aria-label={`Upload a new ${label} file`}
+              className="sr-only"
+            />
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={openPicker}
+                autoFocus={autoFocus}
+                aria-label={`Choose ${label} from media library`}
+                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface"
+              >
+                Choose from library
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                aria-label={`Upload a new ${label} file`}
+                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-surface disabled:opacity-50"
+              >
+                {uploading ? "Uploading…" : "Upload new image"}
+              </button>
+            </div>
+
+            {uploadError ? (
+              <p role="alert" className="text-sm text-red-600">
+                {uploadError}
+              </p>
+            ) : null}
 
             {pickerOpen ? (
               <div className="space-y-2 rounded-md border border-border p-2">
@@ -113,14 +172,14 @@ export function MediaField({
                     aria-label="Search media files"
                     className={FIELD_INPUT_CLASS}
                   />
-                  <a
-                    href={uploadHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground hover:bg-surface"
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground hover:bg-surface disabled:opacity-50"
                   >
-                    Add new Image
-                  </a>
+                    {uploading ? "Uploading…" : "Upload"}
+                  </button>
                   <button
                     type="button"
                     onClick={() => setPickerOpen(false)}

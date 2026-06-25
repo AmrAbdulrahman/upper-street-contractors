@@ -20,10 +20,7 @@ export function makeServerClient() {
       createAuthLink(),
       new HttpLink({
         uri: getStrapiGraphqlEndpoint(),
-        fetchOptions: {
-          cache:
-            process.env.ENABLE_PREVIEW === 'true' ? 'no-store' : 'force-cache',
-        },
+        fetchOptions: { cache: 'no-store' },
       }),
     ]),
   })

@@ -1,16 +1,17 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { isStrapiInspectionBuildEnabled } from "@/components/metadata";
 import {
   buildStrapiEntryUrl,
   graphqlTypenameToStrapiSingular,
   strapiSingularToGraphqlTypename,
+  strapiUidToSingular,
 } from "@/helpers/strapi-entry-url";
 import { getStrapiUrl } from "@/lib/strapi-auth";
 import { strapiFetch } from "@/lib/auth/strapi-fetch";
 import {
   isDraftPublishable,
-  listDraftPublishableSchemas,
   readSchemaDescriptor,
 } from "./read-schema";
 import { pickEntryLabel } from "./relation-label";
@@ -23,6 +24,7 @@ import type {
   PublishTarget,
   SchemaDescriptor,
   UpdateResult,
+  UploadResult,
 } from "./types";
 
 function isMultiRelation(cardinality: string | undefined): boolean {
@@ -232,6 +234,66 @@ export async function listMediaFiles(
   }
 }
 
+/**
+ * Uploads a single file to Strapi's media library and returns it as a
+ * MediaFileRef. The drawer then writes the file id onto the entry like any
+ * library pick (existing save/autosave path), so this only puts the bytes in
+ * the library — Strapi handles format/thumbnail generation and provider write.
+ * Auth flows through `strapiFetch` → editor JWT (write), never the read token.
+ */
+export async function uploadMediaFile(formData: FormData): Promise<UploadResult> {
+  if (!isStrapiInspectionBuildEnabled()) {
+    return { ok: false, error: "Inspection mode is not enabled." };
+  }
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "No file provided." };
+  }
+
+  // Strapi's upload plugin expects the binary under the `files` field.
+  const body = new FormData();
+  body.append("files", file, file.name);
+
+  const baseUrl = getStrapiUrl().replace(/\/$/, "");
+  try {
+    // No Content-Type header — fetch sets the multipart boundary itself.
+    const res = await strapiFetch(`${baseUrl}/api/upload`, {
+      method: "POST",
+      cache: "no-store",
+      body,
+    });
+    if (!res.ok) {
+      return { ok: false, error: await extractStrapiError(res) };
+    }
+    // The upload plugin returns a bare array of the created files.
+    const uploaded = (await res.json()) as Array<{
+      id: number;
+      name: string;
+      url: string;
+      mime?: string;
+    }>;
+    const created = Array.isArray(uploaded) ? uploaded[0] : undefined;
+    if (!created) {
+      return { ok: false, error: "Upload returned no file." };
+    }
+    return {
+      ok: true,
+      file: {
+        id: created.id,
+        name: created.name,
+        url: created.url,
+        mime: created.mime,
+      },
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Upload failed",
+    };
+  }
+}
+
 export async function listEntries(
   targetSingular: string,
 ): Promise<RelationRef[]> {
@@ -322,40 +384,6 @@ function restCollectionPath(schema: SchemaDescriptor): string {
     : `/api/${schema.pluralName}`;
 }
 
-function hasUnpublishedDraftChanges(
-  draft: RestDocument,
-  published: RestDocument | null,
-): boolean {
-  if (!draft.documentId) return false;
-  if (!published?.documentId) return true;
-
-  const draftTime = new Date(draft.updatedAt ?? 0).getTime();
-  const publishedTime = new Date(published.updatedAt ?? 0).getTime();
-  return draftTime > publishedTime;
-}
-
-async function fetchRestDocuments(url: string): Promise<RestDocument[]> {
-  const res = await strapiFetch(url, { cache: "no-store" });
-  if (!res.ok) return [];
-
-  const json = (await res.json()) as {
-    data?: RestDocument | RestDocument[] | null;
-  };
-  const data = json.data;
-  if (!data) return [];
-  return Array.isArray(data) ? data : [data];
-}
-
-async function fetchDraftDocuments(
-  schema: SchemaDescriptor,
-  baseUrl: string,
-): Promise<RestDocument[]> {
-  const path = restCollectionPath(schema);
-  return fetchRestDocuments(
-    `${baseUrl}${path}?status=draft&pagination[pageSize]=200`,
-  );
-}
-
 async function fetchPublishedDocument(
   schema: SchemaDescriptor,
   documentId: string,
@@ -377,50 +405,26 @@ async function fetchPublishedDocument(
   return json.data ?? null;
 }
 
-async function listUnpublishedDraftsForSchema(
-  schema: SchemaDescriptor,
-  baseUrl: string,
-): Promise<ChangedEntry[]> {
-  const drafts = await fetchDraftDocuments(schema, baseUrl);
-  const typename = strapiSingularToGraphqlTypename(schema.singular);
-  const entries: ChangedEntry[] = [];
-
-  for (const draft of drafts) {
-    if (!draft.documentId) continue;
-
-    const published = await fetchPublishedDocument(
-      schema,
-      draft.documentId,
-      baseUrl,
-    );
-
-    if (!hasUnpublishedDraftChanges(draft, published)) continue;
-
-    entries.push({
-      documentId: draft.documentId,
-      typename,
-      published: Boolean(published?.documentId),
-    });
-  }
-
-  return entries;
-}
-
 export async function listChangedEntries(): Promise<ChangedEntry[]> {
   if (!isStrapiInspectionBuildEnabled()) return [];
 
   const baseUrl = getStrapiUrl().replace(/\/$/, "");
-  const schemas = listDraftPublishableSchemas();
-
-  const results = await Promise.all(
-    schemas.map((schema) =>
-      listUnpublishedDraftsForSchema(schema, baseUrl).catch(
-        () => [] as ChangedEntry[],
-      ),
-    ),
-  );
-
-  return results.flat();
+  try {
+    const res = await strapiFetch(`${baseUrl}/api/inspect/drafts`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as {
+      entries?: { uid: string; documentId: string; published: boolean }[];
+    };
+    return (json.entries ?? []).map(({ uid, documentId, published }) => ({
+      documentId,
+      typename: strapiSingularToGraphqlTypename(strapiUidToSingular(uid)),
+      published,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 async function runPublishBatch(
@@ -475,6 +479,8 @@ async function runPublishBatch(
         errors: [...errors, ...resolved.map((item) => ({ ...item.target, error: message }))],
       };
     }
+
+    revalidateTag('strapi', 'max');
 
     const json = (await res.json()) as {
       errors?: { documentId: string; error: string }[];
