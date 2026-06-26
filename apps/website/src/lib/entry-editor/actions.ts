@@ -10,10 +10,7 @@ import {
 } from "@/helpers/strapi-entry-url";
 import { getStrapiUrl } from "@/lib/strapi-auth";
 import { strapiFetch } from "@/lib/auth/strapi-fetch";
-import {
-  isDraftPublishable,
-  readSchemaDescriptor,
-} from "./read-schema";
+import { readSchemaDescriptor } from "./read-schema";
 import { pickEntryLabel } from "./relation-label";
 import type {
   EntryFieldDescriptor,
@@ -22,7 +19,6 @@ import type {
   RelationRef,
   PublishResult,
   PublishTarget,
-  SchemaDescriptor,
   UpdateResult,
   UploadResult,
 } from "./types";
@@ -57,8 +53,6 @@ function unavailableDescriptor(
     documentId,
     focusedField,
     entryCmsUrl: cmsUrl(typename, documentId),
-    draftPublish: false,
-    published: false,
     fields: [],
   };
 }
@@ -167,21 +161,6 @@ export async function getEntryFormDescriptor(args: {
     };
   });
 
-  // Entry-level publish state for the drawer-header "shown on live" toggle. Only
-  // meaningful for draft & publish content types; a draft-status fetch can't tell
-  // us if a published version exists, so resolve it with a dedicated query.
-  const draftPublish = isDraftPublishable(singular);
-  let published = false;
-  if (draftPublish && resolvedDocumentId) {
-    const baseUrl = getStrapiUrl().replace(/\/$/, "");
-    const publishedDoc = await fetchPublishedDocument(
-      schema,
-      resolvedDocumentId,
-      baseUrl,
-    ).catch(() => null);
-    published = Boolean(publishedDoc?.documentId);
-  }
-
   return {
     available: true,
     typename,
@@ -190,8 +169,6 @@ export async function getEntryFormDescriptor(args: {
     documentId: resolvedDocumentId,
     focusedField,
     entryCmsUrl: cmsUrl(typename, resolvedDocumentId),
-    draftPublish,
-    published,
     fields,
   };
 }
@@ -373,38 +350,6 @@ export type ChangedEntry = {
   published: boolean;
 };
 
-type RestDocument = {
-  documentId?: string;
-  updatedAt?: string;
-};
-
-function restCollectionPath(schema: SchemaDescriptor): string {
-  return schema.kind === "singleType"
-    ? `/api/${schema.singularName}`
-    : `/api/${schema.pluralName}`;
-}
-
-async function fetchPublishedDocument(
-  schema: SchemaDescriptor,
-  documentId: string,
-  baseUrl: string,
-): Promise<RestDocument | null> {
-  const path =
-    schema.kind === "singleType"
-      ? restCollectionPath(schema)
-      : `${restCollectionPath(schema)}/${documentId}`;
-
-  const res = await strapiFetch(`${baseUrl}${path}?status=published`, {
-    cache: "no-store",
-  });
-
-  if (res.status === 404) return null;
-  if (!res.ok) return null;
-
-  const json = (await res.json()) as { data?: RestDocument | null };
-  return json.data ?? null;
-}
-
 export async function listChangedEntries(): Promise<ChangedEntry[]> {
   if (!isStrapiInspectionBuildEnabled()) return [];
 
@@ -521,10 +466,4 @@ export async function publishEntries(
   targets: PublishTarget[],
 ): Promise<PublishResult> {
   return runPublishBatch(targets, "publish");
-}
-
-export async function unpublishEntries(
-  targets: PublishTarget[],
-): Promise<PublishResult> {
-  return runPublishBatch(targets, "unpublish");
 }

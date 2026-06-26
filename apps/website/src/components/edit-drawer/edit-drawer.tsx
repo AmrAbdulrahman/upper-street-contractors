@@ -2,15 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import {
-  getEntryFormDescriptor,
-  publishEntries,
-  unpublishEntries,
-} from "@/lib/entry-editor/actions";
+import { getEntryFormDescriptor } from "@/lib/entry-editor/actions";
 import type { EntryFormDescriptor } from "@/lib/entry-editor/types";
-import { refreshChangedEntries } from "./changed-entries-store";
 import {
   closeEditDrawer,
   useEditDrawerTarget,
@@ -62,80 +55,6 @@ function DrawerUnavailable({ url }: { url: string }) {
         Open in CMS
       </a>
     </div>
-  );
-}
-
-/**
- * Header toggle controlling whether the edited entry is published (shown on the
- * live site) or Draft (hidden). Acts immediately, independent of the form's Save.
- */
-function EntryPublishToggle({
-  documentId,
-  typename,
-  initialPublished,
-}: {
-  documentId: string;
-  typename: string | null;
-  initialPublished: boolean;
-}) {
-  const router = useRouter();
-  const [published, setPublished] = useState(initialPublished);
-  const [busy, setBusy] = useState(false);
-
-  const toggle = () => {
-    if (busy) return;
-    const next = !published;
-    setBusy(true);
-    (next ? publishEntries : unpublishEntries)([{ typename, documentId }]).then(
-      (result) => {
-        setBusy(false);
-        if (!result.ok) {
-          toast.error(
-            `Couldn't ${next ? "publish" : "set to draft"}: ${result.errors
-              .map((entry) => entry.error)
-              .join("; ")}`,
-          );
-          return;
-        }
-        setPublished(next);
-        toast.success(
-          next ? "Published — now live" : "Set to Draft — hidden from live",
-        );
-        refreshChangedEntries();
-        router.refresh();
-      },
-    );
-  };
-
-  return (
-    <span className="flex shrink-0 items-center gap-2">
-      <span
-        className={`text-xs font-medium ${published ? "text-whatsapp" : "text-red-600"}`}
-      >
-        {published ? "Published" : "Draft"}
-      </span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={published}
-        aria-label={
-          published
-            ? "Unpublish — hide from the live site"
-            : "Publish — show on the live site"
-        }
-        disabled={busy}
-        onClick={toggle}
-        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-          published ? "bg-whatsapp" : "bg-gray-300"
-        }`}
-      >
-        <span
-          className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-            published ? "translate-x-[18px]" : "translate-x-0.5"
-          }`}
-        />
-      </button>
-    </span>
   );
 }
 
@@ -238,8 +157,6 @@ export default function EditDrawer() {
   if (typeof document === "undefined" || !target) return null;
 
   const title = humanizeFieldName(target.typename ?? "Entry");
-  const showToggle =
-    descriptor?.available && descriptor.draftPublish && !!descriptor.documentId;
 
   return createPortal(
     <div className="fixed inset-0 z-[100]">
@@ -272,14 +189,6 @@ export default function EditDrawer() {
             >
               Edit {title}
             </h2>
-            {showToggle ? (
-              <EntryPublishToggle
-                key={descriptor.documentId}
-                documentId={descriptor.documentId as string}
-                typename={descriptor.typename}
-                initialPublished={descriptor.published}
-              />
-            ) : null}
           </div>
           <button
             data-drawer-close

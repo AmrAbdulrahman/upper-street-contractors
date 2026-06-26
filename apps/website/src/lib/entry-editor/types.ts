@@ -72,10 +72,6 @@ export type EntryFormDescriptor = {
   documentId: string | null;
   focusedField: string | null;
   entryCmsUrl: string;
-  /** Whether this content type has draft & publish enabled (toggle only shows if so). */
-  draftPublish: boolean;
-  /** Whether the entry currently has a published version (shown on the live site). */
-  published: boolean;
   fields: EntryFieldDescriptor[];
 };
 
