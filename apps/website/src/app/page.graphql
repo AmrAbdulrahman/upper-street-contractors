@@ -51,4 +51,13 @@ query GetHomePage($status: PublicationStatus = PUBLISHED) {
       }
     }
   }
+  atAglance(status: $status) {
+    __typename
+    documentId
+    title
+    footer
+    cards {
+      ...GlanceCard
+    }
+  }
 }

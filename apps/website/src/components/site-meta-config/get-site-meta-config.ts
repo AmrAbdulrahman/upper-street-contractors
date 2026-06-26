@@ -8,7 +8,15 @@ import { strapiRead } from "@/lib/strapi-read";
 
 async function fetchSiteMetaConfig(): Promise<SiteMetaConfigFragment | null> {
   try {
-    const data = await strapiRead<GetSiteMetaConfigQuery>(GetSiteMetaConfigDocument);
+    // Global chrome (header/footer/metadata/robots), rarely changes. Cache it
+    // even in inspect mode (safe: it's a non-user-scoped singleton) so it costs
+    // at most one CMS call per 10 min across all renders. Flushed on publish via
+    // revalidateTag('strapi').
+    const data = await strapiRead<GetSiteMetaConfigQuery>(
+      GetSiteMetaConfigDocument,
+      undefined,
+      { revalidate: 600, cacheInInspect: true },
+    );
     return data?.siteMetaConfigs?.at(0) ?? null;
   } catch {
     return null;

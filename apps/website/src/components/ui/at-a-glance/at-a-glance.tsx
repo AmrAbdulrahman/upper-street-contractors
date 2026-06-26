@@ -1,8 +1,7 @@
 import { AddStrapiEntry, StrapiEntry, StrapiEntryField } from "@/components/strapi";
 import { RichText } from "@/components/strapi/rich-text";
 import { Icon } from "@/components/ui/icon";
-import { GetAtAGlanceDocument, type GetAtAGlanceQuery } from "@/generated/graphql";
-import { strapiRead } from "@/lib/strapi-read";
+import { getHomePage } from "@/app/get-home-page";
 import { GlanceCard } from "./glance-card";
 
 function formatGlanceValue(quantity: number | null | undefined): string {
@@ -14,7 +13,9 @@ function formatGlanceValue(quantity: number | null | undefined): string {
 }
 
 export default async function AtAGlance() {
-  const data = await strapiRead<GetAtAGlanceQuery>(GetAtAGlanceDocument);
+  // Shares the request-memoised GetHomePage read (see get-home-page.ts) — the
+  // atAglance data rides along in that query, so this adds zero network calls.
+  const data = await getHomePage();
   const glance = data?.atAglance ?? null;
 
   if (!glance) {

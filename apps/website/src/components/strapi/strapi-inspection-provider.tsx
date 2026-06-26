@@ -1,10 +1,9 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   createContext,
   useContext,
-  useEffect,
   useMemo,
   useSyncExternalStore,
   type ReactNode,
@@ -44,7 +43,6 @@ export function StrapiInspectionProvider({
   children,
   strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337",
 }: StrapiInspectionProviderProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const enabled = useSyncExternalStore(
@@ -60,19 +58,6 @@ export function StrapiInspectionProvider({
     }),
     [enabled, strapiUrl],
   );
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    const onFocus = () => {
-      router.refresh();
-    };
-
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [enabled, router]);
 
   return (
     <StrapiInspectionContext.Provider value={value}>

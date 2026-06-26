@@ -3,12 +3,11 @@ import { PageSection } from "@/components/sections";
 import { pageMetaToMetadata } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { flattenSectionRefs } from "@/helpers/flatten-section-refs";
-import { GetHomePageDocument, type GetHomePageQuery } from "@/generated/graphql";
-import { strapiRead } from "@/lib/strapi-read";
+import { getHomePage } from "./get-home-page";
 
 async function getHomeSections() {
   try {
-    const data = await strapiRead<GetHomePageQuery>(GetHomePageDocument);
+    const data = await getHomePage();
     const page = data?.pages?.at(0);
     return flattenSectionRefs(page?.section_refs);
   } catch {
@@ -20,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   try {
     const [siteMetaConfig, data] = await Promise.all([
       getSiteMetaConfig(),
-      strapiRead<GetHomePageQuery>(GetHomePageDocument),
+      getHomePage(),
     ]);
 
     const page = data?.pages?.at(0);
