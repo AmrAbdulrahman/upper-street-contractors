@@ -1,4 +1,4 @@
-import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { ZeroCmsEntry, ZeroCmsEntryField, ZeroCmsList } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Button } from "@/components/ui/button";
 import { AtAGlance } from "@/components/ui/at-a-glance";
@@ -49,15 +49,17 @@ export default function HomeHeroSection({ data: hero }: { data: HomeHeroData }) 
               </ZeroCmsEntryField>
             ) : null}
 
-            {buttons.length ? (
-              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                {buttons.map((button) => (
-                  <ZeroCmsEntry key={button.id} entry={button}>
-                    <Button data={button} />
-                  </ZeroCmsEntry>
-                ))}
-              </div>
-            ) : null}
+            <ZeroCmsList
+              className="flex flex-col gap-3 sm:flex-row sm:flex-wrap"
+              field="buttons"
+              items={buttons}
+            >
+              {buttons.map((button) => (
+                <ZeroCmsEntry key={button.id} entry={button}>
+                  <Button data={button} />
+                </ZeroCmsEntry>
+              ))}
+            </ZeroCmsList>
 
             {hero.footer ? (
               <ZeroCmsEntryField field="footer">

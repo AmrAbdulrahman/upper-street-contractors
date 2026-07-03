@@ -148,3 +148,13 @@ export function useZeroCms(): ZeroCmsContextValue {
   if (!ctx) throw new Error('useZeroCms must be used within <ZeroCmsProvider>');
   return ctx;
 }
+
+/**
+ * Like {@link useZeroCms} but returns null instead of throwing when there is no
+ * <ZeroCmsProvider>. Used by components that also render on public pages (no
+ * provider mounted), e.g. <ZeroCmsList> reading schema-driven limits in inspect
+ * mode while staying inert in production.
+ */
+export function useZeroCmsOptional(): ZeroCmsContextValue | null {
+  return useContext(ZeroCmsContext);
+}

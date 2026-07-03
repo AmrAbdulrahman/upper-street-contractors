@@ -1,4 +1,4 @@
-import { AddZeroCmsEntry, ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { ZeroCmsEntry, ZeroCmsEntryField, ZeroCmsList } from "@usc/zero-cms-widget";
 import { BulletList } from "@/components/ui/bullet-list";
 import { ProfileCard } from "@/components/ui/profile-card";
 import { WhyChooseUsSectionFragment } from "@/generated/graphql";
@@ -36,14 +36,16 @@ export function WhyChooseUsSection({ data }: WhyChooseUsSectionProps) {
               Why homeowners choose us
             </h2>
 
-            {bulletItems.length > 0 ? (
-              <ul className="mt-6 flex flex-col gap-3">
-                {bulletItems.map((item) =>
-                  item ? <BulletList key={item.id} data={item} /> : null,
-                )}
-                <AddZeroCmsEntry field="listOfPoints" />
-              </ul>
-            ) : null}
+            <ZeroCmsList
+              as="ul"
+              className="mt-6 flex flex-col gap-3"
+              field="listOfPoints"
+              items={bulletItems}
+            >
+              {bulletItems.map((item) =>
+                item ? <BulletList key={item.id} data={item} /> : null,
+              )}
+            </ZeroCmsList>
           </div>
 
           <div className="min-w-0">

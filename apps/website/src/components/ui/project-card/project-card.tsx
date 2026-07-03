@@ -1,6 +1,6 @@
 "use client";
 
-import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { ZeroCmsEntry, ZeroCmsEntryField, ZeroCmsList } from "@usc/zero-cms-widget";
 import { Badge, badgePropsFromStrapi } from "@/components/ui/badge";
 import { ProjectCardFragment } from "@/generated/graphql";
 import Link from "next/link";
@@ -38,27 +38,29 @@ export function ProjectCard({ data }: ProjectCardProps) {
         </Link>
 
         <div className="p-[18px]">
-          {badges.length > 0 ? (
-            <div className="relative z-10 mb-2.5 flex flex-wrap gap-1.5">
-              {badges.map((badge) => {
-                const badgeProps = badgePropsFromStrapi(badge, {
-                  className: "border border-border bg-surface text-subtle",
-                });
+          <ZeroCmsList
+            className="relative z-10 mb-2.5 flex flex-wrap gap-1.5"
+            field="projectBadges"
+            items={badges}
+          >
+            {badges.map((badge) => {
+              const badgeProps = badgePropsFromStrapi(badge, {
+                className: "border border-border bg-surface text-subtle",
+              });
 
-                if (!badgeProps) {
-                  return null;
-                }
+              if (!badgeProps) {
+                return null;
+              }
 
-                return (
-                  <ZeroCmsEntry key={badge.id} entry={badge}>
-                    <ZeroCmsEntryField field="text">
-                      <Badge {...badgeProps} />
-                    </ZeroCmsEntryField>
-                  </ZeroCmsEntry>
-                );
-              })}
-            </div>
-          ) : null}
+              return (
+                <ZeroCmsEntry key={badge.id} entry={badge}>
+                  <ZeroCmsEntryField field="text">
+                    <Badge {...badgeProps} />
+                  </ZeroCmsEntryField>
+                </ZeroCmsEntry>
+              );
+            })}
+          </ZeroCmsList>
 
           <Link href={href} className="block">
             {title ? (

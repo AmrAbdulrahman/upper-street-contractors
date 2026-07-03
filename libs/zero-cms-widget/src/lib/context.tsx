@@ -4,6 +4,9 @@
  * Widget controller: lets any part of a host app open the in-place edit drawer for
  * an entry by `__id`. The Type is resolved from the id via `adapter.locate` (so the
  * host only needs the id), then the drawer reuses zero-cms-app's EntryEditor.
+ *
+ * Drawers are a STACK: opening a child (edit or create) from inside a drawer layers
+ * a new panel on top; closing it returns to the parent with its state intact.
  */
 
 import {
@@ -12,6 +15,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -44,12 +48,21 @@ export interface UnlinkOptions {
   childId: string;
 }
 
+/** One panel on the drawer stack. */
 interface DrawerTarget {
-  id: string;
-  type: string;
+  /** Stable React key + patch handle for this panel. */
+  key: string;
+  /** Entry id; null for a create panel (nothing created yet — link-on-save). */
+  id: string | null;
+  /** Type `__name`; null while `locate` is resolving it. */
+  type: string | null;
+  mode: 'edit' | 'create';
   focusField?: string;
-  /** Whether the drawer was opened to create a new entry vs edit an existing one. */
-  mode?: 'create' | 'edit';
+  /** Resolving the type via `locate`. */
+  loading?: boolean;
+  error?: string | null;
+  /** Create panels only: settled with the new id on save, or null on cancel. */
+  onResult?: (createdId: string | null) => void;
 }
 
 interface WidgetContextValue {
@@ -57,20 +70,28 @@ interface WidgetContextValue {
   inspect: boolean;
   isOpen: boolean;
   openEntry: (id: string, opts?: OpenOptions) => Promise<void>;
-  /** Create a new entry for a parent relation field, link it, and open its drawer. */
+  /** Create a new entry for a parent relation field, link it on save, and open its drawer. */
   openCreate: (opts: CreateOptions) => Promise<void>;
   /** Remove a child from a parent relation field (unlink only; entry survives). */
   unlink: (opts: UnlinkOptions) => Promise<void>;
+  /** Close the whole stack. */
   close: () => void;
 }
 
 const WidgetContext = createContext<WidgetContextValue | null>(null);
 
-/** Internal: also exposes the resolved target + loading/error to the drawer. */
+/** Internal: also exposes the drawer stack + push/pop for the drawer host. */
 interface WidgetInternal extends WidgetContextValue {
-  target: DrawerTarget | null;
-  loading: boolean;
-  error: string | null;
+  stack: DrawerTarget[];
+  /** Pop the top panel. */
+  pop: () => void;
+  /** Push an edit panel (alias of {@link WidgetContextValue.openEntry}). */
+  pushEntry: (id: string, opts?: OpenOptions) => Promise<void>;
+  /**
+   * Push a create panel and resolve with the created id once the user saves it, or
+   * null if they cancel. Nothing is linked until the caller acts on the id.
+   */
+  pushCreate: (type: string) => Promise<string | null>;
 }
 const InternalContext = createContext<WidgetInternal | null>(null);
 
@@ -85,9 +106,8 @@ export function WidgetProvider({
   onChanged?: () => void;
 }) {
   const { adapter, schema, notify } = useZeroCms();
-  const [target, setTarget] = useState<DrawerTarget | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [stack, setStack] = useState<DrawerTarget[]>([]);
+  const seq = useRef(0);
 
   // Inspect overlays (<ZeroCmsEntry>/<ZeroCmsEntryField>) clone host elements that
   // cross the RSC server->client boundary; the server sees opaque child references
@@ -98,62 +118,94 @@ export function WidgetProvider({
   useEffect(() => setHydrated(true), []);
   const inspectActive = hydrated && inspect;
 
+  const pushTarget = useCallback((t: Omit<DrawerTarget, 'key'>): string => {
+    const key = `d${++seq.current}`;
+    setStack((s) => [...s, { ...t, key }]);
+    return key;
+  }, []);
+
+  const patchTarget = useCallback((key: string, patch: Partial<DrawerTarget>) => {
+    setStack((s) => s.map((t) => (t.key === key ? { ...t, ...patch } : t)));
+  }, []);
+
+  const pop = useCallback(() => setStack((s) => s.slice(0, -1)), []);
+
   const openEntry = useCallback(
     async (id: string, opts?: OpenOptions) => {
-      setError(null);
       if (opts?.type) {
-        setTarget({ id, type: opts.type, focusField: opts.focusField, mode: 'edit' });
+        pushTarget({ id, type: opts.type, focusField: opts.focusField, mode: 'edit' });
         return;
       }
-      setLoading(true);
+      // Push immediately (loading), then patch this exact panel by key once located,
+      // so a concurrently-pushed panel is never clobbered by index.
+      const key = pushTarget({
+        id,
+        type: null,
+        focusField: opts?.focusField,
+        mode: 'edit',
+        loading: true,
+      });
       try {
         const found = await adapter.locate(id);
-        if (!found) setError(`No entry with id "${id}"`);
-        else
-          setTarget({
-            id: found.id,
-            type: found.type,
-            focusField: opts?.focusField,
-            mode: 'edit',
-          });
+        if (found) patchTarget(key, { id: found.id, type: found.type, loading: false });
+        else patchTarget(key, { loading: false, error: `No entry with id "${id}"` });
       } catch (err) {
-        setError((err as Error)?.message ?? 'Failed to open entry');
-      } finally {
-        setLoading(false);
+        patchTarget(key, {
+          loading: false,
+          error: (err as Error)?.message ?? 'Failed to open entry',
+        });
       }
     },
-    [adapter]
+    [adapter, pushTarget, patchTarget]
+  );
+
+  const pushCreate = useCallback(
+    (type: string) =>
+      new Promise<string | null>((resolve) => {
+        let settled = false;
+        // Idempotent: create-success and cancel can't both resolve.
+        const settle = (v: string | null) => {
+          if (!settled) {
+            settled = true;
+            resolve(v);
+          }
+        };
+        if (!type) return settle(null);
+        pushTarget({ id: null, type, mode: 'create', onResult: settle });
+      }),
+    [pushTarget]
   );
 
   const openCreate = useCallback(
     async ({ parentId, parentType, parentField }: CreateOptions) => {
-      setError(null);
-      setLoading(true);
+      // Resolve the parent Type (via locate if the caller didn't pass it).
+      let pType = parentType ?? null;
+      if (!pType) pType = (await adapter.locate(parentId))?.type ?? null;
+      if (!pType) {
+        notify('error', `Cannot resolve the parent type for "${parentId}"`);
+        return;
+      }
+
+      // Resolve which Type to create from the parent field's allowedTypes.
+      const parentSchema = schema.find((t) => t.__name === pType);
+      const fieldDef = parentSchema?.fields.find((f) => f.__name === parentField);
+      const isRefs = fieldDef?.__type === 'references';
+      const allowed =
+        fieldDef && (fieldDef.__type === 'reference' || fieldDef.__type === 'references')
+          ? fieldDef.allowedTypes
+          : [];
+      const childType = allowed[0];
+      if (!childType) {
+        notify('error', `No creatable type for field "${parentField}"`);
+        return;
+      }
+
+      // Open a create panel; link only once it resolves on SAVE (cancel ⇒ no orphan).
+      const createdId = await pushCreate(childType);
+      if (!createdId) return;
+
       try {
-        // Resolve the parent Type (via locate if the caller didn't pass it).
-        let pType = parentType ?? null;
-        if (!pType) pType = (await adapter.locate(parentId))?.type ?? null;
-        if (!pType) {
-          setError(`Cannot resolve the parent type for "${parentId}"`);
-          return;
-        }
-
-        // Resolve which Type to create from the parent field's allowedTypes.
-        const parentSchema = schema.find((t) => t.__name === pType);
-        const fieldDef = parentSchema?.fields.find((f) => f.__name === parentField);
-        const allowed =
-          fieldDef && (fieldDef.__type === 'reference' || fieldDef.__type === 'references')
-            ? fieldDef.allowedTypes
-            : [];
-        const childType = allowed[0];
-        if (!childType) {
-          setError(`No creatable type for field "${parentField}"`);
-          return;
-        }
-
-        // Create an empty child draft, then link it into the parent field.
-        const created = await adapter.create(childType, {});
-        if (fieldDef?.__type === 'references') {
+        if (isRefs) {
           const parent = await adapter.get(pType, parentId, {
             status: 'draft',
             includeUnpublished: true,
@@ -162,21 +214,18 @@ export function WidgetProvider({
             ? (parent[parentField] as string[])
             : [];
           await adapter.patch(pType, parentId, {
-            [parentField]: [...current, created.__id],
+            [parentField]: [...current, createdId],
           });
         } else {
-          await adapter.patch(pType, parentId, { [parentField]: created.__id });
+          await adapter.patch(pType, parentId, { [parentField]: createdId });
         }
-
-        // Open the new entry so the editor can fill it in.
-        setTarget({ id: created.__id, type: childType, mode: 'create' });
+        onChanged?.();
+        notify('success', 'Item added');
       } catch (err) {
-        setError((err as Error)?.message ?? 'Failed to create entry');
-      } finally {
-        setLoading(false);
+        notify('error', errorMessage(err));
       }
     },
-    [adapter, schema]
+    [adapter, schema, notify, onChanged, pushCreate]
   );
 
   const unlink = useCallback(
@@ -216,19 +265,22 @@ export function WidgetProvider({
   );
 
   const close = useCallback(() => {
-    setTarget(null);
-    setError(null);
+    // Settle any pending create resolvers with null so awaiting callers don't hang.
+    setStack((s) => {
+      for (const t of s) t.onResult?.(null);
+      return [];
+    });
   }, []);
 
-  const isOpen = target !== null || loading || error !== null;
+  const isOpen = stack.length > 0;
 
   const publicValue = useMemo<WidgetContextValue>(
     () => ({ inspect: inspectActive, isOpen, openEntry, openCreate, unlink, close }),
     [inspectActive, isOpen, openEntry, openCreate, unlink, close]
   );
   const internalValue = useMemo<WidgetInternal>(
-    () => ({ ...publicValue, target, loading, error }),
-    [publicValue, target, loading, error]
+    () => ({ ...publicValue, stack, pop, pushEntry: openEntry, pushCreate }),
+    [publicValue, stack, pop, openEntry, pushCreate]
   );
 
   return (

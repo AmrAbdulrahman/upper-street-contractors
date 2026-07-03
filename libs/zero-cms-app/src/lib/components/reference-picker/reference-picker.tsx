@@ -19,6 +19,8 @@ import { Button, Input, cx } from '../ui';
 export interface RefOption {
   id: string;
   label: string;
+  /** The target entry's Type `__name` (for click-to-edit + option grouping). */
+  type: string;
   /** Media id of the target entry's image, or null when it has none. */
   mediaId: string | null;
 }
@@ -141,19 +143,24 @@ export function SingleReferencePicker({
   );
 }
 
-/** One draggable, thumbnailed row in a multi-reference list. */
+/** One draggable, thumbnailed row in a multi-reference list. The thumb+label form a
+ *  click target (right of the drag handle) that opens the child for editing. */
 function SortableRefRow({
   id,
   label,
   mediaId,
   index,
   onRemove,
+  onOpen,
+  canRemove = true,
 }: {
   id: string;
   label: string;
   mediaId: string | null;
   index: number;
   onRemove: () => void;
+  onOpen?: () => void;
+  canRemove?: boolean;
 }) {
   const { ref, handleRef, isDragging } = useSortable({ id, index });
   return (
@@ -172,13 +179,31 @@ function SortableRefRow({
       >
         ⠿
       </button>
-      <OptionThumb mediaId={mediaId} className="h-10 w-10 shrink-0" />
-      <span className="min-w-0 flex-1 truncate text-neutral-800">{label}</span>
+      {onOpen ? (
+        <button
+          type="button"
+          onClick={onOpen}
+          aria-label={`Edit ${label}`}
+          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+        >
+          <OptionThumb mediaId={mediaId} className="h-10 w-10 shrink-0" />
+          <span className="min-w-0 flex-1 truncate text-neutral-800 hover:text-neutral-900 hover:underline">
+            {label}
+          </span>
+        </button>
+      ) : (
+        <>
+          <OptionThumb mediaId={mediaId} className="h-10 w-10 shrink-0" />
+          <span className="min-w-0 flex-1 truncate text-neutral-800">{label}</span>
+        </>
+      )}
       <button
         type="button"
         onClick={onRemove}
+        disabled={!canRemove}
         aria-label={`Remove ${label}`}
-        className="rounded border border-neutral-200 px-1.5 text-xs text-neutral-500 transition-colors hover:bg-neutral-100"
+        title={canRemove ? undefined : 'Minimum reached'}
+        className="rounded border border-neutral-200 px-1.5 text-xs text-neutral-500 transition-colors hover:bg-neutral-100 disabled:opacity-40 disabled:hover:bg-transparent"
       >
         ✕
       </button>
@@ -186,15 +211,27 @@ function SortableRefRow({
   );
 }
 
-/** Multi-reference picker: reorderable thumbnail rows + a grid to add more. */
+/** Multi-reference picker: reorderable thumbnail rows + a grid to add more.
+ *  `onOpen` makes each row click-to-edit its child; `onCreate`/`createTypes` add a
+ *  "＋ Add new <Type>" affordance (link-on-save); `atMax`/`canRemove` enforce limits. */
 export function MultiReferencePicker({
   value,
   onChange,
   options,
+  onOpen,
+  onCreate,
+  createTypes = [],
+  atMax = false,
+  canRemove = true,
 }: {
   value: string[];
   onChange: (ids: string[]) => void;
   options: RefOption[];
+  onOpen?: (id: string) => void;
+  onCreate?: (type: string) => void;
+  createTypes?: { type: string; label: string }[];
+  atMax?: boolean;
+  canRemove?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const byId = useMemo(() => {
@@ -206,9 +243,11 @@ export function MultiReferencePicker({
   const selectedSet = new Set(value);
   const available = options.filter((o) => !selectedSet.has(o.id));
   const add = (id: string) => {
-    if (id && !selectedSet.has(id)) onChange([...value, id]);
+    if (id && !selectedSet.has(id) && !atMax) onChange([...value, id]);
   };
-  const remove = (index: number) => onChange(value.filter((_, i) => i !== index));
+  const remove = (index: number) => {
+    if (canRemove) onChange(value.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="space-y-2">
@@ -227,7 +266,9 @@ export function MultiReferencePicker({
                   index={index}
                   label={o?.label ?? id.slice(0, 8)}
                   mediaId={o?.mediaId ?? null}
+                  canRemove={canRemove}
                   onRemove={() => remove(index)}
+                  onOpen={onOpen ? () => onOpen(id) : undefined}
                 />
               );
             })}
@@ -235,9 +276,22 @@ export function MultiReferencePicker({
         </DragDropProvider>
       )}
 
-      <Button onClick={() => setOpen((o) => !o)}>
-        {open ? 'Close library' : '+ Add…'}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          onClick={() => setOpen((o) => !o)}
+          disabled={atMax && !open}
+          title={atMax && !open ? 'Maximum reached' : undefined}
+        >
+          {open ? 'Close library' : '+ Add…'}
+        </Button>
+        {onCreate &&
+          !atMax &&
+          createTypes.map((c) => (
+            <Button key={c.type} onClick={() => onCreate(c.type)}>
+              ＋ Add new {c.label}
+            </Button>
+          ))}
+      </div>
 
       {open && <ThumbGrid options={available} onPick={add} />}
     </div>

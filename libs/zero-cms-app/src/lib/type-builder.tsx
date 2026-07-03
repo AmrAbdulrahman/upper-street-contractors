@@ -8,11 +8,17 @@
 
 import { useEffect, useState } from 'react';
 import type { Field, FieldType, Schema, Type } from '@usc/zero-cms-core';
+import ReactSelect from 'react-select';
 import { useZeroCms } from './context';
 import { Badge, Button, EmptyState, Field as FieldShell, Input, Select, cls, cx } from './components/ui';
 import { errorMessage } from './util';
 
-const FIELD_TYPES: FieldType[] = [
+/**
+ * Field-type picker options. `reference`/`references` are presented as one
+ * "relation" kind; a separate cardinality dropdown then chooses One-to-One
+ * (`reference`) vs One-to-Many (`references`).
+ */
+const KIND_OPTIONS = [
   'text',
   'longtext',
   'richtext',
@@ -22,9 +28,12 @@ const FIELD_TYPES: FieldType[] = [
   'boolean',
   'asset',
   'lookup',
-  'reference',
-  'references',
-];
+  'relation',
+] as const;
+
+function isRelation(field: Field): field is Extract<Field, { allowedTypes: string[] }> {
+  return field.__type === 'reference' || field.__type === 'references';
+}
 
 /** Reset a field's meta to defaults for a new kind. */
 function withKind(field: Field, kind: FieldType): Field {
@@ -41,6 +50,32 @@ function withKind(field: Field, kind: FieldType): Field {
     default:
       return { ...base, __type: kind };
   }
+}
+
+/**
+ * Toggle a relation field's cardinality, preserving `allowedTypes` (unlike
+ * {@link withKind}, which resets them). Narrowing to One-to-One drops min/max.
+ */
+function withCardinality(field: Field, next: 'reference' | 'references'): Field {
+  const base = {
+    __name: field.__name,
+    label: field.label,
+    required: field.required,
+    description: field.description,
+  };
+  const allowedTypes = isRelation(field) ? field.allowedTypes : [];
+  if (next === 'references') {
+    const min = field.__type === 'references' ? field.min : undefined;
+    const max = field.__type === 'references' ? field.max : undefined;
+    return {
+      ...base,
+      __type: 'references',
+      allowedTypes,
+      ...(min != null ? { min } : {}),
+      ...(max != null ? { max } : {}),
+    };
+  }
+  return { ...base, __type: 'reference', allowedTypes };
 }
 
 export function TypeBuilder() {
@@ -190,11 +225,14 @@ function FieldRow({
           className="max-w-48"
         />
         <Select
-          value={field.__type}
-          onChange={(e) => onChange(withKind(field, e.target.value as FieldType))}
+          value={isRelation(field) ? 'relation' : field.__type}
+          onChange={(e) => {
+            const v = e.target.value;
+            onChange(v === 'relation' ? withKind(field, 'reference') : withKind(field, v as FieldType));
+          }}
           className="max-w-40"
         >
-          {FIELD_TYPES.map((t) => (
+          {KIND_OPTIONS.map((t) => (
             <option key={t} value={t}>
               {t}
             </option>
@@ -257,28 +295,89 @@ function FieldRow({
         </label>
       )}
 
-      {(field.__type === 'reference' || field.__type === 'references') && (
-        <div className="flex flex-wrap gap-2 text-sm text-neutral-600">
-          {typeNames.map((tn) => {
-            const checked = field.allowedTypes.includes(tn);
-            return (
-              <label key={tn} className="inline-flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() =>
+      {isRelation(field) && (
+        <div className="space-y-2">
+          <Select
+            value={field.__type}
+            onChange={(e) =>
+              onChange(withCardinality(field, e.target.value as 'reference' | 'references'))
+            }
+            className="max-w-44"
+          >
+            <option value="reference">→ One to One</option>
+            <option value="references">⇉ One to Many</option>
+          </Select>
+
+          <ReactSelect
+            isMulti
+            instanceId={`allowed-${field.__name}`}
+            unstyled
+            placeholder="Allowed types…"
+            options={typeNames.map((tn) => ({ value: tn, label: tn }))}
+            value={field.allowedTypes.map((tn) => ({ value: tn, label: tn }))}
+            onChange={(opts) => onChange({ ...field, allowedTypes: opts.map((o) => o.value) })}
+            classNames={{
+              control: (s) =>
+                cx(
+                  'flex w-full items-center rounded-md border bg-white px-2 py-1 text-sm transition',
+                  s.isFocused ? 'border-neutral-900 ring-1 ring-neutral-900' : 'border-neutral-300'
+                ),
+              valueContainer: () => 'flex flex-wrap gap-1',
+              multiValue: () =>
+                'inline-flex items-center gap-1 rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-700',
+              multiValueLabel: () => 'text-neutral-700',
+              multiValueRemove: () =>
+                'ml-0.5 cursor-pointer rounded text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800',
+              placeholder: () => 'text-neutral-400',
+              input: () => 'text-sm text-neutral-900',
+              indicatorsContainer: () => 'text-neutral-400',
+              dropdownIndicator: () => 'px-1 hover:text-neutral-700',
+              clearIndicator: () => 'px-1 hover:text-neutral-700',
+              indicatorSeparator: () => 'bg-neutral-200',
+              menu: () => 'z-50 mt-1 overflow-hidden rounded-md border border-neutral-200 bg-white shadow-lg',
+              menuList: () => 'py-1',
+              option: (s) =>
+                cx(
+                  'cursor-pointer px-3 py-2 text-sm',
+                  s.isFocused ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-700',
+                  s.isSelected && 'font-medium'
+                ),
+              noOptionsMessage: () => 'px-3 py-2 text-sm text-neutral-400',
+            }}
+          />
+
+          {field.__type === 'references' && (
+            <div className="flex items-center gap-3 text-sm text-neutral-600">
+              <label className="inline-flex items-center gap-1">
+                min
+                <Input
+                  type="number"
+                  className="max-w-24"
+                  value={field.min ?? ''}
+                  onChange={(e) =>
                     onChange({
                       ...field,
-                      allowedTypes: checked
-                        ? field.allowedTypes.filter((x) => x !== tn)
-                        : [...field.allowedTypes, tn],
+                      min: e.target.value === '' ? undefined : Number(e.target.value),
                     })
                   }
                 />
-                {tn}
               </label>
-            );
-          })}
+              <label className="inline-flex items-center gap-1">
+                max
+                <Input
+                  type="number"
+                  className="max-w-24"
+                  value={field.max ?? ''}
+                  onChange={(e) =>
+                    onChange({
+                      ...field,
+                      max: e.target.value === '' ? undefined : Number(e.target.value),
+                    })
+                  }
+                />
+              </label>
+            </div>
+          )}
         </div>
       )}
     </div>

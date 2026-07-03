@@ -1,4 +1,4 @@
-import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { ZeroCmsEntry, ZeroCmsEntryField, ZeroCmsList } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Icon } from "@/components/ui/icon";
 import { query } from "@/lib/cms/query";
@@ -27,19 +27,17 @@ export default async function AtAGlance() {
           </ZeroCmsEntryField>
         ) : null}
 
-        {cards.length > 0 ? (
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            {cards.map((card) => (
-              <ZeroCmsEntry key={card.id} entry={card}>
-                <GlanceCard
-                  value={formatGlanceValue(card.quantity)}
-                  valueAccent={card.unit}
-                  label={card.label ?? ""}
-                />
-              </ZeroCmsEntry>
-            ))}
-          </div>
-        ) : null}
+        <ZeroCmsList className="mt-5 grid grid-cols-2 gap-3" field="cards" items={cards}>
+          {cards.map((card) => (
+            <ZeroCmsEntry key={card.id} entry={card}>
+              <GlanceCard
+                value={formatGlanceValue(card.quantity)}
+                valueAccent={card.unit}
+                label={card.label ?? ""}
+              />
+            </ZeroCmsEntry>
+          ))}
+        </ZeroCmsList>
 
         {glance.footer ? (
           <ZeroCmsEntryField field="footer" className="min-w-0 flex-1">

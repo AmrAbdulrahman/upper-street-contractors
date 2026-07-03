@@ -14,6 +14,7 @@ import { createHttpAdapter, type Adapter } from '@usc/zero-cms-core';
 import {
   EntryEditor,
   ZeroCmsProvider,
+  ReferenceActionsProvider,
   useZeroCms,
   createAuthClient,
   ui,
@@ -109,44 +110,84 @@ function DrawerBody({
   token?: string | null;
   onAuthed?: (token: string) => void;
 }) {
-  const { isOpen, close, target, loading, error } = useWidgetInternal();
+  const { stack, pop, close, pushEntry, pushCreate } = useWidgetInternal();
   const { schema } = useZeroCms();
-  const type = target ? schema.find((t) => t.__name === target.type) : undefined;
   const needsLogin = Boolean(client) && !token;
 
-  return (
-    <Drawer open={isOpen} onClose={close} label="Edit entry">
-      {needsLogin && client && onAuthed ? (
+  const refActions = useMemo(
+    () => ({
+      openReference: (id: string, type?: string) =>
+        void pushEntry(id, type ? { type } : undefined),
+      createReference: pushCreate,
+    }),
+    [pushEntry, pushCreate]
+  );
+
+  // Login gate: a single base drawer shown whenever the stack is open but unauthed.
+  if (needsLogin && client && onAuthed) {
+    return (
+      <Drawer open={stack.length > 0} onClose={close} label="Sign in" depth={0} isTop>
         <DrawerLogin client={client} onAuthed={onAuthed} />
-      ) : (
-        <>
-          {loading && (
-            <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
-          )}
-          {error && (
-            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-          {target && type && (
-            <EntryEditor
-              key={target.id}
-              type={type}
-              entryId={target.id}
-              createMode={target.mode === 'create'}
-              focusField={target.focusField}
-              onClose={close}
-              onChanged={() => onSaved?.()}
-            />
-          )}
-          {target && !type && !loading && (
-            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-              Unknown type &quot;{target.type}&quot;
-            </div>
-          )}
-        </>
-      )}
-    </Drawer>
+      </Drawer>
+    );
+  }
+
+  return (
+    <ReferenceActionsProvider value={refActions}>
+      {stack.map((t, i) => {
+        const isTop = i === stack.length - 1;
+        const type = t.type ? schema.find((s) => s.__name === t.type) : undefined;
+        // Closing a create panel settles its resolver as cancelled (no orphan);
+        // an edit panel has no resolver, so this just pops.
+        const settleClose = () => {
+          t.onResult?.(null);
+          pop();
+        };
+        return (
+          <Drawer
+            key={t.key}
+            open
+            depth={i}
+            isTop={isTop}
+            onClose={settleClose}
+            label={t.mode === 'create' ? 'Add entry' : 'Edit entry'}
+          >
+            {t.loading && (
+              <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
+            )}
+            {t.error && (
+              <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                {t.error}
+              </div>
+            )}
+            {t.type && type && (
+              <EntryEditor
+                key={t.key}
+                type={type}
+                entryId={t.mode === 'create' ? undefined : t.id ?? undefined}
+                createMode={t.mode === 'create'}
+                focusField={t.focusField}
+                onClose={settleClose}
+                onChanged={() => onSaved?.()}
+                onCreated={
+                  t.mode === 'create'
+                    ? (id) => {
+                        t.onResult?.(id);
+                        pop();
+                      }
+                    : undefined
+                }
+              />
+            )}
+            {t.type && !type && !t.loading && (
+              <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                Unknown type &quot;{t.type}&quot;
+              </div>
+            )}
+          </Drawer>
+        );
+      })}
+    </ReferenceActionsProvider>
   );
 }
 

@@ -65,6 +65,36 @@ describe('<ZeroCmsWidget>', () => {
     await waitFor(() => expect(container.querySelector('.ring-2')).toBeTruthy());
   });
 
+  it('stacks a second drawer over the first and Escape pops back to the parent', async () => {
+    const adapter = await createNodeAdapter(createMemoryStoragePort({ schema }));
+    const a = await adapter.create('note', { title: 'Parent A' });
+    const b = await adapter.create('note', { title: 'Child B' });
+
+    render(
+      <ZeroCmsWidget adapter={adapter}>
+        <Host id={a.__id} />
+        <Host id={b.__id} />
+      </ZeroCmsWidget>
+    );
+
+    const [editA, editB] = await screen.findAllByRole('button', { name: 'edit' });
+
+    fireEvent.click(editA);
+    await screen.findByRole('dialog');
+    // include hidden — lower (inert) panels may be excluded from the a11y tree.
+    expect(screen.getAllByRole('dialog', { hidden: true })).toHaveLength(1);
+
+    fireEvent.click(editB);
+    await waitFor(() =>
+      expect(screen.getAllByRole('dialog', { hidden: true })).toHaveLength(2)
+    );
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    await waitFor(() =>
+      expect(screen.getAllByRole('dialog', { hidden: true })).toHaveLength(1)
+    );
+  });
+
   it('inspect mode renders <ZeroCmsEntry>/<ZeroCmsEntryField> children', async () => {
     const adapter = await createNodeAdapter(createMemoryStoragePort({ schema }));
     const created = await adapter.create('note', { title: 'Wrapped', body: 'B' });

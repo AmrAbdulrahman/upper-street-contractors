@@ -7,11 +7,17 @@ export { ZeroCmsApp, CmsApp, type ZeroCmsAppProps } from './lib/ZeroCmsApp';
 export {
   ZeroCmsProvider,
   useZeroCms,
+  useZeroCmsOptional,
   type ZeroCmsProviderProps,
   type RichTextComponent,
   type BlocksComponent,
   type NotifyFn,
 } from './lib/context';
+export {
+  ReferenceActionsProvider,
+  useReferenceActions,
+  type ReferenceActions,
+} from './lib/reference-actions';
 
 // Sub-views (compose your own shell) + field extensibility
 export { EntriesList, EntryEditor } from './lib/entries';

@@ -19,6 +19,7 @@ import {
   type NotifyFn,
 } from './context';
 import { SECTIONS, type Section } from './nav';
+import { ReferenceActionsProvider } from './reference-actions';
 import { EntriesList, EntryEditor } from './entries';
 import { TypeBuilder } from './type-builder';
 import { MediaLibrary } from './components/media';
@@ -154,6 +155,18 @@ function Shell({
     }
   }, [nav.section, nav.typeName, schema, go]);
 
+  // Click-to-edit a referenced child navigates the single aside to it (browser back
+  // returns). `createReference` is intentionally omitted: without a drawer stack the
+  // aside can't defer the link (navigating unmounts the parent editor), so the
+  // references editor hides "add new" in the admin app.
+  const referenceActions = useMemo(
+    () => ({
+      openReference: (id: string, type?: string) =>
+        go({ section: 'entries', typeName: type ?? nav.typeName, entryId: id, isNew: false }),
+    }),
+    [go, nav.typeName]
+  );
+
   const activeType = schema.find((t) => t.__name === nav.typeName);
 
   return (
@@ -249,15 +262,17 @@ function Shell({
 
       {(nav.entryId || nav.isNew) && activeType && nav.section === 'entries' && (
         <aside className={cx(cls.card, 'w-[28rem] shrink-0 overflow-auto border-l p-5')}>
-          <EntryEditor
-            key={nav.entryId ?? 'new'}
-            type={activeType}
-            entryId={nav.entryId}
-            onClose={() =>
-              go({ section: 'entries', typeName: activeType.__name, isNew: false })
-            }
-            onChanged={() => setReloadKey((k) => k + 1)}
-          />
+          <ReferenceActionsProvider value={referenceActions}>
+            <EntryEditor
+              key={nav.entryId ?? 'new'}
+              type={activeType}
+              entryId={nav.entryId}
+              onClose={() =>
+                go({ section: 'entries', typeName: activeType.__name, isNew: false })
+              }
+              onChanged={() => setReloadKey((k) => k + 1)}
+            />
+          </ReferenceActionsProvider>
         </aside>
       )}
     </div>

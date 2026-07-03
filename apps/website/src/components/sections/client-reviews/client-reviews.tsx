@@ -2,7 +2,6 @@ import {
   ZeroCmsEntry,
   ZeroCmsEntryField,
   ZeroCmsList,
-  ZeroCmsRelationEntry,
 } from "@usc/zero-cms-widget";
 import { Button } from "@/components/ui/button";
 import { ReviewCard } from "@/components/ui/review-card";
@@ -57,21 +56,19 @@ export function ClientReviewsSection({ data }: ClientReviewsSectionProps) {
             )}
           </ZeroCmsList>
 
-          {links.length > 0 ? (
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
-              {links.map((link) =>
-                link ? (
-                  <ZeroCmsRelationEntry
-                    key={link.id}
-                    entry={link}
-                    field="reviewLinks"
-                  >
-                    <Button data={link} />
-                  </ZeroCmsRelationEntry>
-                ) : null,
-              )}
-            </div>
-          ) : null}
+          <ZeroCmsList
+            className="mt-9 flex flex-wrap justify-center gap-3"
+            field="reviewLinks"
+            items={links}
+          >
+            {links.map((link) =>
+              link ? (
+                <ZeroCmsEntry key={link.id} entry={link}>
+                  <Button data={link} />
+                </ZeroCmsEntry>
+              ) : null,
+            )}
+          </ZeroCmsList>
         </div>
       </section>
     </ZeroCmsEntry>

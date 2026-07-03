@@ -127,6 +127,7 @@ export function EntryEditor({
   createMode,
   onClose,
   onChanged,
+  onCreated,
   focusField,
 }: {
   type: Type;
@@ -139,6 +140,12 @@ export function EntryEditor({
   createMode?: boolean;
   onClose: () => void;
   onChanged: () => void;
+  /**
+   * Called with the new entry's id right after a create-mode save, INSTEAD of
+   * `onClose`. Lets the opener link the new entry (link-on-save) and dismiss this
+   * panel itself. Unset ⇒ create falls back to `onClose` (the admin "+ New" path).
+   */
+  onCreated?: (id: string) => void;
   /** Field `__name` to scroll to + highlight on open. */
   focusField?: string;
 }) {
@@ -200,11 +207,16 @@ export function EntryEditor({
       if (isNew) {
         const created = await adapter.create(type.__name, clean);
         draftReg?.markDraft(type.__name, created.__id);
+        // Link-on-save: hand the new id to the opener (e.g. a references editor),
+        // which links it and dismisses this panel. Fall back to closing for the
+        // plain admin "+ New" path (no onCreated).
+        if (onCreated) onCreated(created.__id);
+        else onClose();
       } else {
         await adapter.update(type.__name, entryId, clean);
         draftReg?.markDraft(type.__name, entryId);
+        onClose();
       }
-      onClose();
     }, isNew ? 'Entry created' : 'Changes saved');
 
   // Autosave (existing entries only): persist to __draft without closing. Errors

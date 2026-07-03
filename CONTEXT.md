@@ -74,6 +74,32 @@ _Avoid_: Editable field (ambiguous)
 The action (green bottom-center button) that publishes every Entry whose draft was changed in the current Inspect-mode session, draft → published.
 _Avoid_: Save all, deploy, go live
 
+## Relations
+
+**Relation field**:
+An Entry field that points at other Entries. Its cardinality is either One-to-One or One-to-Many, chosen in the type-builder.
+_Avoid_: reference / references (the implementation `__type` names), foreign key, link field
+
+**One-to-One relation**:
+A Relation field holding at most one target Entry (implementation `__type: reference`).
+_Avoid_: single ref
+
+**One-to-Many relation**:
+A Relation field holding an ordered list of target Entries (implementation `__type: references`); its length may be bounded by optional min / max.
+_Avoid_: multi ref, collection
+
+**Allowed types**:
+The set of Types a Relation field may point at.
+_Avoid_: whitelist, ref types
+
+**Reference list**:
+The Inspect-mode wrapper that renders a One-to-Many relation as an add-able row/grid of cards, injecting a "+ Add" affordance and enforcing `max` (component: `ZeroCmsList`). Removal is not offered here — a child is removed from the parent's Edit drawer.
+_Avoid_: repeater, collection list
+
+**Stacked drawer**:
+Edit drawers layered on top of one another. Opening a linked child Entry (to edit) or creating a new one from within a drawer pushes a new panel; closing it returns to the panel beneath, with its state intact. New Entries are linked into the parent only when their create form is saved.
+_Avoid_: nested modal, sub-drawer
+
 ## Editor access
 
 **Editor**:

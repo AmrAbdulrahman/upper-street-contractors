@@ -110,6 +110,10 @@ export interface ReferencesField extends FieldMetaBase {
   __name: string;
   __type: 'references';
   allowedTypes: string[];
+  /** Minimum linked entries; the references editor blocks removing below this. */
+  min?: number;
+  /** Maximum linked entries; "+ Add" is disabled at this count. */
+  max?: number;
 }
 
 export type Field =
