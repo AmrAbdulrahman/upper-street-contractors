@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ZeroCmsBar, ZeroCmsWidget } from "@usc/zero-cms-widget";
 import { revalidateCms } from "@/lib/cms/revalidate";
+import { HugeRTEBlocksEditor } from "@/components/cms/hugerte-blocks-editor";
 
 /**
  * Renders the zero-cms widget + admin bar (preview deploy only).
@@ -33,7 +34,12 @@ export function CmsInspectShellClient({
   }, [router]);
 
   return (
-    <ZeroCmsWidget inspect={inspect} auth={{ baseUrl: "" }} onSaved={onContentChange}>
+    <ZeroCmsWidget
+      inspect={inspect}
+      auth={{ baseUrl: "" }}
+      blocks={HugeRTEBlocksEditor}
+      onSaved={onContentChange}
+    >
       <Suspense fallback={null}>
         <InspectControls
           inspect={inspect}

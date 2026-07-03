@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { CmsApp } from "@usc/zero-cms-app";
+import { HugeRTEBlocksEditor } from "@/components/cms/hugerte-blocks-editor";
 
 /**
  * /admin/[[...rest]] — the zero-cms management app, deep-linked + login-gated. The
@@ -28,6 +29,7 @@ export default function AdminPage() {
       <h1 className="mb-4 text-xl font-semibold text-neutral-900">Content admin</h1>
       <CmsApp
         auth={{ baseUrl: "" }}
+        blocks={HugeRTEBlocksEditor}
         path={path}
         onNavigate={(p) =>
           router.push("/admin" + (p.length ? "/" + p.join("/") : ""))

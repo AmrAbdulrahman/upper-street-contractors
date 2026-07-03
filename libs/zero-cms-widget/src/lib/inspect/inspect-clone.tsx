@@ -31,7 +31,7 @@ export function mergeClassNames(
 export const editButtonClassName = [
   'flex h-8 w-8 cursor-pointer items-center justify-center rounded-md',
   'border border-white/20 bg-neutral-900/90 text-white shadow-md backdrop-blur-sm',
-  'transition-colors hover:bg-neutral-900 z-[500]',
+  'transition-colors hover:bg-neutral-900 z-[90]',
 ].join(' ');
 
 const EDIT_ATTR = 'data-zero-cms-inspect-edit';
@@ -122,7 +122,10 @@ function EditButton({
         position: 'fixed',
         top: rect.top + 8,
         left: rect.right - 40,
-        zIndex: 1100,
+        // Below the sticky app header (z-100) + bar (z-1000) so the pencil is
+        // clipped by the chrome instead of floating over it when content scrolls
+        // under; still above ordinary page content.
+        zIndex: 90,
         visibility: 'visible',
       });
     };

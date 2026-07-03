@@ -59,7 +59,7 @@
     "__type": "at-aglance-card",
     "__status": "published",
     "values": {
-      "quantity": 470,
+      "quantity": 471,
       "unit": "+",
       "label": "Customer reviews"
     },
@@ -105,9 +105,9 @@
     "values": {
       "title": "At a glance",
       "cards": [
-        "bf6c3f00-4ec1-4815-9f75-1346e3720983",
         "f32b4372-de3a-4588-9d63-729158258202",
         "9f599178-2251-4573-856a-6fd358e4aaf4",
+        "bf6c3f00-4ec1-4815-9f75-1346e3720983",
         "53db565c-dd68-42cd-b068-20228eb22af2"
       ],
       "footer": [
@@ -636,54 +636,6 @@
     "__type": "home-header-section",
     "__status": "published",
     "values": {
-      "overline": "Islington's Trusted Renovation Team",
-      "title": [
-        {
-          "type": "paragraph",
-          "children": [
-            {
-              "text": "Bathrooms, Kitchens & ",
-              "type": "text"
-            },
-            {
-              "text": "Home Refurbishments",
-              "type": "text",
-              "italic": true
-            },
-            {
-              "text": " in Islington 22",
-              "type": "text"
-            }
-          ]
-        }
-      ],
-      "subtitle": "Owner-led, fully managed renovations delivered by an in-house team—clear quotes, reliable scheduling, and respectful workmanship.",
-      "buttons": [
-        "89600458-c302-4a4f-b372-fd11a5d40589",
-        "80685b11-9789-45f6-8d47-68a3662971d0"
-      ],
-      "footer": [
-        {
-          "type": "paragraph",
-          "children": [
-            {
-              "text": "Based in Islington (N9). Covering North London—larger projects considered across London. ",
-              "type": "text"
-            },
-            {
-              "bold": true,
-              "text": "Most renovation projects start from £10,000+.",
-              "type": "text"
-            },
-            {
-              "text": " Bathrooms from £8k · Kitchens from £15k · Refurbishments from £25k+.",
-              "type": "text"
-            }
-          ]
-        }
-      ]
-    },
-    "__draft": {
       "overline": "Islington's Trusted Renovation Team122",
       "title": [
         {
@@ -706,22 +658,23 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "Based in Islington (N9). Covering North London—larger projects considered across London. ",
-              "type": "text"
+              "type": "text",
+              "text": "Based in Islington (N9). Covering North London—larger projects considered across London. "
             },
             {
-              "bold": true,
+              "type": "text",
               "text": "Most renovation projects start from £10,000+.",
-              "type": "text"
+              "bold": true
             },
             {
-              "text": " Bathrooms from £8k · Kitchens from £15k · Refurbishments from £25k+.",
-              "type": "text"
+              "type": "text",
+              "text": " Bathrooms from £8k · Kitchens from £15k · Refurbishments from £25k+."
             }
           ]
         }
       ]
-    }
+    },
+    "__draft": null
   },
   {
     "__id": "4dfbd32a-c846-4eff-bc97-cab61ef0cf80",
@@ -735,8 +688,8 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "We keep things straightforward so you always know what's",
-              "type": "text"
+              "type": "text",
+              "text": "We keep things straightforward so you always know what's"
             }
           ]
         },
@@ -744,8 +697,8 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "happening and what comes next. ",
-              "type": "text"
+              "type": "text",
+              "text": "happening and what comes next."
             }
           ]
         }
@@ -813,8 +766,8 @@
     "values": {
       "imageFile": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
       "imgDescription": "Profile Image of a man",
-      "width": 75,
-      "height": 75,
+      "width": 100,
+      "height": 100,
       "imageRadius": "full"
     },
     "__draft": null
@@ -824,10 +777,10 @@
     "__type": "image-container",
     "__status": "published",
     "values": {
-      "imageFile": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "imageFile": "986f1751-f05a-4d2d-8f3e-cb966117fd4a",
       "imgDescription": "whoWeAreImage",
       "height": 340,
-      "imageRadius": "xl"
+      "imageRadius": "xl2"
     },
     "__draft": null
   },
@@ -1002,8 +955,8 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "\"Communication was excellent throughout—we always knew what was happening. The team was respectful of our home and left it spotless each day. The bathroom looks incredible.\"",
-              "type": "text"
+              "type": "text",
+              "text": "\"Communication was excellent throughout—we always knew what was happening. The team was respectful of our home and left it spotless each day. The bathroom looks incredible.\""
             }
           ]
         }
@@ -1031,7 +984,21 @@
       ],
       "clientInfo": "e95bff7c-674a-40e9-8027-817912667432"
     },
-    "__draft": null
+    "__draft": {
+      "score": 3.5,
+      "clientReview": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "\"We had a full kitchen and bathroom done together. The programme was well organised with clear milestones. The team was punctual, clean and professional throughout.\"",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "clientInfo": "e95bff7c-674a-40e9-8027-817912667432"
+    }
   },
   {
     "__id": "bba5d1d3-065a-4038-ac81-96087c24512e",
@@ -1228,8 +1195,8 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "We're a family-run, owner-led team based in Islington. We specialise in bathroom renovations, kitchen installations and full home refurbishments—delivering calm, organised projects for busy homeowners who want the job done properly.",
-              "type": "text"
+              "type": "text",
+              "text": "We're a family-run, owner-led team based in Islington. We specialise in bathroom renovations, kitchen installations and full home refurbishments—delivering calm, organised projects for busy homeowners who want the job done properly."
             }
           ]
         },
@@ -1237,14 +1204,15 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "From the first site visit to finishing touches, we manage the programme, coordinate trades, and keep communication clear. Smaller repairs and maintenance are also available for local clients who value a reliable team.",
-              "type": "text"
+              "type": "text",
+              "text": "From the first site visit to finishing touches, we manage the programme, coordinate trades, and keep communication clear. Smaller repairs and maintenance are also available for local clients who value a reliable team."
             }
           ]
         }
       ],
       "buttons": [
-        "c6363c76-0fd6-4912-8448-d59a1fbd2de8"
+        "c6363c76-0fd6-4912-8448-d59a1fbd2de8",
+        "6eccc16e-28ed-47d1-b490-b2e0c1c04bd3"
       ],
       "imageContainer": "e045d151-58c5-4d15-9163-411a56c31a76"
     },
@@ -1274,8 +1242,8 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "Upper Street Contracts is led by a civil engineer with a background in construction management and project delivery. That experience shapes how we work: clear planning, realistic timelines, consistent site standards, and accountability throughout.",
-              "type": "text"
+              "type": "text",
+              "text": "Upper Street Contracts is led by a civil engineer with a background in construction management and project delivery. That experience shapes how we work: clear planning, realistic timelines, consistent site standards, and accountability throughout."
             }
           ]
         },
@@ -1283,8 +1251,8 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "We're not trying to be the biggest builder in London—we focus on reliable execution, high-quality workmanship, and the kind of communication you'd expect from a professional team.",
-              "type": "text"
+              "type": "text",
+              "text": "We're not trying to be the biggest builder in London—we focus on reliable execution, high-quality workmanship, and the kind of communication you'd expect from a professional team."
             }
           ]
         }
@@ -1362,6 +1330,28 @@
       "priceLine": "From £15,000 (size/spec dependent)",
       "linkText": "View Kitchens",
       "href": "/kitchens"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6eccc16e-28ed-47d1-b490-b2e0c1c04bd3",
+    "__type": "button",
+    "__status": "unpublished",
+    "values": null,
+    "__draft": null
+  },
+  {
+    "__id": "7ec197dd-954b-4830-97e7-b3ce16f13ed1",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Sample",
+      "variant": "text",
+      "color": "black",
+      "borderRadius": 8,
+      "icon": "c6a3a0da-fcfe-4ed7-88ba-337d84460eb4",
+      "iconPosition": "end",
+      "href": "https://www.facebook.com"
     },
     "__draft": null
   }

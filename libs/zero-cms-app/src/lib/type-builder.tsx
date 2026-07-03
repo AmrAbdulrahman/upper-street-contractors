@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react';
 import type { Field, FieldType, Schema, Type } from '@usc/zero-cms-core';
 import { useZeroCms } from './context';
-import { Badge, Button, EmptyState, Field as FieldShell, Input, Select, cls, cx } from './ui';
+import { Badge, Button, EmptyState, Field as FieldShell, Input, Select, cls, cx } from './components/ui';
 import { errorMessage } from './util';
 
 const FIELD_TYPES: FieldType[] = [

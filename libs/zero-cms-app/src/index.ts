@@ -9,12 +9,13 @@ export {
   useZeroCms,
   type ZeroCmsProviderProps,
   type RichTextComponent,
+  type BlocksComponent,
 } from './lib/context';
 
 // Sub-views (compose your own shell) + field extensibility
 export { EntriesList, EntryEditor } from './lib/entries';
 export { TypeBuilder } from './lib/type-builder';
-export { MediaLibrary } from './lib/media';
+export { MediaLibrary } from './lib/components/media';
 export {
   EntryForm,
   fieldRegistry,
@@ -24,7 +25,14 @@ export {
   type EntryFormProps,
 } from './lib/fields';
 export { SECTIONS, type Section, type View } from './lib/nav';
-export * as ui from './lib/ui';
+export {
+  DraftRegistryProvider,
+  useDraftRegistry,
+  useDraftRegistryOptional,
+  type DraftRef,
+  type DraftRegistryValue,
+} from './lib/draft-registry';
+export * as ui from './lib/components/ui';
 export { defaultsFor, errorMessage } from './lib/util';
 
 // Auth

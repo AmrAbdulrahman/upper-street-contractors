@@ -15,7 +15,7 @@ import {
 } from 'react';
 import { createHttpAdapter, type Adapter, type SafeUser } from '@usc/zero-cms-core';
 import { createAuthClient } from './auth-client';
-import { Button, Field, Input, Spinner, cls, cx } from '../ui';
+import { Button, Field, Input, Spinner, cls, cx } from '../components/ui';
 import { errorMessage } from '../util';
 
 export interface AuthConfig {

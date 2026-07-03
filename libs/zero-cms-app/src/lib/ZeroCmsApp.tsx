@@ -11,12 +11,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Adapter, SafeUser } from '@usc/zero-cms-core';
-import { ZeroCmsProvider, useZeroCms, type RichTextComponent } from './context';
+import {
+  ZeroCmsProvider,
+  useZeroCms,
+  type RichTextComponent,
+  type BlocksComponent,
+} from './context';
 import { SECTIONS, type Section } from './nav';
 import { EntriesList, EntryEditor } from './entries';
 import { TypeBuilder } from './type-builder';
-import { MediaLibrary } from './media';
-import { Button, Spinner, cls, cx } from './ui';
+import { MediaLibrary } from './components/media';
+import { Button, Spinner, cls, cx } from './components/ui';
 import { AuthGate, type AuthConfig } from './auth/AuthGate';
 
 export interface ZeroCmsAppProps {
@@ -25,6 +30,8 @@ export interface ZeroCmsAppProps {
   /** Enable the login gate; the gate provides an authed adapter. */
   auth?: AuthConfig;
   richText?: RichTextComponent;
+  /** Editor for `blocks` fields; defaults to the built-in BlocksEditor. */
+  blocks?: BlocksComponent;
   className?: string;
   /** URL path segments, e.g. ['entries','project','<id>']. Enables deep linking. */
   path?: string[];
@@ -68,7 +75,7 @@ export function ZeroCmsApp(props: ZeroCmsAppProps) {
     return (
       <AuthGate config={props.auth}>
         {(adapter, ctx) => (
-          <ZeroCmsProvider adapter={adapter} richText={props.richText}>
+          <ZeroCmsProvider adapter={adapter} richText={props.richText} blocks={props.blocks}>
             <Shell
               className={props.className}
               path={props.path}
@@ -84,7 +91,7 @@ export function ZeroCmsApp(props: ZeroCmsAppProps) {
   if (!props.adapter)
     throw new Error('ZeroCmsApp requires either `adapter` or `auth`');
   return (
-    <ZeroCmsProvider adapter={props.adapter} richText={props.richText}>
+    <ZeroCmsProvider adapter={props.adapter} richText={props.richText} blocks={props.blocks}>
       <Shell className={props.className} path={props.path} onNavigate={props.onNavigate} />
     </ZeroCmsProvider>
   );

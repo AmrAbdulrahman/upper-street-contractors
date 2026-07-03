@@ -20,6 +20,7 @@ import {
   type AuthClient,
   type AuthConfig,
   type RichTextComponent,
+  type BlocksComponent,
 } from '@usc/zero-cms-app';
 import { Drawer } from './Drawer';
 import { WidgetProvider, useWidgetInternal } from './context';
@@ -29,6 +30,8 @@ export interface ZeroCmsWidgetProps {
   /** Gate editing behind a login; the drawer manages the session. */
   auth?: AuthConfig;
   richText?: RichTextComponent;
+  /** Editor for `blocks` fields; defaults to the built-in BlocksEditor. */
+  blocks?: BlocksComponent;
   /** Called after a successful create/update/publish/etc inside the drawer. */
   onSaved?: () => void;
   /**
@@ -44,7 +47,7 @@ export function ZeroCmsWidget(props: ZeroCmsWidgetProps) {
   if (!props.adapter)
     throw new Error('ZeroCmsWidget requires either `adapter` or `auth`');
   return (
-    <ZeroCmsProvider adapter={props.adapter} richText={props.richText}>
+    <ZeroCmsProvider adapter={props.adapter} richText={props.richText} blocks={props.blocks}>
       <WidgetProvider inspect={props.inspect}>
         {props.children}
         <DrawerBody onSaved={props.onSaved} />
@@ -56,6 +59,7 @@ export function ZeroCmsWidget(props: ZeroCmsWidgetProps) {
 function AuthedWidget({
   auth,
   richText,
+  blocks,
   onSaved,
   inspect,
   children,
@@ -76,7 +80,7 @@ function AuthedWidget({
   );
 
   return (
-    <ZeroCmsProvider adapter={adapter} richText={richText}>
+    <ZeroCmsProvider adapter={adapter} richText={richText} blocks={blocks}>
       <WidgetProvider inspect={inspect}>
         {children}
         <DrawerBody onSaved={onSaved} client={client} token={token} onAuthed={setToken} />

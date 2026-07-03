@@ -17,13 +17,26 @@ import {
   type ComponentType,
   type ReactNode,
 } from 'react';
-import type { Adapter, Schema, MediaItem } from '@usc/zero-cms-core';
-import { cls, cx } from './ui';
+import type { Adapter, Schema, MediaItem, BlocksContent } from '@usc/zero-cms-core';
+import { BlocksEditor } from '@usc/zero-cms-blocks';
+import { DraftRegistryProvider } from './draft-registry';
+import { cls, cx } from './components/ui';
 
 export type RichTextComponent = ComponentType<{
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+}>;
+
+/**
+ * Pluggable editor for `blocks` fields. Mirrors {@link RichTextComponent} but
+ * speaks the structured {@link BlocksContent} tree. Defaults to the dependency-free
+ * {@link BlocksEditor}; a host can inject a richer one (e.g. a HugeRTE-backed
+ * WYSIWYG that converts blocks↔HTML internally) via `<ZeroCmsProvider blocks={…}>`.
+ */
+export type BlocksComponent = ComponentType<{
+  value: BlocksContent;
+  onChange: (value: BlocksContent) => void;
 }>;
 
 interface ZeroCmsContextValue {
@@ -34,6 +47,7 @@ interface ZeroCmsContextValue {
   media: MediaItem[];
   refreshMedia: () => Promise<void>;
   RichText: RichTextComponent;
+  Blocks: BlocksComponent;
 }
 
 const ZeroCmsContext = createContext<ZeroCmsContextValue | null>(null);
@@ -51,12 +65,15 @@ const DefaultRichText: RichTextComponent = ({ value, onChange, placeholder }) =>
 export interface ZeroCmsProviderProps {
   adapter: Adapter;
   richText?: RichTextComponent;
+  /** Editor for `blocks` fields; defaults to the built-in {@link BlocksEditor}. */
+  blocks?: BlocksComponent;
   children: ReactNode;
 }
 
 export function ZeroCmsProvider({
   adapter,
   richText,
+  blocks,
   children,
 }: ZeroCmsProviderProps) {
   const [schema, setSchema] = useState<Schema>([]);
@@ -100,11 +117,16 @@ export function ZeroCmsProvider({
       media,
       refreshMedia,
       RichText: richText ?? DefaultRichText,
+      Blocks: blocks ?? BlocksEditor,
     }),
-    [adapter, schema, schemaLoading, refreshSchema, media, refreshMedia, richText]
+    [adapter, schema, schemaLoading, refreshSchema, media, refreshMedia, richText, blocks]
   );
 
-  return <ZeroCmsContext.Provider value={value}>{children}</ZeroCmsContext.Provider>;
+  return (
+    <ZeroCmsContext.Provider value={value}>
+      <DraftRegistryProvider>{children}</DraftRegistryProvider>
+    </ZeroCmsContext.Provider>
+  );
 }
 
 export function useZeroCms(): ZeroCmsContextValue {

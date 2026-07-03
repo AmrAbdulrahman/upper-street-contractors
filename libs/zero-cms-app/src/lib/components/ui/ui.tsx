@@ -95,18 +95,24 @@ export function Field({
   label,
   required,
   error,
+  badge,
   children,
 }: {
   label: string;
   required?: boolean;
   error?: string;
+  /** Optional chip shown beside the label, e.g. the field's type. */
+  badge?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <label className="block space-y-1">
-      <span className={cls.label}>
-        {label}
-        {required && <span className="text-red-500"> *</span>}
+      <span className={cx(cls.label, 'flex items-center gap-2')}>
+        <span>
+          {label}
+          {required && <span className="text-red-500"> *</span>}
+        </span>
+        {badge}
       </span>
       {children}
       {error && <span className="block text-xs text-red-600">{error}</span>}

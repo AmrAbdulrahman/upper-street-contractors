@@ -62,5 +62,13 @@
     "height": 162,
     "alternativeText": "Company Default Image",
     "createdAt": "2026-06-28T21:45:24.053Z"
+  },
+  {
+    "id": "986f1751-f05a-4d2d-8f3e-cb966117fd4a",
+    "filename": "986f1751-f05a-4d2d-8f3e-cb966117fd4a__Screenshot 2025-06-20 021525.png",
+    "mime": "image/png",
+    "size": 592567,
+    "kind": "image",
+    "createdAt": "2026-07-03T15:46:21.043Z"
   }
 ]

@@ -5,8 +5,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { OutputEntry, Type } from '@usc/zero-cms-core';
 import { useZeroCms } from './context';
+import { useDraftRegistryOptional } from './draft-registry';
 import { EntryForm, entryLabel, titleField, type FormValues } from './fields';
-import { Badge, Button, EmptyState, Input, Select, Spinner, cls, cx } from './ui';
+import { Badge, Button, EmptyState, Input, Select, Spinner, cls, cx } from './components/ui';
 import { cleanValues, defaultsFor, errorMessage } from './util';
 
 type StatusFilter = 'all' | 'published' | 'draft' | 'unpublished';
@@ -135,6 +136,7 @@ export function EntryEditor({
   focusField?: string;
 }) {
   const { adapter, refreshMedia } = useZeroCms();
+  const draftReg = useDraftRegistryOptional();
   const isNew = !entryId;
   const [entry, setEntry] = useState<OutputEntry | null>(null);
   const [loading, setLoading] = useState(!isNew);
@@ -184,10 +186,33 @@ export function EntryEditor({
   const save = (values: FormValues) =>
     run(async () => {
       const clean = cleanValues(values);
-      if (isNew) await adapter.create(type.__name, clean);
-      else await adapter.update(type.__name, entryId, clean);
+      if (isNew) {
+        const created = await adapter.create(type.__name, clean);
+        draftReg?.markDraft(type.__name, created.__id);
+      } else {
+        await adapter.update(type.__name, entryId, clean);
+        draftReg?.markDraft(type.__name, entryId);
+      }
       onClose();
     });
+
+  // Autosave (existing entries only): persist to __draft without closing. Errors
+  // surface inline and rethrow so EntryForm keeps the edit dirty for a retry.
+  const saveQuiet = async (values: FormValues) => {
+    if (isNew || !entryId) return;
+    setError(null);
+    try {
+      await adapter.update(type.__name, entryId, cleanValues(values));
+      // Reflect the new draft at once: flip the header badge and register it so the
+      // bar's publish count updates instantly, no re-query round-trip.
+      setEntry((prev) => (prev ? { ...prev, hasDraft: true } : prev));
+      draftReg?.markDraft(type.__name, entryId);
+      onChanged();
+    } catch (err) {
+      setError(errorMessage(err));
+      throw err;
+    }
+  };
 
   const act = (fn: () => Promise<unknown>, close = false) =>
     run(async () => {
@@ -225,20 +250,29 @@ export function EntryEditor({
         type={type}
         defaultValues={defaultsFor(type, entry)}
         onSubmit={save}
+        autosave={!isNew && entryId ? saveQuiet : undefined}
         focusField={focusField}
         submitLabel={isNew ? 'Create draft' : 'Save draft'}
         footer={
           !isNew && entry ? (
-            <div className="flex flex-wrap items-center gap-2">
+            // A fragment (not a nested flex container) so these render as direct
+            // siblings of the submit button in EntryForm's single flat row.
+            <>
               <Button
                 variant="primary"
                 disabled={busy}
-                onClick={() => act(() => adapter.publish(type.__name, entryId!))}
+                onClick={() =>
+                  act(async () => {
+                    await adapter.publish(type.__name, entryId!);
+                    draftReg?.clearDraft(type.__name, entryId!);
+                  })
+                }
               >
                 Publish
               </Button>
               {entry.__status === 'published' && (
                 <Button
+                  variant="outline"
                   disabled={busy}
                   onClick={() => act(() => adapter.unpublish(type.__name, entryId!))}
                 >
@@ -247,8 +281,14 @@ export function EntryEditor({
               )}
               {entry.hasDraft && (
                 <Button
+                  variant="outline"
                   disabled={busy}
-                  onClick={() => act(() => adapter.discardDraft(type.__name, entryId!))}
+                  onClick={() =>
+                    act(async () => {
+                      await adapter.discardDraft(type.__name, entryId!);
+                      draftReg?.clearDraft(type.__name, entryId!);
+                    })
+                  }
                 >
                   Discard draft
                 </Button>
@@ -256,13 +296,17 @@ export function EntryEditor({
               <Button
                 variant="danger"
                 disabled={busy}
+                className="ml-auto"
                 onClick={() =>
-                  act(() => adapter.delete(type.__name, entryId!), true)
+                  act(async () => {
+                    await adapter.delete(type.__name, entryId!);
+                    draftReg?.clearDraft(type.__name, entryId!);
+                  }, true)
                 }
               >
                 Delete
               </Button>
-            </div>
+            </>
           ) : null
         }
       />

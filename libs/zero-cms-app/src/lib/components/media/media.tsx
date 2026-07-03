@@ -4,11 +4,23 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { MediaItem } from '@usc/zero-cms-core';
-import { useZeroCms } from './context';
-import { Badge, Button, EmptyState, Spinner, cls, cx } from './ui';
-import { errorMessage } from './util';
+import { useZeroCms } from '../../context';
+import { Badge, Button, EmptyState, Spinner, cls, cx } from '../ui';
+import { errorMessage } from '../../util';
 
-function MediaThumb({ item }: { item: MediaItem }) {
+/**
+ * Thumbnail for one media item. Images are fetched through the adapter and shown
+ * via an object URL (the lib is framework-agnostic — no public media route to
+ * point an <img src> at); non-images show a kind placeholder. `className` sets the
+ * box size so the same component serves the library grid and the asset picker.
+ */
+export function MediaThumb({
+  item,
+  className = 'h-28 w-full',
+}: {
+  item: MediaItem;
+  className?: string;
+}) {
   const { adapter } = useZeroCms();
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
@@ -30,15 +42,20 @@ function MediaThumb({ item }: { item: MediaItem }) {
   if (item.kind === 'image')
     return url ? (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={url} alt={item.filename} className="h-28 w-full rounded object-cover" />
+      <img src={url} alt={item.filename} className={cx(className, 'rounded object-cover')} />
     ) : (
-      <div className="flex h-28 items-center justify-center rounded bg-neutral-100">
+      <div className={cx(className, 'flex items-center justify-center rounded bg-neutral-100')}>
         <Spinner />
       </div>
     );
 
   return (
-    <div className="flex h-28 items-center justify-center rounded bg-neutral-100 text-xs text-neutral-500">
+    <div
+      className={cx(
+        className,
+        'flex items-center justify-center rounded bg-neutral-100 text-xs text-neutral-500'
+      )}
+    >
       {item.kind}
     </div>
   );

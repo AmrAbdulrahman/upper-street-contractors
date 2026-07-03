@@ -27,7 +27,7 @@ export function Drawer({ open, onClose, label, children }: DrawerProps) {
   if (!open) return null;
 
   return (
-    <div className="zero-cms fixed inset-0 z-[1000] flex justify-end">
+    <div className="zero-cms fixed inset-0 z-[1300] flex justify-end">
       <button
         aria-label="Close"
         tabIndex={-1}

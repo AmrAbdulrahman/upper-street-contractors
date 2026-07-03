@@ -24,6 +24,15 @@ export interface OpenOptions {
   focusField?: string;
 }
 
+export interface CreateOptions {
+  /** The parent entry to link the new entry into. */
+  parentId: string;
+  /** Parent Type `__name`; resolved via `locate` when omitted. */
+  parentType?: string | null;
+  /** The parent's `reference`/`references` field to link into. */
+  parentField: string;
+}
+
 interface DrawerTarget {
   id: string;
   type: string;
@@ -35,6 +44,8 @@ interface WidgetContextValue {
   inspect: boolean;
   isOpen: boolean;
   openEntry: (id: string, opts?: OpenOptions) => Promise<void>;
+  /** Create a new entry for a parent relation field, link it, and open its drawer. */
+  openCreate: (opts: CreateOptions) => Promise<void>;
   close: () => void;
 }
 
@@ -55,7 +66,7 @@ export function WidgetProvider({
   children: ReactNode;
   inspect?: boolean;
 }) {
-  const { adapter } = useZeroCms();
+  const { adapter, schema } = useZeroCms();
   const [target, setTarget] = useState<DrawerTarget | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +106,60 @@ export function WidgetProvider({
     [adapter]
   );
 
+  const openCreate = useCallback(
+    async ({ parentId, parentType, parentField }: CreateOptions) => {
+      setError(null);
+      setLoading(true);
+      try {
+        // Resolve the parent Type (via locate if the caller didn't pass it).
+        let pType = parentType ?? null;
+        if (!pType) pType = (await adapter.locate(parentId))?.type ?? null;
+        if (!pType) {
+          setError(`Cannot resolve the parent type for "${parentId}"`);
+          return;
+        }
+
+        // Resolve which Type to create from the parent field's allowedTypes.
+        const parentSchema = schema.find((t) => t.__name === pType);
+        const fieldDef = parentSchema?.fields.find((f) => f.__name === parentField);
+        const allowed =
+          fieldDef && (fieldDef.__type === 'reference' || fieldDef.__type === 'references')
+            ? fieldDef.allowedTypes
+            : [];
+        const childType = allowed[0];
+        if (!childType) {
+          setError(`No creatable type for field "${parentField}"`);
+          return;
+        }
+
+        // Create an empty child draft, then link it into the parent field.
+        const created = await adapter.create(childType, {});
+        if (fieldDef?.__type === 'references') {
+          const parent = await adapter.get(pType, parentId, {
+            status: 'draft',
+            includeUnpublished: true,
+          });
+          const current = Array.isArray(parent?.[parentField])
+            ? (parent[parentField] as string[])
+            : [];
+          await adapter.patch(pType, parentId, {
+            [parentField]: [...current, created.__id],
+          });
+        } else {
+          await adapter.patch(pType, parentId, { [parentField]: created.__id });
+        }
+
+        // Open the new entry so the editor can fill it in.
+        setTarget({ id: created.__id, type: childType });
+      } catch (err) {
+        setError((err as Error)?.message ?? 'Failed to create entry');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [adapter, schema]
+  );
+
   const close = useCallback(() => {
     setTarget(null);
     setError(null);
@@ -103,8 +168,8 @@ export function WidgetProvider({
   const isOpen = target !== null || loading || error !== null;
 
   const publicValue = useMemo<WidgetContextValue>(
-    () => ({ inspect: inspectActive, isOpen, openEntry, close }),
-    [inspectActive, isOpen, openEntry, close]
+    () => ({ inspect: inspectActive, isOpen, openEntry, openCreate, close }),
+    [inspectActive, isOpen, openEntry, openCreate, close]
   );
   const internalValue = useMemo<WidgetInternal>(
     () => ({ ...publicValue, target, loading, error }),

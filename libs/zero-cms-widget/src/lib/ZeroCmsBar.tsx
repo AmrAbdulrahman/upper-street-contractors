@@ -11,7 +11,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useZeroCms } from '@usc/zero-cms-app';
+import { useZeroCms, useDraftRegistry, type DraftRef } from '@usc/zero-cms-app';
 
 export interface ZeroCmsBarProps {
   inspect: boolean;
@@ -21,12 +21,10 @@ export interface ZeroCmsBarProps {
   className?: string;
 }
 
-interface DraftRef {
-  type: string;
-  id: string;
-}
-
 const STORAGE_KEY = 'zero-cms-bar-minimized';
+// Matches the strip's `h-9`; the app header + metadata buttons read this var and
+// pin below the bar so the two stack instead of overlapping (issue: bar on top).
+const BAR_OFFSET = '36px';
 
 export function ZeroCmsBar({
   inspect,
@@ -35,7 +33,10 @@ export function ZeroCmsBar({
   className,
 }: ZeroCmsBarProps) {
   const { adapter, schema } = useZeroCms();
-  const [drafts, setDrafts] = useState<DraftRef[] | null>(null);
+  // Which entries currently have drafts is a shared store: the drawer marks them
+  // optimistically on every (auto)save, and this bar re-syncs authoritatively.
+  const { drafts, setDrafts, clearDraft } = useDraftRegistry();
+  const [synced, setSynced] = useState(false);
   const [busy, setBusy] = useState(false);
   const [minimized, setMinimized] = useState(false);
 
@@ -47,33 +48,50 @@ export function ZeroCmsBar({
     localStorage.setItem(STORAGE_KEY, v ? 'true' : 'false');
   };
 
-  const refreshDrafts = useCallback(async () => {
+  // Offset the app header below the sticky bar (cleared while minimized / unmounted).
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--admin-banner-offset', minimized ? '0px' : BAR_OFFSET);
+    return () => {
+      root.style.setProperty('--admin-banner-offset', '0px');
+    };
+  }, [minimized]);
+
+  // Authoritative re-sync of the draft set (self-heals the optimistic registry).
+  const refresh = useCallback(async () => {
     try {
       const found: DraftRef[] = [];
-      // for (const t of schema) {
-      //   const { data } = await adapter.query(t.__name, {
-      //     status: 'draft',
-      //     where: { hasDraft: { eq: true } },
-      //     includeUnpublished: true,
-      //   });
-      //   for (const e of data) found.push({ type: t.__name, id: e.__id });
-      // }
+      // `hasDraft` is a derived filterable field in the query DSL (query-engine).
+      for (const t of schema) {
+        const { data } = await adapter.query(t.__name, {
+          status: 'draft',
+          where: { hasDraft: { eq: true } },
+          includeUnpublished: true,
+        });
+        for (const e of data) found.push({ type: t.__name, id: e.__id });
+      }
       setDrafts(found);
+      setSynced(true);
     } catch {
-      setDrafts(null); // not signed in / no access — hide publish
+      setSynced(false); // not signed in / no access — hide publish
     }
-  }, [adapter, schema]);
+  }, [adapter, schema, setDrafts]);
 
+  // Sync on mount + whenever inspect toggles; between those the drawer keeps the
+  // count live via the shared registry, so publishing reacts without a re-query.
   useEffect(() => {
-    if (inspect) void refreshDrafts();
-  }, [inspect, refreshDrafts]);
+    void refresh();
+  }, [refresh, inspect]);
 
   const publishAll = async () => {
-    if (!drafts?.length) return;
+    if (!drafts.length) return;
     setBusy(true);
     try {
-      for (const d of drafts) await adapter.publish(d.type, d.id);
-      await refreshDrafts();
+      for (const d of drafts) {
+        await adapter.publish(d.type, d.id);
+        clearDraft(d.type, d.id);
+      }
+      await refresh();
       onChange?.();
     } finally {
       setBusy(false);
@@ -115,16 +133,23 @@ export function ZeroCmsBar({
         {inspect ? 'Turn off edit mode' : 'Turn on edit mode'}
       </button>
 
-      {inspect && drafts && drafts.length > 0 ? (
+      {synced ? (
         <button
           type="button"
           onClick={publishAll}
-          disabled={busy}
-          className={`${btn} border-green-400 bg-green-500/20 text-green-100 hover:bg-green-500/30 disabled:opacity-60`}
+          disabled={busy || drafts.length === 0}
+          aria-label="Publish all drafts"
+          className={`${btn} ${
+            drafts.length > 0
+              ? 'border-green-400 bg-green-500/20 text-green-100 hover:bg-green-500/30'
+              : 'border-white/20 text-white/50'
+          } disabled:cursor-default`}
         >
           {busy
             ? 'Publishing…'
-            : `Publish ${drafts.length} draft${drafts.length > 1 ? 's' : ''}`}
+            : drafts.length === 0
+              ? 'Nothing to publish'
+              : `Publish ${drafts.length} item${drafts.length > 1 ? 's' : ''}`}
         </button>
       ) : null}
 
