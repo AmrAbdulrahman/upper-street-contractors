@@ -1,13 +1,12 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
-      "!{projectRoot}/eslint.config.mjs"
+      "!{projectRoot}/eslint.config.mjs",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json"
     ],
     "sharedGlobals": []
   },
@@ -26,27 +25,29 @@
       "options": {
         "targetName": "lint"
       }
+    },
+    {
+      "plugin": "@nx/vitest",
+      "options": {
+        "testTargetName": "test",
+        "ciTargetName": "test-ci",
+        "testMode": "watch"
+      }
     }
   ],
   "targetDefaults": {
-    "codegen": {
+    "@nx/js:tsc": {
       "cache": true,
-      "inputs": [
-        "default",
-        "{projectRoot}/codegen.ts",
-        "{projectRoot}/src/**/*.graphql",
-        "{workspaceRoot}/scripts/fix-graphql-codegen.mjs",
-        "{workspaceRoot}/scripts/wait-for-graphql-server.mjs",
-        { "env": "STRAPI_URL" },
-        { "env": "STRAPI_API_TOKEN" }
-      ],
-      "outputs": ["{projectRoot}/src/generated"],
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node scripts/wait-for-graphql-server.mjs && graphql-codegen --config {projectRoot}/codegen.ts && node scripts/fix-graphql-codegen.mjs",
-        "cwd": "{workspaceRoot}"
-      }
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
-  "analytics": true
+  "analytics": true,
+  "generators": {
+    "@nx/react": {
+      "library": {
+        "unitTestRunner": "vitest"
+      }
+    }
+  }
 }

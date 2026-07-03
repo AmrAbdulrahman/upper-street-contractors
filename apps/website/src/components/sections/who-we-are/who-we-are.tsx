@@ -1,10 +1,10 @@
 import {
-  AddStrapiEntry,
-  StrapiEntry,
-  StrapiEntryField,
-  StrapiRelationEntry,
-} from "@/components/strapi";
-import { RichText } from "@/components/strapi/rich-text";
+  AddZeroCmsEntry,
+  ZeroCmsEntry,
+  ZeroCmsEntryField,
+  ZeroCmsRelationEntry,
+} from "@usc/zero-cms-widget";
+import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Button } from "@/components/ui/button";
 import { ImageContainer } from "@/components/ui/image-container";
 import { WhoWeAreSectionFragment } from "@/generated/graphql";
@@ -18,50 +18,50 @@ export function WhoWeAreSection({ data }: WhoWeAreSectionProps) {
   const buttonItems = buttons?.filter(Boolean) ?? [];
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <section className="bg-white">
         <div className="mx-auto grid max-w-container gap-10 px-6 py-[88px] lg:grid-cols-2 lg:items-center">
           <div className="min-w-0 flex flex-col">
             {overline ? (
-              <StrapiEntryField field="overline">
+              <ZeroCmsEntryField field="overline">
                 <p className="mb-2.5 text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
                   {overline}
                 </p>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {title ? (
-              <StrapiEntryField field="title">
+              <ZeroCmsEntryField field="title">
                 <h2 className="text-[2rem] leading-tight text-dark">{title}</h2>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {body ? (
-              <StrapiEntryField field="body">
-                <RichText
+              <ZeroCmsEntryField field="body">
+                <RichTextViewer
                   content={body}
                   variant="who-we-are-body"
                   className="mt-4 flex flex-col gap-5"
                 />
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {buttonItems.length ? (
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 {buttonItems.map((button) =>
                   button ? (
-                    <StrapiEntry key={button.documentId} entry={button}>
+                    <ZeroCmsEntry key={button.id} entry={button}>
                       <Button data={button} />
-                    </StrapiEntry>
+                    </ZeroCmsEntry>
                   ) : null,
                 )}
 
-                <AddStrapiEntry field="buttons" />
+                <AddZeroCmsEntry field="buttons" />
               </div>
             ) : null}
           </div>
 
-          <StrapiRelationEntry entry={imageContainer} field="imageContainer">
+          <ZeroCmsRelationEntry entry={imageContainer} field="imageContainer">
             <div className="min-w-0">
               <ImageContainer
                 data={imageContainer}
@@ -69,9 +69,9 @@ export function WhoWeAreSection({ data }: WhoWeAreSectionProps) {
                 placeholderLabel="Team photo placeholder"
               />
             </div>
-          </StrapiRelationEntry>
+          </ZeroCmsRelationEntry>
         </div>
       </section>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

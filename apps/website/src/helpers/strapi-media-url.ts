@@ -1,14 +1,8 @@
-const DEFAULT_STRAPI_URL = "http://localhost:1337";
-
-function getStrapiBaseUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_STRAPI_URL ??
-    process.env.STRAPI_URL ??
-    DEFAULT_STRAPI_URL
-  ).replace(/\/$/, "");
-}
-
-/** Strapi often returns relative `/uploads/...` paths; Next Image needs absolute URLs. */
+/**
+ * Resolve a zero-cms media URL for use in <Image>. zero-cms serves media from a
+ * site-relative route (`/api/cms/media/<id>`), so already-rooted (`/…`) and
+ * absolute (`http(s)://…`) URLs pass through unchanged.
+ */
 export function resolveStrapiMediaUrl(
   url: string | null | undefined,
 ): string | undefined {
@@ -16,10 +10,9 @@ export function resolveStrapiMediaUrl(
     return undefined;
   }
 
-  if (/^https?:\/\//i.test(url)) {
+  if (/^https?:\/\//i.test(url) || url.startsWith("/")) {
     return url;
   }
 
-  const baseUrl = getStrapiBaseUrl();
-  return `${baseUrl}${url.startsWith("/") ? url : `/${url}`}`;
+  return `/${url}`;
 }

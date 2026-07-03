@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Serif_Display, Geist, Geist_Mono } from "next/font/google";
-import { ColdStartGateShell } from "@/components/cold-start";
-import { LoginGateShell } from "@/components/auth";
-import { SiteChrome } from "@/components/layout/site-chrome";
 import { buildBaseMetadata } from "@/helpers";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import "./globals.css";
@@ -48,11 +45,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${dmSerifDisplay.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-surface text-foreground">
-        <ColdStartGateShell>
-          <LoginGateShell>
-            <SiteChrome>{children}</SiteChrome>
-          </LoginGateShell>
-        </ColdStartGateShell>
+        {children}
       </body>
     </html>
   );

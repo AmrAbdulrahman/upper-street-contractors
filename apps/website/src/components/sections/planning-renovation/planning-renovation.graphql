@@ -1,5 +1,5 @@
 fragment PlanningRenovationSection on PlanningRenovationSection {
-  documentId
+  id
   overline
   title
   description

@@ -13,7 +13,15 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true
+    "incremental": true,
+    "paths": {
+      "@usc/zero-cms-core": ["./libs/zero-cms-core/src/index.ts"],
+      "@usc/zero-cms-core/node": ["./libs/zero-cms-core/src/node.ts"],
+      "@usc/zero-cms-app": ["./libs/zero-cms-app/src/index.ts"],
+      "@usc/zero-cms-widget": ["./libs/zero-cms-widget/src/index.ts"],
+      "@usc/zero-cms-graphql": ["./libs/zero-cms-graphql/src/index.ts"],
+      "@usc/zero-cms-blocks": ["./libs/zero-cms-blocks/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

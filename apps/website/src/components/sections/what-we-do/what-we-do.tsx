@@ -1,5 +1,5 @@
-import { AddStrapiEntry, StrapiEntry, StrapiEntryField } from "@/components/strapi";
-import { RichText } from "@/components/strapi/rich-text";
+import { AddZeroCmsEntry, ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Banner } from "@/components/ui/banner";
 import { WorkCard } from "@/components/ui/work-card";
 import { WhatWeDoSectionFragment } from "@/generated/graphql";
@@ -13,48 +13,48 @@ export function WhatWeDoSection({ data }: WhatWeDoSectionProps) {
   const workCardItems = workCards?.filter(Boolean) ?? [];
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <section className="bg-surface">
         <div className="mx-auto max-w-container px-6 py-[88px]">
           <div className="mx-auto  text-center">
             {overline ? (
-              <StrapiEntryField field="overline">
+              <ZeroCmsEntryField field="overline">
                 <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
                   {overline}
                 </p>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {title ? (
-              <StrapiEntryField field="title">
+              <ZeroCmsEntryField field="title">
                 <h2 className="mt-2.5 text-[2rem] leading-tight text-dark">
                   {title}
                 </h2>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {body ? (
-              <StrapiEntryField field="body" className="mt-4">
-                <RichText
+              <ZeroCmsEntryField field="body" className="mt-4">
+                <RichTextViewer
                   content={body}
                   variant="what-we-do-body"
                   className="flex flex-col gap-4 mt-2.5"
                 />
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
           </div>
 
           {workCardItems.length > 0 ? (
             <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {workCardItems.map((card) =>
-                card ? <WorkCard key={card.documentId} data={card} /> : null,
+                card ? <WorkCard key={card.id} data={card} /> : null,
               )}
 
-              <AddStrapiEntry field="workCards" />
+              <AddZeroCmsEntry field="workCards" />
             </div>
           ) : null}
 
-          {/* Banner self-wraps in its own StrapiEntry → opens the banner entry. */}
+          {/* Banner self-wraps in its own ZeroCmsEntry → opens the banner entry. */}
           {banner ? (
             <div className="mt-10">
               <Banner data={banner} />
@@ -62,6 +62,6 @@ export function WhatWeDoSection({ data }: WhatWeDoSectionProps) {
           ) : null}
         </div>
       </section>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

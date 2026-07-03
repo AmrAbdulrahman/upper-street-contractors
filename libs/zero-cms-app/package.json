@@ -1,0 +1,6 @@
+{
+  "name": "@usc/zero-cms-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module"
+}

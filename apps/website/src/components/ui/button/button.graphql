@@ -1,5 +1,5 @@
 fragment Button on Button {
-  documentId
+  id
   action
   color
   href

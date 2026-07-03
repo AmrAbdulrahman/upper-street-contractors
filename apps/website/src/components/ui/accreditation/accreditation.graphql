@@ -1,5 +1,5 @@
 fragment Accreditation on Accreditation {
-  documentId
+  id
   accreditationTitle
   icon {
     ...Icon

@@ -1,8 +1,5 @@
 "use client";
 
-import { useStrapiInspection } from "@/components/strapi";
-import { buildStrapiEntryUrl } from "@/helpers/strapi-entry-url";
-
 const PAGE_META_TOOLTIP = "Edit this page's meta data";
 const SITE_META_TOOLTIP = "Edit global site meta config";
 
@@ -19,31 +16,31 @@ export function MetadataInspectButton({
   strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337",
   placement = "floating",
 }: MetadataInspectButtonProps) {
-  const { enabled } = useStrapiInspection();
+  // const { enabled } = useStrapiInspection();
 
-  if (!enabled) {
-    return null;
-  }
+  // if (!enabled) {
+  //   return null;
+  // }
 
   if (!metaId && !siteMetaConfigId) {
     return null;
   }
 
-  const pageMetaUrl = metaId
-    ? buildStrapiEntryUrl({
-        strapiUrl,
-        documentId: metaId,
-        typename: "MetaData",
-      })
-    : null;
+  // const pageMetaUrl = metaId
+  //   ? buildStrapiEntryUrl({
+  //       strapiUrl,
+  //       documentId: metaId,
+  //       typename: "MetaData",
+  //     })
+  //   : null;
 
-  const siteMetaUrl = siteMetaConfigId
-    ? buildStrapiEntryUrl({
-        strapiUrl,
-        documentId: siteMetaConfigId,
-        typename: "SiteMetaConfig",
-      })
-    : null;
+  // const siteMetaUrl = siteMetaConfigId
+  //   ? buildStrapiEntryUrl({
+  //       strapiUrl,
+  //       documentId: siteMetaConfigId,
+  //       typename: "SiteMetaConfig",
+  //     })
+  //   : null;
 
   const floatingButtonClassName =
     "group fixed z-60 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-2 border-dashed border-gold bg-transparent shadow-[0_8px_28px_rgba(27,38,56,0.38),0_0_20px_rgba(184,134,58,0.7),0_0_40px_rgba(184,134,58,0.3)] transition-[border-color,box-shadow] hover:border-gold-mid hover:shadow-[0_10px_36px_rgba(27,38,56,0.45),0_0_28px_rgba(184,134,58,0.85),0_0_56px_rgba(184,134,58,0.4)]";
@@ -57,7 +54,7 @@ export function MetadataInspectButton({
   if (placement === "banner") {
     return (
       <>
-        {siteMetaUrl ? (
+        {/* {siteMetaUrl ? (
           <a
             href={siteMetaUrl}
             target="_blank"
@@ -77,14 +74,14 @@ export function MetadataInspectButton({
           >
             Page meta
           </a>
-        ) : null}
+        ) : null} */}
       </>
     );
   }
 
   return (
     <div className="fixed left-4 top-[calc(var(--admin-banner-offset,0px)+1rem)] z-60 flex flex-col gap-2">
-      {pageMetaUrl ? (
+      {/* {pageMetaUrl ? (
         <a
           href={pageMetaUrl}
           target="_blank"
@@ -100,9 +97,9 @@ export function MetadataInspectButton({
             {PAGE_META_TOOLTIP}
           </span>
         </a>
-      ) : null}
+      ) : null} */}
 
-      {siteMetaUrl ? (
+      {/* {siteMetaUrl ? (
         <a
           href={siteMetaUrl}
           target="_blank"
@@ -118,7 +115,8 @@ export function MetadataInspectButton({
             {SITE_META_TOOLTIP}
           </span>
         </a>
-      ) : null}
+      ) : null} */}
+      TODO
     </div>
   );
 }

@@ -73,7 +73,7 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
         {filteredProjects.length > 0 ? (
           <div className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
             {filteredProjects.map((project) => (
-              <ProjectCard key={project.documentId} data={project} />
+              <ProjectCard key={project.id} data={project} />
             ))}
           </div>
         ) : (

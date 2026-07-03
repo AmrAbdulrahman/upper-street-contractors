@@ -1,0 +1,9 @@
+{
+  "name": "zero-cms-widget",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/zero-cms-widget/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project zero-cms-widget --web",
+  "targets": {}
+}

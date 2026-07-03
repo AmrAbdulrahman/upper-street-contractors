@@ -1,5 +1,5 @@
 fragment Badge on Badge {
-  documentId
+  id
   text
   variant
   href

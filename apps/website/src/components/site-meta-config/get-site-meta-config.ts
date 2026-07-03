@@ -1,10 +1,9 @@
 import { cache } from "react";
 import {
   GetSiteMetaConfigDocument,
-  type GetSiteMetaConfigQuery,
   type SiteMetaConfigFragment,
 } from "@/generated/graphql";
-import { strapiRead } from "@/lib/strapi-read";
+import { query } from "@/lib/cms/query";
 
 async function fetchSiteMetaConfig(): Promise<SiteMetaConfigFragment | null> {
   try {
@@ -12,7 +11,7 @@ async function fetchSiteMetaConfig(): Promise<SiteMetaConfigFragment | null> {
     // even in inspect mode (safe: it's a non-user-scoped singleton) so it costs
     // at most one CMS call per 10 min across all renders. Flushed on publish via
     // revalidateTag('strapi').
-    const data = await strapiRead<GetSiteMetaConfigQuery>(
+    const data = await query(
       GetSiteMetaConfigDocument,
       undefined,
       { revalidate: 600, cacheInInspect: true },

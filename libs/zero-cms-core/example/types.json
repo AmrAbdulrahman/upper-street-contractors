@@ -1,0 +1,24 @@
+[
+  {
+    "__name": "author",
+    "label": "Author",
+    "fields": [
+      { "__name": "name", "__type": "text", "required": true },
+      { "__name": "avatar", "__type": "asset", "accept": "image" }
+    ]
+  },
+  {
+    "__name": "project",
+    "label": "Project",
+    "fields": [
+      { "__name": "title", "__type": "text", "required": true },
+      { "__name": "summary", "__type": "longtext" },
+      { "__name": "body", "__type": "richtext" },
+      { "__name": "featured", "__type": "boolean" },
+      { "__name": "hero", "__type": "asset", "accept": "image" },
+      { "__name": "category", "__type": "lookup", "options": ["Bathroom", "Loft", "Refurbishment"] },
+      { "__name": "author", "__type": "reference", "allowedTypes": ["author"] },
+      { "__name": "related", "__type": "references", "allowedTypes": ["project"] }
+    ]
+  }
+]

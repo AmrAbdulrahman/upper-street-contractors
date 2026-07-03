@@ -1,5 +1,5 @@
 fragment BulletList on BulletList {
-  documentId
+  id
   text
   listIcon {
     ...Icon

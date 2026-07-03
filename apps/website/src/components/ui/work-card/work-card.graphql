@@ -1,5 +1,5 @@
 fragment WorkCard on WorkCard {
-  documentId
+  id
   emoji
   title
   body

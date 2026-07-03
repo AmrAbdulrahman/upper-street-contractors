@@ -93,7 +93,7 @@ tsconfig.base.json          # Shared TypeScript config
 7. **Flatten refs** — add the new relation to `apps/website/src/helpers/flatten-section-refs.ts`.
 8. **Codegen** — run `npm run codegen` (Strapi must be running with a valid API token).
 
-Wrap editable Strapi fields with `StrapiEntry` / `StrapiEntryField` from `@/components/strapi` when inspection overlays are needed. Use `RichText` from `@/components/strapi/rich-text` for blocks fields.
+Wrap editable Strapi fields with `StrapiEntry` / `StrapiEntryField` from `@/components/strapi` when inspection overlays are needed. Use `RichText` from `@/components/ui/rich-text-viewer` for blocks fields.
 
 ## Apollo usage
 

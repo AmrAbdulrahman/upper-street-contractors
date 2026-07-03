@@ -1,0 +1,17 @@
+{
+  "__name": "accreditation",
+  "label": "Accreditation",
+  "fields": [
+    {
+      "__name": "accreditationTitle",
+      "__type": "text"
+    },
+    {
+      "__name": "icon",
+      "__type": "reference",
+      "allowedTypes": [
+        "icon"
+      ]
+    }
+  ]
+}

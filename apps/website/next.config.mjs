@@ -8,7 +8,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingRoot: path.join(__dirname, "../../"),
-  // ENABLE_PREVIEW toggles draft content + inspection overlays (see preview-utils.ts).
+  // NEXT_PUBLIC_APP_ENV=preview enables draft content + the zero-cms editor bar
+  // (see lib/app-env.ts).
   // Disable streaming metadata so meta tags always render in <head>
   // (streaming injects them into <body> for non-bot UAs -> fails Lighthouse SEO)
   htmlLimitedBots: /.*/,

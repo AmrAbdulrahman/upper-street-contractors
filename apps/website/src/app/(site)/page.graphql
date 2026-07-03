@@ -1,0 +1,45 @@
+query GetHomePage($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
+  pages(
+    filters: { key: { eq: "home" } }
+    pagination: { limit: 1 }
+    status: $status
+    includeUnpublished: $includeUnpublished
+  ) {
+    id
+    title
+    description
+    meta {
+      ...PageMetadata
+    }
+    sections {
+      __typename
+      ... on HomeHeaderSection {
+        ...HomeHeroSection
+      }
+      ... on WhoWeAreSection {
+        ...WhoWeAreSection
+      }
+      ... on AccreditationList {
+        ...AccreditationList
+      }
+      ... on WhatWeDoSection {
+        ...WhatWeDoSection
+      }
+      ... on WhyChooseUsSection {
+        ...WhyChooseUsSection
+      }
+      ... on HowItWorksSection {
+        ...HowItWorksSection
+      }
+      ... on RecentWorkSection {
+        ...RecentWorkSection
+      }
+      ... on ClientReviewSection {
+        ...ClientReviewSection
+      }
+      ... on PlanningRenovationSection {
+        ...PlanningRenovationSection
+      }
+    }
+  }
+}

@@ -36,7 +36,7 @@ export function ProjectBanner({
       <div className={`relative overflow-hidden ${heightClassName} ${roundedClass}`}>
         <Image
           src={bannerUrl}
-          alt={banner.alternativeText ?? "Project photo"}
+          alt={banner.alt ?? "Project photo"}
           width={banner.width ?? 800}
           height={banner.height ?? 560}
           className="h-full w-full object-cover"

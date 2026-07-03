@@ -1,4 +1,4 @@
-import { AddStrapiEntry, StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import { AddZeroCmsEntry, ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import { BulletList } from "@/components/ui/bullet-list";
 import { ProfileCard } from "@/components/ui/profile-card";
 import { WhyChooseUsSectionFragment } from "@/generated/graphql";
@@ -20,16 +20,16 @@ export function WhyChooseUsSection({ data }: WhyChooseUsSectionProps) {
   const bulletItems = listOfPoints?.filter(Boolean) ?? [];
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <section className="bg-white">
         <div className="mx-auto grid max-w-container gap-12 px-6 py-[88px] lg:grid-cols-2 lg:items-start lg:gap-x-[72px] lg:gap-y-12">
           <div className="min-w-0">
             {overline ? (
-              <StrapiEntryField field="overline">
+              <ZeroCmsEntryField field="overline">
                 <p className="mb-2.5 text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
                   {overline}
                 </p>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             <h2 className="text-[clamp(26px,3.5vw,42px)] leading-tight text-dark">
@@ -39,9 +39,9 @@ export function WhyChooseUsSection({ data }: WhyChooseUsSectionProps) {
             {bulletItems.length > 0 ? (
               <ul className="mt-6 flex flex-col gap-3">
                 {bulletItems.map((item) =>
-                  item ? <BulletList key={item.documentId} data={item} /> : null,
+                  item ? <BulletList key={item.id} data={item} /> : null,
                 )}
-                <AddStrapiEntry field="listOfPoints" />
+                <AddZeroCmsEntry field="listOfPoints" />
               </ul>
             ) : null}
           </div>
@@ -58,6 +58,6 @@ export function WhyChooseUsSection({ data }: WhyChooseUsSectionProps) {
           </div>
         </div>
       </section>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

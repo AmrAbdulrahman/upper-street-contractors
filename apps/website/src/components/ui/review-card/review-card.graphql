@@ -1,9 +1,9 @@
 fragment ReviewCard on ReviewCard {
-  documentId
+  id
   score
   clientReview
   clientInfo {
-    documentId
+    id
     name
     reviewSource
     location

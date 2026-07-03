@@ -1,5 +1,5 @@
-import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
-import { RichText } from "@/components/strapi/rich-text";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Button } from "@/components/ui/button";
 import { BannerFragment } from "@/generated/graphql";
 
@@ -90,59 +90,59 @@ export function Banner({ data, className = "" }: BannerProps) {
     <div className="min-w-0 flex flex-col gap-1">
       <div className="flex items-center gap-2.5">
         {emoji ? (
-          <StrapiEntryField field="emoji" as="span">
+          <ZeroCmsEntryField field="emoji" as="span">
             <span aria-hidden className="shrink-0 text-lg leading-none">
               {emoji}
             </span>
-          </StrapiEntryField>
+          </ZeroCmsEntryField>
         ) : null}
 
         {title ? (
-          <StrapiEntryField field="title" as="span">
+          <ZeroCmsEntryField field="title" as="span">
             <span className={titleClasses[bannerVariant]}>{title}</span>
-          </StrapiEntryField>
+          </ZeroCmsEntryField>
         ) : null}
       </div>
 
       {body ? (
-        <StrapiEntryField field="body" className="min-w-0">
-          <RichText
+        <ZeroCmsEntryField field="body" className="min-w-0">
+          <RichTextViewer
             content={body}
             variant={richTextVariant}
             className={hasButton ? "max-w-2xl" : undefined}
           />
-        </StrapiEntryField>
+        </ZeroCmsEntryField>
       ) : null}
     </div>
   ) : (
     <div className="flex min-w-0 items-center gap-2.5">
       {emoji ? (
-        <StrapiEntryField field="emoji" as="span">
+        <ZeroCmsEntryField field="emoji" as="span">
           <span aria-hidden className="shrink-0 text-lg leading-none">
             {emoji}
           </span>
-        </StrapiEntryField>
+        </ZeroCmsEntryField>
       ) : null}
 
       {body ? (
-        <StrapiEntryField field="body" className="min-w-0">
-          <RichText content={body} variant={richTextVariant} />
-        </StrapiEntryField>
+        <ZeroCmsEntryField field="body" className="min-w-0">
+          <RichTextViewer content={body} variant={richTextVariant} />
+        </ZeroCmsEntryField>
       ) : null}
     </div>
   );
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <div className={containerClasses}>
         {contentBlock}
 
         {hasButton && button ? (
-          <StrapiEntry entry={button}>
+          <ZeroCmsEntry entry={button}>
             <Button data={button} className="w-full shrink-0 md:w-auto" />
-          </StrapiEntry>
+          </ZeroCmsEntry>
         ) : null}
       </div>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

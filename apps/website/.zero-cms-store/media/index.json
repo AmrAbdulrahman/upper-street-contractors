@@ -1,0 +1,66 @@
+[
+  {
+    "id": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
+    "filename": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9__photo-1656338997878-279d71d48f6e.avif",
+    "mime": "image/avif",
+    "size": 32526,
+    "kind": "image",
+    "alternativeText": "An image of a man",
+    "createdAt": "2026-06-28T21:45:21.327Z"
+  },
+  {
+    "id": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+    "filename": "94853c3c-fbed-4c43-aa71-acbcaddfa528__Builders Team Blueprints.jpg",
+    "mime": "image/jpeg",
+    "size": 176720,
+    "kind": "image",
+    "width": 1024,
+    "height": 1024,
+    "alternativeText": "Builders Team Blueprints",
+    "createdAt": "2026-06-28T21:45:21.944Z"
+  },
+  {
+    "id": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+    "filename": "9ef64507-6d15-4cdd-8acd-67602a0cd5de__nano-banana-2-kn7fr7d7w68y0q6jwrn2jmfg6188kbqt.png",
+    "mime": "image/png",
+    "size": 565396,
+    "kind": "image",
+    "width": 1024,
+    "height": 1024,
+    "alternativeText": "Home Renovation",
+    "createdAt": "2026-06-28T21:45:22.766Z"
+  },
+  {
+    "id": "5302973b-899b-4cf8-9d83-9214ac26fe45",
+    "filename": "5302973b-899b-4cf8-9d83-9214ac26fe45__nano-banana-2-kn7dh8t5408qxw0pxx0by6akmx88jen0.png",
+    "mime": "image/png",
+    "size": 539131,
+    "kind": "image",
+    "width": 1024,
+    "height": 1024,
+    "alternativeText": "Open-Plan Kitchen Extension",
+    "createdAt": "2026-06-28T21:45:23.295Z"
+  },
+  {
+    "id": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde",
+    "filename": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde__nano-banana-2-kn7ff6epd2paqs1qjm7561be6988k7v7.png",
+    "mime": "image/png",
+    "size": 572308,
+    "kind": "image",
+    "width": 1024,
+    "height": 1024,
+    "alternativeText": "Victorian Terrace Bathroom",
+    "createdAt": "2026-06-28T21:45:23.946Z"
+  },
+  {
+    "id": "360afa34-c056-4322-8d43-241fa78e067e",
+    "filename": "360afa34-c056-4322-8d43-241fa78e067e__img.png",
+    "mime": "image/png",
+    "size": 2482,
+    "kind": "image",
+    "width": 202,
+    "height": 162,
+    "alternativeText": "Company Default Image",
+    "createdAt": "2026-06-28T21:45:24.053Z"
+  }
+]

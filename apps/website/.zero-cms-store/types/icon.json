@@ -1,0 +1,10 @@
+{
+  "__name": "icon",
+  "label": "icon",
+  "fields": [
+    {
+      "__name": "code",
+      "__type": "text"
+    }
+  ]
+}

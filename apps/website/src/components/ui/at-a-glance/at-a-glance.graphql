@@ -1,0 +1,15 @@
+query GetAtAGlance($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
+  atAglances(status: $status, includeUnpublished: $includeUnpublished) {
+    id
+    type
+    title
+    footer
+    cards {
+      id
+      type
+      quantity
+      unit
+      label
+    }
+  }
+}

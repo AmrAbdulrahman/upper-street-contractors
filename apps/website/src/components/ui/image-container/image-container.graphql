@@ -1,12 +1,12 @@
 fragment ImageContainer on ImageContainer {
-  documentId
+  id
   height
   width
   imageRadius
   imgDescription
   imageFile {
     url
-    alternativeText
+    alt
     width
     height
   }

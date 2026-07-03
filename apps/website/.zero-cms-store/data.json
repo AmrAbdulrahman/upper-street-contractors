@@ -1,0 +1,1368 @@
+[
+  {
+    "__id": "60dd3c22-7c66-4c3a-ae97-c32497b45745",
+    "__type": "accreditation-list",
+    "__status": "published",
+    "values": {
+      "title": "accreditationListSection",
+      "list": [
+        "70d36622-2e54-4bb3-8db4-0efcf3db2d3e",
+        "06d95381-4cec-4f23-a9e0-a016564d9d7d",
+        "e98e83dd-cabd-4806-bc1d-9d1f1d49c222",
+        "bf3e5f06-a1a0-4640-9095-430dc673ba5f"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e98e83dd-cabd-4806-bc1d-9d1f1d49c222",
+    "__type": "accreditation",
+    "__status": "published",
+    "values": {
+      "accreditationTitle": "FMB Member",
+      "icon": "c6a3a0da-fcfe-4ed7-88ba-337d84460eb4"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "06d95381-4cec-4f23-a9e0-a016564d9d7d",
+    "__type": "accreditation",
+    "__status": "published",
+    "values": {
+      "accreditationTitle": "12-month workmanship guarantee",
+      "icon": "be4f40dd-b2e8-4c61-9d95-930399676c23"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "70d36622-2e54-4bb3-8db4-0efcf3db2d3e",
+    "__type": "accreditation",
+    "__status": "published",
+    "values": {
+      "accreditationTitle": "Fully insured",
+      "icon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "bf3e5f06-a1a0-4640-9095-430dc673ba5f",
+    "__type": "accreditation",
+    "__status": "published",
+    "values": {
+      "accreditationTitle": "TrustMark Registered",
+      "icon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f32b4372-de3a-4588-9d63-729158258202",
+    "__type": "at-aglance-card",
+    "__status": "published",
+    "values": {
+      "quantity": 470,
+      "unit": "+",
+      "label": "Customer reviews"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9f599178-2251-4573-856a-6fd358e4aaf4",
+    "__type": "at-aglance-card",
+    "__status": "published",
+    "values": {
+      "quantity": 10,
+      "unit": "yrs",
+      "label": "Serving Islington"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "53db565c-dd68-42cd-b068-20228eb22af2",
+    "__type": "at-aglance-card",
+    "__status": "published",
+    "values": {
+      "quantity": 48,
+      "unit": "hrs",
+      "label": "Quote turnaround"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "bf6c3f00-4ec1-4815-9f75-1346e3720983",
+    "__type": "at-aglance-card",
+    "__status": "published",
+    "values": {
+      "quantity": 8,
+      "unit": "K+",
+      "label": "Bathroom from"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "edff35d8-2b8e-4d5b-836f-550e37a89f57",
+    "__type": "at-aglance",
+    "__status": "published",
+    "values": {
+      "title": "At a glance",
+      "cards": [
+        "bf6c3f00-4ec1-4815-9f75-1346e3720983",
+        "f32b4372-de3a-4588-9d63-729158258202",
+        "9f599178-2251-4573-856a-6fd358e4aaf4",
+        "53db565c-dd68-42cd-b068-20228eb22af2"
+      ],
+      "footer": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "bold": true,
+              "text": "13-month workmanship guarantee",
+              "type": "text"
+            },
+            {
+              "text": " on all renovation projects k22",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "61818729-1eb7-4d78-a7f4-cd0237366602",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "⏱ 5 weeks",
+      "variant": "light",
+      "borderRadius": 8
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b2b283a6-1f67-4981-8e84-fc18caee49c1",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "🚿 Bathroom",
+      "variant": "light",
+      "borderRadius": 8
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f7edc6a7-84f1-4b03-9473-49781b5fa700",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "⏱ 3 Weeks",
+      "variant": "light",
+      "borderRadius": 8
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f1080a5c-8439-4b91-af0f-c2f02367c929",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "📍 Highbury, N5",
+      "variant": "light",
+      "href": "https://maps.app.goo.gl/t6yDTJFtGvzBVUFV8",
+      "borderRadius": 8
+    },
+    "__draft": null
+  },
+  {
+    "__id": "2d8a1d42-b22f-4adc-aaef-a3cc91f4b874",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "🍳 Kitchen",
+      "variant": "light",
+      "borderRadius": 8
+    },
+    "__draft": null
+  },
+  {
+    "__id": "23574ca5-f3f5-415a-983b-d1c8f5ff3cf7",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "Refurbishment",
+      "variant": "dark",
+      "borderRadius": 999
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e0593770-fad1-47fe-b1c3-47af9b6ed069",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "Bathroom",
+      "variant": "dark",
+      "borderRadius": 999
+    },
+    "__draft": null
+  },
+  {
+    "__id": "26a4bfbe-3ebf-4f60-bd90-be569352ade4",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "⏱10 Weeks",
+      "variant": "light",
+      "borderRadius": 8
+    },
+    "__draft": null
+  },
+  {
+    "__id": "2eefb162-516a-4606-bfc4-01cfd5f446d7",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "📍 Barnsbury, N1",
+      "variant": "light",
+      "href": "https://maps.app.goo.gl/t6yDTJFtGvzBVUFV8",
+      "borderRadius": 8
+    },
+    "__draft": null
+  },
+  {
+    "__id": "edec5b58-2de1-41c3-9d54-dc6bf4179e69",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "📍Canonbury, N1",
+      "variant": "light",
+      "href": "https://maps.app.goo.gl/t6yDTJFtGvzBVUFV8",
+      "borderRadius": 8
+    },
+    "__draft": null
+  },
+  {
+    "__id": "67eb3331-952c-4f59-bfff-4217efc27542",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "🏠 Full Home",
+      "variant": "light",
+      "borderRadius": 8
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7d24daa1-7c34-4ece-9deb-4377da119ca0",
+    "__type": "badge",
+    "__status": "published",
+    "values": {
+      "text": "Kitchen",
+      "variant": "dark",
+      "borderRadius": 999
+    },
+    "__draft": null
+  },
+  {
+    "__id": "846f27ad-b20c-4018-843d-ee6aed2248c3",
+    "__type": "banner",
+    "__status": "published",
+    "values": {
+      "variant": "note",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "We aim to return detailed quotes within 48 hours of the visit where possible (scope dependent).",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "hoverable": true
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d3957164-3ac2-4267-ab6b-ae5728b85f77",
+    "__type": "banner",
+    "__status": "published",
+    "values": {
+      "variant": "light",
+      "emoji": "🛡️",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "bold": true,
+              "text": "12-month workmanship guarantee",
+              "type": "text"
+            },
+            {
+              "text": " on all renovation work ",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "hoverable": true
+    },
+    "__draft": null
+  },
+  {
+    "__id": "a3c764be-8a64-42c1-aa02-1f583035b191",
+    "__type": "banner",
+    "__status": "published",
+    "values": {
+      "variant": "transparent",
+      "emoji": "🔧",
+      "title": "Repairs & Smaller Works",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "code": true,
+              "text": " Local repairs, maintenance and smaller improvements—bookable by WhatsApp with photos/video.",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "button": "ac631586-85e7-4134-a4c7-772daad632b0",
+      "hoverable": true
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f0d6df57-74d3-421a-a9c0-8444230396b8",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "In-house trades, plus long-term specialist partners when required",
+      "listIcon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "2c2a6ee7-b853-4099-8307-f7974d028eb9",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "12-month workmanship guarantee on all projects",
+      "listIcon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d0e6d3a1-b4ef-4ea6-bc60-54b93c8471b4",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "WhatsApp-friendly communication—photos and videos welcome",
+      "listIcon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e9b97ab2-10dd-412e-bc23-06e70d010741",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "Local to Islington—realistic scheduling and response times",
+      "listIcon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "16873a6a-93f3-4704-b32e-799efdb50305",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "Clear, broken-down quotations—no vague one-liners",
+      "listIcon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "be56c9d9-2499-40b9-b7c9-59f22ad2a637",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "Respectful, tidy work in occupied homes",
+      "listIcon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "13f9dbe5-11d3-4adc-9dd2-d6624b4014dc",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "Trade purchasing support when we supply materials",
+      "listIcon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8d6cb5c8-1bfb-4b58-a7a9-1dc586b7736e",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "Owner-led project management with an engineering-led approach",
+      "listIcon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8ba006d9-06ec-4204-a4c0-74bee0999002",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "WhatsApp Us",
+      "variant": "contained",
+      "color": "green",
+      "borderRadius": 8,
+      "icon": "9bc6db03-9fcb-41c6-834c-c0759248bafb",
+      "iconPosition": "start",
+      "action": "whatsapp",
+      "href": "https://wa.me/442074245466"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "13896b20-66a0-4e52-abf9-fac777a8d37d",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Request a Quote",
+      "variant": "outlined",
+      "color": "white",
+      "borderRadius": 8,
+      "iconPosition": "start",
+      "href": "/contact"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ac631586-85e7-4134-a4c7-772daad632b0",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Repairs & Smaller Works",
+      "variant": "outlined",
+      "color": "dark_blue",
+      "borderRadius": 8,
+      "icon": "5404c812-e3ca-4ba7-b42f-e1b6bc0a8123",
+      "iconPosition": "end",
+      "href": "/repairs-and-smaller-works"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c6363c76-0fd6-4912-8448-d59a1fbd2de8",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Meet The Team",
+      "variant": "contained",
+      "color": "dark_blue",
+      "borderRadius": 8,
+      "icon": "5404c812-e3ca-4ba7-b42f-e1b6bc0a8123",
+      "iconPosition": "end",
+      "href": "/about"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "89600458-c302-4a4f-b372-fd11a5d40589",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Send Photos on WhatsApp",
+      "variant": "contained",
+      "color": "green",
+      "borderRadius": 8,
+      "icon": "9bc6db03-9fcb-41c6-834c-c0759248bafb",
+      "action": "whatsapp"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "eecf6c53-c3dd-4c90-b52d-c739fd77337a",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "WhatsApp Us",
+      "variant": "contained",
+      "color": "green",
+      "iconPosition": "start",
+      "action": "whatsapp",
+      "href": "https://wa.me/442074245466"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6480d171-f925-4877-8594-96c3ac797fe3",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Request a Quote",
+      "variant": "outlined",
+      "color": "white",
+      "iconPosition": "start",
+      "href": "/contact"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ad064f66-1d79-4bd9-903f-f609492e0d10",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Read Reviews on Google",
+      "variant": "outlined",
+      "color": "dark_blue",
+      "borderRadius": 8,
+      "href": "https://www.google.com/maps/place/Upper+Street+Contractors+(Upper+Street+Handyman+Ltd.)/@51.5434014,-0.1147328,797m/data=!3m2!1e3!5s0x48761b135ba10b23:0xc9458b5134ba384d!4m8!3m7!1s0x48761b65b0e1cc77:0x7a4e1c6848fe92af!8m2!3d51.5434014!4d-0.1147328!9m1!1b1!16s%2Fg%2F11c5t084v4?entry=ttu"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6fe2d143-c089-49b6-b3ce-fbf49f6d50c4",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Read Reviews on Trustpilot",
+      "variant": "outlined",
+      "color": "dark_blue",
+      "borderRadius": 8,
+      "href": "https://uk.trustpilot.com/review/upperstreet.contractors"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "80685b11-9789-45f6-8d47-68a3662971d0",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Request a Free Quote",
+      "variant": "outlined",
+      "color": "white",
+      "borderRadius": 8,
+      "action": "contact_form"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "40515ecb-7171-483e-87d1-379329c3dc2b",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "View All Projects",
+      "variant": "contained",
+      "color": "dark_blue",
+      "borderRadius": 8,
+      "icon": "5404c812-e3ca-4ba7-b42f-e1b6bc0a8123",
+      "iconPosition": "end",
+      "href": "/projects"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e934335e-9c9d-4467-b0dd-4b2732e61586",
+    "__type": "client-review-info",
+    "__status": "published",
+    "values": {
+      "name": "James T.",
+      "reviewSource": "Google Reviews",
+      "location": "Highbury",
+      "image": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
+      "reviewLink": "https://maps.app.goo.gl/hm8RRYMapo2ufL618"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e676c2c7-8815-4612-b463-f5ecd1e8cea4",
+    "__type": "client-review-info",
+    "__status": "published",
+    "values": {
+      "name": "David K.",
+      "reviewSource": "Trustpilot",
+      "location": "Canonbury",
+      "image": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
+      "reviewLink": "https://uk.trustpilot.com/reviews/6a0354d2c27b0e166b979628"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e95bff7c-674a-40e9-8027-817912667432",
+    "__type": "client-review-info",
+    "__status": "published",
+    "values": {
+      "name": "Michael R.",
+      "reviewSource": "Trustpilot",
+      "location": "Islington",
+      "image": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
+      "reviewLink": "https://uk.trustpilot.com/reviews/6a0354d2c27b0e166b979628"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "601fba82-1078-4782-9add-908e73b262f6",
+    "__type": "client-review-section",
+    "__status": "published",
+    "values": {
+      "overline": "Client reviews",
+      "title": "What our clients say",
+      "description": "470+ reviews on Trustpilot and Google. Here's what homeowners say about working with us.",
+      "reviewCards": [
+        "5644f892-10ae-4dae-952e-35e6f05a4b7c",
+        "bba5d1d3-065a-4038-ac81-96087c24512e",
+        "4ebd586f-2656-454e-8eed-8d3b17348ddb"
+      ],
+      "reviewLinks": [
+        "6fe2d143-c089-49b6-b3ce-fbf49f6d50c4",
+        "ad064f66-1d79-4bd9-903f-f609492e0d10"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "16dae380-82ad-413c-a0a5-23086d778bfb",
+    "__type": "home-header-section",
+    "__status": "published",
+    "values": {
+      "overline": "Islington's Trusted Renovation Team",
+      "title": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "Bathrooms, Kitchens & ",
+              "type": "text"
+            },
+            {
+              "text": "Home Refurbishments",
+              "type": "text",
+              "italic": true
+            },
+            {
+              "text": " in Islington 22",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "subtitle": "Owner-led, fully managed renovations delivered by an in-house team—clear quotes, reliable scheduling, and respectful workmanship.",
+      "buttons": [
+        "89600458-c302-4a4f-b372-fd11a5d40589",
+        "80685b11-9789-45f6-8d47-68a3662971d0"
+      ],
+      "footer": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "Based in Islington (N9). Covering North London—larger projects considered across London. ",
+              "type": "text"
+            },
+            {
+              "bold": true,
+              "text": "Most renovation projects start from £10,000+.",
+              "type": "text"
+            },
+            {
+              "text": " Bathrooms from £8k · Kitchens from £15k · Refurbishments from £25k+.",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    "__draft": {
+      "overline": "Islington's Trusted Renovation Team122",
+      "title": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "text": "Bathrooms, Kitchens & Home Refurbishments in Islington"
+            }
+          ]
+        }
+      ],
+      "subtitle": "Owner-led, fully managed renovations delivered by an in-house team—clear quotes, reliable scheduling, and respectful workmanship.",
+      "buttons": [
+        "89600458-c302-4a4f-b372-fd11a5d40589",
+        "80685b11-9789-45f6-8d47-68a3662971d0"
+      ],
+      "footer": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "Based in Islington (N9). Covering North London—larger projects considered across London. ",
+              "type": "text"
+            },
+            {
+              "bold": true,
+              "text": "Most renovation projects start from £10,000+.",
+              "type": "text"
+            },
+            {
+              "text": " Bathrooms from £8k · Kitchens from £15k · Refurbishments from £25k+.",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "__id": "4dfbd32a-c846-4eff-bc97-cab61ef0cf80",
+    "__type": "how-it-works-section",
+    "__status": "published",
+    "values": {
+      "overline": "How it works",
+      "title": "Simple, transparent process",
+      "sectionSummary": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "We keep things straightforward so you always know what's",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "happening and what comes next. ",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "processList": [
+        "ec461205-2cb8-4624-be1a-bef0f39b883e",
+        "3e036e3a-2fa0-4668-9e75-aadc68fda219",
+        "e19b515b-6073-4d75-ba32-bc12fb85bd77",
+        "458b273b-77f4-44f7-a251-a2796bb03d07",
+        "b738b6b6-9a37-48c9-b99e-d77d68898f8a"
+      ],
+      "sectionBanner": "846f27ad-b20c-4018-843d-ee6aed2248c3"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c6a3a0da-fcfe-4ed7-88ba-337d84460eb4",
+    "__type": "icon",
+    "__status": "published",
+    "values": {
+      "code": "star"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9bc6db03-9fcb-41c6-834c-c0759248bafb",
+    "__type": "icon",
+    "__status": "published",
+    "values": {
+      "code": "whatsapp"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5404c812-e3ca-4ba7-b42f-e1b6bc0a8123",
+    "__type": "icon",
+    "__status": "published",
+    "values": {
+      "code": "arrow-right"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6ccca669-a30e-4159-bcb9-0d07fec2d340",
+    "__type": "icon",
+    "__status": "published",
+    "values": {
+      "code": "check"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "be4f40dd-b2e8-4c61-9d95-930399676c23",
+    "__type": "icon",
+    "__status": "published",
+    "values": {
+      "code": "shield"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
+    "__type": "image-container",
+    "__status": "published",
+    "values": {
+      "imageFile": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
+      "imgDescription": "Profile Image of a man",
+      "width": 75,
+      "height": 75,
+      "imageRadius": "full"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e045d151-58c5-4d15-9163-411a56c31a76",
+    "__type": "image-container",
+    "__status": "published",
+    "values": {
+      "imageFile": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "imgDescription": "whoWeAreImage",
+      "height": 340,
+      "imageRadius": "xl"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "a6a3d1f4-0495-4cb7-87cd-03c5e947ccc9",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Home",
+      "description": "The landing page for Upper Street Contractors (Upper Street Handyman Ltd.) website."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d444a24c-c55d-4a9e-a338-380781f62456",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Bathroom Renovations"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e38af12f-feb9-42c1-8568-7d8a8dde12c7",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "bathroom-renovations-service",
+      "title": "Bathroom Renovations",
+      "description": "Bathroom Renovations",
+      "meta": "d444a24c-c55d-4a9e-a338-380781f62456",
+      "sections": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d4fff4c7-3974-4048-988c-c34b26d90570",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "home",
+      "title": "Upper Street Contractors",
+      "meta": "a6a3d1f4-0495-4cb7-87cd-03c5e947ccc9",
+      "sections": [
+        "16dae380-82ad-413c-a0a5-23086d778bfb",
+        "39ce386a-904e-4834-80b8-52e5c8d8ffd3",
+        "dde85097-523f-4d3f-b0ad-a3aa02e40801",
+        "cd71c0a1-cd19-41db-99ae-cacc65724e6e",
+        "4dfbd32a-c846-4eff-bc97-cab61ef0cf80",
+        "f2169f2c-588c-41ae-aa17-468336982ecf",
+        "601fba82-1078-4782-9add-908e73b262f6",
+        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e2df15c9-1a04-419b-a0d1-30391e669aba",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "title": "Planning a renovation?",
+      "description": "Send photos and your postcode on WhatsApp for a quick response, or request a quote for a site visit and detailed scope.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ],
+      "footer": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "Need a smaller job handled professionally? ",
+              "type": "text"
+            },
+            {
+              "url": "/repairs-and-smaller-works",
+              "type": "link",
+              "children": [
+                {
+                  "text": "Visit Repairs & Smaller Works",
+                  "type": "text"
+                }
+              ]
+            },
+            {
+              "text": " to book an hourly visit.",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7602ded8-4bd1-46d8-a271-0fc64b8ffd92",
+    "__type": "project-card",
+    "__status": "published",
+    "values": {
+      "title": "Full Home Refurbishment",
+      "description": "Layout changes · Kitchen · Bathroom · Decorating · Carpentry",
+      "projectBanner": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "projectCategory": "23574ca5-f3f5-415a-983b-d1c8f5ff3cf7",
+      "projectBadges": [
+        "f1080a5c-8439-4b91-af0f-c2f02367c929",
+        "26a4bfbe-3ebf-4f60-bd90-be569352ade4",
+        "67eb3331-952c-4f59-bfff-4217efc27542"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "a50a462f-b20a-4c62-914f-fdf3bfe33b1a",
+    "__type": "project-card",
+    "__status": "published",
+    "values": {
+      "title": "Open-Plan Kitchen Extension",
+      "description": " Howdens supply-and-install · Structural opening · Underfloor heating",
+      "projectBanner": "5302973b-899b-4cf8-9d83-9214ac26fe45",
+      "projectCategory": "7d24daa1-7c34-4ece-9deb-4377da119ca0",
+      "projectBadges": [
+        "2eefb162-516a-4606-bfc4-01cfd5f446d7",
+        "61818729-1eb7-4d78-a7f4-cd0237366602",
+        "2d8a1d42-b22f-4adc-aaef-a3cc91f4b874"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f43593c0-7abf-42e4-906a-78cadb600af4",
+    "__type": "project-card",
+    "__status": "published",
+    "values": {
+      "title": "Victorian Terrace Bathroom",
+      "description": " Full strip-out · Wetroom-style shower · Custom tiling · New layout                 ",
+      "projectBanner": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde",
+      "projectCategory": "e0593770-fad1-47fe-b1c3-47af9b6ed069",
+      "projectBadges": [
+        "edec5b58-2de1-41c3-9d54-dc6bf4179e69",
+        "f7edc6a7-84f1-4b03-9473-49781b5fa700",
+        "b2b283a6-1f67-4981-8e84-fc18caee49c1"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f2169f2c-588c-41ae-aa17-468336982ecf",
+    "__type": "recent-work-section",
+    "__status": "published",
+    "values": {
+      "overline": "Recent work",
+      "title": "Recent work in North London",
+      "description": "A selection of bathrooms, kitchens and refurbishments delivered across Islington and nearby areas.",
+      "projects": [
+        "7602ded8-4bd1-46d8-a271-0fc64b8ffd92",
+        "f43593c0-7abf-42e4-906a-78cadb600af4",
+        "a50a462f-b20a-4c62-914f-fdf3bfe33b1a"
+      ],
+      "viewAllProjects": "40515ecb-7171-483e-87d1-379329c3dc2b"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5644f892-10ae-4dae-952e-35e6f05a4b7c",
+    "__type": "review-card",
+    "__status": "published",
+    "values": {
+      "score": 4,
+      "clientReview": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "\"Communication was excellent throughout—we always knew what was happening. The team was respectful of our home and left it spotless each day. The bathroom looks incredible.\"",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "clientInfo": "e934335e-9c9d-4467-b0dd-4b2732e61586"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4ebd586f-2656-454e-8eed-8d3b17348ddb",
+    "__type": "review-card",
+    "__status": "published",
+    "values": {
+      "score": 4.5,
+      "clientReview": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "\"We had a full kitchen and bathroom done together. The programme was well organised with clear milestones. The team was punctual, clean and professional throughout.\"",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "clientInfo": "e95bff7c-674a-40e9-8027-817912667432"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "bba5d1d3-065a-4038-ac81-96087c24512e",
+    "__type": "review-card",
+    "__status": "published",
+    "values": {
+      "score": 4.9,
+      "clientReview": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "\"The quote was detailed and upfront—no hidden costs. Project came in on time and on budget. The engineering approach really shows in the quality of the finish. Highly recommend.\"",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "clientInfo": "e676c2c7-8815-4612-b463-f5ecd1e8cea4"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "163855d9-ced7-4d7b-b148-443410216690",
+    "__type": "site-meta-config",
+    "__status": "published",
+    "values": {
+      "siteName": "Upper Street Contractors",
+      "siteUrl": "https://upperstreet.contractors/",
+      "pageTitleTemplate": "%s | Upper Street Contractors",
+      "defaultMetaTitle": "Upper Street Contractors",
+      "defaultMetaDescription": "Owner-led bathroom, kitchen and home refurbishment specialists in Islington. Delivering calm, organised projects for busy North London homeowners since 2016.",
+      "defaultImage": "360afa34-c056-4322-8d43-241fa78e067e",
+      "indexable": true,
+      "legalName": "Upper Street Handyman Ltd.",
+      "phoneNumber": "+442074245466",
+      "email": "info@upperstreet.contractors",
+      "mapLocation": {
+        "lat": 51.543410262219474,
+        "lon": -0.11472839288278856
+      },
+      "addressLine": "Unit 7, 149 Roman Way",
+      "city": "London, United Kingdom",
+      "postalCode": "N7 8XH",
+      "socialLinks": [
+        "7bddec0f-ab51-4038-92e4-2362702513ad",
+        "06063b0c-7dcc-45ca-93bc-f41a25ff72d4"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7bddec0f-ab51-4038-92e4-2362702513ad",
+    "__type": "social-link",
+    "__status": "published",
+    "values": {
+      "socialNetworkName": "Google Maps",
+      "url": "https://g.page/r/Ca-S_khoHE56EAE/review",
+      "description": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "A link that redirects the user to the company's location and pops up a review window to review our business.",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "06063b0c-7dcc-45ca-93bc-f41a25ff72d4",
+    "__type": "social-link",
+    "__status": "published",
+    "values": {
+      "socialNetworkName": "WhatsApp",
+      "url": "http://wa.me/447588376345",
+      "description": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "A link to open a conversation with the business on whatsapp.",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3e036e3a-2fa0-4668-9e75-aadc68fda219",
+    "__type": "static-step",
+    "__status": "published",
+    "values": {
+      "stepOrder": "2",
+      "stepTitle": "Site Visit",
+      "stepDescription": "For larger projects; small works often scoped from photos"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b738b6b6-9a37-48c9-b99e-d77d68898f8a",
+    "__type": "static-step",
+    "__status": "published",
+    "values": {
+      "stepOrder": "5",
+      "stepTitle": "Handover & Aftercare",
+      "stepDescription": "12-month workmanship guarantee from sign-off"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "458b273b-77f4-44f7-a251-a2796bb03d07",
+    "__type": "static-step",
+    "__status": "published",
+    "values": {
+      "stepOrder": "4",
+      "stepTitle": "Scheduling & Delivery",
+      "stepDescription": "Structured programme with regular updates"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ec461205-2cb8-4624-be1a-bef0f39b883e",
+    "__type": "static-step",
+    "__status": "published",
+    "values": {
+      "stepOrder": "1",
+      "stepTitle": "Enquiry",
+      "stepDescription": "Phone, email or WhatsApp—photos welcome"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e19b515b-6073-4d75-ba32-bc12fb85bd77",
+    "__type": "static-step",
+    "__status": "published",
+    "values": {
+      "stepOrder": "3",
+      "stepTitle": "Detailed Quote",
+      "stepDescription": "Clear scope, breakdown and options provided"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "dde85097-523f-4d3f-b0ad-a3aa02e40801",
+    "__type": "what-we-do-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we do",
+      "title": "Premium renovations for Islington homeowners",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "We lead with quality project work.",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "Smaller repairs are also available for existing clients and local residents.",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "workCards": [
+        "11b3d53f-0fc8-47b7-8f9e-5b6bd477321d",
+        "13eb2b0e-15c6-4da8-9d9f-8130fa8f90b2",
+        "8609329a-c4af-4535-84e6-0a9168088dae"
+      ],
+      "banner": "a3c764be-8a64-42c1-aa02-1f583035b191"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "39ce386a-904e-4834-80b8-52e5c8d8ffd3",
+    "__type": "who-we-are-section",
+    "__status": "published",
+    "values": {
+      "overline": "who we are",
+      "title": "A local team you can trust",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "We're a family-run, owner-led team based in Islington. We specialise in bathroom renovations, kitchen installations and full home refurbishments—delivering calm, organised projects for busy homeowners who want the job done properly.",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "From the first site visit to finishing touches, we manage the programme, coordinate trades, and keep communication clear. Smaller repairs and maintenance are also available for local clients who value a reliable team.",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "buttons": [
+        "c6363c76-0fd6-4912-8448-d59a1fbd2de8"
+      ],
+      "imageContainer": "e045d151-58c5-4d15-9163-411a56c31a76"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "cd71c0a1-cd19-41db-99ae-cacc65724e6e",
+    "__type": "why-choose-us-section",
+    "__status": "published",
+    "values": {
+      "overline": "Why choose us",
+      "listOfPoints": [
+        "8d6cb5c8-1bfb-4b58-a7a9-1dc586b7736e",
+        "16873a6a-93f3-4704-b32e-799efdb50305",
+        "f0d6df57-74d3-421a-a9c0-8444230396b8",
+        "be56c9d9-2499-40b9-b7c9-59f22ad2a637",
+        "2c2a6ee7-b853-4099-8307-f7974d028eb9",
+        "d0e6d3a1-b4ef-4ea6-bc60-54b93c8471b4",
+        "13f9dbe5-11d3-4adc-9dd2-d6624b4014dc",
+        "e9b97ab2-10dd-412e-bc23-06e70d010741"
+      ],
+      "cardImage": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
+      "cardTitle": "Owner-led, accountable delivery",
+      "cardRole": "Civil Engineer & Founder",
+      "cardParagraph": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "Upper Street Contracts is led by a civil engineer with a background in construction management and project delivery. That experience shapes how we work: clear planning, realistic timelines, consistent site standards, and accountability throughout.",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "We're not trying to be the biggest builder in London—we focus on reliable execution, high-quality workmanship, and the kind of communication you'd expect from a professional team.",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "cardBanner": "d3957164-3ac2-4267-ab6b-ae5728b85f77"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8609329a-c4af-4535-84e6-0a9168088dae",
+    "__type": "work-card",
+    "__status": "published",
+    "values": {
+      "emoji": "🏠",
+      "title": "Home Refurbishments",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "Multi-room refurbishments and reconfigurations, delivered by an in-house team with structured project management.",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "priceLine": "£25,000–£150,000 (scope dependent)",
+      "linkText": "View Refurbishments",
+      "href": "/refurbishments"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "11b3d53f-0fc8-47b7-8f9e-5b6bd477321d",
+    "__type": "work-card",
+    "__status": "published",
+    "values": {
+      "emoji": "🚿",
+      "title": "Bathroom Renovations",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": " High-quality installation, waterproofing, tiling, plumbing and electrics—managed end to end.\n              ",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "priceLine": "From £8,000 (size/spec dependent)",
+      "linkText": "View Bathrooms",
+      "href": "/bathrooms"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "13eb2b0e-15c6-4da8-9d9f-8130fa8f90b2",
+    "__type": "work-card",
+    "__status": "published",
+    "values": {
+      "emoji": "🍳",
+      "title": "Kitchen Installations",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "text": "Supply-and-install or fit-only, with coordinated electrics, plumbing, carpentry and finishing.",
+              "type": "text"
+            }
+          ]
+        }
+      ],
+      "priceLine": "From £15,000 (size/spec dependent)",
+      "linkText": "View Kitchens",
+      "href": "/kitchens"
+    },
+    "__draft": null
+  }
+]

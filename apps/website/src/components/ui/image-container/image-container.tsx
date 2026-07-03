@@ -48,7 +48,7 @@ function getImageAlt(
   return (
     alt ??
     data.imgDescription ??
-    data.imageFile?.alternativeText ??
+    data.imageFile?.alt ??
     "Image"
   );
 }

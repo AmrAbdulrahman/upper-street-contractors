@@ -1,0 +1,27 @@
+{
+  "__name": "badge",
+  "label": "Badge",
+  "fields": [
+    {
+      "__name": "text",
+      "__type": "text"
+    },
+    {
+      "__name": "variant",
+      "__type": "lookup",
+      "options": [
+        "light",
+        "dark"
+      ]
+    },
+    {
+      "__name": "href",
+      "__type": "text"
+    },
+    {
+      "__name": "borderRadius",
+      "__type": "number",
+      "integer": true
+    }
+  ]
+}

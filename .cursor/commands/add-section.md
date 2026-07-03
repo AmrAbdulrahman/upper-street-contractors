@@ -21,7 +21,7 @@ Read `docs/agents/project-stack.md` for conventions. Use caveman mode.
 3. **Component** — create `apps/website/src/components/sections/<name>/<name>.tsx`:
    - Import fragment type from `@/generated/graphql`
    - Wrap editable Strapi nodes with `StrapiEntry` / `StrapiEntryField` from `@/components/strapi`
-   - Use `RichText` from `@/components/strapi/rich-text` for blocks fields
+   - Use `RichText` from `@/components/ui/rich-text-viewer` for blocks fields
    - Tailwind classes matching existing sections
 
 4. **Barrel** — create `apps/website/src/components/sections/<name>/index.ts` exporting the component

@@ -1,5 +1,5 @@
 fragment Banner on Banner {
-  documentId
+  id
   title
   body
   emoji

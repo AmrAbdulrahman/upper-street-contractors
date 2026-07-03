@@ -1,5 +1,5 @@
 fragment SiteMetaConfig on SiteMetaConfig {
-  documentId
+  id
   siteName
   siteUrl
   pageTitleTemplate
@@ -15,19 +15,19 @@ fragment SiteMetaConfig on SiteMetaConfig {
   mapLocation
   defaultImage {
     url
-    alternativeText
+    alt
     width
     height
   }
   socialLinks {
-    documentId
+    id
     socialNetworkName
     url
   }
 }
 
-query GetSiteMetaConfig($status: PublicationStatus = PUBLISHED) {
-  siteMetaConfigs(pagination: { limit: 1 }, status: $status) {
+query GetSiteMetaConfig($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
+  siteMetaConfigs(pagination: { limit: 1 }, status: $status, includeUnpublished: $includeUnpublished) {
     ...SiteMetaConfig
   }
 }

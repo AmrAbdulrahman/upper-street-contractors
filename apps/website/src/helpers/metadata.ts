@@ -32,7 +32,7 @@ function getOgImages(
       url: imageUrl,
       width: defaultImage.width ?? undefined,
       height: defaultImage.height ?? undefined,
-      alt: defaultImage.alternativeText ?? undefined,
+      alt: defaultImage.alt ?? undefined,
     },
   ];
 }

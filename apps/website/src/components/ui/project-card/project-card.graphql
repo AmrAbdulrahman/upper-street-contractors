@@ -1,10 +1,10 @@
 fragment ProjectCard on ProjectCard {
-  documentId
+  id
   title
   description
   projectBanner {
     url
-    alternativeText
+    alt
     width
     height
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import { Badge, badgePropsFromStrapi } from "@/components/ui/badge";
 import { ProjectCardFragment } from "@/generated/graphql";
 import Link from "next/link";
@@ -23,18 +23,18 @@ export function ProjectCard({ data }: ProjectCardProps) {
     projectBanner,
     projectCategory,
     projectBadges,
-    documentId,
+    id,
   } = data;
   const badges = projectBadges?.filter(Boolean) ?? [];
-  const href = `/projects/${documentId}`;
+  const href = `/projects/${id}`;
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <article className={cardClasses}>
         <Link href={href} className="block">
-          <StrapiEntryField field="projectBanner">
+          <ZeroCmsEntryField field="projectBanner">
             <ProjectBanner banner={projectBanner} category={projectCategory} />
-          </StrapiEntryField>
+          </ZeroCmsEntryField>
         </Link>
 
         <div className="p-[18px]">
@@ -50,11 +50,11 @@ export function ProjectCard({ data }: ProjectCardProps) {
                 }
 
                 return (
-                  <StrapiEntry key={badge.documentId} entry={badge}>
-                    <StrapiEntryField field="text">
+                  <ZeroCmsEntry key={badge.id} entry={badge}>
+                    <ZeroCmsEntryField field="text">
                       <Badge {...badgeProps} />
-                    </StrapiEntryField>
-                  </StrapiEntry>
+                    </ZeroCmsEntryField>
+                  </ZeroCmsEntry>
                 );
               })}
             </div>
@@ -62,21 +62,21 @@ export function ProjectCard({ data }: ProjectCardProps) {
 
           <Link href={href} className="block">
             {title ? (
-              <StrapiEntryField field="title">
+              <ZeroCmsEntryField field="title">
                 <h3 className={titleClasses}>{title}</h3>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {description ? (
-              <StrapiEntryField field="description">
+              <ZeroCmsEntryField field="description">
                 <p className="text-[13px] leading-[1.55] text-muted">
                   {description}
                 </p>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
           </Link>
         </div>
       </article>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

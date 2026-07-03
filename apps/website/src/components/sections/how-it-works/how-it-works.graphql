@@ -1,5 +1,5 @@
 fragment HowItWorksSection on HowItWorksSection {
-  documentId
+  id
   overline
   title
   sectionSummary

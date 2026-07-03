@@ -1,5 +1,5 @@
 fragment RecentWorkSection on RecentWorkSection {
-  documentId
+  id
   overline
   title
   description

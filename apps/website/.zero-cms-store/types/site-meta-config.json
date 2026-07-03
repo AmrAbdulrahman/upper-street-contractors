@@ -1,0 +1,74 @@
+{
+  "__name": "site-meta-config",
+  "label": "Site Meta Config",
+  "fields": [
+    {
+      "__name": "siteName",
+      "__type": "text"
+    },
+    {
+      "__name": "siteUrl",
+      "__type": "text"
+    },
+    {
+      "__name": "pageTitleTemplate",
+      "__type": "text"
+    },
+    {
+      "__name": "defaultMetaTitle",
+      "__type": "text"
+    },
+    {
+      "__name": "defaultMetaDescription",
+      "__type": "text"
+    },
+    {
+      "__name": "defaultImage",
+      "__type": "asset",
+      "accept": "any"
+    },
+    {
+      "__name": "locale",
+      "__type": "text"
+    },
+    {
+      "__name": "indexable",
+      "__type": "boolean"
+    },
+    {
+      "__name": "legalName",
+      "__type": "text"
+    },
+    {
+      "__name": "phoneNumber",
+      "__type": "text"
+    },
+    {
+      "__name": "email",
+      "__type": "text"
+    },
+    {
+      "__name": "mapLocation",
+      "__type": "json"
+    },
+    {
+      "__name": "addressLine",
+      "__type": "text"
+    },
+    {
+      "__name": "city",
+      "__type": "text"
+    },
+    {
+      "__name": "postalCode",
+      "__type": "text"
+    },
+    {
+      "__name": "socialLinks",
+      "__type": "references",
+      "allowedTypes": [
+        "social-link"
+      ]
+    }
+  ]
+}
