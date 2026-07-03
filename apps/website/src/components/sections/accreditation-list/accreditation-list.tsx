@@ -1,4 +1,4 @@
-import { ZeroCmsEntry, AddZeroCmsEntry } from "@usc/zero-cms-widget";
+import { ZeroCmsEntry, ZeroCmsList } from "@usc/zero-cms-widget";
 import { Accreditation } from "@/components/ui/accreditation";
 import { TrustpilotWidget } from "@/components/ui/trustpilot-widget";
 import { AccreditationListFragment } from "@/generated/graphql";
@@ -18,24 +18,19 @@ export function AccreditationList({ data }: AccreditationListProps) {
             <TrustpilotWidget variant="mini" />
           </div>
 
-          {accreditations.length > 0 ? (
-            <div className="mx-auto flex w-full max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3.5">
-              {accreditations.map((accreditation) =>
-                accreditation ? (
-                  <ZeroCmsEntry
-                    key={accreditation.id}
-                    entry={accreditation}
-                  >
-                    <Accreditation data={accreditation} />
-                  </ZeroCmsEntry>
-                ) : null,
-              )}
-
-              <AddZeroCmsEntry field="list" />
-            </div>
-          ) : (
-            <AddZeroCmsEntry field="list" />
-          )}
+          <ZeroCmsList
+            className="mx-auto flex w-full max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3.5"
+            field="list"
+            items={accreditations}
+          >
+            {accreditations.map((accreditation) =>
+              accreditation ? (
+                <ZeroCmsEntry key={accreditation.id} entry={accreditation}>
+                  <Accreditation data={accreditation} />
+                </ZeroCmsEntry>
+              ) : null,
+            )}
+          </ZeroCmsList>
         </div>
       </section>
     </ZeroCmsEntry>

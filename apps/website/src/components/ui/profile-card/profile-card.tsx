@@ -1,11 +1,11 @@
-import { ZeroCmsEntryField, ZeroCmsRelationEntry } from "@usc/zero-cms-widget";
+import { ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Banner } from "@/components/ui/banner";
-import { ImageContainer } from "@/components/ui/image-container";
-import type { BannerFragment, ImageContainerFragment } from "@/generated/graphql";
+import { CmsImage, type CmsImageData } from "@/components/ui/cms-image";
+import type { BannerFragment } from "@/generated/graphql";
 
 type ProfileCardProps = {
-  image?: ImageContainerFragment | null;
+  image?: CmsImageData;
   title?: string | null;
   role?: string | null;
   paragraph?: unknown;
@@ -23,16 +23,16 @@ export function ProfileCard({
 }: ProfileCardProps) {
   return (
     <div className="rounded-3xl bg-dark px-8 py-9 text-white">
-      <ZeroCmsRelationEntry entry={image} field="cardImage">
+      <ZeroCmsEntryField field="cardImage">
         <div className="mb-[18px] size-[72px] shrink-0 overflow-hidden rounded-full border-2 border-white/10">
-          <ImageContainer
+          <CmsImage
             data={image}
-            alt={imageAlt ?? title ?? "Profile photo"}
+            fallbackAlt={imageAlt ?? title ?? "Profile photo"}
             placeholderLabel="PHOTO"
-            className="!size-[72px] !h-[72px] !w-[72px] rounded-full"
+            className="size-[72px] rounded-full object-cover"
           />
         </div>
-      </ZeroCmsRelationEntry>
+      </ZeroCmsEntryField>
 
       {title ? (
         <ZeroCmsEntryField field="cardTitle">

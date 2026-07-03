@@ -4,7 +4,10 @@ fragment WhoWeAreSection on WhoWeAreSection {
   title
   body
   imageContainer {
-    ...ImageContainer
+    url
+    alt
+    width
+    height
   }
   buttons {
     ...Button

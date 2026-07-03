@@ -39,6 +39,15 @@ export type BlocksComponent = ComponentType<{
   onChange: (value: BlocksContent) => void;
 }>;
 
+/**
+ * Host-injected notifier for mutation feedback (toasts). The lib stays
+ * framework-free — the host wires this to its toast lib (e.g. sonner) and passes
+ * it via `<ZeroCmsProvider notify={…}>`. Defaults to a no-op when unset.
+ */
+export type NotifyFn = (kind: 'success' | 'error', message: string) => void;
+
+const noopNotify: NotifyFn = () => {};
+
 interface ZeroCmsContextValue {
   adapter: Adapter;
   schema: Schema;
@@ -48,6 +57,7 @@ interface ZeroCmsContextValue {
   refreshMedia: () => Promise<void>;
   RichText: RichTextComponent;
   Blocks: BlocksComponent;
+  notify: NotifyFn;
 }
 
 const ZeroCmsContext = createContext<ZeroCmsContextValue | null>(null);
@@ -67,6 +77,8 @@ export interface ZeroCmsProviderProps {
   richText?: RichTextComponent;
   /** Editor for `blocks` fields; defaults to the built-in {@link BlocksEditor}. */
   blocks?: BlocksComponent;
+  /** Toast notifier for mutation feedback; defaults to a no-op. */
+  notify?: NotifyFn;
   children: ReactNode;
 }
 
@@ -74,6 +86,7 @@ export function ZeroCmsProvider({
   adapter,
   richText,
   blocks,
+  notify,
   children,
 }: ZeroCmsProviderProps) {
   const [schema, setSchema] = useState<Schema>([]);
@@ -118,8 +131,9 @@ export function ZeroCmsProvider({
       refreshMedia,
       RichText: richText ?? DefaultRichText,
       Blocks: blocks ?? BlocksEditor,
+      notify: notify ?? noopNotify,
     }),
-    [adapter, schema, schemaLoading, refreshSchema, media, refreshMedia, richText, blocks]
+    [adapter, schema, schemaLoading, refreshSchema, media, refreshMedia, richText, blocks, notify]
   );
 
   return (

@@ -76,6 +76,8 @@ async function dispatch(adapter: Adapter, op: string, args: unknown[]): Promise<
       return adapter.listMedia();
     case 'putMedia':
       return adapter.putMedia(base64ToBytes(args[0] as string), args[1] as never);
+    case 'updateMedia':
+      return adapter.updateMedia(args[0] as string, args[1] as never);
     case 'getMedia': {
       const { item, bytes } = await adapter.getMedia(args[0] as string);
       return { item, bytesBase64: bytesToBase64(bytes) };

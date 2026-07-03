@@ -33,6 +33,7 @@ const RPC_MIN_ROLE: Record<string, Role> = {
   unpublish: 'editor',
   discardDraft: 'editor',
   putMedia: 'editor',
+  updateMedia: 'editor',
   deleteMedia: 'editor',
 
   // edit content types

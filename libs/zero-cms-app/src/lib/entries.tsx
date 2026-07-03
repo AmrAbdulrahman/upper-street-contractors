@@ -124,20 +124,28 @@ export function EntriesList({
 export function EntryEditor({
   type,
   entryId,
+  createMode,
   onClose,
   onChanged,
   focusField,
 }: {
   type: Type;
   entryId?: string;
+  /**
+   * Force the "create" title even though the entry already exists — the in-place
+   * widget pre-creates the entry before opening, so `isNew` (no id) can't tell
+   * create from edit. Defaults to `isNew` (the admin "+ New" path passes nothing).
+   */
+  createMode?: boolean;
   onClose: () => void;
   onChanged: () => void;
   /** Field `__name` to scroll to + highlight on open. */
   focusField?: string;
 }) {
-  const { adapter, refreshMedia } = useZeroCms();
+  const { adapter, refreshMedia, notify } = useZeroCms();
   const draftReg = useDraftRegistryOptional();
   const isNew = !entryId;
+  const creating = createMode ?? isNew;
   const [entry, setEntry] = useState<OutputEntry | null>(null);
   const [loading, setLoading] = useState(!isNew);
   const [error, setError] = useState<string | null>(null);
@@ -169,15 +177,18 @@ export function EntryEditor({
     };
   }, [adapter, type.__name, entryId, isNew]);
 
-  const run = async (fn: () => Promise<unknown>) => {
+  const run = async (fn: () => Promise<unknown>, successMsg?: string) => {
     setBusy(true);
     setError(null);
     try {
       await fn();
       await refreshMedia();
       onChanged();
+      if (successMsg) notify('success', successMsg);
     } catch (err) {
-      setError(errorMessage(err));
+      const msg = errorMessage(err);
+      setError(msg);
+      notify('error', msg);
     } finally {
       setBusy(false);
     }
@@ -194,7 +205,7 @@ export function EntryEditor({
         draftReg?.markDraft(type.__name, entryId);
       }
       onClose();
-    });
+    }, isNew ? 'Entry created' : 'Changes saved');
 
   // Autosave (existing entries only): persist to __draft without closing. Errors
   // surface inline and rethrow so EntryForm keeps the edit dirty for a retry.
@@ -209,17 +220,19 @@ export function EntryEditor({
       draftReg?.markDraft(type.__name, entryId);
       onChanged();
     } catch (err) {
-      setError(errorMessage(err));
+      const msg = errorMessage(err);
+      setError(msg);
+      notify('error', msg);
       throw err;
     }
   };
 
-  const act = (fn: () => Promise<unknown>, close = false) =>
+  const act = (fn: () => Promise<unknown>, close = false, successMsg?: string) =>
     run(async () => {
       await fn();
       if (close) onClose();
       else await reloadEntry();
-    });
+    }, successMsg);
 
   if (loading)
     return (
@@ -231,9 +244,12 @@ export function EntryEditor({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-neutral-900">
-          {isNew ? `New ${type.label ?? type.__name}` : 'Edit entry'}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-semibold text-neutral-900">
+            {creating ? 'Add Entry' : 'Edit Entry'}
+          </h3>
+          <Badge>{type.label ?? type.__name}</Badge>
+        </div>
         <div className="flex items-center gap-2">
           {entry && <StatusBadges entry={entry} />}
           <Button onClick={onClose}>Close</Button>
@@ -265,7 +281,7 @@ export function EntryEditor({
                   act(async () => {
                     await adapter.publish(type.__name, entryId!);
                     draftReg?.clearDraft(type.__name, entryId!);
-                  })
+                  }, false, 'Published')
                 }
               >
                 Publish
@@ -274,7 +290,9 @@ export function EntryEditor({
                 <Button
                   variant="outline"
                   disabled={busy}
-                  onClick={() => act(() => adapter.unpublish(type.__name, entryId!))}
+                  onClick={() =>
+                    act(() => adapter.unpublish(type.__name, entryId!), false, 'Unpublished')
+                  }
                 >
                   Unpublish
                 </Button>
@@ -287,7 +305,7 @@ export function EntryEditor({
                     act(async () => {
                       await adapter.discardDraft(type.__name, entryId!);
                       draftReg?.clearDraft(type.__name, entryId!);
-                    })
+                    }, false, 'Draft discarded')
                   }
                 >
                   Discard draft
@@ -301,7 +319,7 @@ export function EntryEditor({
                   act(async () => {
                     await adapter.delete(type.__name, entryId!);
                     draftReg?.clearDraft(type.__name, entryId!);
-                  }, true)
+                  }, true, 'Entry deleted')
                 }
               >
                 Delete

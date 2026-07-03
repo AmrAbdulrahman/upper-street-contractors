@@ -2,7 +2,9 @@
 
 import { useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { Toaster } from "sonner";
 import { CmsApp } from "@usc/zero-cms-app";
+import { cmsNotify } from "@/lib/cms/notify";
 import { HugeRTEBlocksEditor } from "@/components/cms/hugerte-blocks-editor";
 
 /**
@@ -30,11 +32,13 @@ export default function AdminPage() {
       <CmsApp
         auth={{ baseUrl: "" }}
         blocks={HugeRTEBlocksEditor}
+        notify={cmsNotify}
         path={path}
         onNavigate={(p) =>
           router.push("/admin" + (p.length ? "/" + p.join("/") : ""))
         }
       />
+      <Toaster position="bottom-center" richColors closeButton />
     </main>
   );
 }

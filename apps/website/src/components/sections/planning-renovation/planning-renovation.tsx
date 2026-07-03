@@ -1,7 +1,7 @@
 import {
-  AddZeroCmsEntry,
   ZeroCmsEntry,
   ZeroCmsEntryField,
+  ZeroCmsList,
 } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Button } from "@/components/ui/button";
@@ -45,19 +45,19 @@ export function PlanningRenovationSection({
             </ZeroCmsEntryField>
           ) : null}
 
-          {buttonItems.length ? (
-            <div className="mt-10 flex flex-wrap justify-center gap-3.5">
-              {buttonItems.map((button) =>
-                button ? (
-                  <ZeroCmsEntry key={button.id} entry={button}>
-                    <Button data={button} />
-                  </ZeroCmsEntry>
-                ) : null,
-              )}
-
-              <AddZeroCmsEntry field="buttons" />
-            </div>
-          ) : null}
+          <ZeroCmsList
+            className="mt-10 flex flex-wrap justify-center gap-3.5"
+            field="buttons"
+            items={buttonItems}
+          >
+            {buttonItems.map((button) =>
+              button ? (
+                <ZeroCmsEntry key={button.id} entry={button}>
+                  <Button data={button} />
+                </ZeroCmsEntry>
+              ) : null,
+            )}
+          </ZeroCmsList>
 
           {footer ? (
             <ZeroCmsEntryField field="footer">

@@ -1,4 +1,4 @@
-import { AddZeroCmsEntry, ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { ZeroCmsEntry, ZeroCmsEntryField, ZeroCmsList } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Banner } from "@/components/ui/banner";
 import { WorkCard } from "@/components/ui/work-card";
@@ -44,15 +44,15 @@ export function WhatWeDoSection({ data }: WhatWeDoSectionProps) {
             ) : null}
           </div>
 
-          {workCardItems.length > 0 ? (
-            <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {workCardItems.map((card) =>
-                card ? <WorkCard key={card.id} data={card} /> : null,
-              )}
-
-              <AddZeroCmsEntry field="workCards" />
-            </div>
-          ) : null}
+          <ZeroCmsList
+            className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+            field="workCards"
+            items={workCardItems}
+          >
+            {workCardItems.map((card) =>
+              card ? <WorkCard key={card.id} data={card} /> : null,
+            )}
+          </ZeroCmsList>
 
           {/* Banner self-wraps in its own ZeroCmsEntry → opens the banner entry. */}
           {banner ? (

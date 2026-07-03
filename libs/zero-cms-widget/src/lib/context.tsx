@@ -15,7 +15,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { useZeroCms } from '@usc/zero-cms-app';
+import { useZeroCms, errorMessage } from '@usc/zero-cms-app';
 
 export interface OpenOptions {
   /** Skip the `locate` round-trip if the caller already knows the Type. */
@@ -33,10 +33,23 @@ export interface CreateOptions {
   parentField: string;
 }
 
+export interface UnlinkOptions {
+  /** The parent entry to unlink the child from. */
+  parentId: string;
+  /** Parent Type `__name`; resolved via `locate` when omitted. */
+  parentType?: string | null;
+  /** The parent's `reference`/`references` field to drop the child from. */
+  parentField: string;
+  /** The child entry id to remove from the field. The entry itself is NOT deleted. */
+  childId: string;
+}
+
 interface DrawerTarget {
   id: string;
   type: string;
   focusField?: string;
+  /** Whether the drawer was opened to create a new entry vs edit an existing one. */
+  mode?: 'create' | 'edit';
 }
 
 interface WidgetContextValue {
@@ -46,6 +59,8 @@ interface WidgetContextValue {
   openEntry: (id: string, opts?: OpenOptions) => Promise<void>;
   /** Create a new entry for a parent relation field, link it, and open its drawer. */
   openCreate: (opts: CreateOptions) => Promise<void>;
+  /** Remove a child from a parent relation field (unlink only; entry survives). */
+  unlink: (opts: UnlinkOptions) => Promise<void>;
   close: () => void;
 }
 
@@ -62,11 +77,14 @@ const InternalContext = createContext<WidgetInternal | null>(null);
 export function WidgetProvider({
   children,
   inspect = false,
+  onChanged,
 }: {
   children: ReactNode;
   inspect?: boolean;
+  /** Called after a mutation the widget performs itself (e.g. unlink) so the host can revalidate. */
+  onChanged?: () => void;
 }) {
-  const { adapter, schema } = useZeroCms();
+  const { adapter, schema, notify } = useZeroCms();
   const [target, setTarget] = useState<DrawerTarget | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +102,7 @@ export function WidgetProvider({
     async (id: string, opts?: OpenOptions) => {
       setError(null);
       if (opts?.type) {
-        setTarget({ id, type: opts.type, focusField: opts.focusField });
+        setTarget({ id, type: opts.type, focusField: opts.focusField, mode: 'edit' });
         return;
       }
       setLoading(true);
@@ -96,6 +114,7 @@ export function WidgetProvider({
             id: found.id,
             type: found.type,
             focusField: opts?.focusField,
+            mode: 'edit',
           });
       } catch (err) {
         setError((err as Error)?.message ?? 'Failed to open entry');
@@ -150,7 +169,7 @@ export function WidgetProvider({
         }
 
         // Open the new entry so the editor can fill it in.
-        setTarget({ id: created.__id, type: childType });
+        setTarget({ id: created.__id, type: childType, mode: 'create' });
       } catch (err) {
         setError((err as Error)?.message ?? 'Failed to create entry');
       } finally {
@@ -158,6 +177,42 @@ export function WidgetProvider({
       }
     },
     [adapter, schema]
+  );
+
+  const unlink = useCallback(
+    async ({ parentId, parentType, parentField, childId }: UnlinkOptions) => {
+      try {
+        // Resolve the parent Type (via locate if the caller didn't pass it).
+        let pType = parentType ?? null;
+        if (!pType) pType = (await adapter.locate(parentId))?.type ?? null;
+        if (!pType) throw new Error(`Cannot resolve the parent type for "${parentId}"`);
+
+        // Drop the child id from the parent field (inverse of openCreate's link step).
+        const parentSchema = schema.find((t) => t.__name === pType);
+        const fieldDef = parentSchema?.fields.find((f) => f.__name === parentField);
+        if (fieldDef?.__type === 'references') {
+          const parent = await adapter.get(pType, parentId, {
+            status: 'draft',
+            includeUnpublished: true,
+          });
+          const current = Array.isArray(parent?.[parentField])
+            ? (parent[parentField] as string[])
+            : [];
+          await adapter.patch(pType, parentId, {
+            [parentField]: current.filter((id) => id !== childId),
+          });
+        } else {
+          await adapter.patch(pType, parentId, { [parentField]: null });
+        }
+
+        // No drawer to close; ask the host to revalidate so the item disappears.
+        onChanged?.();
+        notify('success', 'Item removed');
+      } catch (err) {
+        notify('error', errorMessage(err));
+      }
+    },
+    [adapter, schema, onChanged, notify]
   );
 
   const close = useCallback(() => {
@@ -168,8 +223,8 @@ export function WidgetProvider({
   const isOpen = target !== null || loading || error !== null;
 
   const publicValue = useMemo<WidgetContextValue>(
-    () => ({ inspect: inspectActive, isOpen, openEntry, openCreate, close }),
-    [inspectActive, isOpen, openEntry, openCreate, close]
+    () => ({ inspect: inspectActive, isOpen, openEntry, openCreate, unlink, close }),
+    [inspectActive, isOpen, openEntry, openCreate, unlink, close]
   );
   const internalValue = useMemo<WidgetInternal>(
     () => ({ ...publicValue, target, loading, error }),

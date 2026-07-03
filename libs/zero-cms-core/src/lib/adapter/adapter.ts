@@ -28,6 +28,11 @@ export interface MediaUpload {
   alternativeText?: string;
 }
 
+/** Editable media metadata. The file bytes + system fields stay immutable. */
+export interface MediaMetaUpdate {
+  alternativeText?: string;
+}
+
 export interface Adapter {
   getSchema(): Promise<Schema>;
   saveSchema(schema: Schema): Promise<Schema>;
@@ -48,6 +53,8 @@ export interface Adapter {
 
   listMedia(): Promise<MediaItem[]>;
   putMedia(bytes: Uint8Array, meta: MediaUpload): Promise<MediaItem>;
+  /** Update editable media metadata (e.g. alt text); the bytes are unchanged. */
+  updateMedia(id: string, meta: MediaMetaUpdate): Promise<MediaItem>;
   getMedia(id: string): Promise<{ item: MediaItem; bytes: Uint8Array }>;
   deleteMedia(id: string): Promise<void>;
 }

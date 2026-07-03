@@ -11,7 +11,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useZeroCms, useDraftRegistry, type DraftRef } from '@usc/zero-cms-app';
+import { useZeroCms, useDraftRegistry, errorMessage, type DraftRef } from '@usc/zero-cms-app';
 
 export interface ZeroCmsBarProps {
   inspect: boolean;
@@ -32,7 +32,7 @@ export function ZeroCmsBar({
   onChange,
   className,
 }: ZeroCmsBarProps) {
-  const { adapter, schema } = useZeroCms();
+  const { adapter, schema, notify } = useZeroCms();
   // Which entries currently have drafts is a shared store: the drawer marks them
   // optimistically on every (auto)save, and this bar re-syncs authoritatively.
   const { drafts, setDrafts, clearDraft } = useDraftRegistry();
@@ -85,6 +85,7 @@ export function ZeroCmsBar({
 
   const publishAll = async () => {
     if (!drafts.length) return;
+    const n = drafts.length;
     setBusy(true);
     try {
       for (const d of drafts) {
@@ -93,6 +94,9 @@ export function ZeroCmsBar({
       }
       await refresh();
       onChange?.();
+      notify('success', `Published ${n} item${n > 1 ? 's' : ''}`);
+    } catch (err) {
+      notify('error', errorMessage(err));
     } finally {
       setBusy(false);
     }
@@ -132,6 +136,16 @@ export function ZeroCmsBar({
       >
         {inspect ? 'Turn off edit mode' : 'Turn on edit mode'}
       </button>
+
+      <a
+        href="/admin"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Open the CMS admin in a new tab"
+        className={`${btn} border-white/60 text-white hover:bg-white/15`}
+      >
+        Open CMS
+      </a>
 
       {synced ? (
         <button

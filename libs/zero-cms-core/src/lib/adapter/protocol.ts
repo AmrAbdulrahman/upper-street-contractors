@@ -19,6 +19,7 @@ export type RpcOp =
   | 'locate'
   | 'listMedia'
   | 'putMedia'
+  | 'updateMedia'
   | 'getMedia'
   | 'deleteMedia';
 

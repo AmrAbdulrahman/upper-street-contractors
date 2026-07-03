@@ -16,6 +16,7 @@ import {
   useZeroCms,
   type RichTextComponent,
   type BlocksComponent,
+  type NotifyFn,
 } from './context';
 import { SECTIONS, type Section } from './nav';
 import { EntriesList, EntryEditor } from './entries';
@@ -32,6 +33,8 @@ export interface ZeroCmsAppProps {
   richText?: RichTextComponent;
   /** Editor for `blocks` fields; defaults to the built-in BlocksEditor. */
   blocks?: BlocksComponent;
+  /** Toast notifier for mutation feedback; forwarded to the provider. */
+  notify?: NotifyFn;
   className?: string;
   /** URL path segments, e.g. ['entries','project','<id>']. Enables deep linking. */
   path?: string[];
@@ -75,7 +78,12 @@ export function ZeroCmsApp(props: ZeroCmsAppProps) {
     return (
       <AuthGate config={props.auth}>
         {(adapter, ctx) => (
-          <ZeroCmsProvider adapter={adapter} richText={props.richText} blocks={props.blocks}>
+          <ZeroCmsProvider
+            adapter={adapter}
+            richText={props.richText}
+            blocks={props.blocks}
+            notify={props.notify}
+          >
             <Shell
               className={props.className}
               path={props.path}
@@ -91,7 +99,12 @@ export function ZeroCmsApp(props: ZeroCmsAppProps) {
   if (!props.adapter)
     throw new Error('ZeroCmsApp requires either `adapter` or `auth`');
   return (
-    <ZeroCmsProvider adapter={props.adapter} richText={props.richText} blocks={props.blocks}>
+    <ZeroCmsProvider
+      adapter={props.adapter}
+      richText={props.richText}
+      blocks={props.blocks}
+      notify={props.notify}
+    >
       <Shell className={props.className} path={props.path} onNavigate={props.onNavigate} />
     </ZeroCmsProvider>
   );

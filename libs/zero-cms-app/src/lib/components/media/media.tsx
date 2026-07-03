@@ -5,8 +5,23 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MediaItem } from '@usc/zero-cms-core';
 import { useZeroCms } from '../../context';
-import { Badge, Button, EmptyState, Spinner, cls, cx } from '../ui';
+import { Badge, Button, EmptyState, Field, Spinner, Textarea, cls, cx } from '../ui';
 import { errorMessage } from '../../util';
+
+/** Human-readable byte size (B / KB / MB). */
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  const kb = n / 1024;
+  return kb < 1024 ? `${kb.toFixed(1)} KB` : `${(kb / 1024).toFixed(1)} MB`;
+}
+
+/** Original upload name — media files are stored as `<id>__<name>`. */
+function mediaName(item: MediaItem): string {
+  const prefix = `${item.id}__`;
+  return item.filename.startsWith(prefix)
+    ? item.filename.slice(prefix.length)
+    : item.filename;
+}
 
 /**
  * Thumbnail for one media item. Images are fetched through the adapter and shown
@@ -62,10 +77,11 @@ export function MediaThumb({
 }
 
 export function MediaLibrary() {
-  const { media, adapter, refreshMedia } = useZeroCms();
+  const { media, adapter, refreshMedia, notify } = useZeroCms();
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<MediaItem | null>(null);
 
   const upload = async (files: FileList) => {
     setBusy(true);
@@ -79,8 +95,11 @@ export function MediaLibrary() {
         });
       }
       await refreshMedia();
+      notify('success', `Uploaded ${files.length} file${files.length > 1 ? 's' : ''}`);
     } catch (err) {
-      setError(errorMessage(err));
+      const msg = errorMessage(err);
+      setError(msg);
+      notify('error', msg);
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -92,8 +111,11 @@ export function MediaLibrary() {
     try {
       await adapter.deleteMedia(id);
       await refreshMedia();
+      notify('success', 'Media deleted');
     } catch (err) {
-      setError(errorMessage(err));
+      const msg = errorMessage(err);
+      setError(msg);
+      notify('error', msg);
     }
   };
 
@@ -125,21 +147,129 @@ export function MediaLibrary() {
             <div key={m.id} className={cx(cls.card, 'space-y-2 p-2')}>
               <MediaThumb item={m} />
               <div className="flex items-center gap-1">
-                <span className="flex-1 truncate text-xs text-neutral-600" title={m.filename}>
-                  {m.filename}
+                <span className="flex-1 truncate text-xs text-neutral-600" title={mediaName(m)}>
+                  {mediaName(m)}
                 </span>
                 <Badge>{m.kind}</Badge>
               </div>
-              <button
-                onClick={() => remove(m.id)}
-                className="text-xs text-red-600 hover:underline"
-              >
-                delete
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setEditing(m)}
+                  className="text-xs font-medium text-neutral-700 hover:underline"
+                >
+                  edit
+                </button>
+                <button
+                  onClick={() => remove(m.id)}
+                  className="text-xs text-red-600 hover:underline"
+                >
+                  delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
       )}
+
+      {editing && (
+        <MediaEditDrawer item={editing} onClose={() => setEditing(null)} />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Slide-over to edit a media item's alt text. Shows immutable metadata (name,
+ * type, size, dimensions, upload date) read-only + an editable alt field that
+ * persists to `MediaItem.alternativeText` — the single source every app image
+ * reads as its alt text. Built with in-lib primitives (no widget dependency).
+ */
+function MediaEditDrawer({
+  item,
+  onClose,
+}: {
+  item: MediaItem;
+  onClose: () => void;
+}) {
+  const { adapter, refreshMedia, notify } = useZeroCms();
+  const [alt, setAlt] = useState(item.alternativeText ?? '');
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await adapter.updateMedia(item.id, {
+        alternativeText: alt.trim() ? alt.trim() : undefined,
+      });
+      await refreshMedia();
+      notify('success', 'Alt text saved');
+      onClose();
+    } catch (err) {
+      notify('error', errorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      className="zero-cms fixed inset-0 z-[1400] flex justify-end"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Edit media"
+    >
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div
+        className={cx(
+          cls.card,
+          'relative z-10 flex h-full w-[26rem] max-w-[90vw] flex-col gap-4 overflow-auto rounded-none border-l p-5'
+        )}
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-neutral-900">Edit media</h3>
+          <Button onClick={onClose}>Close</Button>
+        </div>
+
+        <MediaThumb item={item} className="h-40 w-full" />
+
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-sm">
+          <dt className="text-neutral-500">Name</dt>
+          <dd className="truncate text-neutral-800" title={mediaName(item)}>
+            {mediaName(item)}
+          </dd>
+          <dt className="text-neutral-500">Type</dt>
+          <dd className="text-neutral-800">{item.mime}</dd>
+          <dt className="text-neutral-500">Size</dt>
+          <dd className="text-neutral-800">{formatBytes(item.size)}</dd>
+          {item.width && item.height ? (
+            <>
+              <dt className="text-neutral-500">Dimensions</dt>
+              <dd className="text-neutral-800">
+                {item.width} × {item.height}
+              </dd>
+            </>
+          ) : null}
+          <dt className="text-neutral-500">Uploaded</dt>
+          <dd className="text-neutral-800">
+            {new Date(item.createdAt).toLocaleString()}
+          </dd>
+        </dl>
+
+        <Field label="Alt text">
+          <Textarea
+            value={alt}
+            onChange={(e) => setAlt(e.target.value)}
+            placeholder="Describe the image for screen readers + SEO"
+          />
+        </Field>
+
+        <div className="mt-auto flex justify-end gap-2">
+          <Button onClick={onClose}>Cancel</Button>
+          <Button variant="primary" disabled={saving} onClick={save}>
+            {saving ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

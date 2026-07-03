@@ -23,10 +23,8 @@
     },
     {
       "__name": "imageContainer",
-      "__type": "reference",
-      "allowedTypes": [
-        "image-container"
-      ]
+      "__type": "asset",
+      "accept": "image"
     }
   ]
 }

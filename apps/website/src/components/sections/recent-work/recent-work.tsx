@@ -1,7 +1,7 @@
 import {
-  AddZeroCmsEntry,
   ZeroCmsEntry,
   ZeroCmsEntryField,
+  ZeroCmsList,
   ZeroCmsRelationEntry,
 } from "@usc/zero-cms-widget";
 import { Button } from "@/components/ui/button";
@@ -46,17 +46,15 @@ export function RecentWorkSection({ data }: RecentWorkSectionProps) {
             ) : null}
           </div>
 
-          {projectItems.length > 0 ? (
-            <div className="mt-12 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
-              {projectItems.map((project) =>
-                project ? (
-                  <ProjectCard key={project.id} data={project} />
-                ) : null,
-              )}
-
-              <AddZeroCmsEntry field="projects" />
-            </div>
-          ) : null}
+          <ZeroCmsList
+            className="mt-12 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3"
+            field="projects"
+            items={projectItems}
+          >
+            {projectItems.map((project) =>
+              project ? <ProjectCard key={project.id} data={project} /> : null,
+            )}
+          </ZeroCmsList>
 
           {viewAllProjects ? (
             <div className="mt-9 flex justify-center">

@@ -9,7 +9,7 @@ import type { GetOptions, QueryInput, QueryResult } from '../model/query';
 import type { MediaItem } from '../model/media';
 import type { OutputEntry } from '../engine/output';
 import { ZeroCmsError, type ZeroCmsErrorCode } from '../model/errors';
-import type { Adapter, DanglingRef, MediaUpload } from './adapter';
+import type { Adapter, DanglingRef, MediaUpload, MediaMetaUpdate } from './adapter';
 import { RPC_PATH, type RpcErrorBody, type RpcOp } from './protocol';
 import { base64ToBytes, bytesToBase64 } from './base64';
 
@@ -63,6 +63,8 @@ export function createHttpAdapter(opts: HttpAdapterOptions): Adapter {
     async putMedia(bytes: Uint8Array, meta: MediaUpload) {
       return rpc<MediaItem>('putMedia', [bytesToBase64(bytes), meta]);
     },
+    updateMedia: (id: string, meta: MediaMetaUpdate) =>
+      rpc<MediaItem>('updateMedia', [id, meta]),
     async getMedia(id: string) {
       const r = await rpc<{ item: MediaItem; bytesBase64: string }>('getMedia', [id]);
       return { item: r.item, bytes: base64ToBytes(r.bytesBase64) };

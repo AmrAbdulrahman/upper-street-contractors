@@ -21,6 +21,7 @@ import {
   type AuthConfig,
   type RichTextComponent,
   type BlocksComponent,
+  type NotifyFn,
 } from '@usc/zero-cms-app';
 import { Drawer } from './Drawer';
 import { WidgetProvider, useWidgetInternal } from './context';
@@ -32,6 +33,8 @@ export interface ZeroCmsWidgetProps {
   richText?: RichTextComponent;
   /** Editor for `blocks` fields; defaults to the built-in BlocksEditor. */
   blocks?: BlocksComponent;
+  /** Toast notifier for mutation feedback; forwarded to the provider. */
+  notify?: NotifyFn;
   /** Called after a successful create/update/publish/etc inside the drawer. */
   onSaved?: () => void;
   /**
@@ -47,8 +50,13 @@ export function ZeroCmsWidget(props: ZeroCmsWidgetProps) {
   if (!props.adapter)
     throw new Error('ZeroCmsWidget requires either `adapter` or `auth`');
   return (
-    <ZeroCmsProvider adapter={props.adapter} richText={props.richText} blocks={props.blocks}>
-      <WidgetProvider inspect={props.inspect}>
+    <ZeroCmsProvider
+      adapter={props.adapter}
+      richText={props.richText}
+      blocks={props.blocks}
+      notify={props.notify}
+    >
+      <WidgetProvider inspect={props.inspect} onChanged={props.onSaved}>
         {props.children}
         <DrawerBody onSaved={props.onSaved} />
       </WidgetProvider>
@@ -60,6 +68,7 @@ function AuthedWidget({
   auth,
   richText,
   blocks,
+  notify,
   onSaved,
   inspect,
   children,
@@ -80,8 +89,8 @@ function AuthedWidget({
   );
 
   return (
-    <ZeroCmsProvider adapter={adapter} richText={richText} blocks={blocks}>
-      <WidgetProvider inspect={inspect}>
+    <ZeroCmsProvider adapter={adapter} richText={richText} blocks={blocks} notify={notify}>
+      <WidgetProvider inspect={inspect} onChanged={onSaved}>
         {children}
         <DrawerBody onSaved={onSaved} client={client} token={token} onAuthed={setToken} />
       </WidgetProvider>
@@ -124,6 +133,7 @@ function DrawerBody({
               key={target.id}
               type={type}
               entryId={target.id}
+              createMode={target.mode === 'create'}
               focusField={target.focusField}
               onClose={close}
               onChanged={() => onSaved?.()}

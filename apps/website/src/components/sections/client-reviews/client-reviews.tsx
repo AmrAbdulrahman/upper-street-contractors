@@ -1,7 +1,7 @@
 import {
-  AddZeroCmsEntry,
   ZeroCmsEntry,
   ZeroCmsEntryField,
+  ZeroCmsList,
   ZeroCmsRelationEntry,
 } from "@usc/zero-cms-widget";
 import { Button } from "@/components/ui/button";
@@ -47,15 +47,15 @@ export function ClientReviewsSection({ data }: ClientReviewsSectionProps) {
             ) : null}
           </div>
 
-          {cards.length > 0 ? (
-            <div className="mt-12 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
-              {cards.map((card) =>
-                card ? <ReviewCard key={card.id} data={card} /> : null,
-              )}
-
-              <AddZeroCmsEntry field="reviewCards" />
-            </div>
-          ) : null}
+          <ZeroCmsList
+            className="mt-12 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3"
+            field="reviewCards"
+            items={cards}
+          >
+            {cards.map((card) =>
+              card ? <ReviewCard key={card.id} data={card} /> : null,
+            )}
+          </ZeroCmsList>
 
           {links.length > 0 ? (
             <div className="mt-9 flex flex-wrap justify-center gap-3">

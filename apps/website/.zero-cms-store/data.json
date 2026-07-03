@@ -580,7 +580,7 @@
       "name": "James T.",
       "reviewSource": "Google Reviews",
       "location": "Highbury",
-      "image": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
+      "image": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
       "reviewLink": "https://maps.app.goo.gl/hm8RRYMapo2ufL618"
     },
     "__draft": null
@@ -593,7 +593,7 @@
       "name": "David K.",
       "reviewSource": "Trustpilot",
       "location": "Canonbury",
-      "image": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
+      "image": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
       "reviewLink": "https://uk.trustpilot.com/reviews/6a0354d2c27b0e166b979628"
     },
     "__draft": null
@@ -606,7 +606,7 @@
       "name": "Michael R.",
       "reviewSource": "Trustpilot",
       "location": "Islington",
-      "image": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
+      "image": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
       "reviewLink": "https://uk.trustpilot.com/reviews/6a0354d2c27b0e166b979628"
     },
     "__draft": null
@@ -756,31 +756,6 @@
     "__status": "published",
     "values": {
       "code": "shield"
-    },
-    "__draft": null
-  },
-  {
-    "__id": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
-    "__type": "image-container",
-    "__status": "published",
-    "values": {
-      "imageFile": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
-      "imgDescription": "Profile Image of a man",
-      "width": 100,
-      "height": 100,
-      "imageRadius": "full"
-    },
-    "__draft": null
-  },
-  {
-    "__id": "e045d151-58c5-4d15-9163-411a56c31a76",
-    "__type": "image-container",
-    "__status": "published",
-    "values": {
-      "imageFile": "986f1751-f05a-4d2d-8f3e-cb966117fd4a",
-      "imgDescription": "whoWeAreImage",
-      "height": 340,
-      "imageRadius": "xl2"
     },
     "__draft": null
   },
@@ -970,21 +945,6 @@
     "__type": "review-card",
     "__status": "published",
     "values": {
-      "score": 4.5,
-      "clientReview": [
-        {
-          "type": "paragraph",
-          "children": [
-            {
-              "text": "\"We had a full kitchen and bathroom done together. The programme was well organised with clear milestones. The team was punctual, clean and professional throughout.\"",
-              "type": "text"
-            }
-          ]
-        }
-      ],
-      "clientInfo": "e95bff7c-674a-40e9-8027-817912667432"
-    },
-    "__draft": {
       "score": 3.5,
       "clientReview": [
         {
@@ -998,7 +958,8 @@
         }
       ],
       "clientInfo": "e95bff7c-674a-40e9-8027-817912667432"
-    }
+    },
+    "__draft": null
   },
   {
     "__id": "bba5d1d3-065a-4038-ac81-96087c24512e",
@@ -1214,9 +1175,37 @@
         "c6363c76-0fd6-4912-8448-d59a1fbd2de8",
         "6eccc16e-28ed-47d1-b490-b2e0c1c04bd3"
       ],
-      "imageContainer": "e045d151-58c5-4d15-9163-411a56c31a76"
+      "imageContainer": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
     },
-    "__draft": null
+    "__draft": {
+      "overline": "who we are",
+      "title": "A local team you can trust",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "text": "We're a family-run, owner-led team based in Islington. We specialise in bathroom renovations, kitchen installations and full home refurbishments—delivering calm, organised projects for busy homeowners who want the job done properly."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "text": "From the first site visit to finishing touches, we manage the programme, coordinate trades, and keep communication clear. Smaller repairs and maintenance are also available for local clients who value a reliable team."
+            }
+          ]
+        }
+      ],
+      "buttons": [
+        "c6363c76-0fd6-4912-8448-d59a1fbd2de8",
+        "6eccc16e-28ed-47d1-b490-b2e0c1c04bd3"
+      ],
+      "imageContainer": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+    }
   },
   {
     "__id": "cd71c0a1-cd19-41db-99ae-cacc65724e6e",
@@ -1234,7 +1223,7 @@
         "13f9dbe5-11d3-4adc-9dd2-d6624b4014dc",
         "e9b97ab2-10dd-412e-bc23-06e70d010741"
       ],
-      "cardImage": "9ebf7cb0-6a0f-4fbd-ad4f-88eb2b8d68f6",
+      "cardImage": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
       "cardTitle": "Owner-led, accountable delivery",
       "cardRole": "Civil Engineer & Founder",
       "cardParagraph": [
@@ -1354,5 +1343,19 @@
       "href": "https://www.facebook.com"
     },
     "__draft": null
+  },
+  {
+    "__id": "9ac96f51-ece5-425a-bbe3-f9336fc67d03",
+    "__type": "work-card",
+    "__status": "published",
+    "values": {},
+    "__draft": null
+  },
+  {
+    "__id": "f8d45096-d7a4-4e85-a646-1e99d622983a",
+    "__type": "button",
+    "__status": "unpublished",
+    "values": null,
+    "__draft": {}
   }
 ]

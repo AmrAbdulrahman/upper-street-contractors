@@ -30,6 +30,7 @@ export function createEngineAdapter(engine: Engine): EngineAdapter {
     locate: async (id) => engine.locate(id),
     listMedia: async () => engine.listMedia(),
     putMedia: (bytes, meta) => engine.putMedia(bytes, meta),
+    updateMedia: (id, meta) => engine.updateMediaMeta(id, meta),
     getMedia: (id) => engine.getMedia(id),
     deleteMedia: (id) => engine.deleteMedia(id),
   };

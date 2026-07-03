@@ -9,7 +9,10 @@ fragment ReviewCard on ReviewCard {
     location
     reviewLink
     image {
-      ...ImageContainer
+      url
+      alt
+      width
+      height
     }
   }
 }

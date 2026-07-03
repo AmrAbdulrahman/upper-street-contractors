@@ -5,7 +5,10 @@ fragment WhyChooseUsSection on WhyChooseUsSection {
     ...BulletList
   }
   cardImage {
-    ...ImageContainer
+    url
+    alt
+    width
+    height
   }
   cardTitle
   cardRole

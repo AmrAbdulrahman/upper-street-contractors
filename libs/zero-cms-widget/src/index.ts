@@ -8,7 +8,12 @@
  */
 
 export { ZeroCmsWidget, type ZeroCmsWidgetProps } from './lib/ZeroCmsWidget';
-export { useZeroCmsWidget, type OpenOptions, type CreateOptions } from './lib/context';
+export {
+  useZeroCmsWidget,
+  type OpenOptions,
+  type CreateOptions,
+  type UnlinkOptions,
+} from './lib/context';
 export { Drawer, type DrawerProps } from './lib/Drawer';
 export { ZeroCmsBar, type ZeroCmsBarProps } from './lib/ZeroCmsBar';
 
@@ -26,6 +31,7 @@ export {
   AddZeroCmsEntry,
   type AddZeroCmsEntryProps,
 } from './lib/inspect/AddZeroCmsEntry';
+export { ZeroCmsList, type ZeroCmsListProps } from './lib/inspect/ZeroCmsList';
 export {
   ZeroCmsEntryProvider,
   useZeroCmsEntry,

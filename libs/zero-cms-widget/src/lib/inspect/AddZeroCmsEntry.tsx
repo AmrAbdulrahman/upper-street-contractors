@@ -13,9 +13,16 @@ import { useZeroCmsEntry } from './entry-context';
 export interface AddZeroCmsEntryProps {
   /** The parent's `reference`/`references` field to add the new entry into. */
   field: string;
+  /**
+   * Greys out and blocks the button (e.g. when a list is at its `max`). Kept
+   * visible so the limit is discoverable rather than the affordance vanishing.
+   */
+  disabled?: boolean;
+  /** Tooltip shown when disabled (e.g. "Maximum of 6 reached"). */
+  disabledReason?: string;
 }
 
-export function AddZeroCmsEntry({ field }: AddZeroCmsEntryProps) {
+export function AddZeroCmsEntry({ field, disabled, disabledReason }: AddZeroCmsEntryProps) {
   const widget = useZeroCmsWidgetOptional();
   const ctx = useZeroCmsEntry();
 
@@ -25,6 +32,8 @@ export function AddZeroCmsEntry({ field }: AddZeroCmsEntryProps) {
     <button
       type="button"
       aria-label={`Add ${field}`}
+      disabled={disabled}
+      title={disabled ? disabledReason : undefined}
       onClick={() =>
         void widget.openCreate({
           parentId: ctx.entryId,
@@ -32,7 +41,7 @@ export function AddZeroCmsEntry({ field }: AddZeroCmsEntryProps) {
           parentField: field,
         })
       }
-      className="zero-cms inline-flex items-center gap-1 rounded-md border border-dashed border-neutral-400 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:border-neutral-900 hover:text-neutral-900"
+      className="zero-cms inline-flex items-center gap-1 rounded-md border border-dashed border-neutral-400 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:border-neutral-900 hover:text-neutral-900 disabled:cursor-not-allowed disabled:border-neutral-200 disabled:text-neutral-300 disabled:hover:border-neutral-200 disabled:hover:text-neutral-300"
     >
       + Add
     </button>

@@ -16,10 +16,8 @@
     },
     {
       "__name": "image",
-      "__type": "reference",
-      "allowedTypes": [
-        "image-container"
-      ]
+      "__type": "asset",
+      "accept": "image"
     },
     {
       "__name": "reviewLink",

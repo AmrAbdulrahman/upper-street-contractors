@@ -15,10 +15,8 @@
     },
     {
       "__name": "cardImage",
-      "__type": "reference",
-      "allowedTypes": [
-        "image-container"
-      ]
+      "__type": "asset",
+      "accept": "image"
     },
     {
       "__name": "cardTitle",

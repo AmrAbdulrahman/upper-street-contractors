@@ -2,8 +2,10 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Toaster } from "sonner";
 import { ZeroCmsBar, ZeroCmsWidget } from "@usc/zero-cms-widget";
 import { revalidateCms } from "@/lib/cms/revalidate";
+import { cmsNotify } from "@/lib/cms/notify";
 import { HugeRTEBlocksEditor } from "@/components/cms/hugerte-blocks-editor";
 
 /**
@@ -34,21 +36,25 @@ export function CmsInspectShellClient({
   }, [router]);
 
   return (
-    <ZeroCmsWidget
-      inspect={inspect}
-      auth={{ baseUrl: "" }}
-      blocks={HugeRTEBlocksEditor}
-      onSaved={onContentChange}
-    >
-      <Suspense fallback={null}>
-        <InspectControls
-          inspect={inspect}
-          onInspectChange={setInspect}
-          onContentChange={onContentChange}
-        />
-      </Suspense>
-      {children}
-    </ZeroCmsWidget>
+    <>
+      <ZeroCmsWidget
+        inspect={inspect}
+        auth={{ baseUrl: "" }}
+        blocks={HugeRTEBlocksEditor}
+        notify={cmsNotify}
+        onSaved={onContentChange}
+      >
+        <Suspense fallback={null}>
+          <InspectControls
+            inspect={inspect}
+            onInspectChange={setInspect}
+            onContentChange={onContentChange}
+          />
+        </Suspense>
+        {children}
+      </ZeroCmsWidget>
+      <Toaster position="bottom-center" richColors closeButton />
+    </>
   );
 }
 

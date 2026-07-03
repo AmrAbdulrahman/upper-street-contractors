@@ -293,6 +293,21 @@ export class Engine {
     });
   }
 
+  /** Update editable metadata (alt text) on a media item; bytes stay untouched. */
+  async updateMediaMeta(
+    id: string,
+    meta: { alternativeText?: string }
+  ): Promise<MediaItem> {
+    return this.mutex.run(async () => {
+      const item = this.media.find((m) => m.id === id);
+      if (!item) throw new ZeroCmsError('NOT_FOUND', `No media "${id}"`);
+      if (meta.alternativeText !== undefined)
+        item.alternativeText = meta.alternativeText;
+      await this.port.writeMediaIndex(this.media);
+      return item;
+    });
+  }
+
   private findMediaUsage(mediaId: string) {
     const hits: ReferenceHit[] = [];
     for (const entry of this.entries) {

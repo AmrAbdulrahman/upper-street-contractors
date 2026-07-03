@@ -1,12 +1,11 @@
 import {
-  AddZeroCmsEntry,
   ZeroCmsEntry,
   ZeroCmsEntryField,
-  ZeroCmsRelationEntry,
+  ZeroCmsList,
 } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Button } from "@/components/ui/button";
-import { ImageContainer } from "@/components/ui/image-container";
+import { CmsImage } from "@/components/ui/cms-image";
 import { WhoWeAreSectionFragment } from "@/generated/graphql";
 
 type WhoWeAreSectionProps = {
@@ -46,30 +45,31 @@ export function WhoWeAreSection({ data }: WhoWeAreSectionProps) {
               </ZeroCmsEntryField>
             ) : null}
 
-            {buttonItems.length ? (
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                {buttonItems.map((button) =>
-                  button ? (
-                    <ZeroCmsEntry key={button.id} entry={button}>
-                      <Button data={button} />
-                    </ZeroCmsEntry>
-                  ) : null,
-                )}
-
-                <AddZeroCmsEntry field="buttons" />
-              </div>
-            ) : null}
+            <ZeroCmsList
+              className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap"
+              field="buttons"
+              items={buttonItems}
+            >
+              {buttonItems.map((button) =>
+                button ? (
+                  <ZeroCmsEntry key={button.id} entry={button}>
+                    <Button data={button} />
+                  </ZeroCmsEntry>
+                ) : null,
+              )}
+            </ZeroCmsList>
           </div>
 
-          <ZeroCmsRelationEntry entry={imageContainer} field="imageContainer">
+          <ZeroCmsEntryField field="imageContainer">
             <div className="min-w-0">
-              <ImageContainer
+              <CmsImage
                 data={imageContainer}
-                alt={imageContainer?.imgDescription ?? title ?? "Team photo"}
+                fallbackAlt={title ?? "Team photo"}
                 placeholderLabel="Team photo placeholder"
+                className="h-[340px] w-full rounded-2xl object-cover"
               />
             </div>
-          </ZeroCmsRelationEntry>
+          </ZeroCmsEntryField>
         </div>
       </section>
     </ZeroCmsEntry>

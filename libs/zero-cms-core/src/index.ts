@@ -27,7 +27,7 @@ export {
 export { bindStore, type Store } from './lib/client/store';
 
 // Adapter contract + http transport
-export type { Adapter, DanglingRef, MediaUpload } from './lib/adapter/adapter';
+export type { Adapter, DanglingRef, MediaUpload, MediaMetaUpdate } from './lib/adapter/adapter';
 export {
   createHttpAdapter,
   type HttpAdapterOptions,

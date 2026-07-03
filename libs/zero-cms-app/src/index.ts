@@ -10,6 +10,7 @@ export {
   type ZeroCmsProviderProps,
   type RichTextComponent,
   type BlocksComponent,
+  type NotifyFn,
 } from './lib/context';
 
 // Sub-views (compose your own shell) + field extensibility

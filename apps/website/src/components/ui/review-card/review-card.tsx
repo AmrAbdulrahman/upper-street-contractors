@@ -1,10 +1,6 @@
-import {
-  ZeroCmsEntry,
-  ZeroCmsEntryField,
-  ZeroCmsRelationEntry,
-} from "@usc/zero-cms-widget";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
-import { ImageContainer } from "@/components/ui/image-container";
+import { CmsImage } from "@/components/ui/cms-image";
 import { ReviewCardFragment } from "@/generated/graphql";
 import Link from "next/link";
 
@@ -109,16 +105,16 @@ function ReviewProfile({
   return (
     <ZeroCmsEntry entry={clientInfo}>
       <div className="mt-auto flex items-center gap-3 pt-6">
-        <ZeroCmsRelationEntry entry={image} field="image">
+        <ZeroCmsEntryField field="image">
           <div className="size-10 shrink-0 overflow-hidden rounded-full">
-            <ImageContainer
+            <CmsImage
               data={image}
-              alt={name ?? "Reviewer"}
+              fallbackAlt={name ?? "Reviewer"}
               placeholderLabel={name?.charAt(0)?.toUpperCase() ?? "?"}
-              className="!size-10 !h-10 !w-10 rounded-full"
+              className="size-10 rounded-full object-cover"
             />
           </div>
-        </ZeroCmsRelationEntry>
+        </ZeroCmsEntryField>
 
         <div className="min-w-0">
           {name ? (

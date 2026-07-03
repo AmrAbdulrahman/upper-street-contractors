@@ -53,7 +53,7 @@ export function WhyChooseUsSection({ data }: WhyChooseUsSectionProps) {
               role={cardRole}
               paragraph={cardParagraph}
               banner={cardBanner}
-              imageAlt={cardImage?.imgDescription ?? cardTitle ?? "Profile photo"}
+              imageAlt={cardTitle ?? "Profile photo"}
             />
           </div>
         </div>
