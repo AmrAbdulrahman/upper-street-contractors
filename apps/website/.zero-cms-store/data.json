@@ -59,7 +59,7 @@
     "__type": "at-aglance-card",
     "__status": "published",
     "values": {
-      "quantity": 471,
+      "quantity": 470,
       "unit": "+",
       "label": "Customer reviews"
     },
@@ -1120,8 +1120,8 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "We lead with quality project work.",
-              "type": "text"
+              "type": "text",
+              "text": "We lead with quality project work."
             }
           ]
         },
@@ -1129,8 +1129,8 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "Smaller repairs are also available for existing clients and local residents.",
-              "type": "text"
+              "type": "text",
+              "text": "Smaller repairs are also available for existing clients and local residents."
             }
           ]
         }
@@ -1177,35 +1177,7 @@
       ],
       "imageContainer": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
     },
-    "__draft": {
-      "overline": "who we are",
-      "title": "A local team you can trust",
-      "body": [
-        {
-          "type": "paragraph",
-          "children": [
-            {
-              "type": "text",
-              "text": "We're a family-run, owner-led team based in Islington. We specialise in bathroom renovations, kitchen installations and full home refurbishments—delivering calm, organised projects for busy homeowners who want the job done properly."
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "children": [
-            {
-              "type": "text",
-              "text": "From the first site visit to finishing touches, we manage the programme, coordinate trades, and keep communication clear. Smaller repairs and maintenance are also available for local clients who value a reliable team."
-            }
-          ]
-        }
-      ],
-      "buttons": [
-        "c6363c76-0fd6-4912-8448-d59a1fbd2de8",
-        "6eccc16e-28ed-47d1-b490-b2e0c1c04bd3"
-      ],
-      "imageContainer": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
-    }
+    "__draft": null
   },
   {
     "__id": "cd71c0a1-cd19-41db-99ae-cacc65724e6e",
@@ -1286,8 +1258,8 @@
           "type": "paragraph",
           "children": [
             {
-              "text": " High-quality installation, waterproofing, tiling, plumbing and electrics—managed end to end.\n              ",
-              "type": "text"
+              "type": "text",
+              "text": "High-quality installation, waterproofing, tiling, plumbing and electrics—managed end to end."
             }
           ]
         }
@@ -1354,8 +1326,8 @@
   {
     "__id": "f8d45096-d7a4-4e85-a646-1e99d622983a",
     "__type": "button",
-    "__status": "unpublished",
-    "values": null,
-    "__draft": {}
+    "__status": "published",
+    "values": {},
+    "__draft": null
   }
 ]

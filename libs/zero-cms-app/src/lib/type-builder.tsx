@@ -296,63 +296,70 @@ function FieldRow({
       )}
 
       {isRelation(field) && (
-        <div className="space-y-2">
-          <Select
-            value={field.__type}
-            onChange={(e) =>
-              onChange(withCardinality(field, e.target.value as 'reference' | 'references'))
-            }
-            className="max-w-44"
-          >
-            <option value="reference">→ One to One</option>
-            <option value="references">⇉ One to Many</option>
-          </Select>
+        <div className="space-y-3 rounded-md border border-neutral-200 bg-neutral-50 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            Configuration
+          </p>
 
-          <ReactSelect
-            isMulti
-            instanceId={`allowed-${field.__name}`}
-            unstyled
-            placeholder="Allowed types…"
-            options={typeNames.map((tn) => ({ value: tn, label: tn }))}
-            value={field.allowedTypes.map((tn) => ({ value: tn, label: tn }))}
-            onChange={(opts) => onChange({ ...field, allowedTypes: opts.map((o) => o.value) })}
-            classNames={{
-              control: (s) =>
-                cx(
-                  'flex w-full items-center rounded-md border bg-white px-2 py-1 text-sm transition',
-                  s.isFocused ? 'border-neutral-900 ring-1 ring-neutral-900' : 'border-neutral-300'
-                ),
-              valueContainer: () => 'flex flex-wrap gap-1',
-              multiValue: () =>
-                'inline-flex items-center gap-1 rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-700',
-              multiValueLabel: () => 'text-neutral-700',
-              multiValueRemove: () =>
-                'ml-0.5 cursor-pointer rounded text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800',
-              placeholder: () => 'text-neutral-400',
-              input: () => 'text-sm text-neutral-900',
-              indicatorsContainer: () => 'text-neutral-400',
-              dropdownIndicator: () => 'px-1 hover:text-neutral-700',
-              clearIndicator: () => 'px-1 hover:text-neutral-700',
-              indicatorSeparator: () => 'bg-neutral-200',
-              menu: () => 'z-50 mt-1 overflow-hidden rounded-md border border-neutral-200 bg-white shadow-lg',
-              menuList: () => 'py-1',
-              option: (s) =>
-                cx(
-                  'cursor-pointer px-3 py-2 text-sm',
-                  s.isFocused ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-700',
-                  s.isSelected && 'font-medium'
-                ),
-              noOptionsMessage: () => 'px-3 py-2 text-sm text-neutral-400',
-            }}
-          />
+          <FieldShell label="Cardinality">
+            <Select
+              value={field.__type}
+              onChange={(e) =>
+                onChange(withCardinality(field, e.target.value as 'reference' | 'references'))
+              }
+              className="max-w-44"
+            >
+              <option value="reference">→ One to One</option>
+              <option value="references">⇉ One to Many</option>
+            </Select>
+          </FieldShell>
+
+          <FieldShell label="Allowed types">
+            <ReactSelect
+              isMulti
+              instanceId={`allowed-${field.__name}`}
+              unstyled
+              aria-label="Allowed types"
+              placeholder="Allowed types…"
+              options={typeNames.map((tn) => ({ value: tn, label: tn }))}
+              value={field.allowedTypes.map((tn) => ({ value: tn, label: tn }))}
+              onChange={(opts) => onChange({ ...field, allowedTypes: opts.map((o) => o.value) })}
+              classNames={{
+                control: (s) =>
+                  cx(
+                    'flex w-full items-center rounded-md border bg-white px-2 py-1 text-sm transition',
+                    s.isFocused ? 'border-neutral-900 ring-1 ring-neutral-900' : 'border-neutral-300'
+                  ),
+                valueContainer: () => 'flex flex-wrap gap-1',
+                multiValue: () =>
+                  'inline-flex items-center gap-1 rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-700',
+                multiValueLabel: () => 'text-neutral-700',
+                multiValueRemove: () =>
+                  'ml-0.5 cursor-pointer rounded text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800',
+                placeholder: () => 'text-neutral-400',
+                input: () => 'text-sm text-neutral-900',
+                indicatorsContainer: () => 'text-neutral-400',
+                dropdownIndicator: () => 'px-1 hover:text-neutral-700',
+                clearIndicator: () => 'px-1 hover:text-neutral-700',
+                indicatorSeparator: () => 'bg-neutral-200',
+                menu: () => 'z-50 mt-1 overflow-hidden rounded-md border border-neutral-200 bg-white shadow-lg',
+                menuList: () => 'py-1',
+                option: (s) =>
+                  cx(
+                    'cursor-pointer px-3 py-2 text-sm',
+                    s.isFocused ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-700',
+                    s.isSelected && 'font-medium'
+                  ),
+                noOptionsMessage: () => 'px-3 py-2 text-sm text-neutral-400',
+              }}
+            />
+          </FieldShell>
 
           {field.__type === 'references' && (
-            <div className="flex items-center gap-3 text-sm text-neutral-600">
-              <label className="inline-flex items-center gap-1">
-                min
+            <div className="grid grid-cols-2 gap-3">
+              <FieldShell label="Min">
                 <Input
                   type="number"
-                  className="max-w-24"
                   value={field.min ?? ''}
                   onChange={(e) =>
                     onChange({
@@ -361,12 +368,10 @@ function FieldRow({
                     })
                   }
                 />
-              </label>
-              <label className="inline-flex items-center gap-1">
-                max
+              </FieldShell>
+              <FieldShell label="Max">
                 <Input
                   type="number"
-                  className="max-w-24"
                   value={field.max ?? ''}
                   onChange={(e) =>
                     onChange({
@@ -375,7 +380,7 @@ function FieldRow({
                     })
                   }
                 />
-              </label>
+              </FieldShell>
             </div>
           )}
         </div>

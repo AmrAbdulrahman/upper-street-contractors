@@ -100,6 +100,10 @@ _Avoid_: repeater, collection list
 Edit drawers layered on top of one another. Opening a linked child Entry (to edit) or creating a new one from within a drawer pushes a new panel; closing it returns to the panel beneath, with its state intact. New Entries are linked into the parent only when their create form is saved.
 _Avoid_: nested modal, sub-drawer
 
+**Link-on-save**:
+A newly created related Entry is linked into its parent only once the new Entry's own form is saved; cancelling creates no orphan. Applies wherever a Relation field is edited — Inspect mode and the Content admin alike.
+_Avoid_: Deferred link, optimistic create
+
 ## Editor access
 
 **Editor**:
