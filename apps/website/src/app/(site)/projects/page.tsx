@@ -1,49 +1,53 @@
-import {
-  ProjectsHeroPlaceholder,
-  ProjectsView,
-} from "@/components/sections/projects";
-import { getSiteMetaConfig } from "@/components/site-meta-config";
-import { GetProjectsDocument } from "@/generated/graphql";
-import { query } from "@/lib/cms/query";
+import { cache } from "react";
 import type { Metadata } from "next";
+import { ProjectsView } from "@/components/sections/projects";
+import { PageSection, type PageSectionData } from "@/components/sections/page-section";
+import { pageMetaToMetadata } from "@/components/metadata";
+import { getSiteMetaConfig } from "@/components/site-meta-config";
+import { GetPageDocument, GetProjectsDocument } from "@/generated/graphql";
+import { query } from "@/lib/cms/query";
+
+const PAGE_KEY = "projects";
+const PAGE_PATH = "/projects";
+
+const getPage = cache(() => query(GetPageDocument, { key: PAGE_KEY }));
 
 export async function generateMetadata(): Promise<Metadata> {
-  const siteMetaConfig = await getSiteMetaConfig();
-  const siteName = siteMetaConfig?.siteName ?? "Upper Street Contractors";
-  const title = "Projects";
-  const description =
-    "Bathrooms, kitchens and home refurbishments delivered across Islington and nearby areas.";
-  const absoluteTitle = `${title} | ${siteName}`;
-
-  return {
-    title: { absolute: absoluteTitle },
-    description,
-    alternates: {
-      canonical: "/projects",
-    },
-    openGraph: {
-      title: absoluteTitle,
-      description,
-      url: "/projects",
-    },
-    twitter: {
-      title: absoluteTitle,
-      description,
-    },
-  };
+  try {
+    const [siteMetaConfig, data] = await Promise.all([
+      getSiteMetaConfig(),
+      getPage(),
+    ]);
+    return pageMetaToMetadata(data?.pages?.at(0)?.meta, {
+      path: PAGE_PATH,
+      siteName: siteMetaConfig?.siteName ?? undefined,
+    });
+  } catch {
+    const siteMetaConfig = await getSiteMetaConfig();
+    return pageMetaToMetadata(null, {
+      path: PAGE_PATH,
+      siteName: siteMetaConfig?.siteName ?? undefined,
+    });
+  }
 }
 
 export default async function ProjectsPage() {
-  const data = await query(GetProjectsDocument);
+  const [pageData, projectsData] = await Promise.all([
+    getPage(),
+    query(GetProjectsDocument),
+  ]);
 
+  const sections = pageData.pages[0]?.sections ?? [];
   const projects =
-    data?.projectCards?.filter((item): item is NonNullable<typeof item> =>
-      Boolean(item),
+    projectsData?.projectCards?.filter(
+      (item): item is NonNullable<typeof item> => Boolean(item),
     ) ?? [];
 
   return (
     <>
-      <ProjectsHeroPlaceholder />
+      {sections.map((section, i) => (
+        <PageSection key={i} section={section as PageSectionData} />
+      ))}
       <ProjectsView projects={projects} />
     </>
   );

@@ -1,0 +1,23 @@
+{
+  "__name": "image-option",
+  "label": "Image Option",
+  "fields": [
+    {
+      "__name": "image",
+      "__type": "asset",
+      "accept": "image"
+    },
+    {
+      "__name": "emoji",
+      "__type": "text"
+    },
+    {
+      "__name": "label",
+      "__type": "text"
+    },
+    {
+      "__name": "description",
+      "__type": "text"
+    }
+  ]
+}

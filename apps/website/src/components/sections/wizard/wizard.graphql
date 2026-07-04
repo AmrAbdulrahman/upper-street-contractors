@@ -1,0 +1,62 @@
+fragment WizardSection on Wizard {
+  id
+  submitLabel
+  whatsappNumber
+  doneTitle
+  doneMessage
+  contactDetails {
+    ...ContactDetailsSection
+  }
+  questions {
+    __typename
+    ... on ImageQuestion {
+      ...ImageQuestion
+    }
+    ... on FormQuestion {
+      ...FormQuestion
+    }
+  }
+}
+
+fragment ImageQuestion on ImageQuestion {
+  id
+  stepLabel
+  title
+  hint
+  multiSelect
+  options {
+    ...ImageOption
+  }
+}
+
+fragment ImageOption on ImageOption {
+  id
+  emoji
+  label
+  description
+  image {
+    url
+    alt
+    width
+    height
+  }
+}
+
+fragment FormQuestion on FormQuestion {
+  id
+  stepLabel
+  title
+  hint
+  fields {
+    ...FormField
+  }
+}
+
+fragment FormField on FormField {
+  id
+  label
+  fieldKey
+  inputType
+  placeholder
+  required
+}

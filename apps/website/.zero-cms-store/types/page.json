@@ -25,6 +25,9 @@
       "__name": "sections",
       "__type": "references",
       "allowedTypes": [
+        "page-hero",
+        "wizard",
+        "contact-details",
         "home-header-section",
         "who-we-are-section",
         "accreditation-list",

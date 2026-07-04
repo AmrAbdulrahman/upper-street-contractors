@@ -1,0 +1,18 @@
+fragment ContactDetailsSection on ContactDetails {
+  id
+  title
+  note
+  items {
+    ...ContactDetailItem
+  }
+  whatsappButton {
+    ...Button
+  }
+}
+
+fragment ContactDetailItem on ContactDetailItem {
+  id
+  emoji
+  label
+  text
+}

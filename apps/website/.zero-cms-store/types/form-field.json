@@ -1,0 +1,33 @@
+{
+  "__name": "form-field",
+  "label": "Form Field",
+  "fields": [
+    {
+      "__name": "label",
+      "__type": "text"
+    },
+    {
+      "__name": "fieldKey",
+      "label": "Field key (used in the WhatsApp message)",
+      "__type": "text"
+    },
+    {
+      "__name": "inputType",
+      "__type": "lookup",
+      "options": [
+        "text",
+        "email",
+        "tel",
+        "textarea"
+      ]
+    },
+    {
+      "__name": "placeholder",
+      "__type": "text"
+    },
+    {
+      "__name": "required",
+      "__type": "boolean"
+    }
+  ]
+}

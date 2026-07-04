@@ -774,7 +774,8 @@
     "__type": "meta-data",
     "__status": "published",
     "values": {
-      "title": "Bathroom Renovations"
+      "title": "Bathroom Renovations",
+      "description": "Fully managed bathroom renovations in Islington from £8,000+, delivered by an in-house team with a 12-month workmanship guarantee."
     },
     "__draft": null
   },
@@ -787,7 +788,9 @@
       "title": "Bathroom Renovations",
       "description": "Bathroom Renovations",
       "meta": "d444a24c-c55d-4a9e-a338-380781f62456",
-      "sections": []
+      "sections": [
+        "2fedae3b-888d-4c67-99b6-db30f3dbdbcb"
+      ]
     },
     "__draft": null
   },
@@ -1337,6 +1340,559 @@
     "values": {
       "text": "Sample",
       "listIcon": "9bc6db03-9fcb-41c6-834c-c0759248bafb"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "79eb373b-32c5-4c70-b276-0fccac056209",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Request a Site Visit",
+      "variant": "outlined",
+      "color": "white",
+      "borderRadius": 8,
+      "iconPosition": "start",
+      "action": "contact_form",
+      "href": "/contact"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5da32a37-045b-487e-9573-1c313335ca56",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Book a Consultation",
+      "variant": "outlined",
+      "color": "white",
+      "borderRadius": 8,
+      "iconPosition": "start",
+      "action": "contact_form",
+      "href": "/contact"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "99328571-a4d1-401e-acdd-d5e80a9d8eb6",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Home Refurbishments",
+      "description": "Full-property home refurbishments and layout changes in Islington and North London, owner-led with an in-house team."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d868d656-e64e-4cbf-adc1-0603a8c76d59",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Kitchen Installations",
+      "description": "Kitchen installation and refurbishment in Islington — supply-and-install or fit-only, with all trades coordinated."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "dcdd8749-e8ce-4abf-82e4-9a692a74b517",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Projects",
+      "description": "Bathrooms, kitchens and home refurbishments delivered across Islington and nearby North London areas."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d750cf18-b9a6-481d-870b-a1eb1828fadb",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "About Us",
+      "description": "Owner-led, accountable renovation delivery in Islington — a family-run team serving North London since 2016."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "411d633e-2bb0-408f-aeaa-af90914b8057",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Projects",
+      "overline": "PROJECTS",
+      "title": "Renovations in North London",
+      "subtitle": "Bathrooms, kitchens and home refurbishments delivered across Islington and nearby areas. Each case study includes scope, location and timeline.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1c736f50-2fb2-4f49-b6c0-1271ae2d3b40",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Home Refurbishments",
+      "overline": "HOME REFURBISHMENTS & LAYOUT CHANGES · ISLINGTON",
+      "title": "Home Refurbishments & Layout Changes in Islington",
+      "subtitle": "Full-property refurbishments from £25,000 to £150,000+ with owner-led project management and an in-house team.",
+      "buttons": [
+        "79eb373b-32c5-4c70-b276-0fccac056209",
+        "8ba006d9-06ec-4204-a4c0-74bee0999002"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ba20c307-436d-465a-b252-08bb8495bff3",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Kitchen Installations",
+      "overline": "KITCHEN INSTALLATION & REFURBISHMENT IN ISLINGTON",
+      "title": "Kitchen Installation & Refurbishment in Islington",
+      "subtitle": "Supply-and-install or fit-only kitchens from £15,000+, with coordinated electrics, plumbing, carpentry and finishing.",
+      "buttons": [
+        "5da32a37-045b-487e-9573-1c313335ca56",
+        "8ba006d9-06ec-4204-a4c0-74bee0999002"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "2fedae3b-888d-4c67-99b6-db30f3dbdbcb",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Bathroom Renovations",
+      "overline": "BATHROOM RENOVATIONS IN ISLINGTON",
+      "title": "Bathroom Renovations in Islington",
+      "subtitle": "Fully managed bathroom installations from £8,000+ with an in-house team and tidy, respectful delivery.",
+      "buttons": [
+        "89600458-c302-4a4f-b372-fd11a5d40589",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c7d556b4-e2ad-4664-9e7f-745f7e78b39b",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "About Us",
+      "overline": "ABOUT US",
+      "title": "Owner-led, accountable renovation delivery",
+      "subtitle": "A family-run team based in Islington, serving North London homeowners since 2016.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c2067b83-4458-4bb8-a0ba-a05dcdc6cfdb",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "home-refurbishments-service",
+      "title": "Home Refurbishments",
+      "description": "Home Refurbishments & Layout Changes in Islington",
+      "meta": "99328571-a4d1-401e-acdd-d5e80a9d8eb6",
+      "sections": [
+        "1c736f50-2fb2-4f49-b6c0-1271ae2d3b40"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6811b324-362d-4273-bff9-f5da54bbb5fc",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "kitchen-installations-service",
+      "title": "Kitchen Installations",
+      "description": "Kitchen Installation & Refurbishment in Islington",
+      "meta": "d868d656-e64e-4cbf-adc1-0603a8c76d59",
+      "sections": [
+        "ba20c307-436d-465a-b252-08bb8495bff3"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "cf31babc-e991-4fe8-840c-1f6d051149ee",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "projects",
+      "title": "Projects",
+      "description": "Renovations in North London",
+      "meta": "dcdd8749-e8ce-4abf-82e4-9a692a74b517",
+      "sections": [
+        "411d633e-2bb0-408f-aeaa-af90914b8057"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "92bc3747-4d20-418c-be22-d576fe905d07",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "about-us",
+      "title": "About Us",
+      "description": "Owner-led, accountable renovation delivery",
+      "meta": "d750cf18-b9a6-481d-870b-a1eb1828fadb",
+      "sections": [
+        "c7d556b4-e2ad-4664-9e7f-745f7e78b39b"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d3905206-4527-4898-9987-db0a438813ad",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "emoji": "🏠",
+      "label": "Renovation Project",
+      "description": "Kitchen · Bathroom · Full home refurbishment",
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "96d95db8-6f72-4a1f-b61d-cf0cd97caa57",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "emoji": "🔧",
+      "label": "Handyman / Hourly Job",
+      "description": "Repairs · Maintenance · Small works",
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3ac9384d-c719-4b2b-ba98-3005fd3fc355",
+    "__type": "image-question",
+    "__status": "published",
+    "values": {
+      "stepLabel": "Project Type",
+      "title": "What type of project do you have?",
+      "hint": "Select one to get started",
+      "multiSelect": false,
+      "options": [
+        "d3905206-4527-4898-9987-db0a438813ad",
+        "96d95db8-6f72-4a1f-b61d-cf0cd97caa57"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "2307da48-46d3-4eb7-ab1a-b9b8166f247b",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "emoji": "🍳",
+      "label": "Kitchen",
+      "description": "",
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "56fdd56a-2999-46f4-8680-98eee1702f01",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "emoji": "🚿",
+      "label": "Bathroom",
+      "description": "",
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d88c9ad0-0c60-49db-b7ff-f5ce57dbeeef",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "emoji": "🛏️",
+      "label": "Bedroom",
+      "description": "",
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5f2868e8-e1fd-4381-b077-b791b93f3224",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "emoji": "🛋️",
+      "label": "Living Room",
+      "description": "",
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d5e373a9-c349-4401-9838-6266f11557b2",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "emoji": "🪜",
+      "label": "Hallway / Stairs",
+      "description": "",
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7a78387b-08d2-45b3-a1e2-f8017435e57c",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "emoji": "🌳",
+      "label": "Garden / Outdoor",
+      "description": "",
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "68b25dce-54a4-424d-a094-f6e6c985b2f8",
+    "__type": "image-question",
+    "__status": "published",
+    "values": {
+      "stepLabel": "Details",
+      "title": "Which rooms need work?",
+      "hint": "Select all that apply, then tap Next",
+      "multiSelect": true,
+      "options": [
+        "2307da48-46d3-4eb7-ab1a-b9b8166f247b",
+        "56fdd56a-2999-46f4-8680-98eee1702f01",
+        "d88c9ad0-0c60-49db-b7ff-f5ce57dbeeef",
+        "5f2868e8-e1fd-4381-b077-b791b93f3224",
+        "d5e373a9-c349-4401-9838-6266f11557b2",
+        "7a78387b-08d2-45b3-a1e2-f8017435e57c"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1a302d23-e2b7-4bc5-93e7-226a1d27b8b7",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "Name",
+      "fieldKey": "name",
+      "inputType": "text",
+      "placeholder": "Your name",
+      "required": true
+    },
+    "__draft": null
+  },
+  {
+    "__id": "45c1955b-71af-4435-be74-f1c4cb10e663",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "Email",
+      "fieldKey": "email",
+      "inputType": "email",
+      "placeholder": "you@example.com",
+      "required": true
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f23d64cf-868c-4cd6-b07f-8c8d305e8d0b",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "Phone",
+      "fieldKey": "phone",
+      "inputType": "tel",
+      "placeholder": "07…",
+      "required": false
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3c8f841d-ad25-4de1-bc36-398e08a84951",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "Postcode",
+      "fieldKey": "postcode",
+      "inputType": "text",
+      "placeholder": "e.g. N1 1AA",
+      "required": false
+    },
+    "__draft": null
+  },
+  {
+    "__id": "08b4de10-699f-4589-8e05-67ed95d735b2",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "Project details",
+      "fieldKey": "message",
+      "inputType": "textarea",
+      "placeholder": "Tell us a bit about your project",
+      "required": false
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9f1d7a7c-1e96-488c-8f4e-1cdc66316087",
+    "__type": "form-question",
+    "__status": "published",
+    "values": {
+      "stepLabel": "Your Info",
+      "title": "Your details",
+      "hint": "How can we reach you?",
+      "fields": [
+        "1a302d23-e2b7-4bc5-93e7-226a1d27b8b7",
+        "45c1955b-71af-4435-be74-f1c4cb10e663",
+        "f23d64cf-868c-4cd6-b07f-8c8d305e8d0b",
+        "3c8f841d-ad25-4de1-bc36-398e08a84951",
+        "08b4de10-699f-4589-8e05-67ed95d735b2"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b138b032-a022-4930-92db-f295b6c341ca",
+    "__type": "wizard",
+    "__status": "published",
+    "values": {
+      "questions": [
+        "3ac9384d-c719-4b2b-ba98-3005fd3fc355",
+        "68b25dce-54a4-424d-a094-f6e6c985b2f8",
+        "9f1d7a7c-1e96-488c-8f4e-1cdc66316087"
+      ],
+      "contactDetails": "ccf3369b-9299-4b16-9971-a0b3424b58b8",
+      "submitLabel": "Send on WhatsApp",
+      "whatsappNumber": "447876295091",
+      "doneTitle": "Thanks — opening WhatsApp",
+      "doneMessage": "Your enquiry has been prefilled in WhatsApp. Just hit send and we'll reply, usually within a few hours."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6a33ca19-a719-427b-9619-64c47b61ffc5",
+    "__type": "contact-detail-item",
+    "__status": "published",
+    "values": {
+      "emoji": "📞",
+      "label": "PHONE",
+      "text": "020 7424 5466"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "005aa355-ab9b-46a6-b6c2-164516edb067",
+    "__type": "contact-detail-item",
+    "__status": "published",
+    "values": {
+      "emoji": "✉️",
+      "label": "EMAIL",
+      "text": "info@upperstreet.contractors"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e9061a28-d36e-4de3-8e2c-c7270cea773d",
+    "__type": "contact-detail-item",
+    "__status": "published",
+    "values": {
+      "emoji": "📍",
+      "label": "ADDRESS",
+      "text": "Unit 7, 149 Roman Way\nLondon N7 8XH"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5ba777bc-924e-489e-90ba-911947065905",
+    "__type": "contact-detail-item",
+    "__status": "published",
+    "values": {
+      "emoji": "🕐",
+      "label": "HOURS",
+      "text": "Mon–Fri: 8am–6pm\nSat: 9am–2pm"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "0afd4394-f6ce-4c71-b109-6d662767a212",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Open WhatsApp",
+      "variant": "contained",
+      "color": "green",
+      "borderRadius": 8,
+      "icon": "9bc6db03-9fcb-41c6-834c-c0759248bafb",
+      "iconPosition": "start",
+      "action": "whatsapp",
+      "href": "https://wa.me/442074245466"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ccf3369b-9299-4b16-9971-a0b3424b58b8",
+    "__type": "contact-details",
+    "__status": "published",
+    "values": {
+      "title": "Get in touch directly",
+      "items": [
+        "6a33ca19-a719-427b-9619-64c47b61ffc5",
+        "005aa355-ab9b-46a6-b6c2-164516edb067",
+        "e9061a28-d36e-4de3-8e2c-c7270cea773d",
+        "5ba777bc-924e-489e-90ba-911947065905"
+      ],
+      "note": "Fastest response: send photos + postcode + what you need on WhatsApp. We typically reply within a few hours.",
+      "whatsappButton": "0afd4394-f6ce-4c71-b109-6d662767a212"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4fb23715-9d85-48c0-b54b-a908d0858fa9",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Contact",
+      "overline": "GET IN TOUCH",
+      "title": "Let's talk about your project",
+      "subtitle": "Send photos on WhatsApp for a quick response, or fill in the form below for a site visit and detailed quote.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c1c2ec44-7d06-4891-916f-78e2ab267e57",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Contact",
+      "description": "Get in touch with Upper Street Contractors — request a quote, book a site visit, or message us on WhatsApp."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "0de9e1f6-087a-4dad-ad72-a400a973a7c0",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "contact",
+      "title": "Contact",
+      "description": "Contact Upper Street Contractors",
+      "meta": "c1c2ec44-7d06-4891-916f-78e2ab267e57",
+      "sections": [
+        "4fb23715-9d85-48c0-b54b-a908d0858fa9",
+        "b138b032-a022-4930-92db-f295b6c341ca"
+      ]
     },
     "__draft": null
   }

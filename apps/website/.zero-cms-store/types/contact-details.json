@@ -1,0 +1,28 @@
+{
+  "__name": "contact-details",
+  "label": "Contact Details",
+  "fields": [
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "items",
+      "__type": "references",
+      "allowedTypes": [
+        "contact-detail-item"
+      ]
+    },
+    {
+      "__name": "note",
+      "__type": "longtext"
+    },
+    {
+      "__name": "whatsappButton",
+      "__type": "reference",
+      "allowedTypes": [
+        "button"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+query GetPage($key: String!, $status: CmsReadStatus = published, $includeUnpublished: Boolean) {
+  pages(
+    filters: { key: { eq: $key } }
+    pagination: { limit: 1 }
+    status: $status
+    includeUnpublished: $includeUnpublished
+  ) {
+    id
+    title
+    description
+    meta {
+      ...PageMetadata
+    }
+    sections {
+      __typename
+      ... on PageHero {
+        ...PageHeroSection
+      }
+      ... on Wizard {
+        ...WizardSection
+      }
+      ... on ContactDetails {
+        ...ContactDetailsSection
+      }
+      ... on HomeHeaderSection {
+        ...HomeHeroSection
+      }
+      ... on WhoWeAreSection {
+        ...WhoWeAreSection
+      }
+      ... on AccreditationList {
+        ...AccreditationList
+      }
+      ... on WhatWeDoSection {
+        ...WhatWeDoSection
+      }
+      ... on WhyChooseUsSection {
+        ...WhyChooseUsSection
+      }
+      ... on HowItWorksSection {
+        ...HowItWorksSection
+      }
+      ... on RecentWorkSection {
+        ...RecentWorkSection
+      }
+      ... on ClientReviewSection {
+        ...ClientReviewSection
+      }
+      ... on PlanningRenovationSection {
+        ...PlanningRenovationSection
+      }
+    }
+  }
+}

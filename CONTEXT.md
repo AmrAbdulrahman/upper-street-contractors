@@ -12,6 +12,18 @@ _Avoid_: Job, portfolio item, case file
 The home page section that lists curated Projects with a link to the full projects index.
 _Avoid_: Portfolio section, gallery, work showcase
 
+**Page Hero**:
+The banner section at the top of an interior page (Refurbishments, Kitchens, Bathrooms, Projects, About), rendered from a `page-hero` CMS entry in the page's `sections`: a `Home / <label>` breadcrumb, a gold uppercase overline, a serif title, a subtitle, and an optional row of CTA buttons (a page with none simply omits them). Distinct from the Home hero (the `HomeHeaderSection` atop the home page, which carries the at-a-glance panel).
+_Avoid_: page header, banner, ProjectsHeroPlaceholder (the removed UI-only mock)
+
+**Enquiry Wizard**:
+A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select) or a **Form Question** (text/email/tel/textarea fields). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it auto-opens (after ~5s) a WhatsApp message prefilled from the answers to the configured `whatsappNumber`.
+_Avoid_: form, survey, quiz, multi-step form
+
+**Contact Details panel**:
+The `contact-details` section listing ways to reach the company as items (each a `contact-detail-item`: emoji, label, text), plus a note and a WhatsApp button.
+_Avoid_: contact card, info box, get-in-touch
+
 **Category tag**:
 The gold uppercase badge overlaid on a Project card image showing the renovation type (e.g. Refurbishment, Bathroom).
 _Avoid_: Label, pill, proj-tag (CSS class name only)

@@ -1,9 +1,12 @@
 export { AccreditationList } from "./accreditation-list";
 export { ClientReviewsSection } from "./client-reviews";
+export { ContactDetailsSection } from "./contact-details";
 export { HeroHeroSection } from "./home-hero";
 export { HowItWorksSection } from "./how-it-works";
+export { PageHeroSection } from "./page-hero";
 export { RecentWorkSection } from "./recent-work";
 export { PageSection, type PageSectionData } from "./page-section";
 export { WhatWeDoSection } from "./what-we-do";
 export { WhoWeAreSection } from "./who-we-are";
 export { WhyChooseUsSection } from "./why-choose-us";
+export { WizardSection } from "./wizard";
