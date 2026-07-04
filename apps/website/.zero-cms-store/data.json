@@ -945,7 +945,7 @@
     "__type": "review-card",
     "__status": "published",
     "values": {
-      "score": 3.5,
+      "score": 4.5,
       "clientReview": [
         {
           "type": "paragraph",
@@ -1328,6 +1328,16 @@
     "__type": "button",
     "__status": "published",
     "values": {},
+    "__draft": null
+  },
+  {
+    "__id": "6ff5190a-f10a-4f2b-8218-b95b88ded28d",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "Sample",
+      "listIcon": "9bc6db03-9fcb-41c6-834c-c0759248bafb"
+    },
     "__draft": null
   }
 ]

@@ -1,13 +1,12 @@
 'use client';
 
-import { useMemo, type ComponentType } from 'react';
+import { useMemo, useState, type ComponentType } from 'react';
 import { Controller } from 'react-hook-form';
 import { DragDropProvider } from '@dnd-kit/react';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { move } from '@dnd-kit/helpers';
-import ReactSelect from 'react-select';
 import type { RendererProps } from '../registry/types';
-import { cls, cx } from '../../components/ui';
+import { Button, Input, cx } from '../../components/ui';
 import { useZeroCms } from '../../context';
 import { useReferenceActions } from '../../reference-actions';
 import { useEntryOptions } from '../entry-options';
@@ -73,10 +72,91 @@ function SortableReferenceItem({
   );
 }
 
-/** An option in the add dropdown: link an existing entry, or create a new one. */
-type AddOption =
-  | { kind: 'link'; value: string; label: string }
-  | { kind: 'create'; value: string; label: string; ctype: string };
+/**
+ * "+ Add…" control for the plain (non-visual) references editor: a button that
+ * toggles a searchable list of linkable entries plus "create new" actions.
+ *
+ * Its open state is LOCAL and not tied to any input's focus — deliberately NOT a
+ * react-select. A react-select menu closes the instant its text input blurs, and the
+ * sibling drag-and-drop list (@dnd-kit) steals focus back to a drag handle whenever
+ * the control is opened by clicking anywhere but the text input, so the menu flashed
+ * open then shut. A plain toggled panel survives that focus churn.
+ */
+function AddReferenceControl({
+  available,
+  createTypes,
+  canCreate,
+  atMax,
+  max,
+  onLink,
+  onCreate,
+}: {
+  available: RefOption[];
+  createTypes: { type: string; label: string }[];
+  canCreate: boolean;
+  atMax: boolean;
+  max?: number;
+  onLink: (id: string) => void;
+  onCreate: (type: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const q = search.trim().toLowerCase();
+  const filtered = q ? available.filter((o) => o.label.toLowerCase().includes(q)) : available;
+
+  if (atMax) return <p className="text-sm text-neutral-500">Maximum of {max} reached.</p>;
+
+  return (
+    <div className="space-y-2">
+      <Button onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        {open ? 'Close' : '+ Add…'}
+      </Button>
+      {open && (
+        <div className="space-y-2 rounded-md border border-neutral-200 p-2">
+          {available.length > 0 && (
+            <>
+              <Input
+                placeholder="Search entries…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search entries"
+              />
+              <ul className="max-h-64 space-y-1 overflow-y-auto">
+                {filtered.map((o) => (
+                  <li key={o.id}>
+                    <button
+                      type="button"
+                      onClick={() => onLink(o.id)}
+                      className="w-full truncate rounded-md px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+                    >
+                      {o.label}
+                    </button>
+                  </li>
+                ))}
+                {filtered.length === 0 && (
+                  <li className="px-3 py-2 text-sm text-neutral-400">No matches.</li>
+                )}
+              </ul>
+            </>
+          )}
+          {canCreate &&
+            createTypes.map((c) => (
+              <Button
+                key={c.type}
+                onClick={() => onCreate(c.type)}
+                className="w-full justify-start"
+              >
+                ＋ Add new {c.label}
+              </Button>
+            ))}
+          {available.length === 0 && !canCreate && (
+            <p className="px-1 py-1 text-sm text-neutral-400">No entries to add.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export const ReferencesRenderer: ComponentType<RendererProps> = ({ field, control }) => {
   const allowed = field.__type === 'references' ? field.allowedTypes : [];
@@ -137,30 +217,6 @@ export const ReferencesRenderer: ComponentType<RendererProps> = ({ field, contro
         const remove = (index: number) => {
           if (canRemove) f.onChange(selected.filter((_, i) => i !== index));
         };
-
-        const groups: { label: string; options: AddOption[] }[] = [
-          {
-            label: 'Link existing',
-            options: available.map((o) => ({ kind: 'link', value: o.id, label: o.label })),
-          },
-        ];
-        if (createNew && !atMax && createTypes.length)
-          groups.push({
-            label: 'Create new',
-            options: createTypes.map((c) => ({
-              kind: 'create',
-              value: `__create:${c.type}`,
-              label: `＋ Add new ${c.label}`,
-              ctype: c.type,
-            })),
-          });
-
-        const onPick = (opt: AddOption | null) => {
-          if (!opt || atMax) return;
-          if (opt.kind === 'create') void createNew?.(opt.ctype);
-          else if (!selectedSet.has(opt.value)) f.onChange([...selected, opt.value]);
-        };
-
         const canCreate = Boolean(createNew && createTypes.length);
 
         return (
@@ -185,34 +241,14 @@ export const ReferencesRenderer: ComponentType<RendererProps> = ({ field, contro
                 </ul>
               </DragDropProvider>
             )}
-            <ReactSelect<AddOption, false, { label: string; options: AddOption[] }>
-              instanceId={field.__name}
-              unstyled
-              value={null}
-              controlShouldRenderValue={false}
-              options={groups}
-              isDisabled={atMax || (available.length === 0 && !canCreate)}
-              placeholder={atMax ? `Maximum of ${max} reached` : options.length || canCreate ? '+ Add…' : 'Loading…'}
-              onChange={(opt) => onPick(opt as AddOption | null)}
-              menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 2000 }) }}
-              classNames={{
-                control: (s) =>
-                  cx(cls.input, 'flex min-h-[2.5rem] cursor-pointer p-0 pl-1', s.isFocused && 'border-neutral-900 ring-1 ring-neutral-900'),
-                valueContainer: () => 'px-2',
-                placeholder: () => 'text-neutral-500',
-                input: () => 'text-sm text-neutral-900',
-                indicatorsContainer: () => 'text-neutral-400',
-                dropdownIndicator: () => 'px-2 hover:text-neutral-700',
-                indicatorSeparator: () => 'bg-neutral-200',
-                menu: () => cx(cls.card, 'mt-1 overflow-hidden shadow-lg'),
-                menuList: () => 'max-h-64 py-1',
-                group: () => 'py-1',
-                groupHeading: () => 'px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-400',
-                option: (s) =>
-                  cx('cursor-pointer px-3 py-2 text-sm', s.isFocused ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-700'),
-                noOptionsMessage: () => 'px-3 py-2 text-sm text-neutral-500',
-              }}
+            <AddReferenceControl
+              available={available}
+              createTypes={createTypes}
+              canCreate={canCreate}
+              atMax={atMax}
+              max={max}
+              onLink={(id) => f.onChange([...selected, id])}
+              onCreate={(t) => void createNew?.(t)}
             />
           </div>
         );
