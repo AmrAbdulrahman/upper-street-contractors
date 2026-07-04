@@ -87,7 +87,9 @@
       "__type": "references",
       "allowedTypes": [
         "client-comment"
-      ]
+      ],
+      "max": 2,
+      "min": 1
     },
     {
       "__name": "projectTimeline",
@@ -118,6 +120,22 @@
       "__type": "reference",
       "allowedTypes": [
         "author"
+      ]
+    },
+    {
+      "__name": "cta",
+      "label": "Project CTA",
+      "__type": "reference",
+      "allowedTypes": [
+        "cta"
+      ]
+    },
+    {
+      "__name": "sidebarCta",
+      "label": "Sidebar CTA",
+      "__type": "reference",
+      "allowedTypes": [
+        "cta"
       ]
     }
   ]

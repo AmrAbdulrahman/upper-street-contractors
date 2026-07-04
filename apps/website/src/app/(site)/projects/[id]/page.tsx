@@ -90,7 +90,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     (c): c is NonNullable<typeof c> => Boolean(c),
   );
   const pullQuote = comments[0] ?? null;
-  const miniQuote = comments[1] ?? comments[0] ?? null;
+  const miniQuote = comments[1] ?? null;
 
   return (
     <>
@@ -129,7 +129,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </div>
 
               <aside>
-                <ProjectGlance project={project} quote={miniQuote} />
+                <ProjectGlance
+                  project={project}
+                  quote={miniQuote}
+                  sidebarCta={project.sidebarCta}
+                />
               </aside>
             </div>
           </div>
@@ -137,7 +141,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       </ZeroCmsEntry>
 
       <SimilarProjects projects={similar} />
-      <ProjectCta />
+      <ProjectCta data={project.cta} />
     </>
   );
 }

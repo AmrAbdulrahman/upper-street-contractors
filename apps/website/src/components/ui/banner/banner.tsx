@@ -3,7 +3,13 @@ import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Button } from "@/components/ui/button";
 import { BannerFragment } from "@/generated/graphql";
 
-export const BANNER_VARIANTS = ["dark", "light", "note", "transparent"] as const;
+export const BANNER_VARIANTS = [
+  "dark",
+  "light",
+  "note",
+  "transparent",
+  "glass",
+] as const;
 export type BannerVariant = (typeof BANNER_VARIANTS)[number];
 
 type BannerProps = {
@@ -18,6 +24,7 @@ export function normalizeBannerVariant(variant?: string | null): BannerVariant {
   if (key === "light") return "light";
   if (key === "note") return "note";
   if (key === "transparent") return "transparent";
+  if (key === "glass") return "glass";
 
   return "light";
 }
@@ -45,6 +52,10 @@ const variantContainerClasses: Record<
     base: "rounded-sm border-2 border-border bg-transparent text-muted",
     hoverable: "hover:border-gold/60",
   },
+  glass: {
+    base: "rounded-lg border border-white/10 bg-white/[0.06] text-white/80",
+    hoverable: "hover:border-white/25",
+  },
 };
 
 const titleClasses: Record<BannerVariant, string> = {
@@ -52,6 +63,7 @@ const titleClasses: Record<BannerVariant, string> = {
   light: "font-bold text-dark",
   note: "font-bold text-dark",
   transparent: "font-bold text-dark",
+  glass: "font-bold text-white",
 };
 
 function getRichTextVariant(
@@ -62,7 +74,9 @@ function getRichTextVariant(
     return "banner-body-inline";
   }
 
-  return bannerVariant === "dark" ? "banner-body-dark" : "banner-body-light";
+  return bannerVariant === "dark" || bannerVariant === "glass"
+    ? "banner-body-dark"
+    : "banner-body-light";
 }
 
 export function Banner({ data, className = "" }: BannerProps) {

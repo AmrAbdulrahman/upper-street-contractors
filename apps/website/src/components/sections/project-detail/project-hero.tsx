@@ -1,4 +1,4 @@
-import { ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import type { ProjectDetailFragment } from "@/generated/graphql";
 import { getDuration } from "@/helpers/project-meta";
 import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
@@ -34,7 +34,7 @@ function GalleryFigure({
   const url = resolveStrapiMediaUrl(img.image?.url);
   return (
     <figure
-      className={`relative overflow-hidden rounded-lg border border-white/10 bg-white/5 ${className ?? ""}`}
+      className={`relative overflow-hidden border border-white/10 bg-white/5 ${className ?? ""}`}
     >
       {url ? (
         <Image
@@ -73,7 +73,7 @@ export function ProjectHero({ project }: { project: ProjectDetailFragment }) {
 
   return (
     <section className="bg-dark text-white">
-      <div className="mx-auto max-w-container px-6 pt-[72px] pb-16">
+      <div className="mx-auto max-w-container px-6 pt-[72px]">
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-2 text-[13px] text-subtle">
             <li>
@@ -115,11 +115,31 @@ export function ProjectHero({ project }: { project: ProjectDetailFragment }) {
         </ZeroCmsEntryField>
 
         <ul className="mt-6 flex flex-wrap gap-2" aria-label="Project facts">
-          {location ? <li className={glassChip}>📍 {location}</li> : null}
-          {duration ? <li className={glassChip}>⏱ {duration}</li> : null}
-          {projectValue ? <li className={goldChip}>{projectValue}</li> : null}
-          {subCategory ? <li className={glassChip}>🏠 {subCategory}</li> : null}
-          {year ? <li className={glassChip}>✓ Completed {year}</li> : null}
+          {location ? (
+            <ZeroCmsEntryField field="location">
+              <li className={glassChip}>📍 {location}</li>
+            </ZeroCmsEntryField>
+          ) : null}
+          {duration ? (
+            <ZeroCmsEntryField field="beginDate">
+              <li className={glassChip}>⏱ {duration}</li>
+            </ZeroCmsEntryField>
+          ) : null}
+          {projectValue ? (
+            <ZeroCmsEntryField field="projectValue">
+              <li className={goldChip}>{projectValue}</li>
+            </ZeroCmsEntryField>
+          ) : null}
+          {subCategory ? (
+            <ZeroCmsEntryField field="subCategory">
+              <li className={glassChip}>🏠 {subCategory}</li>
+            </ZeroCmsEntryField>
+          ) : null}
+          {year ? (
+            <ZeroCmsEntryField field="endDate">
+              <li className={glassChip}>✓ Completed {year}</li>
+            </ZeroCmsEntryField>
+          ) : null}
         </ul>
 
         {intro.length ? (
@@ -133,24 +153,27 @@ export function ProjectHero({ project }: { project: ProjectDetailFragment }) {
         ) : null}
 
         {main ? (
-          <div className="mt-10 grid gap-3 md:h-[460px] md:grid-cols-3">
+          <div className="mt-10 grid gap-3 overflow-hidden rounded-t-lg md:h-[460px] md:grid-cols-3">
             <div className={sides.length ? "md:col-span-2" : "md:col-span-3"}>
-              <GalleryFigure
-                img={main}
-                className="h-64 md:h-full"
-                sizes="(max-width: 768px) 100vw, 66vw"
-                priority
-              />
+              <ZeroCmsEntry entry={main}>
+                <GalleryFigure
+                  img={main}
+                  className="h-64 md:h-full"
+                  sizes="(max-width: 768px) 100vw, 66vw"
+                  priority
+                />
+              </ZeroCmsEntry>
             </div>
             {sides.length ? (
               <div className="grid gap-3 md:grid-rows-2">
                 {sides.map((img) => (
-                  <GalleryFigure
-                    key={img.id}
-                    img={img}
-                    className="h-40 md:h-full"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
+                  <ZeroCmsEntry key={img.id} entry={img}>
+                    <GalleryFigure
+                      img={img}
+                      className="h-40 md:h-full"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </ZeroCmsEntry>
                 ))}
               </div>
             ) : null}

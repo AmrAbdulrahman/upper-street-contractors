@@ -41,10 +41,10 @@ export function ProjectScope({ summary, deliverables }: ProjectScopeProps) {
       >
         {items.map((d, i) => (
           <ZeroCmsEntry key={d.id} entry={d}>
-            <div className="flex gap-4 border-b border-border py-5 first:pt-0 last:border-0">
+            <div className="flex gap-4 border-b border-border-light py-5 first:pt-0 last:border-0">
               <span
                 aria-hidden
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-dark font-serif text-sm leading-none text-white ring-2 ring-dark ring-offset-2 ring-offset-surface"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-gold bg-gold-light text-xs font-bold leading-none text-gold"
               >
                 {i + 1}
               </span>

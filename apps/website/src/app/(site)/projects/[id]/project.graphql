@@ -1,4 +1,5 @@
 #import "../../components/ui/project-card/project-card.graphql"
+#import "../../components/ui/cta/cta.graphql"
 
 fragment ProjectDetail on Project {
   ...ProjectCard
@@ -36,6 +37,12 @@ fragment ProjectDetail on Project {
   }
   similarWork {
     ...ProjectCard
+  }
+  cta {
+    ...Cta
+  }
+  sidebarCta {
+    ...Cta
   }
 }
 

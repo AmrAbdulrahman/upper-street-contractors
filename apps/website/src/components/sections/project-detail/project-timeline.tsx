@@ -40,7 +40,7 @@ export function ProjectTimeline({ steps }: ProjectTimelineProps) {
             <div className="relative text-center">
               <span
                 aria-hidden
-                className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-dark px-1 text-center font-serif text-[11px] leading-none text-white ring-4 ring-surface"
+                className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-dark px-1 text-center font-serif text-[11px] leading-none text-white ring-2 ring-dark ring-offset-2 ring-offset-surface"
               >
                 {s.step}
               </span>

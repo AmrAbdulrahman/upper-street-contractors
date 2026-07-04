@@ -487,7 +487,8 @@
       "color": "green",
       "borderRadius": 8,
       "icon": "9bc6db03-9fcb-41c6-834c-c0759248bafb",
-      "action": "whatsapp"
+      "action": "whatsapp",
+      "href": "https://wa.me/442074245466"
     },
     "__draft": null
   },
@@ -909,20 +910,29 @@
       "category": "Kitchen",
       "subCategory": "Rear kitchen extension",
       "location": "Barnsbury, N1",
-      "beginDate": "2025-04-07",
+      "beginDate": "2025-03-31",
       "endDate": "2025-05-12",
       "projectValue": "£45k",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
       "summary": "Howdens supply-and-install · Structural opening · Underfloor heating",
       "description": "A dark galley kitchen was transformed into a bright open-plan kitchen-diner opening onto the garden.\n\nWe formed a structural opening, laid underfloor heating and fitted a new kitchen with quartz worktops.",
+      "hero": "5302973b-899b-4cf8-9d83-9214ac26fe45",
       "featured": true,
       "deliveredSummary": "A structural kitchen extension completed in five weeks.",
       "deliverables": [
         "3b36838d-b3d0-4dc0-8e03-a12c986c9904",
         "9da464fa-a2ee-43fa-9aa7-bde6e9758ce2",
-        "9fe0a72f-9fd1-40b6-a84a-719badeb7ae3"
+        "9fe0a72f-9fd1-40b6-a84a-719badeb7ae3",
+        "b1d25a49-d4ce-4b5e-a9f7-672621d36b56",
+        "55b0032f-c8ce-4d99-9405-588483718e6e",
+        "472289ff-c213-43b2-ae0f-943b685a03cf",
+        "2846bab7-72a6-48d2-96ca-75e32da9bf78",
+        "b2320ed0-38fa-4c4b-9631-7d47b80d5196"
       ],
       "clientComments": [
-        "9c9473c5-0268-44c9-aecf-3d59831c0fa1"
+        "12d8fb55-9588-4182-8a8c-a6e02aa7a0b5",
+        "355d27e3-4a38-4bae-96bf-0dc597755975"
       ],
       "projectTimeline": [
         "2288b2ac-1d9d-4f42-b971-ef35ae9d3dc4",
@@ -931,13 +941,13 @@
         "6a24e1ad-1a18-400d-a582-7022091f287c"
       ],
       "projectImages": [
-        "275fa2ae-da58-4e17-8c78-d94d9fa7848d",
         "aecd7b56-aebb-4a6f-8ffb-085c5128f0c5",
-        "6493215e-c627-47d5-bec0-39e76c388cad"
+        "6493215e-c627-47d5-bec0-39e76c388cad",
+        "275fa2ae-da58-4e17-8c78-d94d9fa7848d"
       ],
-      "hero": "5302973b-899b-4cf8-9d83-9214ac26fe45",
-      "clientRating": 5,
-      "occupancy": "Occupied throughout"
+      "similarWork": [],
+      "cta": "53ca36a4-a857-4a03-9da1-29c81d70537a",
+      "sidebarCta": "6cd93914-3c86-4c87-9a4e-59818963f4da"
     },
     "__draft": null
   },
@@ -1254,7 +1264,7 @@
         "c6363c76-0fd6-4912-8448-d59a1fbd2de8",
         "6eccc16e-28ed-47d1-b490-b2e0c1c04bd3"
       ],
-      "imageContainer": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+      "imageContainer": "94853c3c-fbed-4c43-aa71-acbcaddfa528"
     },
     "__draft": null
   },
@@ -1628,10 +1638,10 @@
     "__type": "image-option",
     "__status": "published",
     "values": {
+      "image": "360afa34-c056-4322-8d43-241fa78e067e",
       "emoji": "🏠",
       "label": "Renovation Project",
-      "description": "Kitchen · Bathroom · Full home refurbishment",
-      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+      "description": "Kitchen · Bathroom · Full home refurbishment"
     },
     "__draft": null
   },
@@ -1640,10 +1650,10 @@
     "__type": "image-option",
     "__status": "published",
     "values": {
+      "image": "360afa34-c056-4322-8d43-241fa78e067e",
       "emoji": "🔧",
       "label": "Handyman / Hourly Job",
-      "description": "Repairs · Maintenance · Small works",
-      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+      "description": "Repairs · Maintenance · Small works"
     },
     "__draft": null
   },
@@ -1668,10 +1678,9 @@
     "__type": "image-option",
     "__status": "published",
     "values": {
+      "image": "360afa34-c056-4322-8d43-241fa78e067e",
       "emoji": "🍳",
-      "label": "Kitchen",
-      "description": "",
-      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+      "label": "Kitchen"
     },
     "__draft": null
   },
@@ -1680,10 +1689,9 @@
     "__type": "image-option",
     "__status": "published",
     "values": {
+      "image": "360afa34-c056-4322-8d43-241fa78e067e",
       "emoji": "🚿",
-      "label": "Bathroom",
-      "description": "",
-      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+      "label": "Bathroom"
     },
     "__draft": null
   },
@@ -1692,10 +1700,9 @@
     "__type": "image-option",
     "__status": "published",
     "values": {
+      "image": "360afa34-c056-4322-8d43-241fa78e067e",
       "emoji": "🛏️",
-      "label": "Bedroom",
-      "description": "",
-      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+      "label": "Bedroom"
     },
     "__draft": null
   },
@@ -1704,10 +1711,9 @@
     "__type": "image-option",
     "__status": "published",
     "values": {
+      "image": "360afa34-c056-4322-8d43-241fa78e067e",
       "emoji": "🛋️",
-      "label": "Living Room",
-      "description": "",
-      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+      "label": "Living Room"
     },
     "__draft": null
   },
@@ -1716,10 +1722,9 @@
     "__type": "image-option",
     "__status": "published",
     "values": {
+      "image": "360afa34-c056-4322-8d43-241fa78e067e",
       "emoji": "🪜",
-      "label": "Hallway / Stairs",
-      "description": "",
-      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+      "label": "Hallway / Stairs"
     },
     "__draft": null
   },
@@ -1728,10 +1733,9 @@
     "__type": "image-option",
     "__status": "published",
     "values": {
+      "image": "360afa34-c056-4322-8d43-241fa78e067e",
       "emoji": "🌳",
-      "label": "Garden / Outdoor",
-      "description": "",
-      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a"
+      "label": "Garden / Outdoor"
     },
     "__draft": null
   },
@@ -2911,40 +2915,6 @@
       "beginDate": "2025-05-05",
       "endDate": "2025-08-11",
       "projectValue": "£150k",
-      "summary": "Side return extension · Structural works · Full internal refit",
-      "description": "A double-height side return extension added significant space across two floors.\n\nThe project combined structural works, a new kitchen and a full internal refit throughout the house.",
-      "featured": false,
-      "deliveredSummary": "A major two-storey extension delivered over fourteen weeks.",
-      "deliverables": [
-        "77a20281-28b2-49ed-aefe-5232ffcfc22f",
-        "90a66a61-df13-4bfb-97fe-877926a98b2b",
-        "927076e5-c1fe-4005-94b6-26c1cbc84988"
-      ],
-      "clientComments": [
-        "8cd9e7f4-e425-4941-a2b6-bfa45a689129"
-      ],
-      "projectTimeline": [
-        "c42dd8b3-e0bb-40c5-adac-173a986599df",
-        "8a420d85-bc21-416e-9409-a6e0dbe8bfb5",
-        "23a2e262-af97-469e-ad2e-def7f1ab8825",
-        "6f53c458-cc75-4c21-bf62-e64ef056ddf9"
-      ],
-      "projectImages": [
-        "a39c0dc8-169a-41d5-9203-f0b0df1df3be",
-        "1e7f54df-afc2-4012-9fc6-3df757fb1382"
-      ],
-      "hero": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
-      "clientRating": 5,
-      "occupancy": "Occupied throughout"
-    },
-    "__draft": {
-      "title": "Two-Storey Side Return Extension",
-      "category": "Refurbishment",
-      "subCategory": "Side return extension",
-      "location": "Islington, N1",
-      "beginDate": "2025-05-05",
-      "endDate": "2025-08-11",
-      "projectValue": "£150k",
       "clientRating": 5,
       "occupancy": "Occupied throughout",
       "summary": "Side return extension · Structural works · Full internal refit",
@@ -2972,7 +2942,8 @@
         "0eacd958-75c9-4903-9fa2-456c29297482"
       ],
       "similarWork": []
-    }
+    },
+    "__draft": null
   },
   {
     "__id": "8ea8e5f9-ffc2-4d1e-95d1-d9b2716ad9bb",
@@ -3097,11 +3068,84 @@
   {
     "__id": "0eacd958-75c9-4903-9fa2-456c29297482",
     "__type": "project-image",
-    "__status": "unpublished",
-    "values": null,
-    "__draft": {
-      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a",
+    "__status": "published",
+    "values": {
+      "image": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
       "caption": "A very good looking cat"
-    }
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6cd93914-3c86-4c87-9a4e-59818963f4da",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Planning a similar project?",
+      "subtitle": "Get a detailed quote with a free site visit.",
+      "buttons": [
+        "13896b20-66a0-4e52-abf9-fac777a8d37d",
+        "8ba006d9-06ec-4204-a4c0-74bee0999002"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9923f32e-3c9a-4d92-a590-c85a2ae4bcfb",
+    "__type": "banner",
+    "__status": "published",
+    "values": {
+      "variant": "glass",
+      "emoji": "📅",
+      "body": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "text": "Book a consultation to discuss your extension"
+            }
+          ]
+        }
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "53ca36a4-a857-4a03-9da1-29c81d70537a",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Ready to start your kitchen project?",
+      "subtitle": "Send photos on WhatsApp or request a site visit for a detailed, broken-down quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "240ef9fd-ae8f-4e93-9d7a-4a3b22742aac"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "240ef9fd-ae8f-4e93-9d7a-4a3b22742aac",
+    "__type": "button",
+    "__status": "published",
+    "values": {
+      "label": "Request a Quote",
+      "variant": "outlined",
+      "color": "white",
+      "borderRadius": 8,
+      "iconPosition": "start",
+      "href": "/contact"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b1d25a49-d4ce-4b5e-a9f7-672621d36b56",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Sample 1",
+      "description": "A sample deliver"
+    },
+    "__draft": null
   }
 ]
