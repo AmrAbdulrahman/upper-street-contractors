@@ -50,10 +50,11 @@ _Avoid_: column, property, attribute
 
 **`__type`** (field kind):
 One of: `text`, `longtext`, `richtext`, `blocks`, `number`, `json`, `boolean`,
-`asset`, `lookup`, `reference`, `references`.
+`date`, `asset`, `lookup`, `reference`, `references`.
 - **richtext** — an HTML/markdown string. **blocks** — structured rich text
   ({@link BlocksContent}, Strapi-blocks-compatible) rendered by `@usc/zero-cms-blocks`.
 - **number** — numeric. Meta `integer`, `min`, `max`. **json** — any JSON value.
+- **date** — a calendar date stored as an ISO 8601 string (`YYYY-MM-DD`); a `String` in GraphQL.
 - **asset** — points at a file in `media/`. Meta `accept`: `image | video | any`. In
   GraphQL it resolves to a **Media** object (`id, url, alt, width, height, mime, kind`).
 - **lookup** — text constrained to a predefined set. Meta `options: string[]`.

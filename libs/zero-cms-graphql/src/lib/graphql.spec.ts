@@ -13,6 +13,7 @@ const schema: Schema = [
     fields: [
       { __name: 'title', __type: 'text', required: true },
       { __name: 'category', __type: 'lookup', options: ['Bathroom', 'Loft'] },
+      { __name: 'startedOn', __type: 'date' },
       { __name: 'author', __type: 'reference', allowedTypes: ['author'] },
     ],
   },
@@ -32,6 +33,7 @@ describe('generateSdl', () => {
     expect(sdl).toContain('type Project {');
     expect(sdl).toContain('author: Author'); // single-target reference -> object type
     expect(sdl).toContain('enum ProjectCategory { Bathroom Loft }');
+    expect(sdl).toContain('startedOn: String'); // date kind -> String (ISO 8601)
     expect(sdl).toContain('projects(filters: ProjectFilters, pagination: Pagination');
     expect(sdl).toContain('): [Project!]!'); // flat array, not a Page wrapper
     expect(sdl).toContain('createProject(values: ProjectInput!): Project!');
@@ -46,13 +48,14 @@ describe('graphql execution', () => {
     const p = await adapter.create('project', {
       title: 'Loft job',
       category: 'Loft',
+      startedOn: '2024-05-01',
       author: a.__id,
     });
     await adapter.publish('project', p.__id);
 
     const res = await exec(`{
       projects(filters: { category: { eq: "Loft" } }) {
-        id title status category author { id name }
+        id title status category startedOn author { id name }
       }
     }`);
 
@@ -62,6 +65,7 @@ describe('graphql execution', () => {
     const row = data.projects[0];
     expect(row.title).toBe('Loft job');
     expect(row.status).toBe('published');
+    expect(row.startedOn).toBe('2024-05-01'); // date round-trips as ISO string
     expect((row.author as { name: string }).name).toBe('Jo'); // nested resolved
   });
 

@@ -5,7 +5,7 @@ Language for renovation marketing content: services, projects, and trust signals
 ## Language
 
 **Project**:
-A completed renovation case study shown as a card and on its own detail page.
+A completed renovation case study shown as a card and on its own detail page. Stored as a `project` entry carrying a hero image, Category, Sub-category, Meta-chip facets, a description, What We Delivered, a Project Timeline, Client Comments, Project images and Similar Work. (The earlier card-only `project-card` type has been retired.)
 _Avoid_: Job, portfolio item, case file
 
 **Recent Work section**:
@@ -29,7 +29,7 @@ The gold uppercase badge overlaid on a Project card image showing the renovation
 _Avoid_: Label, pill, proj-tag (CSS class name only)
 
 **Meta chip**:
-A small badge below the image showing one project facet such as location, duration, or scope.
+A small badge below the image showing one project facet such as location, duration (derived from the begin/end dates), or project value.
 _Avoid_: Tag, chip, proj-chip (CSS class name only)
 
 **Projects index**:
@@ -43,6 +43,46 @@ _Avoid_: Tab bar, filter pills (UI class names only)
 **Badge**:
 The reusable pill component that renders category tags and meta chips from variant, radius, href, and text props.
 _Avoid_: Tag, chip, label
+
+**Sub-category**:
+A finer classification under a Project's Category (e.g. "Rear dormer loft" under Loft, "Wetroom conversion" under Bathroom). Free text; not used by the Category filter.
+_Avoid_: subtype, kind
+
+**Duration**:
+A Project's length — a Meta chip **derived** from its begin and end dates (e.g. "3 weeks", "4 months"), never stored.
+_Avoid_: timePeriod (implementation phrasing), time frame
+
+**Project value**:
+The build value of a Project (e.g. "£120k"), shown as a Meta chip.
+_Avoid_: price, cost, budget
+
+**What We Delivered**:
+The Project-detail section pairing a short intro (`deliveredSummary`) with a grid of Deliverables.
+_Avoid_: scope of works, services
+
+**Deliverable**:
+One item in What We Delivered — a title and a short description of a distinct piece of work.
+_Avoid_: task, feature, line item
+
+**Client Comment**:
+A homeowner quote attached to a single Project (a name and a comment), shown on that Project's detail page. Distinct from a Review card, which is site-wide social proof carrying a star score.
+_Avoid_: testimonial, review (the site-wide concept)
+
+**Project Timeline**:
+The ordered list of Timeline Steps on a Project's detail page describing how the job progressed.
+_Avoid_: schedule, roadmap, programme
+
+**Timeline Step**:
+One stage in a Project Timeline — an optional step marker, a title, and a description.
+_Avoid_: milestone, phase
+
+**Project images**:
+The photos on a Project's detail page (each an image with an optional caption), rendered as a grid headed "Photos".
+_Avoid_: gallery (an _Avoid_ term for Recent Work / Projects index), carousel, slider
+
+**Similar Work**:
+The related-Projects strip on a Project's detail page. Editor-pinned Projects (the `similarWork` relation) come first, then the closest others are filled in automatically, ranked by Category → Location → Duration.
+_Avoid_: related posts, you-might-also-like, recommendations
 
 **Client Review section**:
 The home page section that surfaces homeowner testimonials with star ratings and links to individual reviews on Trustpilot or Google.

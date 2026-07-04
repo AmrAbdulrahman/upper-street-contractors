@@ -21,6 +21,7 @@ import { LookupRenderer } from '../lookup';
 import { AssetRenderer } from '../asset';
 import { ReferenceRenderer } from '../reference';
 import { ReferencesRenderer } from '../references';
+import { DateRenderer } from '../date';
 
 const labelOf = (f: Field) => f.label ?? f.__name;
 
@@ -32,6 +33,7 @@ export const fieldRegistry: Record<FieldType, ComponentType<RendererProps>> = {
   number: NumberRenderer,
   json: JsonRenderer,
   boolean: BooleanRenderer,
+  date: DateRenderer,
   lookup: LookupRenderer,
   asset: AssetRenderer,
   reference: ReferenceRenderer,

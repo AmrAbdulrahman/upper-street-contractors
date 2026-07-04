@@ -1,8 +1,9 @@
 "use client";
 
-import { ZeroCmsEntry, ZeroCmsEntryField, ZeroCmsList } from "@usc/zero-cms-widget";
-import { Badge, badgePropsFromStrapi } from "@/components/ui/badge";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { Badge } from "@/components/ui/badge";
 import { ProjectCardFragment } from "@/generated/graphql";
+import { getProjectMetaChips } from "@/helpers/project-meta";
 import Link from "next/link";
 import { ProjectBanner } from "./project-banner";
 
@@ -17,50 +18,38 @@ const titleClasses =
   "mb-1.5 font-sans text-[15px] font-semibold leading-snug text-dark";
 
 export function ProjectCard({ data }: ProjectCardProps) {
-  const {
-    title,
-    description,
-    projectBanner,
-    projectCategory,
-    projectBadges,
-    id,
-  } = data;
-  const badges = projectBadges?.filter(Boolean) ?? [];
+  const { id, title, summary, category, hero } = data;
+  const chips = getProjectMetaChips(data);
   const href = `/projects/${id}`;
 
   return (
     <ZeroCmsEntry entry={data}>
       <article className={cardClasses}>
         <Link href={href} className="block">
-          <ZeroCmsEntryField field="projectBanner">
-            <ProjectBanner banner={projectBanner} category={projectCategory} />
+          <ZeroCmsEntryField field="hero">
+            <ProjectBanner banner={hero} category={category} />
           </ZeroCmsEntryField>
         </Link>
 
         <div className="p-[18px]">
-          <ZeroCmsList
-            className="relative z-10 mb-2.5 flex flex-wrap gap-1.5"
-            field="projectBadges"
-            items={badges}
-          >
-            {badges.map((badge) => {
-              const badgeProps = badgePropsFromStrapi(badge, {
-                className: "border border-border bg-surface text-subtle",
-              });
-
-              if (!badgeProps) {
-                return null;
-              }
-
-              return (
-                <ZeroCmsEntry key={badge.id} entry={badge}>
-                  <ZeroCmsEntryField field="text">
-                    <Badge {...badgeProps} />
-                  </ZeroCmsEntryField>
-                </ZeroCmsEntry>
-              );
-            })}
-          </ZeroCmsList>
+          {chips.length > 0 ? (
+            <ul
+              className="relative z-10 mb-2.5 flex flex-wrap gap-1.5"
+              aria-label="Project details"
+            >
+              {chips.map((chip) => (
+                <li key={chip.key}>
+                  <Badge
+                    variant="light"
+                    radius={8}
+                    className="border border-border bg-surface text-subtle"
+                  >
+                    {chip.text}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          ) : null}
 
           <Link href={href} className="block">
             {title ? (
@@ -69,11 +58,9 @@ export function ProjectCard({ data }: ProjectCardProps) {
               </ZeroCmsEntryField>
             ) : null}
 
-            {description ? (
-              <ZeroCmsEntryField field="description">
-                <p className="text-[13px] leading-[1.55] text-muted">
-                  {description}
-                </p>
+            {summary ? (
+              <ZeroCmsEntryField field="summary">
+                <p className="text-[13px] leading-[1.55] text-muted">{summary}</p>
               </ZeroCmsEntryField>
             ) : null}
           </Link>

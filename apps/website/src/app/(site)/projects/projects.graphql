@@ -1,7 +1,7 @@
 #import "../../components/ui/project-card/project-card.graphql"
 
 query GetProjects($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
-  projectCards(pagination: { limit: 50 }, status: $status, includeUnpublished: $includeUnpublished) {
+  projects(pagination: { limit: 50 }, status: $status, includeUnpublished: $includeUnpublished) {
     ...ProjectCard
   }
 }

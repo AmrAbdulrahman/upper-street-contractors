@@ -856,52 +856,128 @@
   },
   {
     "__id": "7602ded8-4bd1-46d8-a271-0fc64b8ffd92",
-    "__type": "project-card",
+    "__type": "project",
     "__status": "published",
     "values": {
       "title": "Full Home Refurbishment",
-      "description": "Layout changes · Kitchen · Bathroom · Decorating · Carpentry",
-      "projectBanner": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
-      "projectCategory": "23574ca5-f3f5-415a-983b-d1c8f5ff3cf7",
-      "projectBadges": [
-        "f1080a5c-8439-4b91-af0f-c2f02367c929",
-        "26a4bfbe-3ebf-4f60-bd90-be569352ade4",
-        "67eb3331-952c-4f59-bfff-4217efc27542"
-      ]
+      "category": "Refurbishment",
+      "subCategory": "Full home refurbishment",
+      "location": "Highbury, N5",
+      "beginDate": "2025-01-13",
+      "endDate": "2025-03-24",
+      "projectValue": "£120k",
+      "summary": "Layout changes · Kitchen · Bathroom · Decorating · Carpentry",
+      "description": "This tired three-bedroom Victorian terrace was reconfigured from top to bottom to suit modern family life.\n\nWe reworked the ground-floor layout, installed a new kitchen and bathroom, and finished throughout with bespoke carpentry and a full redecoration.",
+      "featured": true,
+      "deliveredSummary": "A complete refurbishment delivered on a fixed price and to programme.",
+      "deliverables": [
+        "55b0032f-c8ce-4d99-9405-588483718e6e",
+        "472289ff-c213-43b2-ae0f-943b685a03cf",
+        "2846bab7-72a6-48d2-96ca-75e32da9bf78"
+      ],
+      "clientComments": [
+        "12d8fb55-9588-4182-8a8c-a6e02aa7a0b5",
+        "355d27e3-4a38-4bae-96bf-0dc597755975"
+      ],
+      "projectTimeline": [
+        "5c15c52b-1845-4730-92d7-250596969c0e",
+        "21beee53-91ed-4cf7-a7f7-7a024e6ab370",
+        "949b823b-d53c-4cbe-a83d-3aa9af5ff8fa",
+        "10e53097-83fb-4a62-a5c8-9f3ceb4af308"
+      ],
+      "projectImages": [
+        "d5a66765-3ac7-4804-b354-9e967dcc087a",
+        "90b158eb-19d0-404b-b4ee-6b8996dd238f",
+        "63586760-190a-4085-9c04-04bb03221a85"
+      ],
+      "similarWork": [
+        "163301b6-ff55-4bf0-860b-b6bb5a4deed5",
+        "19d5a54d-adf4-49a0-889c-8ced5a230af6"
+      ],
+      "hero": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout"
     },
     "__draft": null
   },
   {
     "__id": "a50a462f-b20a-4c62-914f-fdf3bfe33b1a",
-    "__type": "project-card",
+    "__type": "project",
     "__status": "published",
     "values": {
       "title": "Open-Plan Kitchen Extension",
-      "description": " Howdens supply-and-install · Structural opening · Underfloor heating",
-      "projectBanner": "5302973b-899b-4cf8-9d83-9214ac26fe45",
-      "projectCategory": "7d24daa1-7c34-4ece-9deb-4377da119ca0",
-      "projectBadges": [
-        "2eefb162-516a-4606-bfc4-01cfd5f446d7",
-        "61818729-1eb7-4d78-a7f4-cd0237366602",
-        "2d8a1d42-b22f-4adc-aaef-a3cc91f4b874"
-      ]
+      "category": "Kitchen",
+      "subCategory": "Rear kitchen extension",
+      "location": "Barnsbury, N1",
+      "beginDate": "2025-04-07",
+      "endDate": "2025-05-12",
+      "projectValue": "£45k",
+      "summary": "Howdens supply-and-install · Structural opening · Underfloor heating",
+      "description": "A dark galley kitchen was transformed into a bright open-plan kitchen-diner opening onto the garden.\n\nWe formed a structural opening, laid underfloor heating and fitted a new kitchen with quartz worktops.",
+      "featured": true,
+      "deliveredSummary": "A structural kitchen extension completed in five weeks.",
+      "deliverables": [
+        "3b36838d-b3d0-4dc0-8e03-a12c986c9904",
+        "9da464fa-a2ee-43fa-9aa7-bde6e9758ce2",
+        "9fe0a72f-9fd1-40b6-a84a-719badeb7ae3"
+      ],
+      "clientComments": [
+        "9c9473c5-0268-44c9-aecf-3d59831c0fa1"
+      ],
+      "projectTimeline": [
+        "2288b2ac-1d9d-4f42-b971-ef35ae9d3dc4",
+        "27737203-f680-4986-bee6-0ed91e9df29a",
+        "8ea96cf6-9c4b-4876-9279-6c75203b20c5",
+        "6a24e1ad-1a18-400d-a582-7022091f287c"
+      ],
+      "projectImages": [
+        "275fa2ae-da58-4e17-8c78-d94d9fa7848d",
+        "aecd7b56-aebb-4a6f-8ffb-085c5128f0c5",
+        "6493215e-c627-47d5-bec0-39e76c388cad"
+      ],
+      "hero": "5302973b-899b-4cf8-9d83-9214ac26fe45",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout"
     },
     "__draft": null
   },
   {
     "__id": "f43593c0-7abf-42e4-906a-78cadb600af4",
-    "__type": "project-card",
+    "__type": "project",
     "__status": "published",
     "values": {
       "title": "Victorian Terrace Bathroom",
-      "description": " Full strip-out · Wetroom-style shower · Custom tiling · New layout                 ",
-      "projectBanner": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde",
-      "projectCategory": "e0593770-fad1-47fe-b1c3-47af9b6ed069",
-      "projectBadges": [
-        "edec5b58-2de1-41c3-9d54-dc6bf4179e69",
-        "f7edc6a7-84f1-4b03-9473-49781b5fa700",
-        "b2b283a6-1f67-4981-8e84-fc18caee49c1"
-      ]
+      "category": "Bathroom",
+      "subCategory": "Wetroom conversion",
+      "location": "Canonbury, N1",
+      "beginDate": "2025-06-02",
+      "endDate": "2025-06-23",
+      "projectValue": "£18k",
+      "summary": "Full strip-out · Wetroom-style shower · Custom tiling · New layout",
+      "description": "A cramped, dated family bathroom was rebuilt as a calm wetroom with a walk-in shower.\n\nWe stripped back to brick, re-planned the layout and finished with floor-to-ceiling porcelain tiling.",
+      "featured": true,
+      "deliveredSummary": "A full bathroom rebuild delivered in three weeks.",
+      "deliverables": [
+        "b2320ed0-38fa-4c4b-9631-7d47b80d5196",
+        "7bbf8ca9-9268-402b-aabf-1a3c5df414c7",
+        "27450c52-1784-4b38-8157-a4d75c8040b6"
+      ],
+      "clientComments": [
+        "63c2b992-06b8-4534-8f9c-4acab85cf9e6"
+      ],
+      "projectTimeline": [
+        "241a72a5-e4b2-4b60-afbb-d46bf96d026b",
+        "489096d3-79b1-4923-b595-f7bfa2237c2a",
+        "a3ee4d58-8926-468d-b08f-bc1cff1f25cc",
+        "864847ee-ab68-46a9-92df-deb4137ddc25"
+      ],
+      "projectImages": [
+        "cb49783a-6cf1-45d9-8e7b-5750aad7c045",
+        "f8f933c7-c5b3-406a-bc25-a87419b5475e"
+      ],
+      "hero": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde",
+      "clientRating": 5,
+      "occupancy": "Vacant during works"
     },
     "__draft": null
   },
@@ -915,8 +991,8 @@
       "description": "A selection of bathrooms, kitchens and refurbishments delivered across Islington and nearby areas.",
       "projects": [
         "7602ded8-4bd1-46d8-a271-0fc64b8ffd92",
-        "f43593c0-7abf-42e4-906a-78cadb600af4",
-        "a50a462f-b20a-4c62-914f-fdf3bfe33b1a"
+        "a50a462f-b20a-4c62-914f-fdf3bfe33b1a",
+        "f43593c0-7abf-42e4-906a-78cadb600af4"
       ],
       "viewAllProjects": "40515ecb-7171-483e-87d1-379329c3dc2b"
     },
@@ -1895,5 +1971,1137 @@
       ]
     },
     "__draft": null
+  },
+  {
+    "__id": "bf94c030-6587-4178-a974-b3078ba67c93",
+    "__type": "bullet-list",
+    "__status": "published",
+    "values": {
+      "text": "Sample2",
+      "listIcon": "be4f40dd-b2e8-4c61-9d95-930399676c23"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "55b0032f-c8ce-4d99-9405-588483718e6e",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Full layout reconfiguration",
+      "description": "Removed and rebuilt internal walls to open up the living space."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "472289ff-c213-43b2-ae0f-943b685a03cf",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Kitchen & bathroom fit-out",
+      "description": "Supplied and installed a new kitchen and bathroom to a high standard."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "2846bab7-72a6-48d2-96ca-75e32da9bf78",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Decoration & carpentry",
+      "description": "Bespoke joinery, new flooring and full redecoration throughout."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "12d8fb55-9588-4182-8a8c-a6e02aa7a0b5",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Sarah & Tom",
+      "comment": "From first quote to handover the team were faultless. Our home feels brand new."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "355d27e3-4a38-4bae-96bf-0dc597755975",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "James P.",
+      "comment": "Clear weekly updates and a spotless site every day. Highly recommended."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5c15c52b-1845-4730-92d7-250596969c0e",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "01",
+      "title": "Site survey & consultation",
+      "description": "We visited the property, measured up and talked through goals, budget and timings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "21beee53-91ed-4cf7-a7f7-7a024e6ab370",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "02",
+      "title": "Design & fixed quote",
+      "description": "Detailed drawings, material selections and a fixed, itemised quotation with no hidden extras."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "949b823b-d53c-4cbe-a83d-3aa9af5ff8fa",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "03",
+      "title": "Build & fit-out",
+      "description": "Our directly-employed team carried out the works with daily clean-downs and weekly progress updates."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "10e53097-83fb-4a62-a5c8-9f3ceb4af308",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "04",
+      "title": "Snagging & handover",
+      "description": "A joint snagging walk-through, final sign-off and full guarantee paperwork handed over."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d5a66765-3ac7-4804-b354-9e967dcc087a",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "caption": "The finished open-plan living space"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "90b158eb-19d0-404b-b4ee-6b8996dd238f",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "caption": "Reworked ground-floor layout"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "63586760-190a-4085-9c04-04bb03221a85",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "5302973b-899b-4cf8-9d83-9214ac26fe45",
+      "caption": "New kitchen fit-out"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3b36838d-b3d0-4dc0-8e03-a12c986c9904",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Structural opening",
+      "description": "Steel beam installed to create an open-plan kitchen-diner."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9da464fa-a2ee-43fa-9aa7-bde6e9758ce2",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Kitchen supply & install",
+      "description": "Units supplied and fitted with quartz worktops."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9fe0a72f-9fd1-40b6-a84a-719badeb7ae3",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Underfloor heating",
+      "description": "Wet underfloor heating laid and zoned to the new space."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9c9473c5-0268-44c9-aecf-3d59831c0fa1",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "The Okafor family",
+      "comment": "The steelwork and underfloor heating were handled brilliantly. We love the new space."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "2288b2ac-1d9d-4f42-b971-ef35ae9d3dc4",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "01",
+      "title": "Site survey & consultation",
+      "description": "We visited the property, measured up and talked through goals, budget and timings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "27737203-f680-4986-bee6-0ed91e9df29a",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "02",
+      "title": "Design & fixed quote",
+      "description": "Detailed drawings, material selections and a fixed, itemised quotation with no hidden extras."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8ea96cf6-9c4b-4876-9279-6c75203b20c5",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "03",
+      "title": "Build & fit-out",
+      "description": "Our directly-employed team carried out the works with daily clean-downs and weekly progress updates."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6a24e1ad-1a18-400d-a582-7022091f287c",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "04",
+      "title": "Snagging & handover",
+      "description": "A joint snagging walk-through, final sign-off and full guarantee paperwork handed over."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "275fa2ae-da58-4e17-8c78-d94d9fa7848d",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "5302973b-899b-4cf8-9d83-9214ac26fe45",
+      "caption": "The finished kitchen-diner"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "aecd7b56-aebb-4a6f-8ffb-085c5128f0c5",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "caption": "Looking through to the garden"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6493215e-c627-47d5-bec0-39e76c388cad",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "caption": "Structural opening detail"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b2320ed0-38fa-4c4b-9631-7d47b80d5196",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Full strip-out",
+      "description": "Complete removal of the existing suite back to brick."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7bbf8ca9-9268-402b-aabf-1a3c5df414c7",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Wetroom-style shower",
+      "description": "Tanked walk-in shower with linear drainage."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "27450c52-1784-4b38-8157-a4d75c8040b6",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Custom tiling",
+      "description": "Floor-to-ceiling porcelain tiling and new sanitaryware."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "63c2b992-06b8-4534-8f9c-4acab85cf9e6",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Priya S.",
+      "comment": "Beautiful tiling and a really tidy job. The wetroom is exactly what we wanted."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "241a72a5-e4b2-4b60-afbb-d46bf96d026b",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "01",
+      "title": "Site survey & consultation",
+      "description": "We visited the property, measured up and talked through goals, budget and timings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "489096d3-79b1-4923-b595-f7bfa2237c2a",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "02",
+      "title": "Design & fixed quote",
+      "description": "Detailed drawings, material selections and a fixed, itemised quotation with no hidden extras."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "a3ee4d58-8926-468d-b08f-bc1cff1f25cc",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "03",
+      "title": "Build & fit-out",
+      "description": "Our directly-employed team carried out the works with daily clean-downs and weekly progress updates."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "864847ee-ab68-46a9-92df-deb4137ddc25",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "04",
+      "title": "Snagging & handover",
+      "description": "A joint snagging walk-through, final sign-off and full guarantee paperwork handed over."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "cb49783a-6cf1-45d9-8e7b-5750aad7c045",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde",
+      "caption": "The finished wetroom"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f8f933c7-c5b3-406a-bc25-a87419b5475e",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "caption": "New layout and sanitaryware"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8f375f32-321c-45f9-bb34-e7d66822a854",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Dormer construction",
+      "description": "Rear dormer built to create a full-height double bedroom."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5dcf0ca3-b16c-4818-8165-274bb2330052",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Ensuite installation",
+      "description": "New ensuite shower room with a concealed cistern."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c65c705b-e132-416f-b458-88c6f72eab12",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Staircase & insulation",
+      "description": "New staircase, insulation and Velux roof lights to building regs."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "492cf83b-ff2d-4862-ab84-d8357c8ebadf",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Daniel R.",
+      "comment": "The dormer gave us a proper double bedroom. Faultless from design to sign-off."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f26703a8-cb12-4282-8290-5ef9fdb49b0f",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "01",
+      "title": "Site survey & consultation",
+      "description": "We visited the property, measured up and talked through goals, budget and timings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5d6bf767-b04a-4ba0-bd60-14ca3f11572a",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "02",
+      "title": "Design & fixed quote",
+      "description": "Detailed drawings, material selections and a fixed, itemised quotation with no hidden extras."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "2867f3a6-210f-4808-befc-ce3f176dc938",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "03",
+      "title": "Build & fit-out",
+      "description": "Our directly-employed team carried out the works with daily clean-downs and weekly progress updates."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6ce195b7-2f87-4c8c-a8fd-45a23da80800",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "04",
+      "title": "Snagging & handover",
+      "description": "A joint snagging walk-through, final sign-off and full guarantee paperwork handed over."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3f22b451-98c5-4e0b-bc64-a780fdc1d57c",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "caption": "Dormer and staircase design"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "eb9631d6-6469-475e-abc6-a19341838269",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "caption": "The finished master suite"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "137e6fca-cb22-45df-b284-525f2b41e9c1",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "5302973b-899b-4cf8-9d83-9214ac26fe45",
+      "caption": "Ensuite shower room"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "77a20281-28b2-49ed-aefe-5232ffcfc22f",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Full layout reconfiguration",
+      "description": "Removed and rebuilt internal walls to open up the living space."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "90a66a61-df13-4bfb-97fe-877926a98b2b",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Kitchen & bathroom fit-out",
+      "description": "Supplied and installed a new kitchen and bathroom to a high standard."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "927076e5-c1fe-4005-94b6-26c1cbc84988",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Decoration & carpentry",
+      "description": "Bespoke joinery, new flooring and full redecoration throughout."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8cd9e7f4-e425-4941-a2b6-bfa45a689129",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Helen & Marcus",
+      "comment": "A big, complex job managed calmly and to budget. The house is unrecognisable."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c42dd8b3-e0bb-40c5-adac-173a986599df",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "01",
+      "title": "Site survey & consultation",
+      "description": "We visited the property, measured up and talked through goals, budget and timings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8a420d85-bc21-416e-9409-a6e0dbe8bfb5",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "02",
+      "title": "Design & fixed quote",
+      "description": "Detailed drawings, material selections and a fixed, itemised quotation with no hidden extras."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "23a2e262-af97-469e-ad2e-def7f1ab8825",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "03",
+      "title": "Build & fit-out",
+      "description": "Our directly-employed team carried out the works with daily clean-downs and weekly progress updates."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6f53c458-cc75-4c21-bf62-e64ef056ddf9",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "04",
+      "title": "Snagging & handover",
+      "description": "A joint snagging walk-through, final sign-off and full guarantee paperwork handed over."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "a39c0dc8-169a-41d5-9203-f0b0df1df3be",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "caption": "The extended rear elevation"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1e7f54df-afc2-4012-9fc6-3df757fb1382",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "caption": "Two-storey structural design"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "77ac5e19-f4be-43c4-b8c0-d828b44210ad",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Full strip-out",
+      "description": "Complete removal of the existing suite back to brick."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "728a17d3-9507-4477-a500-81379caff47b",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Wetroom-style shower",
+      "description": "Tanked walk-in shower with linear drainage."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "99890c92-50cc-4b20-8ced-1b27a899a308",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Custom tiling",
+      "description": "Floor-to-ceiling porcelain tiling and new sanitaryware."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9bed5179-3edf-4992-a789-1e4ac8d91597",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Aisha M.",
+      "comment": "Quick, clean and a lovely result. Great communication throughout."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "170a0d99-d5ad-4e42-8190-4f093c695be4",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "01",
+      "title": "Site survey & consultation",
+      "description": "We visited the property, measured up and talked through goals, budget and timings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "95ba1db2-1eae-499c-9468-aa308698fcf2",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "02",
+      "title": "Design & fixed quote",
+      "description": "Detailed drawings, material selections and a fixed, itemised quotation with no hidden extras."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "99f21add-1ae0-4853-9d73-e28ebf9b012f",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "03",
+      "title": "Build & fit-out",
+      "description": "Our directly-employed team carried out the works with daily clean-downs and weekly progress updates."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "44b85114-d90c-4e84-828c-cc2371f8f0c6",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "04",
+      "title": "Snagging & handover",
+      "description": "A joint snagging walk-through, final sign-off and full guarantee paperwork handed over."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5cd85d2b-d281-4b10-b280-142e61844ae0",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde",
+      "caption": "The refreshed family bathroom"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d39a925b-ca2d-42ed-afd5-5d4efede62ec",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "caption": "New suite and lighting"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ae2fd81b-cc6d-4dfd-9d2c-14be24c6641a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Structural opening",
+      "description": "Steel beam installed to create an open-plan kitchen-diner."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "80e4121e-cb0c-4de2-bc04-c48eda281682",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Kitchen supply & install",
+      "description": "Units supplied and fitted with quartz worktops."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "005e5d6e-ced5-4319-a72d-f746ca15eb55",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Underfloor heating",
+      "description": "Wet underfloor heating laid and zoned to the new space."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "263e1867-5663-41ca-9e60-5f3e01a8a1b7",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Grace T.",
+      "comment": "The Shaker units are gorgeous and the finish is impeccable."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b17cf27d-c9bb-4319-be83-f9f4db2d7af2",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "01",
+      "title": "Site survey & consultation",
+      "description": "We visited the property, measured up and talked through goals, budget and timings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "19b6a86b-534e-49af-bff5-ada92c63d526",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "02",
+      "title": "Design & fixed quote",
+      "description": "Detailed drawings, material selections and a fixed, itemised quotation with no hidden extras."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1a5cb376-5439-42c9-bdf0-89e7628fdbb3",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "03",
+      "title": "Build & fit-out",
+      "description": "Our directly-employed team carried out the works with daily clean-downs and weekly progress updates."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5c90b911-ff06-41d9-a198-253b8a9e089f",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "04",
+      "title": "Snagging & handover",
+      "description": "A joint snagging walk-through, final sign-off and full guarantee paperwork handed over."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d46e85a8-9ec2-42f8-8bae-e4c80290f046",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "5302973b-899b-4cf8-9d83-9214ac26fe45",
+      "caption": "The finished Shaker kitchen"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "11b3ca2d-d1f2-459d-b32a-77935a3a636d",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "caption": "Kitchen layout plan"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "14abe4cd-cadb-409f-9f57-31223ad1c95e",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Dormer construction",
+      "description": "Rear dormer built to create a full-height double bedroom."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "fe896930-b6a7-4966-8eb2-4edf50ef1b78",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Ensuite installation",
+      "description": "New ensuite shower room with a concealed cistern."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "938d63a7-7958-4d7d-86b1-4e332618f9d6",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Staircase & insulation",
+      "description": "New staircase, insulation and Velux roof lights to building regs."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "07f39281-8d92-4f1a-9660-45b3f9451ff0",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Edward H.",
+      "comment": "Sensitive work on a period roof and a beautiful new loft room. Superb."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "707e041b-357e-4a5b-b3c5-fa52d8f41d66",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "01",
+      "title": "Site survey & consultation",
+      "description": "We visited the property, measured up and talked through goals, budget and timings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4ca8648e-2bde-4723-9c81-91aec64743db",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "02",
+      "title": "Design & fixed quote",
+      "description": "Detailed drawings, material selections and a fixed, itemised quotation with no hidden extras."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b8b32875-427b-4b26-90bd-4ec3064dc962",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "03",
+      "title": "Build & fit-out",
+      "description": "Our directly-employed team carried out the works with daily clean-downs and weekly progress updates."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c27376b3-2ab1-4e40-93d5-d333a12ca4fc",
+    "__type": "timeline-step",
+    "__status": "published",
+    "values": {
+      "step": "04",
+      "title": "Snagging & handover",
+      "description": "A joint snagging walk-through, final sign-off and full guarantee paperwork handed over."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5830d8fe-f5a8-4fb8-93bd-f3fe6ad1a381",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "caption": "Roofline restoration detail"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1a92030c-1643-4b1b-b00e-f181233eb641",
+    "__type": "project-image",
+    "__status": "published",
+    "values": {
+      "image": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "caption": "The new loft room"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "19d5a54d-adf4-49a0-889c-8ced5a230af6",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Loft Conversion with Ensuite",
+      "category": "Loft",
+      "subCategory": "Rear dormer loft",
+      "location": "Stoke Newington, N16",
+      "beginDate": "2025-02-17",
+      "endDate": "2025-04-14",
+      "projectValue": "£60k",
+      "summary": "Rear dormer · Ensuite shower room · New staircase · Velux roof lights",
+      "description": "An unused loft became a light-filled master suite with its own ensuite.\n\nWe built a rear dormer, added a new staircase and fitted an ensuite shower room, all signed off to building regulations.",
+      "featured": false,
+      "deliveredSummary": "A dormer loft conversion with ensuite, delivered to building regs.",
+      "deliverables": [
+        "8f375f32-321c-45f9-bb34-e7d66822a854",
+        "5dcf0ca3-b16c-4818-8165-274bb2330052",
+        "c65c705b-e132-416f-b458-88c6f72eab12"
+      ],
+      "clientComments": [
+        "492cf83b-ff2d-4862-ab84-d8357c8ebadf"
+      ],
+      "projectTimeline": [
+        "f26703a8-cb12-4282-8290-5ef9fdb49b0f",
+        "5d6bf767-b04a-4ba0-bd60-14ca3f11572a",
+        "2867f3a6-210f-4808-befc-ce3f176dc938",
+        "6ce195b7-2f87-4c8c-a8fd-45a23da80800"
+      ],
+      "projectImages": [
+        "3f22b451-98c5-4e0b-bc64-a780fdc1d57c",
+        "eb9631d6-6469-475e-abc6-a19341838269",
+        "137e6fca-cb22-45df-b284-525f2b41e9c1"
+      ],
+      "similarWork": [
+        "b5d51bf4-7c71-460e-a54f-4ba08b1909f4",
+        "163301b6-ff55-4bf0-860b-b6bb5a4deed5"
+      ],
+      "hero": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "clientRating": 4.5,
+      "occupancy": "Occupied throughout"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "163301b6-ff55-4bf0-860b-b6bb5a4deed5",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Two-Storey Side Return Extension",
+      "category": "Refurbishment",
+      "subCategory": "Side return extension",
+      "location": "Islington, N1",
+      "beginDate": "2025-05-05",
+      "endDate": "2025-08-11",
+      "projectValue": "£150k",
+      "summary": "Side return extension · Structural works · Full internal refit",
+      "description": "A double-height side return extension added significant space across two floors.\n\nThe project combined structural works, a new kitchen and a full internal refit throughout the house.",
+      "featured": false,
+      "deliveredSummary": "A major two-storey extension delivered over fourteen weeks.",
+      "deliverables": [
+        "77a20281-28b2-49ed-aefe-5232ffcfc22f",
+        "90a66a61-df13-4bfb-97fe-877926a98b2b",
+        "927076e5-c1fe-4005-94b6-26c1cbc84988"
+      ],
+      "clientComments": [
+        "8cd9e7f4-e425-4941-a2b6-bfa45a689129"
+      ],
+      "projectTimeline": [
+        "c42dd8b3-e0bb-40c5-adac-173a986599df",
+        "8a420d85-bc21-416e-9409-a6e0dbe8bfb5",
+        "23a2e262-af97-469e-ad2e-def7f1ab8825",
+        "6f53c458-cc75-4c21-bf62-e64ef056ddf9"
+      ],
+      "projectImages": [
+        "a39c0dc8-169a-41d5-9203-f0b0df1df3be",
+        "1e7f54df-afc2-4012-9fc6-3df757fb1382"
+      ],
+      "hero": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout"
+    },
+    "__draft": {
+      "title": "Two-Storey Side Return Extension",
+      "category": "Refurbishment",
+      "subCategory": "Side return extension",
+      "location": "Islington, N1",
+      "beginDate": "2025-05-05",
+      "endDate": "2025-08-11",
+      "projectValue": "£150k",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Side return extension · Structural works · Full internal refit",
+      "description": "A double-height side return extension added significant space across two floors.\n\nThe project combined structural works, a new kitchen and a full internal refit throughout the house.",
+      "hero": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "featured": false,
+      "deliveredSummary": "A major two-storey extension delivered over fourteen weeks.",
+      "deliverables": [
+        "77a20281-28b2-49ed-aefe-5232ffcfc22f",
+        "90a66a61-df13-4bfb-97fe-877926a98b2b",
+        "927076e5-c1fe-4005-94b6-26c1cbc84988"
+      ],
+      "clientComments": [
+        "8cd9e7f4-e425-4941-a2b6-bfa45a689129"
+      ],
+      "projectTimeline": [
+        "c42dd8b3-e0bb-40c5-adac-173a986599df",
+        "8a420d85-bc21-416e-9409-a6e0dbe8bfb5",
+        "23a2e262-af97-469e-ad2e-def7f1ab8825",
+        "6f53c458-cc75-4c21-bf62-e64ef056ddf9"
+      ],
+      "projectImages": [
+        "a39c0dc8-169a-41d5-9203-f0b0df1df3be",
+        "1e7f54df-afc2-4012-9fc6-3df757fb1382",
+        "0eacd958-75c9-4903-9fa2-456c29297482"
+      ],
+      "similarWork": []
+    }
+  },
+  {
+    "__id": "8ea8e5f9-ffc2-4d1e-95d1-d9b2716ad9bb",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Family Bathroom Refresh",
+      "category": "Bathroom",
+      "subCategory": "Bathroom refresh",
+      "location": "Holloway, N7",
+      "beginDate": "2025-07-07",
+      "endDate": "2025-07-21",
+      "projectValue": "£12k",
+      "summary": "New suite · Retiling · Improved lighting · Quick turnaround",
+      "description": "A fast, well-organised refresh brought a dated family bathroom up to date.\n\nWe replaced the suite, retiled throughout and improved the lighting and ventilation in two weeks.",
+      "featured": false,
+      "deliveredSummary": "A tidy bathroom refresh completed in two weeks.",
+      "deliverables": [
+        "77ac5e19-f4be-43c4-b8c0-d828b44210ad",
+        "728a17d3-9507-4477-a500-81379caff47b",
+        "99890c92-50cc-4b20-8ced-1b27a899a308"
+      ],
+      "clientComments": [
+        "9bed5179-3edf-4992-a789-1e4ac8d91597"
+      ],
+      "projectTimeline": [
+        "170a0d99-d5ad-4e42-8190-4f093c695be4",
+        "95ba1db2-1eae-499c-9468-aa308698fcf2",
+        "99f21add-1ae0-4853-9d73-e28ebf9b012f",
+        "44b85114-d90c-4e84-828c-cc2371f8f0c6"
+      ],
+      "projectImages": [
+        "5cd85d2b-d281-4b10-b280-142e61844ae0",
+        "d39a925b-ca2d-42ed-afd5-5d4efede62ec"
+      ],
+      "hero": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde",
+      "clientRating": 4.5,
+      "occupancy": "Occupied throughout"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "91608531-7524-4717-b42f-888ab46762b9",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Shaker Kitchen Renovation",
+      "category": "Kitchen",
+      "subCategory": "Shaker kitchen",
+      "location": "De Beauvoir, N1",
+      "beginDate": "2025-08-18",
+      "endDate": "2025-09-29",
+      "projectValue": "£38k",
+      "summary": "Shaker units · Quartz worktops · New appliances · Rewire",
+      "description": "A classic Shaker kitchen was installed as part of a wider ground-floor refresh.\n\nWe fitted new units and quartz worktops, integrated appliances and completed a partial rewire.",
+      "featured": false,
+      "deliveredSummary": "A Shaker kitchen renovation delivered over six weeks.",
+      "deliverables": [
+        "ae2fd81b-cc6d-4dfd-9d2c-14be24c6641a",
+        "80e4121e-cb0c-4de2-bc04-c48eda281682",
+        "005e5d6e-ced5-4319-a72d-f746ca15eb55"
+      ],
+      "clientComments": [
+        "263e1867-5663-41ca-9e60-5f3e01a8a1b7"
+      ],
+      "projectTimeline": [
+        "b17cf27d-c9bb-4319-be83-f9f4db2d7af2",
+        "19b6a86b-534e-49af-bff5-ada92c63d526",
+        "1a5cb376-5439-42c9-bdf0-89e7628fdbb3",
+        "5c90b911-ff06-41d9-a198-253b8a9e089f"
+      ],
+      "projectImages": [
+        "d46e85a8-9ec2-42f8-8bae-e4c80290f046",
+        "11b3ca2d-d1f2-459d-b32a-77935a3a636d"
+      ],
+      "hero": "5302973b-899b-4cf8-9d83-9214ac26fe45",
+      "clientRating": 5,
+      "occupancy": "Vacant during works"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b5d51bf4-7c71-460e-a54f-4ba08b1909f4",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Period Loft & Roofline Restoration",
+      "category": "Loft",
+      "subCategory": "Loft & roofline",
+      "location": "Highbury, N5",
+      "beginDate": "2025-03-03",
+      "endDate": "2025-05-05",
+      "projectValue": "£72k",
+      "summary": "Loft conversion · Roofline restoration · Insulation upgrade",
+      "description": "A period property gained a new loft room alongside a sympathetic roofline restoration.\n\nWe converted the loft, restored the roofline in keeping with the conservation area and upgraded insulation throughout.",
+      "featured": false,
+      "deliveredSummary": "A loft conversion and roofline restoration delivered over nine weeks.",
+      "deliverables": [
+        "14abe4cd-cadb-409f-9f57-31223ad1c95e",
+        "fe896930-b6a7-4966-8eb2-4edf50ef1b78",
+        "938d63a7-7958-4d7d-86b1-4e332618f9d6"
+      ],
+      "clientComments": [
+        "07f39281-8d92-4f1a-9660-45b3f9451ff0"
+      ],
+      "projectTimeline": [
+        "707e041b-357e-4a5b-b3c5-fa52d8f41d66",
+        "4ca8648e-2bde-4723-9c81-91aec64743db",
+        "b8b32875-427b-4b26-90bd-4ec3064dc962",
+        "c27376b3-2ab1-4e40-93d5-d333a12ca4fc"
+      ],
+      "projectImages": [
+        "5830d8fe-f5a8-4fb8-93bd-f3fe6ad1a381",
+        "1a92030c-1643-4b1b-b00e-f181233eb641"
+      ],
+      "hero": "94853c3c-fbed-4c43-aa71-acbcaddfa528",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "0eacd958-75c9-4903-9fa2-456c29297482",
+    "__type": "project-image",
+    "__status": "unpublished",
+    "values": null,
+    "__draft": {
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a",
+      "caption": "A very good looking cat"
+    }
   }
 ]

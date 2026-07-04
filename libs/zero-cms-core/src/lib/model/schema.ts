@@ -13,6 +13,7 @@ export type FieldType =
   | 'number'
   | 'json'
   | 'boolean'
+  | 'date'
   | 'asset'
   | 'lookup'
   | 'reference'
@@ -82,6 +83,12 @@ export interface BooleanField extends FieldMetaBase {
   __type: 'boolean';
 }
 
+/** Calendar date stored as an ISO 8601 string (`YYYY-MM-DD`). */
+export interface DateField extends FieldMetaBase {
+  __name: string;
+  __type: 'date';
+}
+
 /** Points at a file in the media library. */
 export interface AssetField extends FieldMetaBase {
   __name: string;
@@ -122,6 +129,7 @@ export type Field =
   | NumberField
   | JsonField
   | BooleanField
+  | DateField
   | AssetField
   | LookupField
   | ReferenceField

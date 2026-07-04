@@ -20,6 +20,7 @@ function baseFieldType(field: Field): string {
     case 'longtext':
     case 'richtext':
     case 'asset':
+    case 'date':
       return 'string';
     case 'number':
       return 'number';

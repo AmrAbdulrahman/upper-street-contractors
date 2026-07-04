@@ -47,6 +47,14 @@ export function validateValues(
         if (typeof v !== 'boolean')
           issues.push({ field: f.__name, message: 'Expected boolean' });
         break;
+      case 'date':
+        if (
+          typeof v !== 'string' ||
+          !/^\d{4}-\d{2}-\d{2}$/.test(v) ||
+          Number.isNaN(Date.parse(v))
+        )
+          issues.push({ field: f.__name, message: 'Expected date (YYYY-MM-DD)' });
+        break;
       case 'number':
         if (typeof v !== 'number' || Number.isNaN(v))
           issues.push({ field: f.__name, message: 'Expected number' });

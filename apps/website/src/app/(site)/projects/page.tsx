@@ -39,7 +39,7 @@ export default async function ProjectsPage() {
 
   const sections = pageData.pages[0]?.sections ?? [];
   const projects =
-    projectsData?.projectCards?.filter(
+    projectsData?.projects?.filter(
       (item): item is NonNullable<typeof item> => Boolean(item),
     ) ?? [];
 

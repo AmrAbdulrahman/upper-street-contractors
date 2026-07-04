@@ -35,6 +35,7 @@ function outputType(type: Type, field: Field): string {
     case 'text':
     case 'longtext':
     case 'richtext':
+    case 'date':
       return 'String';
     case 'asset':
       return 'Media';
@@ -85,6 +86,8 @@ function inputType(field: Field): string {
       return 'ID';
     case 'references':
       return '[ID!]';
+    case 'date':
+      return 'String';
     default:
       return 'String';
   }
@@ -101,6 +104,7 @@ function whereFilter(field: Field): string | null {
     case 'richtext':
     case 'asset':
     case 'lookup':
+    case 'date':
       return 'StringFilter';
     default:
       return null; // references, blocks and json are not filterable in v1

@@ -26,6 +26,7 @@ const KIND_OPTIONS = [
   'number',
   'json',
   'boolean',
+  'date',
   'asset',
   'lookup',
   'relation',

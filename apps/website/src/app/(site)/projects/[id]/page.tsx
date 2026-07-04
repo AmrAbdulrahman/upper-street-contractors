@@ -1,13 +1,22 @@
-import { Badge, badgePropsFromStrapi } from "@/components/ui/badge";
-import { ProjectBanner } from "@/components/ui/project-card";
+import {
+  ProjectCta,
+  ProjectGlance,
+  ProjectHero,
+  ProjectScope,
+  ProjectTimeline,
+  SimilarProjects,
+} from "@/components/sections/project-detail";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import {
-  GetProjectCardDocument,
-  GetProjectCardIdsDocument,
+  GetProjectDocument,
+  GetProjectIdsDocument,
+  GetProjectsDocument,
 } from "@/generated/graphql";
+import { getSimilarProjects } from "@/helpers/similar-projects";
+import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
 import { query } from "@/lib/cms/query";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type ProjectPageProps = {
@@ -15,12 +24,11 @@ type ProjectPageProps = {
 };
 
 export async function generateStaticParams() {
-  const data = await query(GetProjectCardIdsDocument);
+  const data = await query(GetProjectIdsDocument);
 
   return (
-    data?.projectCards
-      ?.filter((item) => item?.id)
-      .map((item) => ({ id: item!.id })) ?? []
+    data?.projects?.filter((item) => item?.id).map((item) => ({ id: item!.id })) ??
+    []
   );
 }
 
@@ -30,29 +38,30 @@ export async function generateMetadata({
   const { id } = await params;
   const [siteMetaConfig, data] = await Promise.all([
     getSiteMetaConfig(),
-    query(GetProjectCardDocument, { id }),
+    query(GetProjectDocument, { id }),
   ]);
 
-  const project = data?.projectCard;
+  const project = data?.project;
   const siteName = siteMetaConfig?.siteName ?? "Upper Street Contractors";
   const title = project?.title ?? "Project";
-  const description = project?.description ?? undefined;
+  const description = project?.summary ?? undefined;
   const absoluteTitle = `${title} | ${siteName}`;
+  const heroUrl = resolveStrapiMediaUrl(project?.hero?.url);
 
   return {
     title: { absolute: absoluteTitle },
     description,
-    alternates: {
-      canonical: `/projects/${id}`,
-    },
+    alternates: { canonical: `/projects/${id}` },
     openGraph: {
       title: absoluteTitle,
       description,
       url: `/projects/${id}`,
+      ...(heroUrl ? { images: [heroUrl] } : {}),
     },
     twitter: {
       title: absoluteTitle,
       description,
+      card: heroUrl ? "summary_large_image" : "summary",
     },
   };
 }
@@ -60,68 +69,75 @@ export async function generateMetadata({
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { id } = await params;
 
-  const data = await query(GetProjectCardDocument, { id });
+  const [data, allData] = await Promise.all([
+    query(GetProjectDocument, { id }),
+    query(GetProjectsDocument),
+  ]);
 
-  const project = data?.projectCard;
+  const project = data?.project;
 
   if (!project) {
     notFound();
   }
 
-  const badges = project.projectBadges?.filter(Boolean) ?? [];
+  const allProjects =
+    allData?.projects?.filter(
+      (p): p is NonNullable<typeof p> => Boolean(p),
+    ) ?? [];
+  const similar = getSimilarProjects(project, allProjects, 3);
+
+  const comments = (project.clientComments ?? []).filter(
+    (c): c is NonNullable<typeof c> => Boolean(c),
+  );
+  const pullQuote = comments[0] ?? null;
+  const miniQuote = comments[1] ?? comments[0] ?? null;
 
   return (
-    <div className="mx-auto max-w-container px-6 py-20">
-      <Link
-        href="/projects"
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-gold hover:underline"
-      >
-        ← Back to projects
-      </Link>
+    <>
+      <ZeroCmsEntry entry={project}>
+        <ProjectHero project={project} />
 
-      <div className="mt-8 max-w-3xl">
-        <ProjectBanner
-          banner={project.projectBanner}
-          category={project.projectCategory}
-          heightClassName="h-[280px]"
-          rounded
-          imageSizes="(max-width: 1024px) 100vw, 960px"
-          priority
-        />
+        <section className="bg-surface">
+          <div className="mx-auto max-w-container px-6 py-[72px] pb-20">
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14">
+              <div>
+                <ProjectScope
+                  summary={project.deliveredSummary}
+                  deliverables={project.deliverables}
+                />
 
-        {badges.length > 0 ? (
-          <div className="mt-6 flex flex-wrap gap-1.5">
-            {badges.map((badge) => {
-              if (!badge) {
-                return null;
-              }
+                {pullQuote?.comment ? (
+                  <ZeroCmsEntry entry={pullQuote}>
+                    <figure className="mt-10 rounded-2xl border border-border border-l-4 border-l-gold bg-white p-6 shadow-sm">
+                      <ZeroCmsEntryField field="comment">
+                        <blockquote className="text-base leading-relaxed text-dark/85 italic">
+                          {`“${pullQuote.comment}”`}
+                        </blockquote>
+                      </ZeroCmsEntryField>
+                      {pullQuote.name ? (
+                        <ZeroCmsEntryField field="name">
+                          <figcaption className="mt-3 text-sm font-semibold text-dark">
+                            {`— ${pullQuote.name}`}
+                          </figcaption>
+                        </ZeroCmsEntryField>
+                      ) : null}
+                    </figure>
+                  </ZeroCmsEntry>
+                ) : null}
 
-              const badgeProps = badgePropsFromStrapi(badge, {
-                stripHref: true,
-                className: "border border-border bg-surface text-subtle",
-              });
+                <ProjectTimeline steps={project.projectTimeline} />
+              </div>
 
-              if (!badgeProps) {
-                return null;
-              }
-
-              return <Badge key={badge.id} {...badgeProps} />;
-            })}
+              <aside>
+                <ProjectGlance project={project} quote={miniQuote} />
+              </aside>
+            </div>
           </div>
-        ) : null}
+        </section>
+      </ZeroCmsEntry>
 
-        {project.title ? (
-          <h1 className="mt-6 font-serif text-4xl leading-tight text-dark">
-            {project.title}
-          </h1>
-        ) : null}
-
-        {project.description ? (
-          <p className="mt-4 text-lg leading-relaxed text-muted">
-            {project.description}
-          </p>
-        ) : null}
-      </div>
-    </div>
+      <SimilarProjects projects={similar} />
+      <ProjectCta />
+    </>
   );
 }

@@ -3,7 +3,7 @@
  * `schema.json` files into a zero-cms {@link Schema}.
  *
  * Mapping:
- *   string/uid/email/date/...  -> text          text -> longtext
+ *   string/uid/email/datetime/time -> text   date -> date   text -> longtext
  *   richtext -> richtext        blocks -> blocks
  *   integer/biginteger -> number(integer)        decimal/float -> number
  *   boolean -> boolean          json -> json     enumeration -> lookup(options)
@@ -66,10 +66,11 @@ function mapAttribute(
     case 'uid':
     case 'email':
     case 'password':
-    case 'date':
     case 'datetime':
     case 'time':
       return { ...base, __type: 'text' };
+    case 'date':
+      return { ...base, __type: 'date' };
     case 'text':
       return { ...base, __type: 'longtext' };
     case 'richtext':

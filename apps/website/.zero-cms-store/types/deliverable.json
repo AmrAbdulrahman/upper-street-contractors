@@ -1,0 +1,15 @@
+{
+  "__name": "deliverable",
+  "label": "Deliverable",
+  "fields": [
+    {
+      "__name": "title",
+      "__type": "text",
+      "required": true
+    },
+    {
+      "__name": "description",
+      "__type": "longtext"
+    }
+  ]
+}

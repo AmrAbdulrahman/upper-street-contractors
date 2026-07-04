@@ -15,14 +15,14 @@ function deriveCategories(projects: ProjectCardFragment[]): string[] {
   const categories: string[] = [];
 
   for (const project of projects) {
-    const text = project.projectCategory?.text?.trim();
+    const category = project.category?.trim();
 
-    if (!text || seen.has(text)) {
+    if (!category || seen.has(category)) {
       continue;
     }
 
-    seen.add(text);
-    categories.push(text);
+    seen.add(category);
+    categories.push(category);
   }
 
   return categories;
@@ -35,9 +35,7 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
   const filteredProjects =
     selectedFilter === ALL_PROJECTS_LABEL
       ? projects
-      : projects.filter(
-          (project) => project.projectCategory?.text?.trim() === selectedFilter,
-        );
+      : projects.filter((project) => project.category?.trim() === selectedFilter);
 
   const filterOptions = [ALL_PROJECTS_LABEL, ...categories];
 

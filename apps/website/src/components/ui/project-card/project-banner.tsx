@@ -1,15 +1,29 @@
-import { Badge, badgePropsFromStrapi } from "@/components/ui/badge";
-import { ProjectCardFragment } from "@/generated/graphql";
+import { Badge } from "@/components/ui/badge";
 import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
 import Image from "next/image";
+
+type BannerMedia =
+  | {
+      url?: string | null;
+      alt?: string | null;
+      width?: number | null;
+      height?: number | null;
+    }
+  | null
+  | undefined;
+
 type ProjectBannerProps = {
-  banner: ProjectCardFragment["projectBanner"];
-  category: ProjectCardFragment["projectCategory"];
+  banner: BannerMedia;
+  /** The project Category (enum value), rendered as the gold Category tag. */
+  category?: string | null;
   heightClassName?: string;
   rounded?: boolean;
   imageSizes?: string;
   priority?: boolean;
 };
+
+const categoryTagClasses =
+  "relative z-10 bg-gold px-2.5 py-1 text-[10px] font-bold tracking-[0.06em] text-white uppercase";
 
 export function ProjectBanner({
   banner,
@@ -19,16 +33,14 @@ export function ProjectBanner({
   imageSizes = "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw",
   priority = false,
 }: ProjectBannerProps) {
-  const categoryProps = category
-    ? badgePropsFromStrapi(category, {
-        stripHref: true,
-        className:
-          "relative z-10 bg-gold px-2.5 py-1 text-[10px] font-bold tracking-[0.06em] text-white uppercase",
-      })
-    : null;
+  const label = category?.trim();
+  const categoryTag = label ? (
+    <Badge variant="dark" className={categoryTagClasses}>
+      {label}
+    </Badge>
+  ) : null;
 
   const roundedClass = rounded ? "rounded-lg" : "";
-
   const bannerUrl = resolveStrapiMediaUrl(banner?.url);
 
   if (bannerUrl) {
@@ -36,18 +48,16 @@ export function ProjectBanner({
       <div className={`relative overflow-hidden ${heightClassName} ${roundedClass}`}>
         <Image
           src={bannerUrl}
-          alt={banner.alt ?? "Project photo"}
-          width={banner.width ?? 800}
-          height={banner.height ?? 560}
+          alt={banner?.alt ?? "Project photo"}
+          width={banner?.width ?? 800}
+          height={banner?.height ?? 560}
           className="h-full w-full object-cover"
           sizes={imageSizes}
           priority={priority}
         />
 
-        {categoryProps ? (
-          <div className="absolute inset-x-0 bottom-0 flex items-end p-3.5">
-            <Badge {...categoryProps} />
-          </div>
+        {categoryTag ? (
+          <div className="absolute left-3.5 top-3.5">{categoryTag}</div>
         ) : null}
       </div>
     );
@@ -76,7 +86,9 @@ export function ProjectBanner({
         Photo placeholder
       </span>
 
-      {categoryProps ? <Badge {...categoryProps} /> : null}
+      {categoryTag ? (
+        <div className="absolute left-3.5 top-3.5">{categoryTag}</div>
+      ) : null}
     </div>
   );
 }
