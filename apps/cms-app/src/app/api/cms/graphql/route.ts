@@ -1,3 +1,4 @@
+import { withCors } from "@/lib/zero-cms/cors";
 import { getZeroCmsAdapter, getZeroCmsAuth } from "@/lib/zero-cms/server";
 import { createGraphQLHandler } from "@usc/zero-cms-graphql";
 
@@ -17,10 +18,12 @@ async function getHandle() {
   return handle;
 }
 
-export async function POST(req: Request): Promise<Response> {
-  return (await getHandle())(req);
-}
+export const OPTIONS = withCors(async () => new Response(null, { status: 204 }));
 
-export async function GET(req: Request): Promise<Response> {
+export const POST = withCors(async (req: Request): Promise<Response> => {
   return (await getHandle())(req);
-}
+});
+
+export const GET = withCors(async (req: Request): Promise<Response> => {
+  return (await getHandle())(req);
+});

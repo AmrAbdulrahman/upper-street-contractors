@@ -39,7 +39,7 @@ export function CmsInspectShellClient({
     <>
       <ZeroCmsWidget
         inspect={inspect}
-        auth={{ baseUrl: "" }}
+        auth={{ baseUrl: process.env.NEXT_PUBLIC_ZERO_CMS_URL ?? "" }}
         blocks={HugeRTEBlocksEditor}
         notify={cmsNotify}
         onSaved={onContentChange}

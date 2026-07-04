@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* Generate utilities used by the zero-cms libraries (the editor UI rendered here). */
+@source "../../../../libs/zero-cms-app/src";
+@source "../../../../libs/zero-cms-widget/src";
+
+@theme {
+  --color-surface: #f8f5f0;
+  --color-white: #ffffff;
+  --color-dark: #1b2638;
+  --color-dark-2: #0f1923;
+  --color-gold: #b8863a;
+  --color-gold-light: #f0e4cc;
+  --color-gold-mid: #d4a85a;
+  --color-foreground: #1a1a1a;
+  --color-muted: #4a5568;
+  --color-subtle: #8a94a6;
+  --color-border: #e4ddd4;
+  --color-border-light: #ede8e2;
+}

@@ -1,0 +1,30 @@
+{
+  "name": "cms-app",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/cms-app/src",
+  "projectType": "application",
+  "tags": ["cms"],
+  "targets": {
+    "build": {
+      "inputs": [
+        "default",
+        "^default",
+        "{projectRoot}/env.mjs",
+        { "externalDependencies": ["next"] },
+        { "dependentTasksOutputFiles": "**/*.d.ts", "transitive": true }
+      ]
+    },
+    "dev": {
+      "options": {
+        "cwd": "apps/cms-app",
+        "command": "next dev -p 3001"
+      }
+    },
+    "start": {
+      "options": {
+        "cwd": "apps/cms-app",
+        "command": "next start -p 3001"
+      }
+    }
+  }
+}

@@ -16,11 +16,13 @@
 # next.js
 /.next/
 /apps/website/.next/
+/apps/cms-app/.next/
 /out/
 /apps/website/out/
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -50,6 +52,7 @@ apps/website/src/generated/*
 *.tsbuildinfo
 next-env.d.ts
 apps/website/next-env.d.ts
+apps/cms-app/next-env.d.ts
 
 # puppeteer
 .puppeteer-cache/
@@ -67,3 +70,4 @@ apps/cms/public/uploads/*
 !apps/cms/public/uploads/.gitkeep
 vitest.config.*.timestamp*
 
+.zero-cms-store/generated

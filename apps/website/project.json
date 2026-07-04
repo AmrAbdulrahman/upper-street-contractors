@@ -33,7 +33,7 @@
       "inputs": [
         "{workspaceRoot}/scripts/generate-cms-schema.mjs",
         "{projectRoot}/zero-cms.config.mjs",
-        "{projectRoot}/.zero-cms-store/types/**/*.json",
+        "{workspaceRoot}/zero-cms-store/types/**/*.json",
         "{workspaceRoot}/libs/zero-cms-core/src/**/*.ts",
         "{workspaceRoot}/libs/zero-cms-graphql/src/**/*.ts"
       ],

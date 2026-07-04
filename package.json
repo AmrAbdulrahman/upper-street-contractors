@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "nx dev website",
     "dev:cms": "nx dev cms",
+    "dev:cms-app": "nx dev cms-app",
+    "dev:all": "nx run-many --target=dev --projects=website,cms-app --parallel=2",
     "generate:sitemap": "node scripts/generate-sitemap.mjs",
     "build": "npm run generate:sitemap && nx build website",
     "start": "nx start website",

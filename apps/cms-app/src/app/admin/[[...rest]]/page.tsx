@@ -10,8 +10,10 @@ import { HugeRTEBlocksEditor } from "@/components/cms/hugerte-blocks-editor";
 /**
  * /admin/[[...rest]] — the zero-cms management app, deep-linked + login-gated. The
  * catch-all segments after /admin become the CmsApp `path` (e.g.
- * /admin/entries/project/<id>); navigation pushes them back onto the router. The
- * `auth` gate provides the authed adapter. Lives outside the marketing layout.
+ * /admin/entries/project/<id>); navigation pushes them back onto the router.
+ *
+ * Lives here (cms-app), not on the website, so production (static export) never
+ * ships an editing surface at all — see root README -> Architecture.
  */
 export default function AdminPage() {
   const router = useRouter();

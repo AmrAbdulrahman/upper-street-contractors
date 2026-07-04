@@ -1,5 +1,84 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Architecture
+
+Content editing is split from the public site so `website` production can stay a static
+export while edits still happen live. `cms-app` (Railway, always-on, single writer) owns
+the zero-cms store, auth, and the RPC surface; it commits + pushes published changes to
+`main`, which is the only thing production's static build depends on.
+
+```mermaid
+flowchart TB
+    subgraph Browser
+        Editor["Editor browser<br/>(Bearer token, localStorage)"]
+        Visitor["Site visitor"]
+    end
+
+    subgraph Vercel["Vercel"]
+        Staging["website — staging<br/>Next SSR, force-dynamic, no cache<br/>branch: staging"]
+        Prod["website — production<br/>Next static export<br/>branch: main"]
+    end
+
+    subgraph Railway["Railway (Hobby, 1 replica, always-on)"]
+        CmsApp["cms-app (Next)<br/>/zero-cms/rpc · /api/cms/auth<br/>/api/cms/media/[id] · /admin<br/>+ git-sync module"]
+        Vol[("Persistent volume<br/>zero-cms-store/<br/>data.json · types/ · media/")]
+    end
+
+    GH["GitHub repo<br/>main (code+content) / staging (code)"]
+
+    Editor -- "HTTPS + CORS<br/>Authorization: Bearer" --> CmsApp
+    Editor -. "loads admin/inspect UI" .-> Staging
+
+    Staging -- "httpAdapter RPC<br/>live read, every request" --> CmsApp
+
+    Visitor -- "static HTML, no CMS call" --> Prod
+
+    CmsApp -- "nodeFsAdapter<br/>read/write" --> Vol
+    CmsApp -- "git pull on boot" --> GH
+    CmsApp -- "git commit+push on publish<br/>bot token, Contents R/W only" --> GH
+
+    GH -- "push to main →<br/>auto build+deploy" --> Prod
+    Prod -. "build-time local fs read<br/>of zero-cms-store (no network)" .-> Vol
+    GH -- "push to staging →<br/>code-only rebuild" --> Staging
+```
+
+Local dev mirrors the same two-process shape, minus the git-sync push:
+
+```mermaid
+flowchart TB
+    subgraph Dev["Developer machine"]
+        Browser["Browser<br/>localhost:3000"]
+
+        subgraph Website["nx dev website<br/>(port 3000)"]
+            WebSSR["Next dev server<br/>httpAdapter → localhost:3001"]
+        end
+
+        subgraph CmsAppLocal["nx dev cms-app<br/>(port 3001)"]
+            RPC["/zero-cms/rpc · /api/cms/auth<br/>/api/cms/media/[id] · /admin"]
+            GitSyncOff["git-sync module<br/>ZERO_CMS_GIT_SYNC=false → disabled"]
+        end
+
+        Store[("zero-cms-store/<br/>repo root, plain local fs<br/>(same dir committed to git)")]
+    end
+
+    GH["GitHub — main/staging"]
+
+    Browser -- "site + Inspect overlay" --> WebSSR
+    Browser -. "admin UI / auth (CORS: localhost)" .-> RPC
+
+    WebSSR -- "RPC, live read" --> RPC
+    RPC -- "nodeFsAdapter read/write" --> Store
+    GitSyncOff -. "no auto commit/push" .-> Store
+
+    Store -- "manual git add/commit/push<br/>(normal PR flow, human)" --> GH
+```
+
+See [ADR 0003](./docs/adr/0003-zero-cms-filesystem-store.md) and
+[ADR 0004](./docs/adr/0004-zero-cms-pluggable-adapter.md) for the design constraints this
+topology satisfies (single writer, pluggable adapter). Deploying `cms-app` itself
+(Railway service setup, git-sync credentials, secrets) is a manual/infra runbook,
+not code — see [`docs/cms-app-railway.md`](./docs/cms-app-railway.md).
+
 ## Environment setup
 
 Website env vars live in a **single root file** — no per-app duplication.
@@ -31,7 +110,24 @@ Website env vars live in a **single root file** — no per-app duplication.
 
 When you `cd` into `apps/website`, direnv loads the same vars as at the repo root. Next.js, codegen, and Nx scripts all read `process.env` from the shell.
 
-**CMS is separate:** Strapi uses its own `apps/cms/.env` (HOST, APP_KEYS, JWT secrets, etc.). See `apps/cms/.env.example`.
+**CMS is separate:** Strapi uses its own `apps/cms/.env` (HOST, APP_KEYS, JWT secrets, etc.). See `apps/cms/.env.example`. `apps/cms-app` (zero-cms) reads the same root `.env.local` as `website` — no per-app duplication there either.
+
+### zero-cms local dev: two modes
+
+- **Default (simplest):** `npm run dev` — just `website`, reading `zero-cms-store/` directly
+  off local disk. No `cms-app` process needed. Leave `ZERO_CMS_REMOTE_URL` unset.
+- **Full topology:** `npm run dev:all` — runs `website` (:3000) + `cms-app` (:3001) together,
+  matching staging's real shape (`website` talks to `cms-app` over `httpAdapter`). Set
+  `ZERO_CMS_REMOTE_URL`/`NEXT_PUBLIC_ZERO_CMS_URL=http://localhost:3001` and
+  `ZERO_CMS_ALLOWED_ORIGINS=http://localhost:3000` in `.env.local`, plus a dedicated
+  **viewer-role** service account on `cms-app` (log into `http://localhost:3001/admin`
+  with the seeded `ZERO_CMS_ADMIN_EMAIL`/`PASSWORD`, create a viewer user, put its
+  credentials in `.env.local` as `ZERO_CMS_SERVICE_EMAIL`/`PASSWORD`). Worth doing before
+  shipping any change that touches the zero-cms integration itself — see root README ->
+  Architecture.
+
+`ZERO_CMS_GIT_SYNC` should stay unset/`false` locally — it auto-pushes published content
+to `main` and is meant for the Railway deployment only.
 
 ## CMS data transfer
 

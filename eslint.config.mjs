@@ -10,12 +10,15 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     "apps/website/.next/**",
+    "apps/cms-app/.next/**",
     "out/**",
     "apps/website/out/**",
     "build/**",
     "next-env.d.ts",
     "apps/website/next-env.d.ts",
+    "apps/cms-app/next-env.d.ts",
     "apps/website/src/generated/apollo-hooks.ts",
+    "zero-cms-store/generated/**",
   ]),
 ]);
 
