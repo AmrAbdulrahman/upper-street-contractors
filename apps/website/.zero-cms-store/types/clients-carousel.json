@@ -1,0 +1,17 @@
+{
+  "__name": "clients-carousel",
+  "label": "Clients Carousel",
+  "fields": [
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "logos",
+      "__type": "references",
+      "allowedTypes": [
+        "client-logo"
+      ]
+    }
+  ]
+}

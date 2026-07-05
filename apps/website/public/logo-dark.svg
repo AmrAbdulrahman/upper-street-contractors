@@ -1,10 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" width="234" height="287" viewBox="184 226 234 287">
-<style>
-/* Navy crest on light tab bars; flip to white on dark ones. Gold accent stays. */
-@media (prefers-color-scheme: dark) {
-path[fill="#1b2638"], path[fill="#0b2442"] { fill: #ffffff; }
-}
-</style>
+
+
 <g>
 <path transform="matrix(1,0,0,-1,298.2184,383.4881)" d="M0 0-.015-2.25V0Z" fill="#0b2442"/>
 <path transform="matrix(1,0,0,-1,301.3468,375.7932)" d="M0 0-.111 .053-.182 .017V-.523L-.107-.484 20.728-10.759 20.731-10.761V-14.254H21.215V-10.851H34.243L.116 6.491 .005 6.549-.182 6.453V5.909L.01 6.007 32.219-10.366H29.203L.005 4.884-.107 4.943-.182 4.904V4.356L-.106 4.397 28.156-10.366H26.852L.004 3.401-.108 3.458-.182 3.42V2.873L-.105 2.913 25.79-10.366H21.028Z" fill="#1b2638"/>

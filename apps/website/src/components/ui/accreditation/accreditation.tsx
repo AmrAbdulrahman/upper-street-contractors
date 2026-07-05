@@ -1,5 +1,5 @@
-import { ZeroCmsEntryField, ZeroCmsRelationEntry } from "@usc/zero-cms-widget";
-import { Icon } from "@/components/ui/icon";
+import { ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { CmsImage } from "@/components/ui/cms-image";
 import { AccreditationFragment } from "@/generated/graphql";
 
 export type AccreditationProps = {
@@ -7,21 +7,19 @@ export type AccreditationProps = {
 };
 
 export function Accreditation({ data }: AccreditationProps) {
-  const { accreditationTitle, icon } = data;
+  const { accreditationTitle, image } = data;
 
   return (
-    <div className="ps-12 flex w-full items-center gap-2 sm:w-fit sm:max-w-full sm:gap-2.5">
-      <ZeroCmsRelationEntry entry={icon} field="icon" as="span">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold text-white sm:h-8 sm:w-8">
-          <Icon data={icon} className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
-        </span>
-      </ZeroCmsRelationEntry>
-
-      {accreditationTitle ? (
-        <ZeroCmsEntryField field="accreditationTitle" className="min-w-0">
-          <p className="font-medium text-dark text-sm">{accreditationTitle}</p>
-        </ZeroCmsEntryField>
-      ) : null}
+    <div className="flex h-16 w-full items-center justify-center rounded-xl border border-border-light bg-white px-5 sm:w-auto">
+      <ZeroCmsEntryField field="image" className="flex items-center justify-center">
+        <CmsImage
+          data={image}
+          fallbackAlt={accreditationTitle ?? "Accreditation"}
+          placeholderLabel=""
+          sizes="160px"
+          className="h-10 w-auto max-w-[150px] object-contain"
+        />
+      </ZeroCmsEntryField>
     </div>
   );
 }

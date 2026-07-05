@@ -8,7 +8,7 @@
     },
     {
       "__name": "fieldKey",
-      "label": "Field key (used in the WhatsApp message)",
+      "label": "Field key (identifier used in the enquiry email)",
       "__type": "text"
     },
     {
@@ -18,7 +18,9 @@
         "text",
         "email",
         "tel",
-        "textarea"
+        "textarea",
+        "boolean",
+        "file"
       ]
     },
     {
@@ -28,6 +30,16 @@
     {
       "__name": "required",
       "__type": "boolean"
+    },
+    {
+      "__name": "dependsOnFieldKey",
+      "label": "Conditional: only show when this other field key is set",
+      "__type": "text"
+    },
+    {
+      "__name": "dependsOnValue",
+      "label": "Conditional: ...and equals this value (use \"true\" for a toggle)",
+      "__type": "text"
     }
   ]
 }

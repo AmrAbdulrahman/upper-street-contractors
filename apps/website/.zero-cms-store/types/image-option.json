@@ -18,6 +18,16 @@
     {
       "__name": "description",
       "__type": "text"
+    },
+    {
+      "__name": "revealTextInput",
+      "label": "Selecting this option reveals a free-text box",
+      "__type": "boolean"
+    },
+    {
+      "__name": "textInputPlaceholder",
+      "label": "Placeholder for the revealed text box",
+      "__type": "text"
     }
   ]
 }

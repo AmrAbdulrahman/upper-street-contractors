@@ -168,3 +168,38 @@
     animation: none;
   }
 }
+
+/* Clients carousel — infinitely rotating logo strip */
+@keyframes clients-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.clients-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: clients-marquee 45s linear infinite;
+}
+
+.clients-marquee:hover .clients-marquee-track,
+.clients-marquee:focus-within .clients-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clients-marquee-track {
+    animation: none;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 1.25rem;
+  }
+
+  .clients-marquee-track > [aria-hidden="true"] {
+    display: none;
+  }
+}

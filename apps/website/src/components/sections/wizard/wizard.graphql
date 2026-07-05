@@ -34,6 +34,8 @@ fragment ImageOption on ImageOption {
   emoji
   label
   description
+  revealTextInput
+  textInputPlaceholder
   image {
     url
     alt
@@ -59,4 +61,6 @@ fragment FormField on FormField {
   inputType
   placeholder
   required
+  dependsOnFieldKey
+  dependsOnValue
 }
