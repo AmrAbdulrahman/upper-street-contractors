@@ -80,7 +80,7 @@ export function ProjectGlance({ project, quote, sidebarCta }: ProjectGlanceProps
   return (
     <div className="flex flex-col gap-4 lg:sticky lg:top-24">
       <div className="rounded-xl border border-white/10 bg-dark p-6 text-white shadow-lg">
-        <p className="text-[11px] font-semibold tracking-[0.12em] text-gold uppercase">
+        <p className="text-[11px] font-semibold tracking-[0.12em] text-gold-mid uppercase">
           Project at a glance
         </p>
 

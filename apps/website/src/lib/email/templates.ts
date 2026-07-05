@@ -5,13 +5,13 @@
 
 const SITE = "Upper Street Contractors";
 const BRAND = {
-  dark: "#1b2638",
-  gold: "#b8863a",
-  surface: "#f8f5f0",
-  border: "#e4ddd4",
-  muted: "#4a5568",
-  subtle: "#8a94a6",
-  white: "#ffffff",
+  dark: "#031021",
+  gold: "#906d37",
+  surface: "#e5decb",
+  border: "#d6cdb6",
+  muted: "#4a5a6b",
+  subtle: "#7a8798",
+  white: "#f8fdf9",
 };
 
 export type EnquiryField = { label: string; value: string };
@@ -41,6 +41,8 @@ function layout(opts: {
   intro: string;
   fields: EnquiryField[];
   note?: string;
+  /** When set, the header shows the logo image (cid attachment) instead of text. */
+  logoCid?: string;
 }): string {
   return `<!doctype html>
 <html>
@@ -51,7 +53,11 @@ function layout(opts: {
           <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:${BRAND.white};border-radius:16px;overflow:hidden;border:1px solid ${BRAND.border};">
             <tr>
               <td style="background:${BRAND.dark};padding:26px 30px;">
-                <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:${BRAND.gold};font-weight:700;">${SITE}</div>
+                ${
+                  opts.logoCid
+                    ? `<img src="cid:${opts.logoCid}" alt="${SITE}" width="220" style="display:block;border:0;height:auto;max-width:100%;" />`
+                    : `<div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:${BRAND.gold};font-weight:700;">${SITE}</div>`
+                }
                 <div style="font-family:Georgia,'Times New Roman',serif;font-size:23px;color:${BRAND.white};margin-top:6px;">${escapeHtml(opts.heading)}</div>
               </td>
             </tr>
@@ -82,6 +88,7 @@ export function renderEnquiryEmail(opts: {
   senderName: string;
   senderEmail: string;
   attachmentNames: string[];
+  logoCid?: string;
 }): { subject: string; html: string } {
   const who = opts.senderName || opts.senderEmail || "a website visitor";
   const note = opts.attachmentNames.length
@@ -94,6 +101,7 @@ export function renderEnquiryEmail(opts: {
       intro: `You've received a new enquiry from ${who}. The details are below.`,
       fields: opts.fields,
       note,
+      logoCid: opts.logoCid,
     }),
   };
 }
@@ -102,6 +110,7 @@ export function renderConfirmationEmail(opts: {
   fields: EnquiryField[];
   senderName: string;
   attachmentNames: string[];
+  logoCid?: string;
 }): { subject: string; html: string } {
   const note = opts.attachmentNames.length
     ? `You attached: ${opts.attachmentNames.join(", ")}`
@@ -113,6 +122,7 @@ export function renderConfirmationEmail(opts: {
       intro: `Hi${opts.senderName ? ` ${opts.senderName}` : ""}, thanks for getting in touch. Here's a copy of what you sent — we'll be in touch shortly.`,
       fields: opts.fields,
       note,
+      logoCid: opts.logoCid,
     }),
   };
 }

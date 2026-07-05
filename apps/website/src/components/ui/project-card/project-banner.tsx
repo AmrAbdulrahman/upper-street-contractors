@@ -67,7 +67,7 @@ export function ProjectBanner({
     <div
       className={`relative flex items-end p-3.5 ${heightClassName} ${roundedClass}`}
       style={{
-        background: "linear-gradient(145deg, #2a3d52, #1b2638)",
+        background: "linear-gradient(145deg, #0a1c2e, #031021)",
       }}
     >
       <span

@@ -23,7 +23,7 @@ export function PlanningRenovationSection({
         <div className="mx-auto max-w-container px-6 py-[88px]">
           {overline ? (
             <ZeroCmsEntryField field="overline">
-              <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+              <p className="text-[11px] font-bold tracking-[0.12em] text-gold-mid uppercase">
                 {overline}
               </p>
             </ZeroCmsEntryField>

@@ -4,14 +4,26 @@ import Link from "next/link";
 
 type SimilarProjectsProps = {
   projects: ProjectCardFragment[];
+  overline?: string;
+  title?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
 };
 
 /**
- * Display-only "Similar work" section. The list is computed (editor pins + auto
- * ranking) on the detail page, so it is NOT wrapped in a references editor — the
- * editable `similarWork` pins live on the project's own Edit drawer.
+ * Display-only project card grid. Used two ways:
+ * - Project detail "Similar work" strip (computed pins + auto ranking).
+ * - Service-page Case Studies strip (Projects filtered by Category), which
+ *   overrides the headings via props.
+ * The list is precomputed, so it is NOT wrapped in a references editor.
  */
-export function SimilarProjects({ projects }: SimilarProjectsProps) {
+export function SimilarProjects({
+  projects,
+  overline = "More projects",
+  title = "Similar work we've delivered",
+  ctaHref = "/projects",
+  ctaLabel = "View All Projects →",
+}: SimilarProjectsProps) {
   if (projects.length === 0) {
     return null;
   }
@@ -19,11 +31,11 @@ export function SimilarProjects({ projects }: SimilarProjectsProps) {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-container px-6 py-[88px]">
-        <p className="text-center text-[11px] font-bold tracking-[0.14em] text-gold uppercase">
-          More projects
+        <p className="text-center text-[11px] font-bold tracking-[0.14em] text-gold-deep uppercase">
+          {overline}
         </p>
         <h2 className="mt-2 text-center font-serif text-[clamp(28px,3.2vw,40px)] leading-tight text-dark">
-          Similar work we&apos;ve delivered
+          {title}
         </h2>
 
         <div className="mt-10 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
@@ -34,10 +46,10 @@ export function SimilarProjects({ projects }: SimilarProjectsProps) {
 
         <div className="mt-10 flex justify-center">
           <Link
-            href="/projects"
+            href={ctaHref}
             className="inline-flex h-12 items-center justify-center rounded-full bg-dark px-7 text-sm font-semibold text-white transition-colors hover:bg-dark/90"
           >
-            View All Projects →
+            {ctaLabel}
           </Link>
         </div>
       </div>

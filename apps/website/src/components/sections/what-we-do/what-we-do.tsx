@@ -19,7 +19,7 @@ export function WhatWeDoSection({ data }: WhatWeDoSectionProps) {
           <div className="mx-auto  text-center">
             {overline ? (
               <ZeroCmsEntryField field="overline">
-                <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+                <p className="text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
                   {overline}
                 </p>
               </ZeroCmsEntryField>

@@ -18,7 +18,7 @@ export function ProjectTimeline({ steps }: ProjectTimelineProps) {
 
   return (
     <section className="mt-16">
-      <p className="text-[11px] font-bold tracking-[0.14em] text-gold uppercase">
+      <p className="text-[11px] font-bold tracking-[0.14em] text-gold-deep uppercase">
         How it worked
       </p>
       <h2 className="mt-2 font-serif text-[clamp(24px,2.6vw,32px)] leading-tight text-dark">

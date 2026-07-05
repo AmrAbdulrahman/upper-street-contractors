@@ -35,7 +35,7 @@ export function PageHeroSection({ data }: PageHeroSectionProps) {
 
           {overline ? (
             <ZeroCmsEntryField field="overline">
-              <p className="mt-3.5 text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+              <p className="mt-3.5 text-[11px] font-bold tracking-[0.12em] text-gold-mid uppercase">
                 {overline}
               </p>
             </ZeroCmsEntryField>

@@ -789,7 +789,10 @@
       "description": "Bathroom Renovations",
       "meta": "d444a24c-c55d-4a9e-a338-380781f62456",
       "sections": [
-        "2fedae3b-888d-4c67-99b6-db30f3dbdbcb"
+        "2fedae3b-888d-4c67-99b6-db30f3dbdbcb",
+        "ca77c5f0-c92e-451a-b9c3-1b73490bfcdc",
+        "723a7af9-b7af-447d-90ad-37ca0e8e375d",
+        "03345206-0c96-4104-a680-18eacd76676e"
       ]
     },
     "__draft": null
@@ -833,39 +836,6 @@
           "type": "paragraph",
           "children": [
             {
-              "text": "Need a smaller job handled professionally? ",
-              "type": "text"
-            },
-            {
-              "url": "/repairs-and-smaller-works",
-              "type": "link",
-              "children": [
-                {
-                  "text": "Visit Repairs & Smaller Works",
-                  "type": "text"
-                }
-              ]
-            },
-            {
-              "text": " to book an hourly visit.",
-              "type": "text"
-            }
-          ]
-        }
-      ]
-    },
-    "__draft": {
-      "title": "Planning a renovation?",
-      "description": "Send photos and your postcode on WhatsApp for a quick response, or request a quote for a site visit and detailed scope.",
-      "buttons": [
-        "8ba006d9-06ec-4204-a4c0-74bee0999002",
-        "13896b20-66a0-4e52-abf9-fac777a8d37d"
-      ],
-      "footer": [
-        {
-          "type": "paragraph",
-          "children": [
-            {
               "type": "text",
               "text": "Need a smaller job handled professionally? "
             },
@@ -886,7 +856,8 @@
           ]
         }
       ]
-    }
+    },
+    "__draft": null
   },
   {
     "__id": "7602ded8-4bd1-46d8-a271-0fc64b8ffd92",
@@ -1616,7 +1587,10 @@
       "description": "Home Refurbishments & Layout Changes in Islington",
       "meta": "99328571-a4d1-401e-acdd-d5e80a9d8eb6",
       "sections": [
-        "1c736f50-2fb2-4f49-b6c0-1271ae2d3b40"
+        "1c736f50-2fb2-4f49-b6c0-1271ae2d3b40",
+        "44f37cf1-307c-4589-8a43-db1993474b3d",
+        "b3bd76bd-77e8-416f-9080-9ed9e2b005cb",
+        "7df002d8-4cdf-41a1-9602-e91bd176b45f"
       ]
     },
     "__draft": null
@@ -1631,7 +1605,10 @@
       "description": "Kitchen Installation & Refurbishment in Islington",
       "meta": "d868d656-e64e-4cbf-adc1-0603a8c76d59",
       "sections": [
-        "ba20c307-436d-465a-b252-08bb8495bff3"
+        "ba20c307-436d-465a-b252-08bb8495bff3",
+        "7d8ae0c3-6c33-47bb-801a-03d6e0965d5d",
+        "61bb9b6a-1568-45d6-a303-fa7a6c196a82",
+        "85f8baef-996e-4c3f-a988-e2acf281a8d2"
       ]
     },
     "__draft": null
@@ -3221,7 +3198,9 @@
       "meta": "c28c8f28-5250-4509-a767-cf375b47f934",
       "sections": [
         "633f40ab-42cb-4bc7-8133-6e4509fe2f4b",
-        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+        "bf66a21f-edeb-44b5-a909-6878c4aff4a0",
+        "df0a1266-dfb4-4d0d-bbd4-d00a34515ed8",
+        "19f10f67-4243-4fc2-bae9-077c6ea5ce16"
       ]
     },
     "__draft": null
@@ -3260,7 +3239,9 @@
       "meta": "702830bc-7bae-4c79-bb2d-0114880af374",
       "sections": [
         "ccf9fd1f-b7c9-4354-8c1e-4dab2f71b32a",
-        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+        "4b74172d-ce6b-47ed-a959-f1f64393cd9f",
+        "1636da8b-6f4f-4307-98d1-df0724571934",
+        "62871c1d-b6b7-4a9e-a22a-a3c9829c52f5"
       ]
     },
     "__draft": null
@@ -3299,7 +3280,9 @@
       "meta": "9770e4d2-46df-4c28-a5d2-f55817ea5d00",
       "sections": [
         "fdfde23c-0531-45c7-85ca-8fce0934c9f3",
-        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+        "ada063d7-2d61-47df-b43d-13d8eadb36a1",
+        "f371ac32-f11b-4356-9005-1d1e34be0e5f",
+        "645f2112-1705-486f-9d58-3f066019b5cd"
       ]
     },
     "__draft": null
@@ -3338,7 +3321,9 @@
       "meta": "d7931ccf-c31b-4139-8ea6-f428c9ac9ed3",
       "sections": [
         "768dfaf9-b7a6-4756-8c25-918d75399cd4",
-        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+        "468883dc-a9b5-44f5-99ad-f5b2839b490d",
+        "f9cee914-7dca-4a33-8513-7beb4c64fceb",
+        "a1385815-e48b-459f-9d2c-4e581598c6c0"
       ]
     },
     "__draft": null
@@ -3377,7 +3362,9 @@
       "meta": "f6bf44f0-0099-4ef1-aed1-474132e06d17",
       "sections": [
         "121fe4cc-ee75-453b-bfbd-f20d7fc883ec",
-        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+        "766fbfa4-014b-41c6-af63-ffa32752ef66",
+        "629e41f2-5afa-4674-a7f3-f71837198a0c",
+        "157589db-fd71-4506-a937-d9314dbe91fb"
       ]
     },
     "__draft": null
@@ -3416,7 +3403,9 @@
       "meta": "e89ab886-9304-4fed-a20b-6658d9db32b2",
       "sections": [
         "7e718eda-2e6e-4d0d-b62a-c8806ce072b5",
-        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+        "e4ab6316-fb63-4c84-963d-308b839d9d45",
+        "adb132b6-f96e-426c-8862-144c2dc9a605",
+        "e7a8dca8-f401-4119-ac3d-56b1f78c98c5"
       ]
     },
     "__draft": null
@@ -3672,6 +3661,2377 @@
       "fieldKey": "attachments",
       "inputType": "file",
       "required": false
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ae1c2ef9-def4-4687-854a-4b36b572d2cd",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Concealed pipework",
+      "description": "Ran new insulated hot and cold feeds chased neatly into the walls."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e0b2ef8d-e480-46d8-9a20-1274583ae0aa",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Thermostatic mixer",
+      "description": "Installed a thermostatic shower valve for stable, scald-safe temperatures."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "cdace947-48fd-43e8-ac6b-da3056bc99db",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Pressure test & certify",
+      "description": "Pressure-tested every joint and signed off the installation."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f37a42df-1788-4749-8879-87db0cd0b3f8",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Priya M.",
+      "comment": "No mess, no fuss and the pressure is finally where it should be."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "0302a45e-a915-401a-b28d-10e08e740e0a",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Full Bathroom Re-Pipe",
+      "category": "Plumbing",
+      "subCategory": "Concealed pipework",
+      "location": "Highbury, N5",
+      "beginDate": "2025-02-03",
+      "endDate": "2025-02-14",
+      "projectValue": "£4,800",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Concealed re-pipe · New suite feeds · Thermostatic valves",
+      "description": "We stripped failing pipework and re-plumbed the bathroom with concealed, insulated runs and isolation valves throughout.",
+      "hero": "dc8df3f9-d5f8-48d7-80c8-164b76b85ec2",
+      "featured": false,
+      "deliveredSummary": "We stripped failing pipework and re-plumbed the bathroom with concealed, insulated runs and isolation valves throughout.",
+      "deliverables": [
+        "ae1c2ef9-def4-4687-854a-4b36b572d2cd",
+        "e0b2ef8d-e480-46d8-9a20-1274583ae0aa",
+        "cdace947-48fd-43e8-ac6b-da3056bc99db"
+      ],
+      "clientComments": [
+        "f37a42df-1788-4749-8879-87db0cd0b3f8"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "95c576b9-5b23-45b9-bc05-aef83656e5bd",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Leak detection",
+      "description": "Located a concealed waste leak without unnecessary damage."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "0361d83a-b7e4-4475-9220-d8950b397509",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Waste & trap rebuild",
+      "description": "Renewed the trap and waste runs to a reliable, serviceable layout."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8f6e0e51-fce4-4156-956e-a4ffffa76135",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Isolation valves",
+      "description": "Fitted quarter-turn valves so future work is quick and dry."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7416b2e2-d9b2-48c1-bc5c-a2ab56b28122",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Tom R.",
+      "comment": "Came out same day and sorted a leak two others had missed."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "427f1c44-f81f-49e6-a4d5-934e3c0f9e10",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Kitchen Leak & Under-Sink Rebuild",
+      "category": "Plumbing",
+      "subCategory": "Leak repair",
+      "location": "Angel, N1",
+      "beginDate": "2025-03-10",
+      "endDate": "2025-03-12",
+      "projectValue": "£680",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Emergency leak · Waste rebuild · Isolation valves",
+      "description": "We traced a hidden waste leak, rebuilt the under-sink plumbing and fitted quarter-turn isolation valves for easy servicing.",
+      "hero": "3c3c1667-f16b-4d95-bfba-f070ae95fd00",
+      "featured": false,
+      "deliveredSummary": "We traced a hidden waste leak, rebuilt the under-sink plumbing and fitted quarter-turn isolation valves for easy servicing.",
+      "deliverables": [
+        "95c576b9-5b23-45b9-bc05-aef83656e5bd",
+        "0361d83a-b7e4-4475-9220-d8950b397509",
+        "8f6e0e51-fce4-4156-956e-a4ffffa76135"
+      ],
+      "clientComments": [
+        "7416b2e2-d9b2-48c1-bc5c-a2ab56b28122"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7ca77c44-930c-48dd-bdb9-b9d3d84205df",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Tank removal",
+      "description": "Decommissioned the loft tanks and gravity system."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "423dad70-55c0-4243-95b2-f719f52cc8c4",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Unvented cylinder",
+      "description": "Installed and commissioned a mains-pressure unvented cylinder."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "fd27e3f1-3a78-4f35-9c05-53f2ce80fc3b",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "G3 certification",
+      "description": "Issued G3 certification for the unvented installation."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b058b6dd-a7de-4ded-b4f5-be820ccf8729",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "The Alders",
+      "comment": "Every tap and shower now runs at mains pressure — brilliant."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4999aa46-78d0-45e9-86a5-975e10bd7d82",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Unvented Cylinder Installation",
+      "category": "Plumbing",
+      "subCategory": "Megaflo install",
+      "location": "Crouch End, N8",
+      "beginDate": "2025-04-01",
+      "endDate": "2025-04-04",
+      "projectValue": "£3,200",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Unvented cylinder · Balanced mains · G3 certified",
+      "description": "We removed the old gravity-fed setup and installed a G3-certified unvented cylinder with balanced mains across the house.",
+      "hero": "e4db2ff8-f1bf-4154-970b-32c5e302560f",
+      "featured": false,
+      "deliveredSummary": "We removed the old gravity-fed setup and installed a G3-certified unvented cylinder with balanced mains across the house.",
+      "deliverables": [
+        "7ca77c44-930c-48dd-bdb9-b9d3d84205df",
+        "423dad70-55c0-4243-95b2-f719f52cc8c4",
+        "fd27e3f1-3a78-4f35-9c05-53f2ce80fc3b"
+      ],
+      "clientComments": [
+        "b058b6dd-a7de-4ded-b4f5-be820ccf8729"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3a8b29b4-60f0-4518-a006-794914ac6038",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Old boiler removal",
+      "description": "Safely removed and disposed of the failed appliance."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7a1f8b23-c6b1-4a29-a816-462caa328ba9",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Combi install & flush",
+      "description": "Installed the new combi and power-flushed the system."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "710a9249-0536-4d7b-87f1-436ccb089ee5",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Gas Safe commissioning",
+      "description": "Commissioned and registered the boiler under Gas Safe."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e4092474-37dd-4e38-9054-f9fe66912924",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Sandra K.",
+      "comment": "Warm house within a day and the bills have already dropped."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ebec33b3-d9dc-4d98-9a7b-dd217ced3fba",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Combi Boiler Replacement",
+      "category": "Heating",
+      "subCategory": "Boiler swap",
+      "location": "Islington, N1",
+      "beginDate": "2025-01-20",
+      "endDate": "2025-01-22",
+      "projectValue": "£2,650",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Worcester combi · System flush · 10-yr warranty",
+      "description": "We swapped a failed boiler for a high-efficiency Worcester combi, power-flushed the system and registered a 10-year warranty.",
+      "hero": "a15fe712-7d04-42e7-92a0-983c9fb5f825",
+      "featured": false,
+      "deliveredSummary": "We swapped a failed boiler for a high-efficiency Worcester combi, power-flushed the system and registered a 10-year warranty.",
+      "deliverables": [
+        "3a8b29b4-60f0-4518-a006-794914ac6038",
+        "7a1f8b23-c6b1-4a29-a816-462caa328ba9",
+        "710a9249-0536-4d7b-87f1-436ccb089ee5"
+      ],
+      "clientComments": [
+        "e4092474-37dd-4e38-9054-f9fe66912924"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7082096f-c0a0-4412-96c2-e7cc273027cf",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Heat-loss survey",
+      "description": "Sized every radiator from a room-by-room heat-loss survey."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "01d23d20-1d73-4734-a7d1-c90550400dca",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Radiators & pipework",
+      "description": "Ran new pipework and hung nine radiators."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "632a2787-eaf3-4fda-b887-bd691d5aa0d4",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Smart controls",
+      "description": "Set up smart, zoned thermostat control."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1632517b-f595-47bb-b85f-66001da50930",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Daniel O.",
+      "comment": "Every room is evenly heated now, and the app control is a game changer."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4df61051-0caf-4cd0-a679-abc77c9fcedf",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Full Central Heating System",
+      "category": "Heating",
+      "subCategory": "System install",
+      "location": "Holloway, N7",
+      "beginDate": "2025-02-17",
+      "endDate": "2025-03-01",
+      "projectValue": "£6,900",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "9 radiators · Smart controls · System boiler",
+      "description": "We designed and installed a complete central heating system with nine radiators, a system boiler and smart zoned controls.",
+      "hero": "f80fbb3b-d255-462c-a518-ac71565b1d24",
+      "featured": false,
+      "deliveredSummary": "We designed and installed a complete central heating system with nine radiators, a system boiler and smart zoned controls.",
+      "deliverables": [
+        "7082096f-c0a0-4412-96c2-e7cc273027cf",
+        "01d23d20-1d73-4734-a7d1-c90550400dca",
+        "632a2787-eaf3-4fda-b887-bd691d5aa0d4"
+      ],
+      "clientComments": [
+        "1632517b-f595-47bb-b85f-66001da50930"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ab5dba52-ace1-45b7-9009-e7b882c85202",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Radiator replacement",
+      "description": "Swapped old radiators for efficient low-profile panels."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5f08e3e2-cdd7-4367-a9a0-fb65bc16ebd0",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "TRV installation",
+      "description": "Fitted thermostatic valves for room-by-room control."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9d821f7f-5aa7-469a-a466-76c75a4cfbbd",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "System balancing",
+      "description": "Balanced flow rates to remove cold spots."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "617f7391-9601-4a77-b70b-ee7f46a49b4c",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Meera S.",
+      "comment": "The new radiators look great and the cold spots are gone."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6cdcfe70-5172-4685-8646-e044767c1156",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Radiator Upgrade & Balancing",
+      "category": "Heating",
+      "subCategory": "Radiator upgrade",
+      "location": "Canonbury, N1",
+      "beginDate": "2025-03-24",
+      "endDate": "2025-03-26",
+      "projectValue": "£1,450",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Low-profile rads · TRVs · Full balance",
+      "description": "We replaced tired radiators with low-profile designer panels, fitted TRVs throughout and balanced the system for even heat.",
+      "hero": "b0097b5d-252c-4cfb-8281-69f96f34f6e3",
+      "featured": false,
+      "deliveredSummary": "We replaced tired radiators with low-profile designer panels, fitted TRVs throughout and balanced the system for even heat.",
+      "deliverables": [
+        "ab5dba52-ace1-45b7-9009-e7b882c85202",
+        "5f08e3e2-cdd7-4367-a9a0-fb65bc16ebd0",
+        "9d821f7f-5aa7-469a-a466-76c75a4cfbbd"
+      ],
+      "clientComments": [
+        "617f7391-9601-4a77-b70b-ee7f46a49b4c"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5874ef49-65ed-4638-b560-2611b67166fe",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "First-fix rewire",
+      "description": "Replaced all cabling with minimal disruption to finishes."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "084717bd-3b6e-45b5-88d9-7690e6967988",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Consumer unit upgrade",
+      "description": "Fitted an 18th-edition, RCBO-protected board."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "24498653-a17c-413a-80c2-54bc85e0486d",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Testing & certification",
+      "description": "Tested the installation and issued an EICR and EIC."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1a56df31-435c-4d45-a08c-2415487ed2a6",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "James P.",
+      "comment": "Tidy work, minimal disruption and fully certified — total peace of mind."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e148b062-68ef-40ac-bb72-adb1d759007f",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Full House Rewire",
+      "category": "Electrical",
+      "subCategory": "Rewire",
+      "location": "Barnsbury, N1",
+      "beginDate": "2025-01-13",
+      "endDate": "2025-01-31",
+      "projectValue": "£7,500",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Full rewire · New consumer unit · EICR",
+      "description": "We completely rewired a Victorian terrace, installed a new 18th-edition consumer unit and issued full certification.",
+      "hero": "57b6c85e-452e-46b6-bee5-97bb91455301",
+      "featured": false,
+      "deliveredSummary": "We completely rewired a Victorian terrace, installed a new 18th-edition consumer unit and issued full certification.",
+      "deliverables": [
+        "5874ef49-65ed-4638-b560-2611b67166fe",
+        "084717bd-3b6e-45b5-88d9-7690e6967988",
+        "24498653-a17c-413a-80c2-54bc85e0486d"
+      ],
+      "clientComments": [
+        "1a56df31-435c-4d45-a08c-2415487ed2a6"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4cb89808-f98f-477e-a15a-f710b196fbf8",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Old board removal",
+      "description": "Removed the outdated fuse board safely."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "66adc1fa-30b6-4ba9-b579-df2c3b3de099",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "RCBO consumer unit",
+      "description": "Installed individual RCBO protection for every circuit."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3755c49d-938f-464a-ae16-968fb226dda1",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Certification",
+      "description": "Issued an EICR confirming a safe installation."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9c2ac3ee-3c35-4de7-b472-6a2d7ea348b0",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Grace L.",
+      "comment": "Quick, clean and explained everything clearly."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "44e8b136-c23f-408f-9368-3df6a15a46b2",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Consumer Unit Upgrade",
+      "category": "Electrical",
+      "subCategory": "Fuse board",
+      "location": "Finsbury Park, N4",
+      "beginDate": "2025-02-10",
+      "endDate": "2025-02-11",
+      "projectValue": "£780",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "18th-edition board · RCBOs · EICR",
+      "description": "We upgraded an outdated fuse board to a fully RCBO-protected 18th-edition consumer unit with certification.",
+      "hero": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "featured": false,
+      "deliveredSummary": "We upgraded an outdated fuse board to a fully RCBO-protected 18th-edition consumer unit with certification.",
+      "deliverables": [
+        "4cb89808-f98f-477e-a15a-f710b196fbf8",
+        "66adc1fa-30b6-4ba9-b579-df2c3b3de099",
+        "3755c49d-938f-464a-ae16-968fb226dda1"
+      ],
+      "clientComments": [
+        "9c2ac3ee-3c35-4de7-b472-6a2d7ea348b0"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "29002a11-783b-4d78-8688-8a97ad886d8b",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Dedicated circuits",
+      "description": "Added dedicated circuits for appliances and lighting."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f09f404d-d11d-483b-b3dd-01d5757aaa4a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "LED downlights",
+      "description": "Installed low-energy LED downlights on dimmers."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3efe40fc-48b1-4848-b918-81944ca7bdaf",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Socket additions",
+      "description": "Fitted extra sockets with integrated USB charging."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3728332e-e140-4e76-8daf-6f3f70b8a396",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "The Bells",
+      "comment": "The kitchen is so much brighter and we finally have enough sockets."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4f8579ba-b365-4aba-8a61-4bc93e425b58",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Kitchen Lighting & Sockets",
+      "category": "Electrical",
+      "subCategory": "Lighting & sockets",
+      "location": "Stoke Newington, N16",
+      "beginDate": "2025-03-05",
+      "endDate": "2025-03-08",
+      "projectValue": "£1,900",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "LED downlights · New ring main · USB sockets",
+      "description": "We installed dedicated kitchen circuits, LED downlights and additional sockets with USB charging throughout.",
+      "hero": "dc8df3f9-d5f8-48d7-80c8-164b76b85ec2",
+      "featured": false,
+      "deliveredSummary": "We installed dedicated kitchen circuits, LED downlights and additional sockets with USB charging throughout.",
+      "deliverables": [
+        "29002a11-783b-4d78-8688-8a97ad886d8b",
+        "f09f404d-d11d-483b-b3dd-01d5757aaa4a",
+        "3efe40fc-48b1-4848-b918-81944ca7bdaf"
+      ],
+      "clientComments": [
+        "3728332e-e140-4e76-8daf-6f3f70b8a396"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "eba6c1e4-f9b5-4080-a0c2-1a373458ca65",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Bespoke alcove units",
+      "description": "Built cabinetry made to measure for the chimney breast alcoves."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "03c5e888-2f5d-4de6-91af-11faedb0b2f3",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Floating shelves",
+      "description": "Fitted concealed-fix floating shelves above the units."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b187c100-8fbe-4b01-a803-1e118e419b4a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Spray finishing",
+      "description": "Hand-prepared and spray-finished for a factory look."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "90d95d74-8c48-44ec-9258-e8c24277e0e2",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Olivia T.",
+      "comment": "They look like they've always been part of the house."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3e610158-1279-427a-b1c6-f9d25c879a5a",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Alcove Media Units & Shelving",
+      "category": "Carpentry",
+      "subCategory": "Bespoke joinery",
+      "location": "Canonbury, N1",
+      "beginDate": "2025-02-03",
+      "endDate": "2025-02-12",
+      "projectValue": "£3,400",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Bespoke alcoves · Floating shelves · Spray finish",
+      "description": "We designed and built bespoke alcove cabinetry with floating shelves, hand-finished and spray-painted to match the room.",
+      "hero": "3c3c1667-f16b-4d95-bfba-f070ae95fd00",
+      "featured": false,
+      "deliveredSummary": "We designed and built bespoke alcove cabinetry with floating shelves, hand-finished and spray-painted to match the room.",
+      "deliverables": [
+        "eba6c1e4-f9b5-4080-a0c2-1a373458ca65",
+        "03c5e888-2f5d-4de6-91af-11faedb0b2f3",
+        "b187c100-8fbe-4b01-a803-1e118e419b4a"
+      ],
+      "clientComments": [
+        "90d95d74-8c48-44ec-9258-e8c24277e0e2"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "db76fd03-e9c9-44ea-a20d-c493702c4ddf",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Fitted wardrobes",
+      "description": "Built full-height wardrobes into the sloping walls."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "314e8352-d3ba-40ed-b2dd-1c26d4dbe52f",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Eaves storage",
+      "description": "Created hidden eaves storage behind the knee walls."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "05f0d4a1-2740-4324-9373-f7930fee2403",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Soft-close fittings",
+      "description": "Fitted soft-close hinges and runners throughout."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d3276cdb-092f-4725-a65f-a484fde9e9f2",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Ryan H.",
+      "comment": "Storage we didn't think was possible in an awkward loft."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1e0e4540-ac5a-4149-8bbc-c029e916a7b4",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Loft Storage & Fitted Wardrobes",
+      "category": "Carpentry",
+      "subCategory": "Fitted wardrobes",
+      "location": "Tufnell Park, N19",
+      "beginDate": "2025-03-01",
+      "endDate": "2025-03-10",
+      "projectValue": "£4,100",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Fitted wardrobes · Eaves storage · Soft-close",
+      "description": "We used every inch of an awkward loft room with fitted wardrobes and bespoke eaves storage, all soft-close.",
+      "hero": "e4db2ff8-f1bf-4154-970b-32c5e302560f",
+      "featured": false,
+      "deliveredSummary": "We used every inch of an awkward loft room with fitted wardrobes and bespoke eaves storage, all soft-close.",
+      "deliverables": [
+        "db76fd03-e9c9-44ea-a20d-c493702c4ddf",
+        "314e8352-d3ba-40ed-b2dd-1c26d4dbe52f",
+        "05f0d4a1-2740-4324-9373-f7930fee2403"
+      ],
+      "clientComments": [
+        "d3276cdb-092f-4725-a65f-a484fde9e9f2"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "eeddbc86-5a5e-4095-b415-96bbea928469",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Door restoration",
+      "description": "Repaired and rehung original panel doors."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "bc14d2c7-869b-495c-bf71-d4f459f18751",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Staircase repair",
+      "description": "Renewed loose spindles and fixed creaking treads."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ff92f66e-6edf-452a-9d7e-eb2328187a70",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Draught-proofing",
+      "description": "Discreetly draught-proofed doors and sash windows."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "2493fd3b-e9e1-42a8-945e-639c3aae43be",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "The Chens",
+      "comment": "Our original features have been brought back to life beautifully."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "75369ae0-f86c-4af5-9d4e-4cf03d5182e9",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Period Door & Staircase Restoration",
+      "category": "Carpentry",
+      "subCategory": "Restoration",
+      "location": "De Beauvoir, N1",
+      "beginDate": "2025-04-07",
+      "endDate": "2025-04-15",
+      "projectValue": "£2,800",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Original doors · Staircase repair · Draught-proofing",
+      "description": "We restored original panel doors and a Victorian staircase, repairing spindles and draught-proofing throughout.",
+      "hero": "a15fe712-7d04-42e7-92a0-983c9fb5f825",
+      "featured": false,
+      "deliveredSummary": "We restored original panel doors and a Victorian staircase, repairing spindles and draught-proofing throughout.",
+      "deliverables": [
+        "eeddbc86-5a5e-4095-b415-96bbea928469",
+        "bc14d2c7-869b-495c-bf71-d4f459f18751",
+        "ff92f66e-6edf-452a-9d7e-eb2328187a70"
+      ],
+      "clientComments": [
+        "2493fd3b-e9e1-42a8-945e-639c3aae43be"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "46f0b9bd-beed-4b26-9006-62a5c66bce82",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Strip & deck repair",
+      "description": "Removed old felt and renewed the timber deck."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "79c57732-0793-4c71-9f58-76251b63515c",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "GRP fibreglass layer",
+      "description": "Laid a seamless, joint-free fibreglass membrane."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "97ad0cf8-a201-4e86-99ba-0ffb15cdbaf7",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Drainage & trims",
+      "description": "Fitted new outlets and powder-coated edge trims."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b89bb1a1-581f-4404-802d-9448e4db2797",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Angela W.",
+      "comment": "No more leaks and it comes with a proper guarantee."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1cd13c01-103f-4b1e-8d7a-36fe38df5cd3",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Flat Roof Replacement",
+      "category": "Roofing",
+      "subCategory": "GRP flat roof",
+      "location": "Holloway, N7",
+      "beginDate": "2025-02-24",
+      "endDate": "2025-02-28",
+      "projectValue": "£3,900",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "GRP fibreglass · New drainage · 20-yr guarantee",
+      "description": "We stripped a failing felt roof and installed a seamless GRP fibreglass flat roof with new drainage and a 20-year guarantee.",
+      "hero": "f80fbb3b-d255-462c-a518-ac71565b1d24",
+      "featured": false,
+      "deliveredSummary": "We stripped a failing felt roof and installed a seamless GRP fibreglass flat roof with new drainage and a 20-year guarantee.",
+      "deliverables": [
+        "46f0b9bd-beed-4b26-9006-62a5c66bce82",
+        "79c57732-0793-4c71-9f58-76251b63515c",
+        "97ad0cf8-a201-4e86-99ba-0ffb15cdbaf7"
+      ],
+      "clientComments": [
+        "b89bb1a1-581f-4404-802d-9448e4db2797"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1f706667-d85b-4375-9aff-b85319ba77db",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Tile replacement",
+      "description": "Replaced slipped and cracked tiles like-for-like."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "04c20c38-e6a3-4eb2-a621-639539088270",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Ridge repointing",
+      "description": "Re-bedded and pointed the ridge and hips."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f3612154-f523-4759-a521-aa08f473244a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Chimney leadwork",
+      "description": "Renewed lead flashings to stop water ingress."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3d6d6fc7-a12b-43bf-b8b0-6e61617fb5fe",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Mark D.",
+      "comment": "Sorted a long-standing leak that had baffled others."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "bfdcf662-5680-46ea-8827-5b7ea2153cda",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Pitched Roof Repair & Repoint",
+      "category": "Roofing",
+      "subCategory": "Tile & repoint",
+      "location": "Archway, N19",
+      "beginDate": "2025-03-12",
+      "endDate": "2025-03-18",
+      "projectValue": "£2,450",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Slipped tiles · Ridge repoint · Leadwork",
+      "description": "We replaced slipped tiles, re-pointed the ridge line and renewed the leadwork around the chimney.",
+      "hero": "b0097b5d-252c-4cfb-8281-69f96f34f6e3",
+      "featured": false,
+      "deliveredSummary": "We replaced slipped tiles, re-pointed the ridge line and renewed the leadwork around the chimney.",
+      "deliverables": [
+        "1f706667-d85b-4375-9aff-b85319ba77db",
+        "04c20c38-e6a3-4eb2-a621-639539088270",
+        "f3612154-f523-4759-a521-aa08f473244a"
+      ],
+      "clientComments": [
+        "3d6d6fc7-a12b-43bf-b8b0-6e61617fb5fe"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "68c480e6-07a5-4a67-a0b8-44b7651a02ce",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Fascia & soffit renewal",
+      "description": "Replaced rotten timber with UPVC boards."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "34d3dae2-7b4b-49c2-a825-dbcc0bd66336",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Seamless guttering",
+      "description": "Installed new guttering with a proper fall to the outlets."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "03ec2c30-f924-4756-a6fd-3b29db6b1b55",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Roof-space ventilation",
+      "description": "Added soffit vents to reduce condensation."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b5c346cc-4e72-4c2f-8586-c5b7a3eaaa9d",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "The Osei family",
+      "comment": "Looks smart from the street and no more overflowing gutters."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "830c33f2-e21e-4b97-9475-6659e2e53513",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Guttering & Fascia Renewal",
+      "category": "Roofing",
+      "subCategory": "UPVC fascia",
+      "location": "Crouch End, N8",
+      "beginDate": "2025-04-02",
+      "endDate": "2025-04-05",
+      "projectValue": "£1,700",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "UPVC fascia · New guttering · Soffit vents",
+      "description": "We renewed rotten fascias and soffits with maintenance-free UPVC and installed new seamless guttering with ventilation.",
+      "hero": "57b6c85e-452e-46b6-bee5-97bb91455301",
+      "featured": false,
+      "deliveredSummary": "We renewed rotten fascias and soffits with maintenance-free UPVC and installed new seamless guttering with ventilation.",
+      "deliverables": [
+        "68c480e6-07a5-4a67-a0b8-44b7651a02ce",
+        "34d3dae2-7b4b-49c2-a825-dbcc0bd66336",
+        "03ec2c30-f924-4756-a6fd-3b29db6b1b55"
+      ],
+      "clientComments": [
+        "b5c346cc-4e72-4c2f-8586-c5b7a3eaaa9d"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3acf878e-bfae-4fff-a393-c0cbf3594e5f",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Furniture assembly",
+      "description": "Assembled flat-pack wardrobes and drawers."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6731dfdc-4f33-4c1c-bd17-e93c428ff9a9",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "TV wall-mounting",
+      "description": "Mounted the TV with cables neatly concealed."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b19c35fa-c472-4dbb-9f4d-d2ad81e04c9b",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Shelf & picture hanging",
+      "description": "Levelled and securely fixed shelves and frames."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "81c3792f-d32d-4b8e-a250-9cee8e3bd626",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Sophie A.",
+      "comment": "Got through my whole list in one visit — brilliant value."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c16bbcda-a06f-45b5-ac4d-6e20898e12bb",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Flat-Pack & Fixings Day",
+      "category": "Handyman",
+      "subCategory": "Assembly & mounting",
+      "location": "Angel, N1",
+      "beginDate": "2025-01-15",
+      "endDate": "2025-01-15",
+      "projectValue": "£240",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Furniture assembly · TV mounting · Shelving",
+      "description": "A full day of assembly and fixings — wardrobes, a TV wall-mount and floating shelves, all levelled and secure.",
+      "hero": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "featured": false,
+      "deliveredSummary": "A full day of assembly and fixings — wardrobes, a TV wall-mount and floating shelves, all levelled and secure.",
+      "deliverables": [
+        "3acf878e-bfae-4fff-a393-c0cbf3594e5f",
+        "6731dfdc-4f33-4c1c-bd17-e93c428ff9a9",
+        "b19c35fa-c472-4dbb-9f4d-d2ad81e04c9b"
+      ],
+      "clientComments": [
+        "81c3792f-d32d-4b8e-a250-9cee8e3bd626"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "138f726e-9da1-498f-88c3-5d555a30151d",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Door & handle repairs",
+      "description": "Eased sticking doors and replaced worn handles."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4243f614-4d68-4e70-bcd3-1d35852f7cf5",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Bath & kitchen re-sealing",
+      "description": "Renewed silicone for a clean, watertight finish."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "479e6ca3-8565-4ce5-baeb-2c89e3be386a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "General fixes",
+      "description": "Worked through a long snagging list in one go."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8b0b7a36-a259-482f-a48a-b7993e9c4d3b",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Henry G.",
+      "comment": "Reliable, tidy and no job too small."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9493336d-6cbd-4a41-a576-11506b246a7e",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Odd Jobs & Repairs",
+      "category": "Handyman",
+      "subCategory": "Repairs",
+      "location": "Islington, N1",
+      "beginDate": "2025-02-05",
+      "endDate": "2025-02-06",
+      "projectValue": "£360",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Door easing · Re-sealing · Minor repairs",
+      "description": "We tackled a backlog of small jobs: easing sticking doors, re-sealing the bath and a dozen minor repairs.",
+      "hero": "dc8df3f9-d5f8-48d7-80c8-164b76b85ec2",
+      "featured": false,
+      "deliveredSummary": "We tackled a backlog of small jobs: easing sticking doors, re-sealing the bath and a dozen minor repairs.",
+      "deliverables": [
+        "138f726e-9da1-498f-88c3-5d555a30151d",
+        "4243f614-4d68-4e70-bcd3-1d35852f7cf5",
+        "479e6ca3-8565-4ce5-baeb-2c89e3be386a"
+      ],
+      "clientComments": [
+        "8b0b7a36-a259-482f-a48a-b7993e9c4d3b"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "117c4078-645d-44ec-8de0-6f0ab089caa2",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Filling & touch-up paint",
+      "description": "Filled and repainted marked and damaged walls."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6cb9e446-c3ac-4514-9186-046c4aa3a8d9",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Grout & sealant renewal",
+      "description": "Renewed grout and sealant in the kitchen and bathroom."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9dbbdbc6-9ada-4bad-928e-eea717d7f2ee",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Fixture replacement",
+      "description": "Swapped tired handles, sockets and fittings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b04f7232-7d5f-40b0-89d6-f59ea228aad6",
+    "__type": "client-comment",
+    "__status": "published",
+    "values": {
+      "name": "Letting agent, N1",
+      "comment": "Our go-to team for fast, clean turnarounds."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7d7dcbd1-8373-4c9a-83e0-3280850e14bb",
+    "__type": "project",
+    "__status": "published",
+    "values": {
+      "title": "Property Refresh & Touch-Ups",
+      "category": "Handyman",
+      "subCategory": "Decor touch-ups",
+      "location": "Barnsbury, N1",
+      "beginDate": "2025-03-03",
+      "endDate": "2025-03-05",
+      "projectValue": "£520",
+      "clientRating": 5,
+      "occupancy": "Occupied throughout",
+      "summary": "Filling & painting · Grout renewal · Fixtures",
+      "description": "We refreshed a rental between tenants — filling, touch-up painting, grout renewal and replacing tired fixtures.",
+      "hero": "3c3c1667-f16b-4d95-bfba-f070ae95fd00",
+      "featured": false,
+      "deliveredSummary": "We refreshed a rental between tenants — filling, touch-up painting, grout renewal and replacing tired fixtures.",
+      "deliverables": [
+        "117c4078-645d-44ec-8de0-6f0ab089caa2",
+        "6cb9e446-c3ac-4514-9186-046c4aa3a8d9",
+        "9dbbdbc6-9ada-4bad-928e-eea717d7f2ee"
+      ],
+      "clientComments": [
+        "b04f7232-7d5f-40b0-89d6-f59ea228aad6"
+      ],
+      "projectTimeline": [],
+      "projectImages": [],
+      "similarWork": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "a0a62167-0034-4e9a-a47a-206171715f35",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Layout & structural changes",
+      "description": "Removing walls, forming openings and reconfiguring space, with structural sign-off."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d0ed6209-51de-46e8-8438-93d83493f6cf",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Kitchens & bathrooms",
+      "description": "Full supply and installation, coordinated with plumbing and electrics."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4d3838b5-6487-416c-b147-62fad38e5f54",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Electrics & heating",
+      "description": "Rewires, new circuits, boilers and radiators by certified engineers."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "de79e5c8-feff-4dea-ad5b-4e1ca7b985fe",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Decoration & finishes",
+      "description": "Plastering, flooring, joinery and a hand-finished decorative finish."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ba48b383-684d-4cdd-a7e8-2e059d10497a",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Typical range",
+      "cost": "£25k–£150k+",
+      "subtitle": "Whole-home refurbishments, priced after a free site visit.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6aff1f9b-b961-47b0-8555-422014f009f8",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Room by room",
+      "subtitle": "Single-room renovations with a fixed, itemised quote.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "44f37cf1-307c-4589-8a43-db1993474b3d",
+    "__type": "service-offer-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we deliver",
+      "title": "The scope of our refurbishment work",
+      "intro": "From single rooms to whole-home renovations, we manage the trades, the programme and the finish so you deal with one accountable team.",
+      "items": [
+        "a0a62167-0034-4e9a-a47a-206171715f35",
+        "d0ed6209-51de-46e8-8438-93d83493f6cf",
+        "4d3838b5-6487-416c-b147-62fad38e5f54",
+        "de79e5c8-feff-4dea-ad5b-4e1ca7b985fe"
+      ],
+      "callout": "Programme management: one point of contact, a clear schedule and weekly updates from first fix to final snag.",
+      "costCards": [
+        "ba48b383-684d-4cdd-a7e8-2e059d10497a"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b3bd76bd-77e8-416f-9080-9ed9e2b005cb",
+    "__type": "case-studies-section",
+    "__status": "published",
+    "values": {
+      "overline": "Case studies",
+      "title": "Refurbishments we've delivered",
+      "category": "Refurbishment"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7df002d8-4cdf-41a1-9602-e91bd176b45f",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "overline": "",
+      "title": "Planning a home refurbishment?",
+      "description": "Tell us about your project and we'll arrange a site visit and a clear, fixed quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "090c9c02-e4c5-4bad-88aa-8b278a76f37f",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Design & templating",
+      "description": "Accurate measuring and layout planning around your appliances."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "568f197e-c2d6-4b3e-8b14-241ba0a9ae0a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Units & worktops",
+      "description": "Precise cabinet installation and worktop fitting, including stone templating."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "76457bfc-0eef-448e-8a57-69685a71bb7f",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Plumbing & appliances",
+      "description": "Sink, dishwasher and appliance connections by certified trades."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "fb98ace8-d97e-4ad2-9876-1855b4a432cc",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Electrics, tiling & finish",
+      "description": "Sockets, lighting, splashbacks and a fully finished, snag-free kitchen."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4d0f38a3-9c36-447d-b1fb-6cb198f37550",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Installation only",
+      "cost": "From £3.5k",
+      "subtitle": "Fitting your supplied kitchen, plumbing and electrics included.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8e0b9b03-683c-4633-8579-5252ee54bb92",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Supply & install",
+      "cost": "£12k–£40k+",
+      "subtitle": "Full kitchen projects, priced after a free design visit.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7d8ae0c3-6c33-47bb-801a-03d6e0965d5d",
+    "__type": "service-offer-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we deliver",
+      "title": "Everything your new kitchen needs",
+      "intro": "We install kitchens from any supplier and handle the plumbing, electrics, tiling and making-good so the result is seamless.",
+      "items": [
+        "090c9c02-e4c5-4bad-88aa-8b278a76f37f",
+        "568f197e-c2d6-4b3e-8b14-241ba0a9ae0a",
+        "76457bfc-0eef-448e-8a57-69685a71bb7f",
+        "fb98ace8-d97e-4ad2-9876-1855b4a432cc"
+      ],
+      "callout": "Supplier-agnostic: bring your own units or let us recommend a fitter-friendly range — either way we manage the fit.",
+      "costCards": [
+        "4d0f38a3-9c36-447d-b1fb-6cb198f37550",
+        "8e0b9b03-683c-4633-8579-5252ee54bb92"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "61bb9b6a-1568-45d6-a303-fa7a6c196a82",
+    "__type": "case-studies-section",
+    "__status": "published",
+    "values": {
+      "overline": "Case studies",
+      "title": "Kitchens we've delivered",
+      "category": "Kitchen"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "85f8baef-996e-4c3f-a988-e2acf281a8d2",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "overline": "",
+      "title": "Planning a new kitchen?",
+      "description": "Send us your plans or ideas and we'll arrange a visit and a clear, fixed quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3648dfdd-581f-4fda-ab36-7e441fa0610a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Strip-out & first fix",
+      "description": "Careful removal, then new plumbing and electrics roughed in."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6c801d3b-8768-4cac-9283-15ff17266a45",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Waterproofing & tiling",
+      "description": "Full tanking of wet zones and precise wall and floor tiling."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d2e86456-7bf7-4d89-817f-1058205bca6f",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Suite & shower install",
+      "description": "Fitting your suite, screens and thermostatic showers."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "372b815c-c4fb-42eb-ab86-345f46f9d84a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Lighting & finish",
+      "description": "Extraction, IP-rated lighting and a fully finished, snag-free room."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f73ac919-a2b0-4e7e-b868-52c073564f45",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Typical range",
+      "cost": "£8k–£20k+",
+      "subtitle": "Full bathroom installations, priced after a free site visit.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c9763b2d-07d9-4de3-87f6-c517a9c727fd",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Refresh",
+      "cost": "From £4k",
+      "subtitle": "Re-tile, re-seal and refit updates for a tired bathroom.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ca77c5f0-c92e-451a-b9c3-1b73490bfcdc",
+    "__type": "service-offer-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we deliver",
+      "title": "Fully managed bathroom installations",
+      "intro": "From refreshes to full wet-room conversions, we handle every trade and leave you with a waterproof, beautifully finished room.",
+      "items": [
+        "3648dfdd-581f-4fda-ab36-7e441fa0610a",
+        "6c801d3b-8768-4cac-9283-15ff17266a45",
+        "d2e86456-7bf7-4d89-817f-1058205bca6f",
+        "372b815c-c4fb-42eb-ab86-345f46f9d84a"
+      ],
+      "callout": "Tanking guaranteed: wet areas are fully tanked and pressure-tested before tiling — no shortcuts, no leaks.",
+      "costCards": [
+        "f73ac919-a2b0-4e7e-b868-52c073564f45",
+        "c9763b2d-07d9-4de3-87f6-c517a9c727fd"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "723a7af9-b7af-447d-90ad-37ca0e8e375d",
+    "__type": "case-studies-section",
+    "__status": "published",
+    "values": {
+      "overline": "Case studies",
+      "title": "Bathrooms we've delivered",
+      "category": "Bathroom"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "03345206-0c96-4104-a680-18eacd76676e",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "overline": "",
+      "title": "Planning a new bathroom?",
+      "description": "Tell us what you have in mind and we'll arrange a visit and a clear, fixed quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5f47f50b-97e1-4891-9d22-04cb5d126530",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Leaks & repairs",
+      "description": "Fast leak detection and lasting repairs with minimal disruption."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "36b55ce9-6c4e-4680-800f-34ff54b8917e",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Bathroom & kitchen plumbing",
+      "description": "New suite, sink and appliance feeds and wastes."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "01c3eecb-17d0-4c98-9268-3cc0b1dc66a0",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Re-pipes & mains upgrades",
+      "description": "Concealed re-pipes and mains-pressure upgrades."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "96182a86-b806-4aad-aea2-b3c274ea53a1",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Cylinders & pressure",
+      "description": "Unvented cylinder installs, G3-certified, for strong flow."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "439cc906-ee5a-48bc-b4d7-0763a2dc9465",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Call-out & first hour",
+      "cost": "£90+",
+      "subtitle": "Fixed first-hour rate; parts charged at trade.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6fce15e6-e25c-42d8-85a9-9d05e835e88c",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Bathroom plumbing",
+      "cost": "From £1.5k",
+      "subtitle": "Full suite installs, fully tested and certified.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "bf66a21f-edeb-44b5-a909-6878c4aff4a0",
+    "__type": "service-offer-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we deliver",
+      "title": "Plumbing done properly, first time",
+      "intro": "From leaks and repairs to full re-pipes and unvented cylinders, our plumbers work clean, certified and to a fixed price.",
+      "items": [
+        "5f47f50b-97e1-4891-9d22-04cb5d126530",
+        "36b55ce9-6c4e-4680-800f-34ff54b8917e",
+        "01c3eecb-17d0-4c98-9268-3cc0b1dc66a0",
+        "96182a86-b806-4aad-aea2-b3c274ea53a1"
+      ],
+      "callout": "Fixed-price clarity: you approve a clear quote before we start — no surprise hourly bills.",
+      "costCards": [
+        "439cc906-ee5a-48bc-b4d7-0763a2dc9465",
+        "6fce15e6-e25c-42d8-85a9-9d05e835e88c"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "df0a1266-dfb4-4d0d-bbd4-d00a34515ed8",
+    "__type": "case-studies-section",
+    "__status": "published",
+    "values": {
+      "overline": "Case studies",
+      "title": "Plumbing projects we've delivered",
+      "category": "Plumbing"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "19f10f67-4243-4fc2-bae9-077c6ea5ce16",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "overline": "",
+      "title": "Planning plumbing work?",
+      "description": "Tell us what you need and we'll arrange a visit and a clear, fixed quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "69092162-d125-4bfe-a8f2-ccbd4b469a0f",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Boiler installs & swaps",
+      "description": "High-efficiency combi and system boilers, fully commissioned."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f655aca2-8a81-4761-9f31-1174fb9d7df8",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Central heating systems",
+      "description": "Designed from a heat-loss survey for even, efficient heat."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f64ae156-538a-433f-9a11-5d53f5f7afd1",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Radiators & controls",
+      "description": "Modern radiators, TRVs and smart zoned thermostats."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1b88f9fe-8e93-41d2-92c7-9300a7406898",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Servicing & repairs",
+      "description": "Annual servicing and fault-finding to keep systems reliable."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "923567f1-908d-435f-bd49-7dcfd51ea2bd",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Boiler replacement",
+      "cost": "From £2.2k",
+      "subtitle": "Supplied and fitted with warranty registration.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "48f21ffa-4e63-4f23-896b-acba7ffd1371",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Full system",
+      "cost": "£5k–£9k+",
+      "subtitle": "New central heating, priced after a heat-loss survey.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "4b74172d-ce6b-47ed-a959-f1f64393cd9f",
+    "__type": "service-offer-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we deliver",
+      "title": "Warmer homes, lower bills",
+      "intro": "Our Gas Safe engineers install and service boilers, radiators and full heating systems, with smart controls and long warranties.",
+      "items": [
+        "69092162-d125-4bfe-a8f2-ccbd4b469a0f",
+        "f655aca2-8a81-4761-9f31-1174fb9d7df8",
+        "f64ae156-538a-433f-9a11-5d53f5f7afd1",
+        "1b88f9fe-8e93-41d2-92c7-9300a7406898"
+      ],
+      "callout": "Gas Safe registered: every appliance is installed, commissioned and registered to keep your warranty valid.",
+      "costCards": [
+        "923567f1-908d-435f-bd49-7dcfd51ea2bd",
+        "48f21ffa-4e63-4f23-896b-acba7ffd1371"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "1636da8b-6f4f-4307-98d1-df0724571934",
+    "__type": "case-studies-section",
+    "__status": "published",
+    "values": {
+      "overline": "Case studies",
+      "title": "Heating projects we've delivered",
+      "category": "Heating"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "62871c1d-b6b7-4a9e-a22a-a3c9829c52f5",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "overline": "",
+      "title": "Planning heating work?",
+      "description": "Tell us about your system and we'll arrange a visit and a clear, fixed quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "822f0dbd-7b67-48f8-97c9-9c38680f9cb0",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Rewires & new circuits",
+      "description": "Full and partial rewires with minimal disruption."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "a849d656-4268-4d87-bd1e-4feddfa7f1a3",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Consumer units",
+      "description": "18th-edition boards with individual RCBO protection."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "55fd6239-3f1f-4e2a-95b9-dec29d5b735a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Lighting & sockets",
+      "description": "LED lighting, additional sockets and USB points."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d5e607ac-0192-4985-b6d9-dd9f1cf53a8f",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Testing & EICRs",
+      "description": "Inspection, testing and landlord safety certificates."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "16564a5e-9c06-466a-8a0b-0f6625ea3745",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Consumer unit upgrade",
+      "cost": "From £650",
+      "subtitle": "New 18th-edition board with certification.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "885ef234-df89-4212-9661-13019f2f32ca",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Full rewire",
+      "cost": "£4k–£9k+",
+      "subtitle": "Whole-house rewires, priced after a survey.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ada063d7-2d61-47df-b43d-13d8eadb36a1",
+    "__type": "service-offer-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we deliver",
+      "title": "Safe, certified electrical work",
+      "intro": "From extra sockets to full rewires, our registered electricians deliver compliant work with certification you can rely on.",
+      "items": [
+        "822f0dbd-7b67-48f8-97c9-9c38680f9cb0",
+        "a849d656-4268-4d87-bd1e-4feddfa7f1a3",
+        "55fd6239-3f1f-4e2a-95b9-dec29d5b735a",
+        "d5e607ac-0192-4985-b6d9-dd9f1cf53a8f"
+      ],
+      "callout": "Part P certified: notifiable work is registered and you receive full electrical certification on completion.",
+      "costCards": [
+        "16564a5e-9c06-466a-8a0b-0f6625ea3745",
+        "885ef234-df89-4212-9661-13019f2f32ca"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f371ac32-f11b-4356-9005-1d1e34be0e5f",
+    "__type": "case-studies-section",
+    "__status": "published",
+    "values": {
+      "overline": "Case studies",
+      "title": "Electrical projects we've delivered",
+      "category": "Electrical"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "645f2112-1705-486f-9d58-3f066019b5cd",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "overline": "",
+      "title": "Planning electrical work?",
+      "description": "Tell us what you need and we'll arrange a visit and a clear, fixed quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5f5027c2-194b-4071-adf5-5c9c76766f03",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Alcove & media units",
+      "description": "Bespoke cabinetry built around chimney breasts and alcoves."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "540a6349-0589-4a23-8b99-f9d08df886e8",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Fitted wardrobes & storage",
+      "description": "Full-height wardrobes and clever eaves storage."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "0539140f-8710-4f11-9632-276493e10b2b",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Doors & staircases",
+      "description": "Hanging, repair and restoration of doors and stairs."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "47991d14-5a08-4f56-830b-b470fdd531af",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Finishing & spray",
+      "description": "Hand-finished and spray-painted for a flawless look."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e7667131-4779-4ed9-963b-1ef1b51efc06",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Alcove units",
+      "cost": "From £1.8k",
+      "subtitle": "Per pair, made to measure and finished.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f4d0e65c-e2d2-4ec9-a28c-32249a3ce2f4",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Fitted wardrobes",
+      "cost": "£2.5k–£6k+",
+      "subtitle": "Bespoke wardrobes, priced after a design visit.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "468883dc-a9b5-44f5-99ad-f5b2839b490d",
+    "__type": "service-offer-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we deliver",
+      "title": "Bespoke carpentry & joinery",
+      "intro": "From fitted storage to period restoration, our joiners make and fit to a standard you'd expect from a dedicated workshop.",
+      "items": [
+        "5f5027c2-194b-4071-adf5-5c9c76766f03",
+        "540a6349-0589-4a23-8b99-f9d08df886e8",
+        "0539140f-8710-4f11-9632-276493e10b2b",
+        "47991d14-5a08-4f56-830b-b470fdd531af"
+      ],
+      "callout": "Made to measure: everything is templated on site so it fits your space, not a standard size.",
+      "costCards": [
+        "e7667131-4779-4ed9-963b-1ef1b51efc06",
+        "f4d0e65c-e2d2-4ec9-a28c-32249a3ce2f4"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f9cee914-7dca-4a33-8513-7beb4c64fceb",
+    "__type": "case-studies-section",
+    "__status": "published",
+    "values": {
+      "overline": "Case studies",
+      "title": "Carpentry projects we've delivered",
+      "category": "Carpentry"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "a1385815-e48b-459f-9d2c-4e581598c6c0",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "overline": "",
+      "title": "Planning carpentry work?",
+      "description": "Send us your ideas and we'll arrange a visit and a clear, fixed quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d81f9856-0a3f-4a91-8a15-aaa3ba5afd0b",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Flat roof replacement",
+      "description": "Seamless GRP fibreglass roofs with new drainage."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "3f6bb233-a7c1-4161-8e4b-da7758a8149d",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Pitched roof repairs",
+      "description": "Tile replacement, ridge repointing and leadwork."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "03502b7e-bff5-4917-ba82-d774014af10a",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Guttering & fascias",
+      "description": "UPVC fascias, soffits and seamless guttering."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "5266f984-fdb7-4502-8149-e20b2b455b56",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Leaks & maintenance",
+      "description": "Fast diagnosis and repair of persistent leaks."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6ac351a0-b343-4483-8e1c-0a9d292fd6af",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Repairs",
+      "cost": "From £250",
+      "subtitle": "Targeted repairs after a free roof inspection.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "762eaedd-55a5-44da-a48a-f38d5dbeff61",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Flat roof replacement",
+      "cost": "£3k–£8k+",
+      "subtitle": "Full GRP replacements with a written guarantee.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "766fbfa4-014b-41c6-af63-ffa32752ef66",
+    "__type": "service-offer-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we deliver",
+      "title": "Roofs that keep the weather out",
+      "intro": "From leak repairs to full flat-roof replacements, we work safely at height and back our workmanship with real guarantees.",
+      "items": [
+        "d81f9856-0a3f-4a91-8a15-aaa3ba5afd0b",
+        "3f6bb233-a7c1-4161-8e4b-da7758a8149d",
+        "03502b7e-bff5-4917-ba82-d774014af10a",
+        "5266f984-fdb7-4502-8149-e20b2b455b56"
+      ],
+      "callout": "Guaranteed workmanship: flat-roof replacements carry a written guarantee of up to 20 years.",
+      "costCards": [
+        "6ac351a0-b343-4483-8e1c-0a9d292fd6af",
+        "762eaedd-55a5-44da-a48a-f38d5dbeff61"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "629e41f2-5afa-4674-a7f3-f71837198a0c",
+    "__type": "case-studies-section",
+    "__status": "published",
+    "values": {
+      "overline": "Case studies",
+      "title": "Roofing projects we've delivered",
+      "category": "Roofing"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "157589db-fd71-4506-a937-d9314dbe91fb",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "overline": "",
+      "title": "Planning roofing work?",
+      "description": "Tell us what's wrong and we'll arrange an inspection and a clear, fixed quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "cb0fbd10-d234-4844-8141-174abcee1304",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Assembly & mounting",
+      "description": "Flat-pack furniture, TVs, shelves and blinds."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7b2de405-88c6-4f4a-bf49-6e696e453b68",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Small repairs",
+      "description": "Doors, handles, sealant and the endless snagging list."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7c3c6252-2680-4be7-96f9-f584cc944356",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Decor touch-ups",
+      "description": "Filling, touch-up painting and grout renewal."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "a8f5b58f-677c-4598-b4cb-4d6072b6f3a0",
+    "__type": "deliverable",
+    "__status": "published",
+    "values": {
+      "title": "Fixtures & fittings",
+      "description": "Swapping tired handles, sockets and fittings."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "0fce3f14-6c4c-4694-aa5d-27f8a95d4473",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Half day",
+      "cost": "From £140",
+      "subtitle": "Up to four hours for your list of small jobs.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "95891d38-0271-47e9-bec8-9ce9643ea8aa",
+    "__type": "cta",
+    "__status": "published",
+    "values": {
+      "title": "Full day",
+      "cost": "From £240",
+      "subtitle": "A full day working through the backlog.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e4ab6316-fb63-4c84-963d-308b839d9d45",
+    "__type": "service-offer-section",
+    "__status": "published",
+    "values": {
+      "overline": "What we deliver",
+      "title": "The jobs that never get done",
+      "intro": "Book a half or full day and we'll work through your list — assembly, mounting, repairs and touch-ups, all done properly.",
+      "items": [
+        "cb0fbd10-d234-4844-8141-174abcee1304",
+        "7b2de405-88c6-4f4a-bf49-6e696e453b68",
+        "7c3c6252-2680-4be7-96f9-f584cc944356",
+        "a8f5b58f-677c-4598-b4cb-4d6072b6f3a0"
+      ],
+      "callout": "One visit, many jobs: batch your small tasks into a single, cost-effective booking.",
+      "costCards": [
+        "0fce3f14-6c4c-4694-aa5d-27f8a95d4473",
+        "95891d38-0271-47e9-bec8-9ce9643ea8aa"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "adb132b6-f96e-426c-8862-144c2dc9a605",
+    "__type": "case-studies-section",
+    "__status": "published",
+    "values": {
+      "overline": "Case studies",
+      "title": "Handyman jobs we've delivered",
+      "category": "Handyman"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e7a8dca8-f401-4119-ac3d-56b1f78c98c5",
+    "__type": "planning-renovation-section",
+    "__status": "published",
+    "values": {
+      "overline": "",
+      "title": "Got a list of jobs?",
+      "description": "Send us your list and we'll arrange a visit and a clear, fixed quote.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ]
     },
     "__draft": null
   }

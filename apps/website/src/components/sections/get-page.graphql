@@ -49,6 +49,12 @@ query GetPage($key: String!, $status: CmsReadStatus = published, $includeUnpubli
       ... on PlanningRenovationSection {
         ...PlanningRenovationSection
       }
+      ... on ServiceOfferSection {
+        ...ServiceOfferSection
+      }
+      ... on CaseStudiesSection {
+        ...CaseStudiesSection
+      }
     }
   }
 }

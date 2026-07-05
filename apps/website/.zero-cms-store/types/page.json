@@ -37,7 +37,9 @@
         "recent-work-section",
         "client-review-section",
         "planning-renovation-section",
-        "clients-carousel"
+        "clients-carousel",
+        "service-offer-section",
+        "case-studies-section"
       ]
     }
   ]
