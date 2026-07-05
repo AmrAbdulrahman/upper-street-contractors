@@ -5,6 +5,17 @@
   "projectType": "application",
   "tags": [],
   "targets": {
+    "dev": {
+      "dependsOn": ["codegen"],
+      "inputs": [
+        "default",
+        "^default",
+        "{projectRoot}/env.mjs",
+        { "externalDependencies": ["next"] },
+        { "dependentTasksOutputFiles": "**/*.d.ts", "transitive": true },
+        { "env": "NEXT_PUBLIC_APP_ENV" }
+      ]
+    },
     "build": {
       "dependsOn": ["codegen"],
       "inputs": [

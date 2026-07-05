@@ -59,7 +59,7 @@
     "__type": "at-aglance-card",
     "__status": "published",
     "values": {
-      "quantity": 470,
+      "quantity": 900,
       "unit": "+",
       "label": "Customer reviews"
     },
@@ -108,7 +108,8 @@
         "f32b4372-de3a-4588-9d63-729158258202",
         "9f599178-2251-4573-856a-6fd358e4aaf4",
         "bf6c3f00-4ec1-4815-9f75-1346e3720983",
-        "53db565c-dd68-42cd-b068-20228eb22af2"
+        "53db565c-dd68-42cd-b068-20228eb22af2",
+        "16af3f81-8cc1-494a-826c-180297510ec3"
       ],
       "footer": [
         {
@@ -637,7 +638,7 @@
     "__type": "home-header-section",
     "__status": "published",
     "values": {
-      "overline": "Islington's Trusted Renovation Team122",
+      "overline": "Islington's Trusted Renovation Team",
       "title": [
         {
           "type": "paragraph",
@@ -805,6 +806,7 @@
       "meta": "a6a3d1f4-0495-4cb7-87cd-03c5e947ccc9",
       "sections": [
         "16dae380-82ad-413c-a0a5-23086d778bfb",
+        "60dd3c22-7c66-4c3a-ae97-c32497b45745",
         "39ce386a-904e-4834-80b8-52e5c8d8ffd3",
         "dde85097-523f-4d3f-b0ad-a3aa02e40801",
         "cd71c0a1-cd19-41db-99ae-cacc65724e6e",
@@ -1264,7 +1266,7 @@
         "c6363c76-0fd6-4912-8448-d59a1fbd2de8",
         "6eccc16e-28ed-47d1-b490-b2e0c1c04bd3"
       ],
-      "imageContainer": "94853c3c-fbed-4c43-aa71-acbcaddfa528"
+      "imageContainer": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde"
     },
     "__draft": null
   },
@@ -3145,6 +3147,17 @@
     "values": {
       "title": "Sample 1",
       "description": "A sample deliver"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "16af3f81-8cc1-494a-826c-180297510ec3",
+    "__type": "at-aglance-card",
+    "__status": "published",
+    "values": {
+      "quantity": 4,
+      "unit": "markets",
+      "label": "Worldwide"
     },
     "__draft": null
   }
