@@ -15,7 +15,7 @@ import {
   FOOTER_SERVICE_LINKS,
 } from "@/components/layout/nav-links";
 
-import { SiteLogo } from "@/components/layout/site-logo";
+import { SiteBanner } from "@/components/layout/site-banner";
 
 import {
   formatAddress,
@@ -98,11 +98,10 @@ export function Footer({ config }: FooterProps) {
       <div className="mx-auto max-w-container px-6 pt-14 pb-7">
         <div className="mb-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.5fr] lg:gap-12">
           <div>
-            <SiteLogo
+            <SiteBanner
+              tone="light"
               siteName={config?.siteName}
-              streetClassName="text-white"
-              suffixClassName="text-gold"
-              className="mb-3 text-[20px] leading-[1.2]"
+              className="mb-3 h-12"
             />
 
             {description ? (

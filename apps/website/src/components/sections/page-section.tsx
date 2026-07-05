@@ -1,6 +1,7 @@
 import {
   type AccreditationListFragment,
   type ClientReviewSectionFragment,
+  type ClientsCarouselFragment,
   type ContactDetailsSectionFragment,
   type HomeHeroSectionFragment,
   type HowItWorksSectionFragment,
@@ -14,6 +15,7 @@ import {
 } from "@/generated/graphql";
 import { AccreditationList } from "./accreditation-list";
 import { ClientReviewsSection } from "./client-reviews";
+import { ClientsCarousel } from "./clients-carousel";
 import { ContactDetailsSection } from "./contact-details";
 import { HeroHeroSection } from "./home-hero";
 import { HowItWorksSection } from "./how-it-works";
@@ -28,6 +30,7 @@ import { WizardSection } from "./wizard";
 export type PageSectionData = (
   | AccreditationListFragment
   | ClientReviewSectionFragment
+  | ClientsCarouselFragment
   | ContactDetailsSectionFragment
   | HomeHeroSectionFragment
   | HowItWorksSectionFragment
@@ -78,6 +81,9 @@ export function PageSection({ section }: { section: PageSectionData }) {
       return (
         <ClientReviewsSection data={section as ClientReviewSectionFragment} />
       );
+
+    case "ClientsCarousel":
+      return <ClientsCarousel data={section as ClientsCarouselFragment} />;
 
     case "PlanningRenovationSection":
       return (

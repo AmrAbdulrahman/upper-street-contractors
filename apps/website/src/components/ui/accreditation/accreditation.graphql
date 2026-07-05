@@ -1,7 +1,10 @@
 fragment Accreditation on Accreditation {
   id
   accreditationTitle
-  icon {
-    ...Icon
+  image {
+    url
+    alt
+    width
+    height
   }
 }

@@ -8,8 +8,7 @@
       "list": [
         "70d36622-2e54-4bb3-8db4-0efcf3db2d3e",
         "06d95381-4cec-4f23-a9e0-a016564d9d7d",
-        "e98e83dd-cabd-4806-bc1d-9d1f1d49c222",
-        "bf3e5f06-a1a0-4640-9095-430dc673ba5f"
+        "e98e83dd-cabd-4806-bc1d-9d1f1d49c222"
       ]
     },
     "__draft": null
@@ -19,8 +18,8 @@
     "__type": "accreditation",
     "__status": "published",
     "values": {
-      "accreditationTitle": "FMB Member",
-      "icon": "c6a3a0da-fcfe-4ed7-88ba-337d84460eb4"
+      "accreditationTitle": "NIC EIC Approved Contractor",
+      "image": "7efde4be-1cba-446e-9eb6-2f174d17dcc0"
     },
     "__draft": null
   },
@@ -29,8 +28,8 @@
     "__type": "accreditation",
     "__status": "published",
     "values": {
-      "accreditationTitle": "12-month workmanship guarantee",
-      "icon": "be4f40dd-b2e8-4c61-9d95-930399676c23"
+      "accreditationTitle": "Gas Safe Register",
+      "image": "dc53a6bd-0f1f-420f-a605-5dc8fb9c1232"
     },
     "__draft": null
   },
@@ -39,8 +38,8 @@
     "__type": "accreditation",
     "__status": "published",
     "values": {
-      "accreditationTitle": "Fully insured",
-      "icon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+      "accreditationTitle": "FMB Member",
+      "image": "0634000c-d30e-4730-9225-2bee0b30ab23"
     },
     "__draft": null
   },
@@ -50,7 +49,7 @@
     "__status": "published",
     "values": {
       "accreditationTitle": "TrustMark Registered",
-      "icon": "6ccca669-a30e-4159-bcb9-0d07fec2d340"
+      "image": "e4db2ff8-f1bf-4154-970b-32c5e302560f"
     },
     "__draft": null
   },
@@ -805,11 +804,13 @@
       "meta": "a6a3d1f4-0495-4cb7-87cd-03c5e947ccc9",
       "sections": [
         "16dae380-82ad-413c-a0a5-23086d778bfb",
+        "60dd3c22-7c66-4c3a-ae97-c32497b45745",
         "39ce386a-904e-4834-80b8-52e5c8d8ffd3",
         "dde85097-523f-4d3f-b0ad-a3aa02e40801",
         "cd71c0a1-cd19-41db-99ae-cacc65724e6e",
         "4dfbd32a-c846-4eff-bc97-cab61ef0cf80",
         "f2169f2c-588c-41ae-aa17-468336982ecf",
+        "6ca9a453-dbff-41ba-9f82-b71a32893263",
         "601fba82-1078-4782-9add-908e73b262f6",
         "e2df15c9-1a04-419b-a0d1-30391e669aba"
       ]
@@ -853,7 +854,39 @@
         }
       ]
     },
-    "__draft": null
+    "__draft": {
+      "title": "Planning a renovation?",
+      "description": "Send photos and your postcode on WhatsApp for a quick response, or request a quote for a site visit and detailed scope.",
+      "buttons": [
+        "8ba006d9-06ec-4204-a4c0-74bee0999002",
+        "13896b20-66a0-4e52-abf9-fac777a8d37d"
+      ],
+      "footer": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "text": "Need a smaller job handled professionally? "
+            },
+            {
+              "type": "link",
+              "url": "../../../repairs-and-smaller-works",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "Visit Repairs & Smaller Works"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " to book an hourly visit."
+            }
+          ]
+        }
+      ]
+    }
   },
   {
     "__id": "7602ded8-4bd1-46d8-a271-0fc64b8ffd92",
@@ -1744,7 +1777,7 @@
     "__type": "image-question",
     "__status": "published",
     "values": {
-      "stepLabel": "Details",
+      "stepLabel": "Rooms/Location",
       "title": "Which rooms need work?",
       "hint": "Select all that apply, then tap Next",
       "multiSelect": true,
@@ -1836,8 +1869,13 @@
         "1a302d23-e2b7-4bc5-93e7-226a1d27b8b7",
         "45c1955b-71af-4435-be74-f1c4cb10e663",
         "f23d64cf-868c-4cd6-b07f-8c8d305e8d0b",
+        "c4a0ca27-41f6-4cce-8232-36b7d2aa2adb",
+        "30c5115d-5d2e-42ea-91e8-57c397223aee",
         "3c8f841d-ad25-4de1-bc36-398e08a84951",
-        "08b4de10-699f-4589-8e05-67ed95d735b2"
+        "42f7d6aa-550c-4b2a-862e-9c51bdd95e21",
+        "db61fdf4-c794-4c8f-bd0e-5ae9c2b7258e",
+        "08b4de10-699f-4589-8e05-67ed95d735b2",
+        "af863a24-2063-4656-8eb6-6609cd715c91"
       ]
     },
     "__draft": null
@@ -1850,13 +1888,14 @@
       "questions": [
         "3ac9384d-c719-4b2b-ba98-3005fd3fc355",
         "68b25dce-54a4-424d-a094-f6e6c985b2f8",
+        "20879767-5da7-44dd-8628-7b0a94e3af07",
         "9f1d7a7c-1e96-488c-8f4e-1cdc66316087"
       ],
       "contactDetails": "ccf3369b-9299-4b16-9971-a0b3424b58b8",
-      "submitLabel": "Send on WhatsApp",
+      "submitLabel": "Send enquiry",
       "whatsappNumber": "447876295091",
-      "doneTitle": "Thanks — opening WhatsApp",
-      "doneMessage": "Your enquiry has been prefilled in WhatsApp. Just hit send and we'll reply, usually within a few hours."
+      "doneTitle": "Thank you — your enquiry is on its way",
+      "doneMessage": "We've emailed you a copy of your request and will be in touch shortly, usually within a few hours."
     },
     "__draft": null
   },
@@ -3145,6 +3184,494 @@
     "values": {
       "title": "Sample 1",
       "description": "A sample deliver"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c28c8f28-5250-4509-a767-cf375b47f934",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Plumbing Services",
+      "description": "Trusted plumbing across North London — leaks, installations, bathrooms and re-pipes by vetted plumbers."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "633f40ab-42cb-4bc7-8133-6e4509fe2f4b",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Plumbing",
+      "overline": "PLUMBING",
+      "title": "Plumbing Services in North London",
+      "subtitle": "Leaks, installations, bathroom plumbing and full re-pipes — reliable, tidy work across Islington and nearby areas.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "db5d78f0-6866-498d-8f48-8a032dabd341",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "plumbing-service",
+      "title": "Plumbing",
+      "description": "Plumbing Services in North London",
+      "meta": "c28c8f28-5250-4509-a767-cf375b47f934",
+      "sections": [
+        "633f40ab-42cb-4bc7-8133-6e4509fe2f4b",
+        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "702830bc-7bae-4c79-bb2d-0114880af374",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Heating & Boilers",
+      "description": "Heating and boiler work across North London — installs, radiators, underfloor heating and repairs."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ccf9fd1f-b7c9-4354-8c1e-4dab2f71b32a",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Heating",
+      "overline": "HEATING",
+      "title": "Heating & Boilers in North London",
+      "subtitle": "Boiler installs, radiators, underfloor heating and repairs, delivered by qualified engineers.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "784523b2-2029-48a6-a413-74658d618e31",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "heating-service",
+      "title": "Heating",
+      "description": "Heating & Boilers in North London",
+      "meta": "702830bc-7bae-4c79-bb2d-0114880af374",
+      "sections": [
+        "ccf9fd1f-b7c9-4354-8c1e-4dab2f71b32a",
+        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9770e4d2-46df-4c28-a5d2-f55817ea5d00",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Electrical Services",
+      "description": "Certified electrical work across North London — rewires, fuse boards, lighting and fault-finding."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "fdfde23c-0531-45c7-85ca-8fce0934c9f3",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Electrical",
+      "overline": "ELECTRICAL",
+      "title": "Electrical Services in North London",
+      "subtitle": "Rewires, fuse boards, lighting and fault-finding — certified electrical work for homes across North London.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b5c40c44-ab3e-49f1-9b82-bd096f93a2e7",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "electric-service",
+      "title": "Electrical",
+      "description": "Electrical Services in North London",
+      "meta": "9770e4d2-46df-4c28-a5d2-f55817ea5d00",
+      "sections": [
+        "fdfde23c-0531-45c7-85ca-8fce0934c9f3",
+        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "d7931ccf-c31b-4139-8ea6-f428c9ac9ed3",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Carpentry & Joinery",
+      "description": "Bespoke carpentry and joinery across North London — fitted storage, doors and second-fix work."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "768dfaf9-b7a6-4756-8c25-918d75399cd4",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Carpentry",
+      "overline": "CARPENTRY",
+      "title": "Carpentry & Joinery in North London",
+      "subtitle": "Bespoke joinery, fitted storage, doors and second-fix carpentry finished to a high standard.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ba3051b7-825c-4ff2-8edf-7454ed1e55d6",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "carpentry-service",
+      "title": "Carpentry",
+      "description": "Carpentry & Joinery in North London",
+      "meta": "d7931ccf-c31b-4139-8ea6-f428c9ac9ed3",
+      "sections": [
+        "768dfaf9-b7a6-4756-8c25-918d75399cd4",
+        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "f6bf44f0-0099-4ef1-aed1-474132e06d17",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Roofing",
+      "description": "Roofing across North London — repairs, flat roofs, tiling and guttering to keep homes weather-tight."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "121fe4cc-ee75-453b-bfbd-f20d7fc883ec",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Roofing",
+      "overline": "ROOFING",
+      "title": "Roofing in North London",
+      "subtitle": "Repairs, flat roofs, tiling and guttering — keeping North London homes weather-tight.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "9e24124a-a9d8-4f3d-a621-522e58501fa4",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "roofing-service",
+      "title": "Roofing",
+      "description": "Roofing in North London",
+      "meta": "f6bf44f0-0099-4ef1-aed1-474132e06d17",
+      "sections": [
+        "121fe4cc-ee75-453b-bfbd-f20d7fc883ec",
+        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "e89ab886-9304-4fed-a20b-6658d9db32b2",
+    "__type": "meta-data",
+    "__status": "published",
+    "values": {
+      "title": "Handyman Services",
+      "description": "Reliable handyman services across North London — small jobs, repairs and odd tasks, no job too small."
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7e718eda-2e6e-4d0d-b62a-c8806ce072b5",
+    "__type": "page-hero",
+    "__status": "published",
+    "values": {
+      "breadcrumbLabel": "Handyman",
+      "overline": "HANDYMAN",
+      "title": "Handyman Services in North London",
+      "subtitle": "Small jobs, repairs and odd tasks handled by a trusted local team — no job too small.",
+      "buttons": []
+    },
+    "__draft": null
+  },
+  {
+    "__id": "481bc8e2-2ac5-4719-8e6e-52c59f26dd53",
+    "__type": "page",
+    "__status": "published",
+    "values": {
+      "key": "handyman-service",
+      "title": "Handyman",
+      "description": "Handyman Services in North London",
+      "meta": "e89ab886-9304-4fed-a20b-6658d9db32b2",
+      "sections": [
+        "7e718eda-2e6e-4d0d-b62a-c8806ce072b5",
+        "e2df15c9-1a04-419b-a0d1-30391e669aba"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "8625cb28-446c-4301-b2b1-6c929aad8c41",
+    "__type": "client-logo",
+    "__status": "published",
+    "values": {
+      "image": "3c3c1667-f16b-4d95-bfba-f070ae95fd00",
+      "name": "Islington Estates",
+      "url": ""
+    },
+    "__draft": null
+  },
+  {
+    "__id": "b2e31bb4-ca1d-40f3-aed6-09bfa31b31b3",
+    "__type": "client-logo",
+    "__status": "published",
+    "values": {
+      "image": "57b6c85e-452e-46b6-bee5-97bb91455301",
+      "name": "North London Lettings",
+      "url": ""
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7cb04996-41d5-487b-971b-90a90ad9b5ba",
+    "__type": "client-logo",
+    "__status": "published",
+    "values": {
+      "image": "a15fe712-7d04-42e7-92a0-983c9fb5f825",
+      "name": "Camden Property Co",
+      "url": ""
+    },
+    "__draft": null
+  },
+  {
+    "__id": "09d514c7-2303-4491-8456-1efd3c670f08",
+    "__type": "client-logo",
+    "__status": "published",
+    "values": {
+      "image": "b0097b5d-252c-4cfb-8281-69f96f34f6e3",
+      "name": "Highbury Homes",
+      "url": ""
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ae1cfe84-fb43-4059-842c-c3b6b45e8d50",
+    "__type": "client-logo",
+    "__status": "published",
+    "values": {
+      "image": "dc8df3f9-d5f8-48d7-80c8-164b76b85ec2",
+      "name": "Angel Developments",
+      "url": ""
+    },
+    "__draft": null
+  },
+  {
+    "__id": "74058a9f-a177-4626-b1f5-569f915844c5",
+    "__type": "client-logo",
+    "__status": "published",
+    "values": {
+      "image": "e4db2ff8-f1bf-4154-970b-32c5e302560f",
+      "name": "Barnsbury Group",
+      "url": ""
+    },
+    "__draft": null
+  },
+  {
+    "__id": "ee2721cd-b946-46da-b2f1-6ee7c1e40ebc",
+    "__type": "client-logo",
+    "__status": "published",
+    "values": {
+      "image": "f80fbb3b-d255-462c-a518-ac71565b1d24",
+      "name": "Canonbury Living",
+      "url": ""
+    },
+    "__draft": null
+  },
+  {
+    "__id": "6ca9a453-dbff-41ba-9f82-b71a32893263",
+    "__type": "clients-carousel",
+    "__status": "published",
+    "values": {
+      "title": "Trusted by clients across North London",
+      "logos": [
+        "8625cb28-446c-4301-b2b1-6c929aad8c41",
+        "b2e31bb4-ca1d-40f3-aed6-09bfa31b31b3",
+        "7cb04996-41d5-487b-971b-90a90ad9b5ba",
+        "09d514c7-2303-4491-8456-1efd3c670f08",
+        "ae1cfe84-fb43-4059-842c-c3b6b45e8d50",
+        "74058a9f-a177-4626-b1f5-569f915844c5",
+        "ee2721cd-b946-46da-b2f1-6ee7c1e40ebc"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "795d2b42-67c8-4031-9318-8f8810552d67",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "image": "5302973b-899b-4cf8-9d83-9214ac26fe45",
+      "emoji": "",
+      "label": "Electrical",
+      "description": "Rewires, sockets, lighting"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "96cc5e4f-a239-4436-ae62-42dee51f7bd1",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "image": "80afd3d4-e0fe-49ef-a0b6-41d307c71cde",
+      "emoji": "",
+      "label": "Painting & Decorating",
+      "description": "Interior & exterior finishes"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "afff1f0b-dbca-4ac1-a3d9-d7b879c2d161",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "image": "9ef64507-6d15-4cdd-8acd-67602a0cd5de",
+      "emoji": "",
+      "label": "Plumbing",
+      "description": "Leaks, installs, re-pipes"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "87de70a7-7633-45da-b977-c769f738f3ed",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "image": "360afa34-c056-4322-8d43-241fa78e067e",
+      "emoji": "",
+      "label": "Flooring",
+      "description": "Wood, laminate, vinyl"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "7c9836c7-0048-4f81-9a85-b3365a4acdf4",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "image": "986f1751-f05a-4d2d-8f3e-cb966117fd4a",
+      "emoji": "",
+      "label": "Tiling",
+      "description": "Walls & floors"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "0b9ae496-48de-4ad2-bd57-fbeb240a4a46",
+    "__type": "image-option",
+    "__status": "published",
+    "values": {
+      "image": "5e954fc5-39ed-4ea6-9a87-ef6e53ff60f9",
+      "emoji": "",
+      "label": "Other",
+      "description": "Something else",
+      "revealTextInput": true,
+      "textInputPlaceholder": "Tell us what you need…"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "20879767-5da7-44dd-8628-7b0a94e3af07",
+    "__type": "image-question",
+    "__status": "published",
+    "values": {
+      "stepLabel": "Services",
+      "title": "Which services do you need?",
+      "hint": "Select all that apply.",
+      "multiSelect": true,
+      "options": [
+        "795d2b42-67c8-4031-9318-8f8810552d67",
+        "96cc5e4f-a239-4436-ae62-42dee51f7bd1",
+        "afff1f0b-dbca-4ac1-a3d9-d7b879c2d161",
+        "87de70a7-7633-45da-b977-c769f738f3ed",
+        "7c9836c7-0048-4f81-9a85-b3365a4acdf4",
+        "0b9ae496-48de-4ad2-bd57-fbeb240a4a46"
+      ]
+    },
+    "__draft": null
+  },
+  {
+    "__id": "c4a0ca27-41f6-4cce-8232-36b7d2aa2adb",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "Address line 1",
+      "fieldKey": "addressLine1",
+      "inputType": "text",
+      "placeholder": "",
+      "required": false
+    },
+    "__draft": null
+  },
+  {
+    "__id": "30c5115d-5d2e-42ea-91e8-57c397223aee",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "Address line 2",
+      "fieldKey": "addressLine2",
+      "inputType": "text",
+      "placeholder": "",
+      "required": false
+    },
+    "__draft": null
+  },
+  {
+    "__id": "42f7d6aa-550c-4b2a-862e-9c51bdd95e21",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "I am a company",
+      "fieldKey": "isCompany",
+      "inputType": "boolean",
+      "required": false
+    },
+    "__draft": null
+  },
+  {
+    "__id": "db61fdf4-c794-4c8f-bd0e-5ae9c2b7258e",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "Company Name",
+      "fieldKey": "companyName",
+      "inputType": "text",
+      "placeholder": "",
+      "required": false,
+      "dependsOnFieldKey": "isCompany",
+      "dependsOnValue": "true"
+    },
+    "__draft": null
+  },
+  {
+    "__id": "af863a24-2063-4656-8eb6-6609cd715c91",
+    "__type": "form-field",
+    "__status": "published",
+    "values": {
+      "label": "Attachments",
+      "fieldKey": "attachments",
+      "inputType": "file",
+      "required": false
     },
     "__draft": null
   }

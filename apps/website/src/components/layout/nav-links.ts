@@ -36,13 +36,13 @@ export function getMobileNavLinkClassName(isActive: boolean): string {
 }
 
 export const MAIN_NAV_LINKS: NavLink[] = [
-  // { label: "Home", href: "/" },
-  { label: "Refurbishments", href: "/refurbishments" },
-  { label: "Kitchens", href: "/kitchens" },
+  { label: "Plumbing", href: "/plumbing" },
+  { label: "Heating", href: "/heating" },
+  { label: "Electric", href: "/electric" },
+  { label: "Carpentry", href: "/carpentry" },
+  { label: "Roofing", href: "/roofing" },
   { label: "Bathrooms", href: "/bathrooms" },
-  { label: "Projects", href: "/projects" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
+  { label: "Handyman", href: "/handyman" },
 ];
 
 export const FOOTER_SERVICE_LINKS: NavLink[] = [

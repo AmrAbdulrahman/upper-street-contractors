@@ -40,6 +40,9 @@ query GetHomePage($status: CmsReadStatus = published, $includeUnpublished: Boole
       ... on PlanningRenovationSection {
         ...PlanningRenovationSection
       }
+      ... on ClientsCarousel {
+        ...ClientsCarousel
+      }
     }
   }
 }

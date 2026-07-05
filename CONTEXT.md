@@ -17,8 +17,16 @@ The banner section at the top of an interior page (Refurbishments, Kitchens, Bat
 _Avoid_: page header, banner, ProjectsHeroPlaceholder (the removed UI-only mock)
 
 **Enquiry Wizard**:
-A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select) or a **Form Question** (text/email/tel/textarea fields). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it auto-opens (after ~5s) a WhatsApp message prefilled from the answers to the configured `whatsappNumber`.
+A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which emails a branded HTML enquiry to the business and a confirmation copy to the sender (nodemailer over SMTP), then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
 _Avoid_: form, survey, quiz, multi-step form
+
+**Conditional field**:
+A Form Question field (or an Image Question free-text box) that is only shown when another answer matches. A `form-field` carries `dependsOnFieldKey` + `dependsOnValue` (e.g. Company Name appears only when the "I am a company" toggle is on); an `image-option` with `revealTextInput` shows a describe-more textarea when that option is selected. Hidden fields never block Next.
+_Avoid_: dependent field, show/hide rule, branching
+
+**Attachment**:
+A file a visitor adds on the wizard's final step (`file` field type). Client-validated (≤5 files, ≤10 MB total; images/PDF/Word) and sent to the business as email attachments by `/api/enquiry`.
+_Avoid_: upload, file field (implementation phrasing)
 
 **Contact Details panel**:
 The `contact-details` section listing ways to reach the company as items (each a `contact-detail-item`: emoji, label, text), plus a note and a WhatsApp button.
@@ -87,6 +95,18 @@ _Avoid_: related posts, you-might-also-like, recommendations
 **Client Review section**:
 The home page section that surfaces homeowner testimonials with star ratings and links to individual reviews on Trustpilot or Google.
 _Avoid_: Testimonials section, reviews block, social proof
+
+**Clients Carousel**:
+A page section (`clients-carousel` CMS type) showing an editor-chosen list of client logos (`client-logo` children: image + optional name + link) in an infinitely rotating, pause-on-hover strip; collapses to a static wrapped row under `prefers-reduced-motion`.
+_Avoid_: logo slider, partners marquee, brand ticker
+
+**Site Banner**:
+The SVG brand mark (crest + "Upper Street Contractors" wordmark) that replaced the text wordmark, rendered by `SiteBanner`. Ships in two tones — navy for light backgrounds (header) and white for dark (footer) — plus a crest-only variant. In the header it sits in its own row above the service-links row and shrinks on scroll.
+_Avoid_: logo (the old text wordmark), SiteLogo (the retired component)
+
+**Service page**:
+A per-trade landing page reached from the header's service-links row — Plumbing, Heating, Electric, Carpentry, Roofing, Bathrooms, Handyman. Each is a CMS `page` (`<service>-service` key) rendering a Page Hero + a shared CTA. Distinct from the retained Refurbishments / Kitchens / Projects / About pages, which stay reachable via the footer and CTAs.
+_Avoid_: category page, landing page (generic)
 
 **Review card**:
 A single testimonial tile showing a star score, quoted review text, and the reviewer's profile.

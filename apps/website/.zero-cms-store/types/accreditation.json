@@ -4,14 +4,13 @@
   "fields": [
     {
       "__name": "accreditationTitle",
+      "label": "Name (used as image alt text)",
       "__type": "text"
     },
     {
-      "__name": "icon",
-      "__type": "reference",
-      "allowedTypes": [
-        "icon"
-      ]
+      "__name": "image",
+      "__type": "asset",
+      "accept": "image"
     }
   ]
 }
