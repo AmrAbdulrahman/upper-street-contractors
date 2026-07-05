@@ -47,7 +47,7 @@ export function CmsImage({
     return (
       <div
         className={`flex items-center justify-center text-sm text-white/15 ${className ?? ""}`}
-        style={{ background: "linear-gradient(145deg, #2a3d52, #1b2638)" }}
+        style={{ background: "linear-gradient(145deg, #0a1c2e, #031021)" }}
       >
         {placeholderLabel}
       </div>

@@ -46,7 +46,7 @@ function GalleryFigure({
           priority={priority}
         />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-[#2a3d52] to-[#1b2638]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a1c2e] to-[#031021]" />
       )}
       {img.caption ? (
         <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent px-3 py-2 text-xs font-medium text-white/90">
@@ -97,7 +97,7 @@ export function ProjectHero({ project }: { project: ProjectDetailFragment }) {
           </ol>
         </nav>
 
-        <p className="mt-6 text-[11px] font-bold tracking-[0.14em] text-gold uppercase">
+        <p className="mt-6 text-[11px] font-bold tracking-[0.14em] text-gold-mid uppercase">
           Case study
         </p>
 

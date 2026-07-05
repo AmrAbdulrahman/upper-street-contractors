@@ -5,19 +5,20 @@
 @source "../../../../libs/zero-cms-widget/src";
 
 @theme {
-  /* Colors */
-  --color-surface: #f8f5f0;
-  --color-white: #ffffff;
-  --color-dark: #1b2638;
-  --color-dark-2: #0f1923;
-  --color-gold: #b8863a;
-  --color-gold-light: #f0e4cc;
-  --color-gold-mid: #d4a85a;
-  --color-foreground: #1a1a1a;
-  --color-muted: #4a5568;
-  --color-subtle: #8a94a6;
-  --color-border: #e4ddd4;
-  --color-border-light: #ede8e2;
+  /* Colors — brand: gold #906D37, darkblue #031021, cream #E5DECB, white #F8FDF9 */
+  --color-surface: #f4f0e7;
+  --color-white: #f8fdf9;
+  --color-dark: #031021;
+  --color-dark-2: #020a15;
+  --color-gold: #906d37;
+  --color-gold-light: #efe7d3;
+  --color-gold-mid: #b8925a;
+  --color-gold-deep: #7a5a2b;
+  --color-foreground: #031021;
+  --color-muted: #4a5a6b;
+  --color-subtle: #7a8798;
+  --color-border: #d6cdb6;
+  --color-border-light: #e0d8c4;
   --color-whatsapp: #25d366;
 
   /* Radii */
@@ -33,9 +34,9 @@
   --max-width-container: 1160px;
 
   /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  --font-serif: var(--font-dm-serif-display), serif;
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-montserrat);
+  --font-serif: var(--font-playfair), serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 :root {
@@ -59,7 +60,7 @@
   h4,
   h5,
   h6 {
-    font-family: var(--font-dm-serif-display), serif;
+    font-family: var(--font-serif);
     font-weight: 400;
   }
 
@@ -82,6 +83,12 @@
     flex-shrink: 0;
   }
 
+  /* Selected nav link: gold fill with a tiny darkblue outline for contrast. */
+  .nav-link-selected {
+    -webkit-text-stroke: 0.4px var(--color-dark);
+    paint-order: stroke fill;
+  }
+
   .hero::after {
     content: "";
     position: absolute;
@@ -91,7 +98,7 @@
     height: 600px;
     background: radial-gradient(
       circle,
-      rgba(184, 134, 58, 0.12) 0%,
+      rgba(144, 109, 55, 0.12) 0%,
       transparent 70%
     );
     pointer-events: none;

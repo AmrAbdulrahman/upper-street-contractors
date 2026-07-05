@@ -1,23 +1,42 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Serif_Display, Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { buildBaseMetadata } from "@/helpers";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+// Self-hosted variable fonts (files committed under ./fonts).
+const playfair = localFont({
+  src: [
+    {
+      path: "./fonts/playfair-display-latin-wght-normal.woff2",
+      weight: "400 900",
+      style: "normal",
+    },
+    {
+      path: "./fonts/playfair-display-latin-wght-italic.woff2",
+      weight: "400 900",
+      style: "italic",
+    },
+  ],
+  variable: "--font-playfair",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const dmSerifDisplay = DM_Serif_Display({
-  variable: "--font-dm-serif-display",
-  subsets: ["latin"],
-  weight: "400",
+const montserrat = localFont({
+  src: [
+    {
+      path: "./fonts/montserrat-latin-wght-normal.woff2",
+      weight: "100 900",
+      style: "normal",
+    },
+    {
+      path: "./fonts/montserrat-latin-wght-italic.woff2",
+      weight: "100 900",
+      style: "italic",
+    },
+  ],
+  variable: "--font-montserrat",
+  display: "swap",
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#1b2638",
+  themeColor: "#031021",
   colorScheme: "light",
 };
 
@@ -42,7 +61,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${dmSerifDisplay.variable} h-full antialiased`}
+      className={`${playfair.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-surface text-foreground">
         {children}

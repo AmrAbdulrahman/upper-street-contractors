@@ -32,8 +32,12 @@ _Avoid_: upload, file field (implementation phrasing)
 The `contact-details` section listing ways to reach the company as items (each a `contact-detail-item`: emoji, label, text), plus a note and a WhatsApp button.
 _Avoid_: contact card, info box, get-in-touch
 
+**Quick Contact widget**:
+The pair of floating tabs pinned to the top-right of every public page (rendered by `QuickContact` in `SiteChrome`): a WhatsApp tab and a Request-a-Quote tab. Each shows only its icon at rest and stretches left to reveal its label on hover/focus (CSS-only). Superseded the desktop header's Request-a-Quote + WhatsApp buttons (removed); the mobile menu still carries its own.
+_Avoid_: floating buttons, contact FAB, sticky CTA
+
 **Category tag**:
-The gold uppercase badge overlaid on a Project card image showing the renovation type (e.g. Refurbishment, Bathroom).
+The gold uppercase badge overlaid on a Project card image showing its Category — a renovation type (Refurbishment, Kitchen, Bathroom, Loft) or a trade (Plumbing, Heating, Electrical, Carpentry, Roofing, Handyman). The Category also drives which Projects a Case Studies section shows.
 _Avoid_: Label, pill, proj-tag (CSS class name only)
 
 **Meta chip**:
@@ -65,7 +69,7 @@ The build value of a Project (e.g. "£120k"), shown as a Meta chip.
 _Avoid_: price, cost, budget
 
 **What We Delivered**:
-The Project-detail section pairing a short intro (`deliveredSummary`) with a grid of Deliverables.
+The Project-detail section pairing a short intro (`deliveredSummary`) with a list of Deliverables — a completed Project's past-tense scope. Distinct from a Service page's present-tense Service Offer section.
 _Avoid_: scope of works, services
 
 **Deliverable**:
@@ -89,7 +93,7 @@ The photos on a Project's detail page (each an image with an optional caption), 
 _Avoid_: gallery (an _Avoid_ term for Recent Work / Projects index), carousel, slider
 
 **Similar Work**:
-The related-Projects strip on a Project's detail page. Editor-pinned Projects (the `similarWork` relation) come first, then the closest others are filled in automatically, ranked by Category → Location → Duration.
+The related-Projects strip on a Project's detail page. Editor-pinned Projects (the `similarWork` relation) come first, then the closest others are filled in automatically, ranked by Category → Location → Duration. The same card grid is reused by a Service page's Case Studies section.
 _Avoid_: related posts, you-might-also-like, recommendations
 
 **Client Review section**:
@@ -105,8 +109,20 @@ The SVG brand mark (crest + "Upper Street Contractors" wordmark) that replaced t
 _Avoid_: logo (the old text wordmark), SiteLogo (the retired component)
 
 **Service page**:
-A per-trade landing page reached from the header's service-links row — Plumbing, Heating, Electric, Carpentry, Roofing, Bathrooms, Handyman. Each is a CMS `page` (`<service>-service` key) rendering a Page Hero + a shared CTA. Distinct from the retained Refurbishments / Kitchens / Projects / About pages, which stay reachable via the footer and CTAs.
+A per-service landing page reached from the header's service-links row — Refurbishments, Kitchens, Bathrooms, Plumbing, Heating, Electric, Carpentry, Roofing, Handyman (Refurbishments and Kitchens were promoted from the footer into the main nav). Each is a CMS `page` (`<service>-service` key) whose `sections` follow one shared shape: a Page Hero, a Service Offer section, a Case Studies section, and a per-page CTA band (a `planning-renovation-section` carrying WhatsApp + Request-a-Quote). Distinct from the Projects / About / Contact pages.
 _Avoid_: category page, landing page (generic)
+
+**Service Offer section**:
+The Service-page section stating what we deliver for that service — a `service-offer-section` with an overline, title, intro, a numbered scope list of Deliverables and an optional callout, beside an aside of one or more Cost cards. Present tense (the offer), distinct from a Project's past-tense What We Delivered.
+_Avoid_: scope of works, services, What We Do (the home-page section)
+
+**Cost card**:
+A card in a Service Offer section's aside showing a price or range with a CTA. Stored as a `cta` entry rendered in its `sidebar` variant (title, cost, subtitle, buttons); a section may hold any number.
+_Avoid_: pricing table, quote box
+
+**Case Studies section**:
+The Service-page strip of Projects whose Category matches the page's service (most recent first, capped at three), reusing the Similar Work card grid with its own headings. A `case-studies-section` carries an overline, title and a Category; the Projects are looked up automatically, not pinned. Distinct from Similar Work (project-detail, ranked) and the Recent Work section (home, curated).
+_Avoid_: related projects, portfolio, gallery
 
 **Review card**:
 A single testimonial tile showing a star score, quoted review text, and the reviewer's profile.

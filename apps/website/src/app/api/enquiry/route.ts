@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { getTransport } from "@/lib/email/transport";
 import {
   renderConfirmationEmail,
@@ -12,6 +14,25 @@ export const dynamic = "force-dynamic";
 const MAX_FILES = 5;
 const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10 MB
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Brand logo for the email header, embedded as a `cid` attachment. Loaded once;
+ * if the PNG can't be read the templates fall back to the text wordmark so email
+ * never breaks. Regenerate with `node scripts/generate-email-logo.mjs`.
+ */
+const LOGO_ATTACHMENT = (() => {
+  try {
+    const p = path.join(process.cwd(), "public", "email-logo.png");
+    return {
+      filename: "logo.png",
+      content: readFileSync(p),
+      cid: "logo",
+      contentType: "image/png",
+    } as const;
+  } catch {
+    return null;
+  }
+})();
 
 type Payload = {
   fields?: EnquiryField[];
@@ -102,7 +123,13 @@ export async function POST(request: Request) {
   const senderName =
     typeof payload.senderName === "string" ? payload.senderName.trim() : "";
 
-  const business = renderEnquiryEmail({ fields, senderName, senderEmail, attachmentNames });
+  const business = renderEnquiryEmail({
+    fields,
+    senderName,
+    senderEmail,
+    attachmentNames,
+    logoCid: LOGO_ATTACHMENT?.cid,
+  });
   try {
     await transport.sendMail({
       from,
@@ -110,7 +137,7 @@ export async function POST(request: Request) {
       replyTo: senderEmail && EMAIL_RE.test(senderEmail) ? senderEmail : undefined,
       subject: business.subject,
       html: business.html,
-      attachments,
+      attachments: LOGO_ATTACHMENT ? [...attachments, LOGO_ATTACHMENT] : attachments,
     });
   } catch (e) {
     console.error("enquiry: business email failed", e);
@@ -122,13 +149,19 @@ export async function POST(request: Request) {
 
   // Confirmation to the sender is best-effort — don't fail the request if it bounces.
   if (senderEmail && EMAIL_RE.test(senderEmail)) {
-    const confirmation = renderConfirmationEmail({ fields, senderName, attachmentNames });
+    const confirmation = renderConfirmationEmail({
+      fields,
+      senderName,
+      attachmentNames,
+      logoCid: LOGO_ATTACHMENT?.cid,
+    });
     try {
       await transport.sendMail({
         from,
         to: senderEmail,
         subject: confirmation.subject,
         html: confirmation.html,
+        attachments: LOGO_ATTACHMENT ? [LOGO_ATTACHMENT] : undefined,
       });
     } catch (e) {
       console.error("enquiry: confirmation email failed", e);

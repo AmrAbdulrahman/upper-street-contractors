@@ -1,7 +1,8 @@
 import { Suspense } from "react";
-import { Footer, Header } from "@/components/layout";
+import { Footer, Header, QuickContact } from "@/components/layout";
 import { LocalBusinessJsonLd } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
+import { resolveWhatsAppUrl } from "@/helpers";
 
 type SiteChromeProps = {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ async function SiteChromeContent({ children }: SiteChromeProps) {
         {children}
       </main>
       <Footer config={siteMetaConfig} />
+      <QuickContact whatsappUrl={resolveWhatsAppUrl(siteMetaConfig)} />
     </>
   );
 }

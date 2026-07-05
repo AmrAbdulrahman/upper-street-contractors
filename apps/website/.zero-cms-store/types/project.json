@@ -15,7 +15,13 @@
         "Bathroom",
         "Loft",
         "Refurbishment",
-        "Kitchen"
+        "Kitchen",
+        "Plumbing",
+        "Heating",
+        "Electrical",
+        "Carpentry",
+        "Roofing",
+        "Handyman"
       ]
     },
     {

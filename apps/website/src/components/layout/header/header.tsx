@@ -1,24 +1,16 @@
 "use client";
 
 import type { SiteMetaConfigFragment } from "@/generated/graphql";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { HeaderDesktopNav } from "@/components/layout/header/header-desktop-nav";
 import { HeaderMobileNav } from "@/components/layout/header/header-mobile-nav";
 import { MAIN_NAV_LINKS } from "@/components/layout/nav-links";
 import { SiteBanner } from "@/components/layout/site-banner";
-import { resolveWhatsAppUrl, iconData } from "@/helpers";
-import { Icon } from "@/components/ui/icon";
+import { resolveWhatsAppUrl } from "@/helpers";
 
 type HeaderProps = {
   config: SiteMetaConfigFragment | null;
 };
-
-const quoteButtonClass =
-  "inline-flex h-11 shrink-0 items-center justify-center rounded-full border border-border bg-white px-5 text-sm font-semibold text-dark transition-colors hover:bg-border-light xl:text-[0.9375rem]";
-
-const whatsappButtonClass =
-  "inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-whatsapp px-5 text-sm font-semibold text-white transition-[filter] hover:brightness-110 xl:text-[0.9375rem]";
 
 /** Toggles once the page is scrolled past a small threshold (rAF-throttled). */
 function useScrolled(threshold = 8): boolean {
@@ -57,7 +49,7 @@ export function Header({ config }: HeaderProps) {
           <SiteBanner
             tone="dark"
             siteName={config?.siteName}
-            className={`transition-[height] duration-300 ${scrolled ? "h-8" : "h-9"}`}
+            className={`transition-[height] duration-300 ${scrolled ? "h-8" : "h-11"}`}
           />
           <HeaderMobileNav links={MAIN_NAV_LINKS} whatsappUrl={whatsappUrl} />
         </div>
@@ -72,25 +64,8 @@ export function Header({ config }: HeaderProps) {
             <SiteBanner
               tone="dark"
               siteName={config?.siteName}
-              className={`transition-[height] duration-300 ${scrolled ? "h-10" : "h-16"}`}
+              className={`transition-[height] duration-300 ${scrolled ? "h-10" : "h-20"}`}
             />
-
-            <div className="flex shrink-0 items-center justify-end gap-3">
-              <Link href="/contact" className={quoteButtonClass}>
-                Request a Quote
-              </Link>
-              {whatsappUrl ? (
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={whatsappButtonClass}
-                >
-                  <Icon data={iconData("whatsapp")} className="h-4 w-4 shrink-0" />
-                  WhatsApp
-                </a>
-              ) : null}
-            </div>
           </div>
 
           <div

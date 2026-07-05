@@ -21,7 +21,7 @@ export function ProjectScope({ summary, deliverables }: ProjectScopeProps) {
 
   return (
     <div>
-      <p className="text-[11px] font-bold tracking-[0.14em] text-gold uppercase">
+      <p className="text-[11px] font-bold tracking-[0.14em] text-gold-deep uppercase">
         Project scope
       </p>
       <h2 className="mt-2 font-serif text-[clamp(28px,3.2vw,40px)] leading-tight text-dark">

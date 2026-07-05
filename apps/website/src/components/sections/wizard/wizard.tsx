@@ -246,7 +246,7 @@ export function WizardSection({ data }: WizardSectionProps) {
               </div>
             ) : (
               <div className="mt-10">
-                <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+                <p className="text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
                   Step {step + 1} of {total}
                   {current.stepLabel ? ` — ${current.stepLabel}` : ""}
                 </p>

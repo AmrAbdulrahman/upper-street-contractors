@@ -23,7 +23,7 @@ export default function HomeHeroSection({ data: hero }: { data: HomeHeroData }) 
           <div className="flex min-w-0 flex-col gap-8">
             {hero.overline ? (
               <ZeroCmsEntryField field="overline">
-                <p className="flex items-center gap-2 text-xs font-medium tracking-[0.22em] text-gold uppercase">
+                <p className="flex items-center gap-2 text-xs font-medium tracking-[0.22em] text-gold-mid uppercase">
                   <span aria-hidden className="eyebrow-dot" />
                   {hero.overline}
                 </p>

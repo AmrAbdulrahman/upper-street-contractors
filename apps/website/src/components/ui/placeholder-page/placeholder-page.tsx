@@ -7,7 +7,7 @@ type PlaceholderPageProps = {
 export function PlaceholderPage({ title }: PlaceholderPageProps) {
   return (
     <main className="mx-auto max-w-container px-6 py-20">
-      <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+      <p className="text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
         Placeholder
       </p>
       <h1 className="mt-2 font-serif text-4xl text-dark">{title}</h1>

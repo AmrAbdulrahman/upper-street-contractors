@@ -26,7 +26,7 @@ export function WhyChooseUsSection({ data }: WhyChooseUsSectionProps) {
           <div className="min-w-0">
             {overline ? (
               <ZeroCmsEntryField field="overline">
-                <p className="mb-2.5 text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+                <p className="mb-2.5 text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
                   {overline}
                 </p>
               </ZeroCmsEntryField>
