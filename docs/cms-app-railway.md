@@ -28,7 +28,7 @@ that clone — not copied out to another image afterward.
 3. **Start command**: `npx nx start cms-app` (runs `next start -p 3001` in place —
    see `apps/cms-app/project.json`)
 4. **Persistent volume**: mount over the repo's working directory (or at minimum
-   over `zero-cms-store/` + the `.git` dir — simplest is the whole checkout).
+   over `.zero-cms-store/` + the `.git` dir — simplest is the whole checkout).
 5. **Replicas: pin to 1.** Do not autoscale — zero-cms-core assumes a single writer
    process (ADR 0003). More than one replica means two processes racing on the same
    `data.json`/git remote.

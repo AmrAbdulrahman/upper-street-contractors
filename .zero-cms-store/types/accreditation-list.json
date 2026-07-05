@@ -4,7 +4,8 @@
   "fields": [
     {
       "__name": "title",
-      "__type": "text"
+      "__type": "text",
+      "required": true
     },
     {
       "__name": "list",

@@ -4,9 +4,9 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Toaster } from "sonner";
 import { ZeroCmsBar, ZeroCmsWidget } from "@usc/zero-cms-widget";
+import { HugeRTEBlocksEditor } from "@usc/zero-cms-blocks";
 import { revalidateCms } from "@/lib/cms/revalidate";
 import { cmsNotify } from "@/lib/cms/notify";
-import { HugeRTEBlocksEditor } from "@/components/cms/hugerte-blocks-editor";
 
 /**
  * Renders the zero-cms widget + admin bar (preview deploy only).

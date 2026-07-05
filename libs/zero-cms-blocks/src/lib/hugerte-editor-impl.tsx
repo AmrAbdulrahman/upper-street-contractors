@@ -1,46 +1,49 @@
-"use client";
+'use client';
 
 // Self-hosted / bundled HugeRTE — these side-effect imports register the editor
 // and its assets onto window.hugerte (no CDN). This whole module is loaded only
-// via next/dynamic({ ssr: false }) from ./hugerte-blocks-editor, so `import
-// "hugerte"` never runs on the server (it would crash SSR).
-import "hugerte";
-import "hugerte/models/dom";
-import "hugerte/themes/silver";
-import "hugerte/icons/default";
-import "hugerte/plugins/lists";
-import "hugerte/plugins/link";
+// via next/dynamic({ ssr: false }) from ./hugerte-editor, so `import "hugerte"`
+// never runs on the server (it would crash SSR).
+import 'hugerte';
+import 'hugerte/models/dom';
+import 'hugerte/themes/silver';
+import 'hugerte/icons/default';
+import 'hugerte/plugins/lists';
+import 'hugerte/plugins/link';
 
-import { Editor } from "@hugerte/hugerte-react";
-import type { Editor as HugeRTEEditor } from "hugerte";
-import { useMemo, useState } from "react";
-import { blocksToHtml, htmlToBlocks, type BlocksContent } from "@usc/zero-cms-blocks";
+import { Editor } from '@hugerte/hugerte-react';
+import type { Editor as HugeRTEEditor } from 'hugerte';
+import { useMemo, useState } from 'react';
+import { blocksToHtml, htmlToBlocks } from './blocks-html';
+import type { BlocksContent } from './types';
 
 // Locked to exactly what the ZeroCmsBlocks renderer supports: Text/H1-3, bold,
 // italic, strikethrough, inline code, bullet/numbered list, link.
-const TOOLBAR = "blocks | bold italic strikethrough inlinecode | bullist numlist | link";
+const TOOLBAR = 'blocks | bold italic strikethrough inlinecode | bullist numlist | link';
 
 const INIT = {
   menubar: false,
   statusbar: false,
   branding: false,
   height: 320,
-  plugins: "lists link",
+  plugins: 'lists link',
   toolbar: TOOLBAR,
-  block_formats: "Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3",
-  // Skins are served from /public (apps/website/public/hugerte) and loaded by URL
-  // — avoids HugeRTE fetching them under the bundler chunk path (which 404s).
-  skin_url: "/hugerte/skins/ui/oxide",
-  content_css: "/hugerte/skins/content/default/content.min.css",
-  formats: { inlinecode: { inline: "code" } },
+  block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3',
+  // Skins are served from each host app's /public/hugerte (Next serves public/
+  // per-app-root) — apps/cms-app symlinks apps/website/public/hugerte so both
+  // hosts serve identical files from one source of truth. Loaded by URL (not
+  // the bundler chunk path) to avoid HugeRTE's asset-fetching 404ing.
+  skin_url: '/hugerte/skins/ui/oxide',
+  content_css: '/hugerte/skins/content/default/content.min.css',
+  formats: { inlinecode: { inline: 'code' } },
   setup: (editor: HugeRTEEditor) => {
-    editor.ui.registry.addToggleButton("inlinecode", {
-      text: "</>",
-      tooltip: "Inline code",
-      onAction: () => editor.execCommand("mceToggleFormat", false, "inlinecode"),
+    editor.ui.registry.addToggleButton('inlinecode', {
+      text: '</>',
+      tooltip: 'Inline code',
+      onAction: () => editor.execCommand('mceToggleFormat', false, 'inlinecode'),
       onSetup: (api) => {
-        const binding = editor.formatter.formatChanged("inlinecode", (state) =>
-          api.setActive(state),
+        const binding = editor.formatter.formatChanged('inlinecode', (state) =>
+          api.setActive(state)
         );
         return () => binding.unbind();
       },
@@ -92,7 +95,7 @@ export default function HugeRTEBlocksEditorImpl({
       />
       {dirty && dropped.length > 0 ? (
         <p role="alert" className="mt-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-          Unsupported content ({dropped.join(", ")}) will be removed on save.
+          Unsupported content ({dropped.join(', ')}) will be removed on save.
         </p>
       ) : null}
     </div>

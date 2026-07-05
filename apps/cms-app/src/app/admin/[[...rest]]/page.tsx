@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Toaster } from "sonner";
 import { CmsApp } from "@usc/zero-cms-app";
+import { HugeRTEBlocksEditor } from "@usc/zero-cms-blocks";
 import { cmsNotify } from "@/lib/cms/notify";
-import { HugeRTEBlocksEditor } from "@/components/cms/hugerte-blocks-editor";
 
 /**
  * /admin/[[...rest]] — the zero-cms management app, deep-linked + login-gated. The

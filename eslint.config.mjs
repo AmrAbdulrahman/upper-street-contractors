@@ -18,7 +18,7 @@ const eslintConfig = defineConfig([
     "apps/website/next-env.d.ts",
     "apps/cms-app/next-env.d.ts",
     "apps/website/src/generated/apollo-hooks.ts",
-    "zero-cms-store/generated/**",
+    ".zero-cms-store/generated/**",
   ]),
 ]);
 

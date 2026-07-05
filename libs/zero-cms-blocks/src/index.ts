@@ -6,6 +6,7 @@
 
 export { ZeroCmsBlocks } from './lib/renderer';
 export { BlocksEditor, type BlocksEditorProps } from './lib/editor';
+export { HugeRTEBlocksEditor } from './lib/hugerte-editor';
 export { blocksToHtml, htmlToBlocks } from './lib/blocks-html';
 export type {
   BlocksContent,

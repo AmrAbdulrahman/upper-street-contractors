@@ -21,7 +21,7 @@ flowchart TB
 
     subgraph Railway["Railway (Hobby, 1 replica, always-on)"]
         CmsApp["cms-app (Next)<br/>/zero-cms/rpc · /api/cms/auth<br/>/api/cms/media/[id] · /admin<br/>+ git-sync module"]
-        Vol[("Persistent volume<br/>zero-cms-store/<br/>data.json · types/ · media/")]
+        Vol[("Persistent volume<br/>.zero-cms-store/<br/>data.json · types/ · media/")]
     end
 
     GH["GitHub repo<br/>main (code+content) / staging (code)"]
@@ -38,7 +38,7 @@ flowchart TB
     CmsApp -- "git commit+push on publish<br/>bot token, Contents R/W only" --> GH
 
     GH -- "push to main →<br/>auto build+deploy" --> Prod
-    Prod -. "build-time local fs read<br/>of zero-cms-store (no network)" .-> Vol
+    Prod -. "build-time local fs read<br/>of .zero-cms-store (no network)" .-> Vol
     GH -- "push to staging →<br/>code-only rebuild" --> Staging
 ```
 
@@ -58,7 +58,7 @@ flowchart TB
             GitSyncOff["git-sync module<br/>ZERO_CMS_GIT_SYNC=false → disabled"]
         end
 
-        Store[("zero-cms-store/<br/>repo root, plain local fs<br/>(same dir committed to git)")]
+        Store[(".zero-cms-store/<br/>repo root, plain local fs<br/>(same dir committed to git)")]
     end
 
     GH["GitHub — main/staging"]
@@ -114,7 +114,7 @@ When you `cd` into `apps/website`, direnv loads the same vars as at the repo roo
 
 ### zero-cms local dev: two modes
 
-- **Default (simplest):** `npm run dev` — just `website`, reading `zero-cms-store/` directly
+- **Default (simplest):** `npm run dev` — just `website`, reading `.zero-cms-store/` directly
   off local disk. No `cms-app` process needed. Leave `ZERO_CMS_REMOTE_URL` unset.
 - **Full topology:** `npm run dev:all` — runs `website` (:3000) + `cms-app` (:3001) together,
   matching staging's real shape (`website` talks to `cms-app` over `httpAdapter`). Set
