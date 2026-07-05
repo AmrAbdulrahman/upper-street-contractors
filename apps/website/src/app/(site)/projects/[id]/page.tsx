@@ -13,7 +13,7 @@ import {
   GetProjectsDocument,
 } from "@/generated/graphql";
 import { getSimilarProjects } from "@/helpers/similar-projects";
-import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
+import { resolveMediaUrl } from "@/helpers/media-url";
 import { query } from "@/lib/cms/query";
 import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import type { Metadata } from "next";
@@ -46,7 +46,7 @@ export async function generateMetadata({
   const title = project?.title ?? "Project";
   const description = project?.summary ?? undefined;
   const absoluteTitle = `${title} | ${siteName}`;
-  const heroUrl = resolveStrapiMediaUrl(project?.hero?.url);
+  const heroUrl = resolveMediaUrl(project?.hero?.url);
 
   return {
     title: { absolute: absoluteTitle },

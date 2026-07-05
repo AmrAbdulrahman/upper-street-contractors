@@ -8,119 +8,126 @@ Reference for agents working in **upper-street-contractors**.
 | ----- | ---- |
 | Framework | Next.js 16 (App Router), React 19, TypeScript 5 |
 | Styling | Tailwind CSS 4 (`apps/website/src/app/globals.css`, `@tailwindcss/postcss`) |
-| CMS | Strapi 5 GraphQL API (`apps/cms`) |
-| Client data | Apollo Client 4 + `@apollo/client-integration-nextjs` |
-| Codegen | `@graphql-codegen/*` — colocated `apps/website/src/**/*.graphql` → `apps/website/src/generated/` |
+| CMS | zero-cms — self-hosted, file-system-backed engine (no DB), served by `apps/cms` |
+| Client/server data | In-process GraphQL execution against zero-cms's generated schema (`@/lib/cms/query`), no separate API client library |
+| Codegen | `@graphql-codegen/*` — colocated `apps/website/src/**/*.graphql` → `apps/website/src/generated/` (schema introspected from the local zero-cms store, not a remote server) |
 | Lint | ESLint 9 + `eslint-config-next` |
-| Monorepo | Nx workspace — `apps/website` (Next.js), `apps/cms` (Strapi 5), shared config at repo root |
+| Monorepo | Nx workspace — `apps/website` (Next.js, public site), `apps/cms` (Next.js, zero-cms editor + RPC server), shared config at repo root |
+
+See root [`README.md`](../../README.md) → Architecture for the full system diagram
+(website ↔ cms, Railway deployment, staging vs production).
 
 ## Build modes
 
-Controlled by `ENABLE_PREVIEW` in `.env.local`:
+Controlled by `NEXT_PUBLIC_APP_ENV` in `.env.local` (see `apps/website/src/lib/app-env.ts`):
 
-- **Production** (`ENABLE_PREVIEW` unset/false): `output: 'export'` — static site. Server Apollo client uses `cache: 'force-cache'`.
-- **Preview** (`ENABLE_PREVIEW=true`): standard Next.js server. Draft content via `$status: DRAFT`. `cache: 'no-store'` where applicable.
+- **Production** (unset/anything but `preview`): published content only, no editor UI mounted.
+- **Preview** (`NEXT_PUBLIC_APP_ENV=preview`): draft + unpublished content readable, zero-cms
+  editor bar + Inspect-mode overlay mounted.
 
-See `apps/website/next.config.mjs` and `apps/website/src/helpers/preview-utils.ts`.
+Production is intended to eventually build as `output: "export"` (fully static) with
+`apps/cms` as the only write surface — not yet flipped, see
+[`docs/cms-railway.md`](../cms-railway.md) for the current blockers.
 
 ## Environment variables
 
-Copy `.env.example` → `.env.local`:
+Copy `.env.example` → `.env.local`. Key ones:
 
-- `STRAPI_URL` — Strapi server URL (default `http://localhost:1337`)
-- `NEXT_PUBLIC_STRAPI_URL` — public Strapi URL for inspection overlays
-- `STRAPI_API_TOKEN` — full-access API token from Strapi admin (Settings → API Tokens)
-- `STRAPI_TRANSFER_TOKEN` — transfer token for `cms:push` / `cms:pull` (Settings → Transfer Tokens on cloud)
-- `STRAPI_CLOUD_URL` — cloud Strapi URL for push/pull (preferred; avoids shell `STRAPI_URL=localhost` conflicts)
-- `ENABLE_PREVIEW` — toggles preview vs static export
-- `NEXT_PUBLIC_STRAPI_INSPECTION_MODE` — optional entry inspection overlays
+- `NEXT_PUBLIC_APP_ENV` — `preview` to enable draft content + the editor UI, otherwise production
+- `ZERO_CMS_AUTH_SECRET` / `ZERO_CMS_ADMIN_EMAIL` / `ZERO_CMS_ADMIN_PASSWORD` — `apps/cms` auth
+- `ZERO_CMS_REMOTE_URL` / `NEXT_PUBLIC_ZERO_CMS_URL` / `ZERO_CMS_SERVICE_EMAIL` / `ZERO_CMS_SERVICE_PASSWORD` — `apps/website` → `apps/cms` (optional locally, required on staging)
+- `ZERO_CMS_ALLOWED_ORIGINS` — CORS allow-list on `apps/cms`
+- `ZERO_CMS_GIT_SYNC` — auto-commit+push published changes to `main` (Railway only, never local)
 
-Codegen (`codegen.ts`) introspects `${STRAPI_URL}/graphql` using `STRAPI_API_TOKEN`. Strapi must be running for codegen.
+Codegen (`codegen.ts`) introspects the zero-cms schema by reading `.zero-cms-store/`
+directly (via `scripts/generate-cms-schema.mjs`) — no running server needed for codegen.
 
 ## Directory layout
 
 ```
-apps/cms/                   # Strapi 5 headless CMS (isolated node_modules — React 18)
-├── src/api/                # Content types (schema.json per type)
-├── config/                 # server, database, plugins
-├── public/uploads/         # media uploads
-└── project.json            # Nx targets: dev, build, start, console
-
-apps/website/               # Next.js application
+apps/cms/                   # zero-cms editor + reference server (Railway)
 ├── src/
-│   ├── app/                # App Router pages + API routes
-│   │   ├── page.tsx        # Home — server query via getClient()
-│   │   ├── page.graphql    # Page-level queries
-│   │   └── api/graphql/    # Client-side Apollo proxy → Strapi
+│   ├── app/
+│   │   ├── admin/           # Management UI (CmsApp from @usc/zero-cms-app)
+│   │   ├── zero-cms/rpc/    # RPC endpoint (create/update/publish/query/...)
+│   │   └── api/cms/         # auth, media, graphql, sync-status
+│   └── lib/zero-cms/        # server.ts (adapter+auth wiring), git-sync.ts, cors.ts
+├── zero-cms.config.mjs      # dir -> ../../.zero-cms-store (shared with website)
+└── project.json             # Nx targets: dev (-p 3001), build, start
+
+apps/website/                # Next.js public site + editor-facing preview
+├── src/
+│   ├── app/                 # App Router pages
+│   │   ├── page.tsx
+│   │   ├── page.graphql     # Page-level queries
+│   │   └── api/enquiry/     # contact-form email (nodemailer)
 │   ├── components/
-│   │   ├── sections/       # Strapi page sections (one folder per section type)
-│   │   ├── ui/             # Reusable UI primitives (Button, Icon, AtAGlance, …)
-│   │   └── strapi/         # StrapiEntry wrappers, rich text, inspection overlays
-│   ├── generated/          # DO NOT EDIT — graphql.ts, apollo-hooks.ts, schema.graphql
-│   ├── helpers/            # flatten-section-refs, strapi-media-url, preview-utils, …
+│   │   ├── sections/        # one folder per zero-cms section Type
+│   │   ├── ui/               # Reusable UI primitives (Button, Badge, ...)
+│   │   └── cms/              # Inspect-mode overlay wiring (CmsInspectShell)
+│   ├── generated/            # DO NOT EDIT — graphql.ts, schema.graphql
 │   └── lib/
-│       ├── apollo-client.tsx   # Client Apollo provider (browser → /api/graphql)
-│       ├── apollo-server.ts    # Server Apollo (RSC, direct Strapi)
-│       └── apollo-preview-link.ts  # Injects $status for draft content
-├── public/                 # Static assets + generated sitemap.xml
+│       ├── cms/query.ts      # in-process GraphQL exec against zero-cms schema
+│       └── zero-cms/server.ts  # local-fs adapter (build) or httpAdapter (staging)
+├── public/                   # Static assets + generated sitemap.xml
 ├── next.config.mjs
-└── project.json            # Nx project config
+└── project.json
+
+.zero-cms-store/              # data.json, types/*.json, media/ — git-tracked, shared
+                               # by both apps (repo root, not under either app)
 
 # Root (workspace-wide)
-codegen.ts                  # GraphQL codegen config
-scripts/                    # Workspace scripts (sitemap generation)
-nx.json                     # Nx workspace config
-tsconfig.base.json          # Shared TypeScript config
+codegen.ts                    # GraphQL codegen config
+scripts/                      # generate-sitemap.mjs, generate-cms-schema.mjs, ...
+nx.json
+tsconfig.base.json
 ```
 
 ## GraphQL conventions
 
 - **Colocated fragments**: each component/section has a sibling `.graphql` file with its fragment.
 - **Fragment naming**: `PascalCase` matching the component (e.g. `HomeHeroSection` on `HomeHeaderSection`).
-- **Required fields**: every fragment includes `documentId` for Strapi inspection overlays. Include `__typename` where polymorphic resolution is needed.
-- **Preview variable**: page/collection queries use `$status: PublicationStatus` (`PUBLISHED` or `DRAFT`). Pass `withPreviewVariables()` from `@/helpers/preview-utils` in server queries when preview mode matters.
+- **Preview variable**: page/collection queries take `$status: CmsReadStatus` (`published` or `draft`)
+  and `$includeUnpublished: Boolean` — `apps/website/src/lib/cms/query.ts` injects both
+  automatically on a preview deploy.
 - **Shared fragments**: compose from `apps/website/src/components/ui/**/*.graphql` (e.g. `...Button`, `...Icon`).
-- **Codegen**: after any `.graphql` change, run `npm run codegen`. Generated hooks land in `apps/website/src/generated/apollo-hooks.ts`; types in `apps/website/src/generated/graphql.ts`.
+- **Codegen**: after any `.graphql` change, run `npm run codegen`. Generated types land in
+  `apps/website/src/generated/graphql.ts`; schema SDL in `apps/website/src/generated/schema.graphql`.
 
-## Strapi section pattern
+## Adding a new content Type
 
-1. **Content type** — create or extend a Strapi content type in `apps/cms/src/api/<name>/content-types/<name>/schema.json`. Add a relation field on `section-ref` if the section appears on pages.
-2. **Fragment** — create `apps/website/src/components/sections/<name>/<name>.graphql` with fragment on the Strapi GraphQL type.
-3. **Component** — create `apps/website/src/components/sections/<name>/<name>.tsx` — accept fragment type from `@/generated/graphql`.
+1. **Type** — add a Type file under `.zero-cms-store/types/<name>.json` (or author it via the
+   `/admin` UI on `apps/cms`, which writes the file for you).
+2. **Fragment** — create `apps/website/src/components/sections/<name>/<name>.graphql`.
+3. **Component** — create `apps/website/src/components/sections/<name>/<name>.tsx` — accept
+   fragment type from `@/generated/graphql`.
 4. **Barrel** — export from `apps/website/src/components/sections/<name>/index.ts`.
-5. **Wire PageSection** — add fragment type to `PageSectionData` union and `switch` in `apps/website/src/components/sections/page-section.tsx`.
-6. **Page query** — add the relation field + fragment spread under `section_refs` in `apps/website/src/app/page.graphql` (or the owning page query). Include `__typename` on the relation field.
+5. **Wire PageSection** — add the fragment type to `PageSectionData` union and the `switch` in
+   `apps/website/src/components/sections/page-section.tsx`.
+6. **Page query** — add the relation field + fragment spread in the owning page query.
 7. **Flatten refs** — add the new relation to `apps/website/src/helpers/flatten-section-refs.ts`.
-8. **Codegen** — run `npm run codegen` (Strapi must be running with a valid API token).
+8. **Codegen** — run `npm run codegen`.
 
-Wrap editable Strapi fields with `StrapiEntry` / `StrapiEntryField` from `@/components/strapi` when inspection overlays are needed. Use `RichText` from `@/components/ui/rich-text-viewer` for blocks fields.
-
-## Apollo usage
-
-- **Server components**: `getClient().query({ query: XDocument, variables: withPreviewVariables() })` from `@/lib/apollo-server`. Import documents from `@/generated/graphql`.
-- **Client components**: `ApolloProvider` in `layout.tsx`. Browser requests go through `/api/graphql` (`apps/website/src/app/api/graphql/route.ts`).
+Wrap editable fields with the zero-cms-widget Inspect overlay when edit pencils are needed.
+Use `RichText` from `@/components/ui/rich-text-viewer` for `blocks` fields.
 
 ## UI component pattern
 
 - Folder per component under `apps/website/src/components/ui/<name>/`.
 - `index.ts` re-exports public API.
-- Optional colocated `.graphql` if the component maps to a Strapi content type.
+- Optional colocated `.graphql` if the component maps to a zero-cms Type.
 - Tailwind utility classes; design tokens in `globals.css` (`bg-surface`, `text-foreground`, etc.).
 
 ## Scripts
 
 | Command | When |
 | ------- | ---- |
-| `npm run dev` | Website dev server (`nx dev website`) |
-| `npm run dev:cms` | Strapi dev server (`nx dev cms`) |
-| `npm run build` | Production/preview build (`nx build website`) |
+| `npm run dev` | Website dev server only, local-fs read (`nx dev website`) — the simple/default local setup |
+| `npm run dev:cms` | zero-cms editor server (`nx dev cms`, port 3001) |
+| `npm run dev:all` | Both together — matches staging's real shape |
+| `npm run build` | Generates the sitemap from `.zero-cms-store/` then builds `website` |
 | `npm run lint` | ESLint |
-| `npm run codegen` | After `.graphql` changes (Strapi must be running) |
-| `npm run codegen:watch` | Watch mode during schema work |
-| `npm run cms:push` | Push local Strapi data/assets to cloud (destructive — overwrites cloud) |
-| `npm run cms:pull` | Pull cloud Strapi data/assets to local (destructive — overwrites local) |
-
-Cloud GraphQL introspection is enabled in `apps/cms/config/plugins.ts`; redeploy cms to Strapi Cloud after changing that config.
+| `npm run codegen` | After `.graphql` changes — reads the local zero-cms store, no server needed |
 
 ## Next.js agent rules
 
@@ -135,7 +142,5 @@ Stack-specific workflows live in `.cursor/commands/`:
 | `/caveman` | Activate caveman communication mode |
 | `/verify-app` | Browser verify via Chrome DevTools MCP |
 | `/grill-me` | Stress-test a plan with grill-with-docs |
-| `/add-section` | Scaffold a Strapi page section |
 | `/add-ui-component` | Scaffold a UI component |
 | `/graphql-codegen` | Run codegen and verify output |
-| `/strapi-query` | Add or extend a GraphQL query/fragment |

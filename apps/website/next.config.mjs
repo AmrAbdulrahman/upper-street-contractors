@@ -18,29 +18,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "satisfying-beauty-a75f179112.media.strapiapp.com",
-      },
-      {
-        protocol: "https",
-        hostname: "satisfying-beauty-a75f179112.strapiapp.com",
-      },
-      {
-        protocol: "https",
         hostname: "images.ctfassets.net",
       },
       {
         protocol: "https",
         hostname: "downloads.ctfassets.net",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "1337",
-      },
-      {
-        protocol: "http",
-        hostname: "127.0.0.1",
-        port: "1337",
       },
     ],
   },

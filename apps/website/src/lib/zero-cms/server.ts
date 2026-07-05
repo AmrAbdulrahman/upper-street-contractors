@@ -14,13 +14,13 @@ import { createHttpAdapter, type Adapter } from "@usc/zero-cms-core";
  * - **unset** -> local `nodeFsAdapter`, reading `zero-cms-store/` directly off disk.
  *   This is only ever actually exercised at **build time**, on the production
  *   (static export) build — production ships no server at runtime to call it from.
- * - **set** -> `httpAdapter` against cms-app (staging: live, every request, no
+ * - **set** -> `httpAdapter` against cms (staging: live, every request, no
  *   cache — see `lib/cms/query.ts`). Server-to-server, not a browser call, so no
- *   CORS involved. Auth is a dedicated **viewer-role service account** on cms-app
+ *   CORS involved. Auth is a dedicated **viewer-role service account** on cms
  *   (`ZERO_CMS_SERVICE_EMAIL`/`ZERO_CMS_SERVICE_PASSWORD`), never an Editor's own
  *   login — logged in once per warm process and cached until near expiry.
  *
- * cms-app itself owns the RPC/auth/media/graphql/admin surface now (this app no
+ * cms itself owns the RPC/auth/media/graphql/admin surface now (this app no
  * longer serves any of that) — see root README -> Architecture.
  */
 type Cache = {
@@ -51,7 +51,7 @@ async function loginService(remoteUrl: string): Promise<{ token: string; expires
     throw new Error(
       "website: ZERO_CMS_SERVICE_EMAIL / ZERO_CMS_SERVICE_PASSWORD are required " +
         "when ZERO_CMS_REMOTE_URL is set — create a dedicated viewer-role account " +
-        "on cms-app for this, not an Editor's own login."
+        "on cms for this, not an Editor's own login."
     );
   }
   const res = await fetch(`${remoteUrl.replace(/\/$/, "")}/api/cms/auth`, {

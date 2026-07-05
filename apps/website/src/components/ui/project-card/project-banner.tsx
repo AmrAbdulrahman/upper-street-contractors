@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
+import { resolveMediaUrl } from "@/helpers/media-url";
 import Image from "next/image";
 
 type BannerMedia =
@@ -41,7 +41,7 @@ export function ProjectBanner({
   ) : null;
 
   const roundedClass = rounded ? "rounded-lg" : "";
-  const bannerUrl = resolveStrapiMediaUrl(banner?.url);
+  const bannerUrl = resolveMediaUrl(banner?.url);
 
   if (bannerUrl) {
     return (

@@ -1,5 +1,4 @@
-// export { buildStrapiEntryUrl } from "./strapi-entry-url";
-export { resolveStrapiMediaUrl } from "./strapi-media-url";
+export { resolveMediaUrl } from "./media-url";
 export { isPreviewEnabled } from "./preview-utils";
 export { formatAddress } from "./format-address";
 export { formatPhoneDisplay } from "./format-phone";

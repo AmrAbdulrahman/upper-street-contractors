@@ -1,44 +1,31 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "lib": ["ES2020"],
-    "target": "ES2019",
-    "strict": false,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "noEmitOnError": true,
-    "noImplicitThis": true,
-    "outDir": "dist",
-    "rootDir": "."
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@usc/zero-cms-core": ["../../libs/zero-cms-core/src/index.ts"],
+      "@usc/zero-cms-core/node": ["../../libs/zero-cms-core/src/node.ts"],
+      "@usc/zero-cms-app": ["../../libs/zero-cms-app/src/index.ts"],
+      "@usc/zero-cms-widget": ["../../libs/zero-cms-widget/src/index.ts"],
+      "@usc/zero-cms-graphql": ["../../libs/zero-cms-graphql/src/index.ts"],
+      "@usc/zero-cms-blocks": ["../../libs/zero-cms-blocks/src/index.ts"],
+      "@cms": ["../../zero-cms-store/generated/index.ts"]
+    }
   },
   "include": [
-    // Include root files
-    "./",
-    // Include all ts files
-    "./**/*.ts",
-    // Include all js files
-    "./**/*.js",
-    // Force the JSON files in the src folder to be included
-    "src/**/*.json"
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "out/types/**/*.ts",
+    "out/dev/types/**/*.ts",
+    "**/*.mts",
+    "env.mjs",
+    "../../zero-cms-store/generated/index.ts"
   ],
-
-  "exclude": [
-    "node_modules/",
-    "build/",
-    "dist/",
-    ".cache/",
-    ".tmp/",
-    ".strapi/",
-
-    // Do not include admin files in the server compilation
-    "src/admin/",
-    // Do not include test files
-    "**/*.test.*",
-    // Do not include plugins in the server compilation
-    "src/plugins/**"
-  ]
+  "exclude": ["node_modules"]
 }
