@@ -56,4 +56,4 @@ apps/website/next-env.d.ts
 
 vitest.config.*.timestamp*
 
-.zero-cms-store/generated
+.zero-cms-store

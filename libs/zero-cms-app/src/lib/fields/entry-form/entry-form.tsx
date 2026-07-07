@@ -46,6 +46,12 @@ const AUTOSAVE_TICK_MS = 100;
 export interface EntryFormProps {
   type: Type;
   defaultValues: FormValues;
+  /**
+   * The entry's live published values, when it has ever been published —
+   * `undefined` for a new/never-published entry. Diffed per-field so each
+   * changed field can show its published value underneath (see FieldControl).
+   */
+  publishedValues?: FormValues;
   onSubmit: (values: FormValues) => void | Promise<void>;
   submitLabel?: string;
   footer?: ReactNode;
@@ -57,16 +63,20 @@ export interface EntryFormProps {
    * the write; the next edit re-arms.
    */
   autosave?: (values: FormValues) => void | Promise<void>;
+  /** Reports whenever the form's dirty state (unsaved edits) flips. */
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 export function EntryForm({
   type,
   defaultValues,
+  publishedValues,
   onSubmit,
   submitLabel = 'Save draft',
   footer,
   focusField,
   autosave,
+  onDirtyChange,
 }: EntryFormProps) {
   const { control, handleSubmit, reset, getValues } = useForm<FormValues>({
     defaultValues: defaultValues as DefaultValues<FormValues>,
@@ -83,6 +93,11 @@ export function EntryForm({
   const baselineRef = useRef(JSON.stringify(cleanValues(defaultValues)));
   const deadlineRef = useRef<number | null>(null);
 
+  // Unsaved-edits flag, reported to the caller — never read baselineRef.current
+  // during render (only inside effects/callbacks), so it's tracked as state
+  // rather than derived inline.
+  const [dirty, setDirty] = useState(false);
+
   // Reset when the edited entry changes.
   const key = useMemo(() => JSON.stringify(defaultValues), [defaultValues]);
   useEffect(() => {
@@ -90,11 +105,20 @@ export function EntryForm({
     baselineRef.current = JSON.stringify(cleanValues(defaultValues));
     deadlineRef.current = null;
     setSecondsLeft(null);
+    setDirty(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
   const watched = useWatch({ control });
   const watchedSignature = JSON.stringify(cleanValues((watched ?? {}) as FormValues));
+
+  useEffect(() => {
+    setDirty(watchedSignature !== baselineRef.current);
+  }, [watchedSignature]);
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
 
   const runAutoSave = () => {
     if (!autosave || !autoSaveOn || savingRef.current) return;
@@ -107,6 +131,10 @@ export function EntryForm({
       .then(() => {
         baselineRef.current = signature;
         setSavedFlash(true);
+        // Read live via getValues() (not the `watchedSignature` closed over when
+        // this autosave was kicked off) — the user may have kept typing while
+        // the request was in flight, and that shouldn't be reported as clean.
+        setDirty(JSON.stringify(cleanValues(getValues())) !== signature);
       })
       .catch(() => {
         // Leave the baseline so the next edit re-arms; the caller surfaces the error.
@@ -163,7 +191,12 @@ export function EntryForm({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {type.fields.map((f) => (
         <FieldHighlight key={f.__name} highlighted={f.__name === focusField}>
-          <FieldControl field={f} control={control} />
+          <FieldControl
+            field={f}
+            control={control}
+            publishedValue={publishedValues ? publishedValues[f.__name] : undefined}
+            hasPublished={publishedValues !== undefined}
+          />
         </FieldHighlight>
       ))}
       <div className="space-y-2 border-t border-neutral-100 pt-3">

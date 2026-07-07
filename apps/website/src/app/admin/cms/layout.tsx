@@ -13,7 +13,7 @@ export default function AdminCmsLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="min-h-screen bg-neutral-100">
+    <div className="flex h-screen flex-col overflow-hidden bg-neutral-100">
       <CmsShell>{children}</CmsShell>
     </div>
   );

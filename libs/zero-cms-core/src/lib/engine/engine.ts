@@ -138,12 +138,18 @@ export class Engine {
   }
 
   async saveSchema(
-    next: Schema,
+    input: Schema,
     actor: string,
     expectedVersion: string | null,
     backfill: BackfillSpec[] = []
   ): Promise<Schema> {
     return this.mutex.run(async () => {
+      // Fresh read (like getSchemaVersion) rather than the cached `this.schema`
+      // — this instance's cache can be stale across concurrent serverless
+      // instances, and the per-Type __createdAt/__updatedAt stamp below must
+      // diff against what's actually stored, not a possibly-stale snapshot.
+      const previous = (await this.port.readSchema())?.schema ?? [];
+      const next = stampSchema(input, previous, nextTimestamp());
       const nextIndex = new SchemaIndex(next);
       const allEntries = await this.fetchAllEntries();
       // Block destructive edits that would invalidate existing published values.
@@ -524,4 +530,30 @@ export class Engine {
     }
     return hits;
   }
+}
+
+/** The content that determines whether a Type "changed", excluding its stamps. */
+function withoutStamps(t: Type): Pick<Type, '__name' | 'label' | 'fields'> {
+  return { __name: t.__name, label: t.label, fields: t.fields };
+}
+
+/**
+ * Stamp per-Type `__createdAt`/`__updatedAt` for a `saveSchema` call, matching
+ * Types across `input`/`previous` by `__name` (the only stable identity a
+ * Type has). Never trusts timestamps the client may have echoed back on
+ * `input` — always recomputed from the diff against `previous`.
+ */
+function stampSchema(input: Schema, previous: Schema, now: string): Schema {
+  const prevByName = new Map(previous.map((t) => [t.__name, t]));
+  return input.map((t) => {
+    const rest = withoutStamps(t);
+    const prev = prevByName.get(t.__name);
+    if (!prev) return { ...rest, __createdAt: now, __updatedAt: now };
+    const unchanged = JSON.stringify(withoutStamps(prev)) === JSON.stringify(rest);
+    return {
+      ...rest,
+      __createdAt: prev.__createdAt ?? now,
+      __updatedAt: unchanged ? (prev.__updatedAt ?? now) : now,
+    };
+  });
 }

@@ -9,7 +9,7 @@
  * content still renders; the drawer shows a sign-in form until authenticated).
  */
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { createHttpAdapter, type Adapter, type SafeUser } from '@usc/zero-cms-core';
 import {
   EntryEditor,
@@ -156,6 +156,21 @@ function DrawerBody({
   const { schema } = useZeroCms();
   const needsLogin = Boolean(client) && !token;
 
+  // Keyed by DrawerTarget.key — the backdrop/Escape close (Drawer's `onClose`,
+  // only wired live for the top panel) should confirm before discarding edits.
+  // The explicit header "Close" button inside EntryEditor is a deliberate
+  // click, not a miss-click, so it's deliberately NOT guarded here.
+  const [dirtyKeys, setDirtyKeys] = useState<ReadonlySet<string>>(new Set());
+  const setDirty = useCallback((key: string, dirty: boolean) => {
+    setDirtyKeys((prev) => {
+      if (prev.has(key) === dirty) return prev;
+      const next = new Set(prev);
+      if (dirty) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }, []);
+
   const refActions = useMemo(
     () => ({
       openReference: (id: string, type?: string) =>
@@ -182,6 +197,7 @@ function DrawerBody({
         // Closing a create panel settles its resolver as cancelled (no orphan);
         // an edit panel has no resolver, so this just pops.
         const settleClose = () => {
+          if (dirtyKeys.has(t.key) && !window.confirm('Discard unsaved changes?')) return;
           t.onResult?.(null);
           pop();
         };
@@ -211,6 +227,7 @@ function DrawerBody({
                 focusField={t.focusField}
                 onClose={settleClose}
                 onChanged={() => onSaved?.()}
+                onDirtyChange={(dirty) => setDirty(t.key, dirty)}
                 onCreated={
                   t.mode === 'create'
                     ? (id) => {

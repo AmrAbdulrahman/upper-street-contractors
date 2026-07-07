@@ -146,7 +146,10 @@ function AdminChrome({
   return (
     <div
       className={cx(
-        'zero-cms flex min-h-[32rem] w-full overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-900',
+        // `h-full` fills a height-constrained host (e.g. the Next admin shell's
+        // viewport-height flex column); `min-h-[32rem]` is the floor for hosts
+        // that don't constrain height at all, so this degrades gracefully.
+        'zero-cms flex h-full min-h-[32rem] w-full overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-900',
         className
       )}
     >

@@ -9,7 +9,11 @@ and Vercel Blob (media bytes) — see [ADR 0008](./docs/adr/0008-zero-cms-redis-
 / [ADR 0009](./docs/adr/0009-zero-cms-multi-writer-optimistic-concurrency.md). Production
 uses **ISR**, not a static export — publishing calls `revalidatePath("/", "layout")`
 inline, in the same request, no webhook — see
-[ADR 0010](./docs/adr/0010-vercel-only-deployment-isr.md).
+[ADR 0010](./docs/adr/0010-vercel-only-deployment-isr.md). That invalidation is
+whole-site but lazy on its own — the RPC response also kicks off a background pass
+(via `after()`) that self-fetches every route so the Full Route Cache is warm again
+before a real visitor's request, instead of the first one after publish paying a
+cold render — see [ADR 0012](./docs/adr/0012-eager-cache-warming-after-publish.md).
 
 Editing happens at `/admin/*`, which **Proxy** (`src/proxy.ts`, Next 16's renamed
 Middleware) gates on a session cookie and rewrites to the exact same public pages —
@@ -43,7 +47,7 @@ flowchart TB
 
     Pages -- "read-only, every request" --> RedisRO
     RPC -- "read-write, session-verified" --> RedisRW
-    RPC -- "revalidatePath on publish" --> Pages
+    RPC -- "revalidatePath + warm (ADR 0012) on publish" --> Pages
     RPC -- "media put/get/delete" --> Blob
 ```
 

@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const indexable = config?.indexable !== false;
   if (!indexable) return [];
 
-  const siteUrl = normalizeSiteUrl(config?.siteUrl);
+  const siteUrl = normalizeSiteUrl(process.env.APP_URL);
   const paths = await getAllSitePaths();
 
   return paths.map((path) => ({

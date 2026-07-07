@@ -3,14 +3,24 @@
 /** Content section: entry listing (search + status filter) and the entry editor. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ZeroCmsError, type OutputEntry, type Type } from '@usc/zero-cms-core';
+import { ZeroCmsError, type OutputEntry, type ReferenceHit, type Type } from '@usc/zero-cms-core';
 import { useZeroCms } from './context';
 import { useDraftRegistryOptional } from './draft-registry';
 import { EntryForm, entryLabel, titleField, type FormValues } from './fields';
 import { Badge, Button, EmptyState, Input, Select, Spinner, cls, cx } from './components/ui';
-import { cleanValues, defaultsFor, errorMessage } from './util';
+import { SortControl, type SortDir, type SortField } from './list-controls';
+import { cleanValues, defaultsFor, errorMessage, fuzzyMatch } from './util';
 
 type StatusFilter = 'all' | 'published' | 'draft' | 'unpublished';
+
+function compareBy(sortBy: SortField, dir: SortDir, type: Type | undefined) {
+  const sign = dir === 'asc' ? 1 : -1;
+  return (a: OutputEntry, b: OutputEntry) => {
+    if (sortBy === 'created') return sign * a.__createdAt.localeCompare(b.__createdAt);
+    if (sortBy === 'updated') return sign * a.__lastEditedAt.localeCompare(b.__lastEditedAt);
+    return sign * entryLabel(type, a).localeCompare(entryLabel(type, b));
+  };
+}
 
 function StatusBadges({ entry }: { entry: OutputEntry }) {
   return (
@@ -45,6 +55,8 @@ export function EntriesList({
   const [entries, setEntries] = useState<OutputEntry[] | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
+  const [sortBy, setSortBy] = useState<SortField>('name');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
 
   // `quiet`: a refreshToken-triggered reload keeps showing the current list
   // while re-fetching, swapping in fresh data once it arrives — no spinner
@@ -91,17 +103,16 @@ export function EntriesList({
 
   const filtered = useMemo(() => {
     if (!entries) return [];
-    const q = search.trim().toLowerCase();
-    return entries.filter((e) => {
+    const q = search.trim();
+    const matched = entries.filter((e) => {
       if (status === 'published' && e.__status !== 'published') return false;
       if (status === 'unpublished' && e.__status !== 'unpublished') return false;
       if (status === 'draft' && !e.hasDraft) return false;
       if (!q) return true;
-      return Object.values(e).some(
-        (v) => typeof v === 'string' && v.toLowerCase().includes(q)
-      );
+      return Object.values(e).some((v) => typeof v === 'string' && fuzzyMatch(q, v));
     });
-  }, [entries, search, status]);
+    return [...matched].sort(compareBy(sortBy, sortDir, type));
+  }, [entries, search, status, sortBy, sortDir, type]);
 
   const tf = titleField(type);
 
@@ -124,6 +135,12 @@ export function EntriesList({
           <option value="draft">Has draft</option>
           <option value="unpublished">Unpublished</option>
         </Select>
+        <SortControl
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          sortDir={sortDir}
+          onSortDirChange={setSortDir}
+        />
         <div className="ml-auto">
           <Button variant="primary" onClick={onNew}>
             + New
@@ -160,6 +177,30 @@ export function EntriesList({
   );
 }
 
+/**
+ * Turn a delete's REFERENCE_INTEGRITY hits into a readable message — the raw
+ * `ReferenceHit[]` only carries ids, so resolve each referencing entry to its
+ * label (falls back to a short id if it can no longer be read).
+ */
+async function describeReferenceHits(
+  hits: ReferenceHit[],
+  schema: Type[],
+  adapter: ReturnType<typeof useZeroCms>['adapter']
+): Promise<string> {
+  const parts = await Promise.all(
+    hits.map(async (h) => {
+      const fromType = schema.find((t) => t.__name === h.fromType);
+      const fieldLabel = fromType?.fields.find((f) => f.__name === h.field)?.label ?? h.field;
+      const label = await adapter
+        .get(h.fromType, h.fromId, { status: 'draft', includeUnpublished: true })
+        .then((e) => (e ? entryLabel(fromType, e) : null))
+        .catch(() => null);
+      return `"${label ?? h.fromId.slice(0, 8)}" (${fromType?.label ?? h.fromType} → ${fieldLabel})`;
+    })
+  );
+  return `Can't delete — still referenced by ${parts.join(', ')}.`;
+}
+
 export function EntryEditor({
   type,
   entryId,
@@ -168,6 +209,7 @@ export function EntryEditor({
   onChanged,
   onCreated,
   focusField,
+  onDirtyChange,
 }: {
   type: Type;
   entryId?: string;
@@ -187,37 +229,50 @@ export function EntryEditor({
   onCreated?: (id: string) => void;
   /** Field `__name` to scroll to + highlight on open. */
   focusField?: string;
+  /** Reports whether the form has unsaved edits — lets a host guard its own close affordance. */
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
-  const { adapter, refreshMedia, notify, currentUserId } = useZeroCms();
+  const { adapter, schema, refreshMedia, notify, currentUserId } = useZeroCms();
   const draftReg = useDraftRegistryOptional();
   const isNew = !entryId;
   const creating = createMode ?? isNew;
   const [entry, setEntry] = useState<OutputEntry | null>(null);
+  // The live published version, fetched alongside `entry`, purely to diff
+  // against in the form (see EntryForm's `publishedValues`) — `null` both
+  // while loading and when the entry has never been published.
+  const [publishedEntry, setPublishedEntry] = useState<OutputEntry | null>(null);
   const [loading, setLoading] = useState(!isNew);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const reloadEntry = useCallback(async () => {
     if (isNew || !entryId) return;
-    setEntry(
-      await adapter.get(type.__name, entryId, {
-        status: 'draft',
-        includeUnpublished: true,
-      })
-    );
+    const [draft, published] = await Promise.all([
+      adapter.get(type.__name, entryId, { status: 'draft', includeUnpublished: true }),
+      adapter.get(type.__name, entryId, { status: 'published' }),
+    ]);
+    setEntry(draft);
+    setPublishedEntry(published);
   }, [adapter, type.__name, entryId, isNew]);
 
   useEffect(() => {
     let live = true;
     if (isNew) {
       setEntry(null);
+      setPublishedEntry(null);
       setLoading(false);
       return;
     }
     setLoading(true);
-    void adapter
-      .get(type.__name, entryId, { status: 'draft', includeUnpublished: true })
-      .then((e) => live && (setEntry(e), setLoading(false)));
+    void Promise.all([
+      adapter.get(type.__name, entryId, { status: 'draft', includeUnpublished: true }),
+      adapter.get(type.__name, entryId, { status: 'published' }),
+    ]).then(([draft, published]) => {
+      if (!live) return;
+      setEntry(draft);
+      setPublishedEntry(published);
+      setLoading(false);
+    });
     return () => {
       live = false;
     };
@@ -235,7 +290,10 @@ export function EntryEditor({
       onChanged();
       if (successMsg) notify('success', successMsg);
     } catch (err) {
-      const msg = errorMessage(err);
+      const msg =
+        err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY'
+          ? await describeReferenceHits(err.details as ReferenceHit[], schema, adapter)
+          : errorMessage(err);
       setError(msg);
       notify('error', msg);
       if (err instanceof ZeroCmsError && err.code === 'CONFLICT') await reloadEntry();
@@ -328,9 +386,11 @@ export function EntryEditor({
       <EntryForm
         type={type}
         defaultValues={defaultsFor(type, entry)}
+        publishedValues={publishedEntry ?? undefined}
         onSubmit={save}
         autosave={!isNew && entryId ? saveQuiet : undefined}
         focusField={focusField}
+        onDirtyChange={onDirtyChange}
         submitLabel={isNew ? 'Create draft' : 'Save draft'}
         footer={
           !isNew && entry ? (

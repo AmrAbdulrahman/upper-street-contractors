@@ -7,9 +7,11 @@
  */
 
 import { type ComponentType } from 'react';
+import { useWatch } from 'react-hook-form';
 import type { Field, FieldType } from '@usc/zero-cms-core';
 import { Badge, Field as FieldShell, cls, cx } from '../../components/ui';
-import type { RendererProps } from './types';
+import { formatFieldValue, valuesEqual } from '../../util';
+import type { FormValues, RendererProps } from './types';
 import { TextRenderer } from '../text';
 import { LongTextRenderer } from '../longtext';
 import { RichTextRenderer } from '../richtext';
@@ -45,13 +47,34 @@ function TypeBadge({ field }: { field: Field }) {
   return <Badge>{field.__type}</Badge>;
 }
 
-export function FieldControl({ field, control }: RendererProps) {
+/** Small note rendered under a field whose value differs from what's live. */
+function PublishedValueNote({ field, value }: { field: Field; value: unknown }) {
+  return (
+    <p className="text-xs text-amber-700">Published: {formatFieldValue(field, value)}</p>
+  );
+}
+
+export function FieldControl({
+  field,
+  control,
+  publishedValue,
+  hasPublished,
+}: RendererProps & {
+  /** This field's value in the live published version, when there is one. */
+  publishedValue?: unknown;
+  /** Whether the entry has ever been published at all — gates the diff below. */
+  hasPublished?: boolean;
+}) {
   const Renderer = fieldRegistry[field.__type];
+  const liveValue = useWatch({ control, name: field.__name as keyof FormValues });
+  const changed = hasPublished && !valuesEqual(liveValue, publishedValue);
+  const highlight = changed && 'rounded-md bg-amber-50 p-2 -m-2 ring-1 ring-amber-300';
+
   // Boolean bypasses FieldShell (its own <label> can't nest inside another
   // <label>), so it renders its own header row with the same label + type badge.
   if (field.__type === 'boolean')
     return (
-      <div className="space-y-1">
+      <div className={cx('space-y-1', highlight)}>
         <span className={cx(cls.label, 'flex items-center gap-2')}>
           <span>
             {labelOf(field)}
@@ -60,15 +83,19 @@ export function FieldControl({ field, control }: RendererProps) {
           <TypeBadge field={field} />
         </span>
         <Renderer field={field} control={control} />
+        {changed && <PublishedValueNote field={field} value={publishedValue} />}
       </div>
     );
   return (
-    <FieldShell
-      label={labelOf(field)}
-      required={field.required}
-      badge={<TypeBadge field={field} />}
-    >
-      <Renderer field={field} control={control} />
-    </FieldShell>
+    <div className={cx(highlight)}>
+      <FieldShell
+        label={labelOf(field)}
+        required={field.required}
+        badge={<TypeBadge field={field} />}
+      >
+        <Renderer field={field} control={control} />
+      </FieldShell>
+      {changed && <PublishedValueNote field={field} value={publishedValue} />}
+    </div>
   );
 }

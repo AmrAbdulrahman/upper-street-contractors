@@ -6,12 +6,22 @@
  * edits that would invalidate existing entries — surfaced as an error here).
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ZeroCmsError, type Field, type FieldType, type Schema, type Type } from '@usc/zero-cms-core';
 import ReactSelect from 'react-select';
 import { useZeroCms } from './context';
 import { Badge, Button, EmptyState, Field as FieldShell, Input, Select, cls, cx } from './components/ui';
-import { errorMessage } from './util';
+import { SortControl, type SortDir, type SortField } from './list-controls';
+import { errorMessage, fuzzyMatch } from './util';
+
+function compareTypesBy(sortBy: SortField, dir: SortDir) {
+  const sign = dir === 'asc' ? 1 : -1;
+  return (a: Type, b: Type) => {
+    if (sortBy === 'created') return sign * (a.__createdAt ?? '').localeCompare(b.__createdAt ?? '');
+    if (sortBy === 'updated') return sign * (a.__updatedAt ?? '').localeCompare(b.__updatedAt ?? '');
+    return sign * (a.label ?? a.__name).localeCompare(b.label ?? b.__name);
+  };
+}
 
 /**
  * Field-type picker options. `reference`/`references` are presented as one
@@ -82,24 +92,44 @@ function withCardinality(field: Field, next: 'reference' | 'references'): Field 
 export function TypeBuilder() {
   const { schema, schemaVersion, adapter, refreshSchema, currentUserId } = useZeroCms();
   const [draft, setDraft] = useState<Schema>(schema);
-  const [selected, setSelected] = useState(0);
+  // Name-based, not index-based — the sidebar list below is filtered/sorted
+  // for display, so an array index can't reliably point at "the selected Type".
+  const [selectedName, setSelectedName] = useState<string | undefined>(schema[0]?.__name);
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<SortField>('name');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => setDraft(schema), [schema]);
 
   const dirty = JSON.stringify(draft) !== JSON.stringify(schema);
-  const type: Type | undefined = draft[selected];
+  const type: Type | undefined =
+    draft.find((t) => t.__name === selectedName) ?? draft[0];
+
+  const visibleTypes = useMemo(() => {
+    const q = search.trim();
+    const matched = draft.filter(
+      (t) => fuzzyMatch(q, t.__name) || fuzzyMatch(q, t.label ?? '')
+    );
+    return [...matched].sort(compareTypesBy(sortBy, sortDir));
+  }, [draft, search, sortBy, sortDir]);
 
   const mutateType = (patch: Partial<Type>) =>
-    setDraft((d) => d.map((t, i) => (i === selected ? { ...t, ...patch } : t)));
+    setDraft((d) => d.map((t) => (t.__name === type?.__name ? { ...t, ...patch } : t)));
+
+  const renameType = (name: string) => {
+    mutateType({ __name: name });
+    setSelectedName(name);
+  };
 
   const mutateField = (fi: number, next: Field) =>
     mutateType({ fields: type!.fields.map((f, i) => (i === fi ? next : f)) });
 
   const addType = () => {
-    setDraft((d) => [...d, { __name: `type_${d.length + 1}`, fields: [] }]);
-    setSelected(draft.length);
+    const name = `type_${draft.length + 1}`;
+    setDraft((d) => [...d, { __name: name, fields: [] }]);
+    setSelectedName(name);
   };
 
   const save = async () => {
@@ -120,19 +150,35 @@ export function TypeBuilder() {
 
   return (
     <div className="flex gap-4">
-      <aside className="w-48 shrink-0 space-y-1">
-        {draft.map((t, i) => (
-          <button
-            key={i}
-            onClick={() => setSelected(i)}
-            className={cx(
-              'w-full truncate rounded-md px-3 py-2 text-left text-sm',
-              i === selected ? 'bg-neutral-900 text-white' : 'hover:bg-neutral-100'
-            )}
-          >
-            {t.__name}
-          </button>
-        ))}
+      <aside className="w-48 shrink-0 space-y-2">
+        <Input
+          placeholder="Filter types…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <SortControl
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          sortDir={sortDir}
+          onSortDirChange={setSortDir}
+        />
+        <div className="space-y-1">
+          {visibleTypes.map((t) => (
+            <button
+              key={t.__name}
+              onClick={() => setSelectedName(t.__name)}
+              className={cx(
+                'w-full truncate rounded-md px-3 py-2 text-left text-sm',
+                t.__name === type?.__name ? 'bg-neutral-900 text-white' : 'hover:bg-neutral-100'
+              )}
+            >
+              {t.label ?? t.__name}
+            </button>
+          ))}
+          {visibleTypes.length === 0 && (
+            <p className="px-2 text-xs text-neutral-400">No matching types.</p>
+          )}
+        </div>
         <Button onClick={addType} className="w-full">
           + Type
         </Button>
@@ -145,16 +191,14 @@ export function TypeBuilder() {
           <>
             <div className="flex items-end gap-2">
               <FieldShell label="Type name">
-                <Input
-                  value={type.__name}
-                  onChange={(e) => mutateType({ __name: e.target.value })}
-                />
+                <Input value={type.__name} onChange={(e) => renameType(e.target.value)} />
               </FieldShell>
               <Button
                 variant="danger"
                 onClick={() => {
-                  setDraft((d) => d.filter((_, i) => i !== selected));
-                  setSelected(0);
+                  const name = type.__name;
+                  setDraft((d) => d.filter((t) => t.__name !== name));
+                  setSelectedName(draft.find((t) => t.__name !== name)?.__name);
                 }}
               >
                 Delete type

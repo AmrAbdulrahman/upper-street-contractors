@@ -5,13 +5,12 @@ import type {
 } from "@/generated/graphql";
 import {
   DEFAULT_ROBOTS,
-  FALLBACK_SITE_URL,
   NOINDEX_ROBOTS,
 } from "@/lib/site-config";
 import { resolveMediaUrl } from "./media-url";
 
 export function normalizeSiteUrl(url: string | null | undefined): string {
-  const value = url?.trim() || FALLBACK_SITE_URL;
+  const value = url?.trim() ?? "";
   return value.replace(/\/+$/, "");
 }
 
@@ -63,7 +62,7 @@ function getTwitterImages(
 export function buildBaseMetadata(
   config: SiteMetaConfigFragment | null,
 ): Metadata {
-  const siteUrl = normalizeSiteUrl(config?.siteUrl);
+  const siteUrl = normalizeSiteUrl(process.env.APP_URL);
   const siteName = config?.siteName ?? "Upper Street Contractors";
   const legalName = config?.legalName ?? siteName;
   const images = getOgImages(config?.defaultImage ?? null);
