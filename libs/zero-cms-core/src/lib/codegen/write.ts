@@ -23,7 +23,7 @@ export async function generateFromConfig(
   config: ZeroCmsConfig,
   opts: GenerateOptions = {}
 ): Promise<string> {
-  const schema = (await createFsStoragePort(config).readSchema()) ?? [];
+  const schema = (await createFsStoragePort(config).readSchema())?.schema ?? [];
   return writeGeneratedClient(schema, opts.outDir ?? config.generated, opts.fileName);
 }
 

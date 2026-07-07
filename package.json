@@ -7,10 +7,7 @@
   },
   "scripts": {
     "dev": "nx dev website",
-    "dev:cms": "nx dev cms",
-    "dev:all": "nx run-many --target=dev --projects=website,cms --parallel=2",
-    "generate:sitemap": "node scripts/generate-sitemap.mjs",
-    "build": "npm run generate:sitemap && nx build website",
+    "build": "nx build website",
     "start": "nx start website",
     "lint": "nx run-many --target lint",
     "sync:claude-cli": "node scripts/sync-claude-cli.mjs"
@@ -21,6 +18,8 @@
     "@hugerte/hugerte-react": "^2.0.2",
     "@next/env": "^16.2.9",
     "@types/nodemailer": "^8.0.1",
+    "@upstash/redis": "^1.38.0",
+    "@vercel/blob": "^2.5.0",
     "graphql": "^16.14.0",
     "hugerte": "^1.0.11",
     "next": "16.2.6",

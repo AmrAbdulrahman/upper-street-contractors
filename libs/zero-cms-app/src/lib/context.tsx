@@ -51,6 +51,8 @@ const noopNotify: NotifyFn = () => {};
 interface ZeroCmsContextValue {
   adapter: Adapter;
   schema: Schema;
+  /** The version to present back to `adapter.saveSchema` (ADR 0009) — fetched fresh alongside `schema`. */
+  schemaVersion: string | null;
   schemaLoading: boolean;
   refreshSchema: () => Promise<void>;
   media: MediaItem[];
@@ -58,6 +60,16 @@ interface ZeroCmsContextValue {
   RichText: RichTextComponent;
   Blocks: BlocksComponent;
   notify: NotifyFn;
+  /**
+   * Caller identity for every mutation (ADR 0009 — required, no anonymous
+   * default at the engine). The server derives the *real* actor from the
+   * verified session when auth is enabled and ignores this value, but it's
+   * still the right thing to send: it's what makes the call meaningful when
+   * auth is off (open/dev adapters), and self-documenting either way.
+   * Defaults to `'anonymous'` only for the no-auth `<ZeroCmsProvider adapter>`
+   * path, which has no signed-in user to draw from at all.
+   */
+  currentUserId: string;
 }
 
 const ZeroCmsContext = createContext<ZeroCmsContextValue | null>(null);
@@ -79,6 +91,8 @@ export interface ZeroCmsProviderProps {
   blocks?: BlocksComponent;
   /** Toast notifier for mutation feedback; defaults to a no-op. */
   notify?: NotifyFn;
+  /** The signed-in user's id, when there is one (see {@link ZeroCmsContextValue.currentUserId}). */
+  currentUserId?: string;
   children: ReactNode;
 }
 
@@ -87,9 +101,11 @@ export function ZeroCmsProvider({
   richText,
   blocks,
   notify,
+  currentUserId,
   children,
 }: ZeroCmsProviderProps) {
   const [schema, setSchema] = useState<Schema>([]);
+  const [schemaVersion, setSchemaVersion] = useState<string | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(true);
   const [media, setMedia] = useState<MediaItem[]>([]);
 
@@ -100,9 +116,15 @@ export function ZeroCmsProvider({
   const refreshSchema = useCallback(async () => {
     setSchemaLoading(true);
     try {
-      setSchema(await adapter.getSchema());
+      const [next, version] = await Promise.all([
+        adapter.getSchema(),
+        adapter.getSchemaVersion(),
+      ]);
+      setSchema(next);
+      setSchemaVersion(version);
     } catch {
       setSchema([]);
+      setSchemaVersion(null);
     } finally {
       setSchemaLoading(false);
     }
@@ -125,6 +147,7 @@ export function ZeroCmsProvider({
     () => ({
       adapter,
       schema,
+      schemaVersion,
       schemaLoading,
       refreshSchema,
       media,
@@ -132,8 +155,21 @@ export function ZeroCmsProvider({
       RichText: richText ?? DefaultRichText,
       Blocks: blocks ?? BlocksEditor,
       notify: notify ?? noopNotify,
+      currentUserId: currentUserId ?? 'anonymous',
     }),
-    [adapter, schema, schemaLoading, refreshSchema, media, refreshMedia, richText, blocks, notify]
+    [
+      adapter,
+      schema,
+      schemaVersion,
+      schemaLoading,
+      refreshSchema,
+      media,
+      refreshMedia,
+      richText,
+      blocks,
+      notify,
+      currentUserId,
+    ]
   );
 
   return (

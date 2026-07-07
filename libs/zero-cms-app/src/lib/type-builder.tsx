@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { Field, FieldType, Schema, Type } from '@usc/zero-cms-core';
+import { ZeroCmsError, type Field, type FieldType, type Schema, type Type } from '@usc/zero-cms-core';
 import ReactSelect from 'react-select';
 import { useZeroCms } from './context';
 import { Badge, Button, EmptyState, Field as FieldShell, Input, Select, cls, cx } from './components/ui';
@@ -80,7 +80,7 @@ function withCardinality(field: Field, next: 'reference' | 'references'): Field 
 }
 
 export function TypeBuilder() {
-  const { schema, adapter, refreshSchema } = useZeroCms();
+  const { schema, schemaVersion, adapter, refreshSchema, currentUserId } = useZeroCms();
   const [draft, setDraft] = useState<Schema>(schema);
   const [selected, setSelected] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -106,11 +106,15 @@ export function TypeBuilder() {
     setError(null);
     setSaved(false);
     try {
-      await adapter.saveSchema(draft);
+      await adapter.saveSchema(draft, currentUserId, schemaVersion);
       await refreshSchema();
       setSaved(true);
     } catch (err) {
       setError(errorMessage(err));
+      // A conflict means someone else changed the schema since this was
+      // loaded — refresh so `draft` resets to the current version instead of
+      // leaving the editor stuck retrying against a version that's gone.
+      if (err instanceof ZeroCmsError && err.code === 'CONFLICT') await refreshSchema();
     }
   };
 

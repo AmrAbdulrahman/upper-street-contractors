@@ -7,9 +7,15 @@
  * while the lib stays router-independent (works uncontrolled too).
  *
  * Inject an {@link Adapter}; optionally a rich-text editor. Tailwind-styled.
+ *
+ * For a Next.js host, prefer the split below (`ZeroCmsAdminLayout` in your
+ * `layout.tsx`, `ZeroCmsAdminContent` in `page.tsx`) over this monolithic
+ * component — see `admin-nav.tsx`'s docstring for why the split exists.
+ * `ZeroCmsApp`/`CmsApp` just composes the two together, for hosts with no
+ * layout/page boundary to put them in (e.g. a single-page mount, or tests).
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import type { Adapter, SafeUser } from '@usc/zero-cms-core';
 import {
   ZeroCmsProvider,
@@ -18,7 +24,8 @@ import {
   type BlocksComponent,
   type NotifyFn,
 } from './context';
-import { SECTIONS, type Section } from './nav';
+import { SECTIONS } from './nav';
+import { AdminNavProvider, useAdminNav } from './admin-nav';
 import { ReferenceActionsProvider } from './reference-actions';
 import { EntriesList, EntryEditor } from './entries';
 import { TypeBuilder } from './type-builder';
@@ -43,110 +50,91 @@ export interface ZeroCmsAppProps {
   onNavigate?: (path: string[]) => void;
 }
 
-interface NavState {
-  section: Section;
-  typeName?: string;
-  entryId?: string;
-  isNew: boolean;
-}
-
-function parsePath(path: string[]): NavState {
-  const [section, a, b] = path;
-  if (section === 'types') return { section: 'types', typeName: a, isNew: false };
-  if (section === 'media') return { section: 'media', isNew: false };
-  return {
-    section: 'entries',
-    typeName: a,
-    entryId: b && b !== 'new' ? b : undefined,
-    isNew: b === 'new',
-  };
-}
-
-function toPath(s: NavState): string[] {
-  if (s.section === 'types') return s.typeName ? ['types', s.typeName] : ['types'];
-  if (s.section === 'media') return ['media'];
-  const p = ['entries'];
-  if (s.typeName) {
-    p.push(s.typeName);
-    if (s.isNew) p.push('new');
-    else if (s.entryId) p.push(s.entryId);
-  }
-  return p;
-}
-
 export function ZeroCmsApp(props: ZeroCmsAppProps) {
-  if (props.auth) {
-    return (
-      <AuthGate config={props.auth}>
-        {(adapter, ctx) => (
-          <ZeroCmsProvider
-            adapter={adapter}
-            richText={props.richText}
-            blocks={props.blocks}
-            notify={props.notify}
-          >
-            <Shell
-              className={props.className}
-              path={props.path}
-              onNavigate={props.onNavigate}
-              user={ctx.user}
-              onLogout={ctx.logout}
-            />
-          </ZeroCmsProvider>
-        )}
-      </AuthGate>
-    );
-  }
-  if (!props.adapter)
-    throw new Error('ZeroCmsApp requires either `adapter` or `auth`');
   return (
-    <ZeroCmsProvider
-      adapter={props.adapter}
-      richText={props.richText}
-      blocks={props.blocks}
-      notify={props.notify}
-    >
-      <Shell className={props.className} path={props.path} onNavigate={props.onNavigate} />
-    </ZeroCmsProvider>
+    <ZeroCmsAdminLayout {...props}>
+      <ZeroCmsAdminContent />
+    </ZeroCmsAdminLayout>
   );
 }
 
 /** Alias matching the `<CmsApp />` name. */
 export const CmsApp = ZeroCmsApp;
 
-function Shell({
+/**
+ * The stable part: auth + the schema/media provider + the nav strip, Type
+ * sidebar, and the main content pane (TypeBuilder / MediaLibrary / entries
+ * list). Put this in a Next.js `layout.tsx` so it survives navigation between
+ * Types/entries instead of being torn down and rebuilt by the App Router on
+ * every catch-all segment change (see `admin-nav.tsx`).
+ *
+ * Everything here is genuinely stable across a *within-Type* entry switch too
+ * — the entries list only needs to re-render (new `activeType`/`reloadKey`),
+ * never remount, when you open a different entry. Only the actual selected
+ * entry's editor is inherently tied to the URL segment; that's the one piece
+ * that belongs in `children` (`<ZeroCmsAdminContent>`, in `page.tsx`) — a
+ * first version of this split put the whole content pane there too, and Next
+ * remounted it (and the list along with it — losing search/filter state, plus
+ * a visible reload flash of an already-loaded list) on every single entry
+ * open, since a Next "page" component isn't guaranteed to survive navigation
+ * the way `layout.tsx` is, even when its own props never change.
+ */
+export function ZeroCmsAdminLayout({
+  adapter,
+  auth,
+  richText,
+  blocks,
+  notify,
   className,
   path,
   onNavigate,
+  children,
+}: ZeroCmsAppProps & { children: ReactNode }) {
+  if (auth) {
+    return (
+      <AuthGate config={auth}>
+        {(authedAdapter, ctx) => (
+          <ZeroCmsProvider
+            adapter={authedAdapter}
+            richText={richText}
+            blocks={blocks}
+            notify={notify}
+            currentUserId={ctx.user.__id}
+          >
+            <AdminNavProvider path={path} onNavigate={onNavigate}>
+              <AdminChrome className={className} user={ctx.user} onLogout={ctx.logout}>
+                {children}
+              </AdminChrome>
+            </AdminNavProvider>
+          </ZeroCmsProvider>
+        )}
+      </AuthGate>
+    );
+  }
+  if (!adapter) throw new Error('ZeroCmsApp requires either `adapter` or `auth`');
+  return (
+    <ZeroCmsProvider adapter={adapter} richText={richText} blocks={blocks} notify={notify}>
+      <AdminNavProvider path={path} onNavigate={onNavigate}>
+        <AdminChrome className={className}>{children}</AdminChrome>
+      </AdminNavProvider>
+    </ZeroCmsProvider>
+  );
+}
+
+function AdminChrome({
+  className,
   user,
   onLogout,
+  children,
 }: {
   className?: string;
-  path?: string[];
-  onNavigate?: (path: string[]) => void;
   user?: SafeUser;
   onLogout?: () => void;
+  children: ReactNode;
 }) {
   const { schema, schemaLoading } = useZeroCms();
-  const [internal, setInternal] = useState<string[]>(path ?? []);
-  const [reloadKey, setReloadKey] = useState(0);
-
-  // Sync when a controlled `path` prop changes (router back/forward).
-  const pathKey = path?.join('/');
-  useEffect(() => {
-    if (path) setInternal(path);
-  }, [pathKey]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const nav = parsePath(internal);
-
-  const go = useCallback(
-    (next: NavState) => {
-      const p = toPath(next);
-      onNavigate?.(p);
-      setInternal(p);
-    },
-    [onNavigate]
-  );
+  const { nav, go, reloadKey } = useAdminNav();
+  const activeType = schema.find((t) => t.__name === nav.typeName);
 
   // Default to the first type when landing on Content without one selected.
   useEffect(() => {
@@ -154,20 +142,6 @@ function Shell({
       go({ section: 'entries', typeName: schema[0].__name, isNew: false });
     }
   }, [nav.section, nav.typeName, schema, go]);
-
-  // Click-to-edit a referenced child navigates the single aside to it (browser back
-  // returns). `createReference` is intentionally omitted: without a drawer stack the
-  // aside can't defer the link (navigating unmounts the parent editor), so the
-  // references editor hides "add new" in the admin app.
-  const referenceActions = useMemo(
-    () => ({
-      openReference: (id: string, type?: string) =>
-        go({ section: 'entries', typeName: type ?? nav.typeName, entryId: id, isNew: false }),
-    }),
-    [go, nav.typeName]
-  );
-
-  const activeType = schema.find((t) => t.__name === nav.typeName);
 
   return (
     <div
@@ -216,9 +190,7 @@ function Shell({
           {schema.map((t) => (
             <button
               key={t.__name}
-              onClick={() =>
-                go({ section: 'entries', typeName: t.__name, isNew: false })
-              }
+              onClick={() => go({ section: 'entries', typeName: t.__name, isNew: false })}
               className={cx(
                 'w-full truncate rounded-md px-3 py-2 text-left text-sm',
                 nav.typeName === t.__name
@@ -246,35 +218,51 @@ function Shell({
           <MediaLibrary />
         ) : activeType ? (
           <EntriesList
-            key={`${activeType.__name}-${reloadKey}`}
+            key={activeType.__name}
+            refreshToken={reloadKey}
             type={activeType}
             onOpen={(id) =>
               go({ section: 'entries', typeName: activeType.__name, entryId: id, isNew: false })
             }
-            onNew={() =>
-              go({ section: 'entries', typeName: activeType.__name, isNew: true })
-            }
+            onNew={() => go({ section: 'entries', typeName: activeType.__name, isNew: true })}
           />
         ) : (
           <p className="text-sm text-neutral-500">Select a type.</p>
         )}
       </main>
 
-      {(nav.entryId || nav.isNew) && activeType && nav.section === 'entries' && (
-        <aside className={cx(cls.card, 'w-[28rem] shrink-0 overflow-auto border-l p-5')}>
-          <ReferenceActionsProvider value={referenceActions}>
-            <EntryEditor
-              key={nav.entryId ?? 'new'}
-              type={activeType}
-              entryId={nav.entryId}
-              onClose={() =>
-                go({ section: 'entries', typeName: activeType.__name, isNew: false })
-              }
-              onChanged={() => setReloadKey((k) => k + 1)}
-            />
-          </ReferenceActionsProvider>
-        </aside>
-      )}
+      {children}
     </div>
+  );
+}
+
+/**
+ * The changing part: just the selected entry's editor drawer, when there is
+ * one. Put this in `page.tsx`, inside `<ZeroCmsAdminLayout>` from the layout
+ * above — it reads everything it needs from context, no props. This is the
+ * one piece that's *supposed* to be tied to the URL segment (a distinct
+ * entryId is a distinct editor instance, by design — see the `key` below), so
+ * Next re-invoking the page component for it is the correct, not wasted, unit
+ * of remount.
+ */
+export function ZeroCmsAdminContent() {
+  const { schema } = useZeroCms();
+  const { nav, go, bumpReload, referenceActions } = useAdminNav();
+  const activeType = schema.find((t) => t.__name === nav.typeName);
+
+  if (!((nav.entryId || nav.isNew) && activeType && nav.section === 'entries')) return null;
+
+  return (
+    <aside className={cx(cls.card, 'w-[28rem] shrink-0 overflow-auto border-l p-5')}>
+      <ReferenceActionsProvider value={referenceActions}>
+        <EntryEditor
+          key={nav.entryId ?? 'new'}
+          type={activeType}
+          entryId={nav.entryId}
+          onClose={() => go({ section: 'entries', typeName: activeType.__name, isNew: false })}
+          onChanged={bumpReload}
+        />
+      </ReferenceActionsProvider>
+    </aside>
   );
 }

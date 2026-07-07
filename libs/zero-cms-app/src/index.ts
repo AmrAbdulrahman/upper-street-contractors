@@ -3,7 +3,14 @@
  * Media). Inject an Adapter from @usc/zero-cms-core. Tailwind-styled, no router.
  */
 
-export { ZeroCmsApp, CmsApp, type ZeroCmsAppProps } from './lib/ZeroCmsApp';
+export {
+  ZeroCmsApp,
+  CmsApp,
+  ZeroCmsAdminLayout,
+  ZeroCmsAdminContent,
+  type ZeroCmsAppProps,
+} from './lib/ZeroCmsApp';
+export { useAdminNav, type NavState } from './lib/admin-nav';
 export {
   ZeroCmsProvider,
   useZeroCms,

@@ -1,94 +1,174 @@
 import "server-only";
 
+import { revalidatePath, revalidateTag } from "next/cache";
+import { after } from "next/server";
 import {
-  createFsStoragePort,
-  createNodeAdapter,
-  loadConfig,
+  Auth,
+  createRedisAdapter,
+  createRedisStoragePort,
+  createRequestHandler,
+  createAuthHandler,
   type EngineAdapter,
 } from "@usc/zero-cms-core/node";
-import { createHttpAdapter, type Adapter } from "@usc/zero-cms-core";
+import { ZERO_CMS_CACHE_TAG } from "@/lib/cms/cache-tag";
+import { getAllSitePaths } from "@/lib/cms/site-routes";
 
 /**
- * Two adapter modes, chosen by `ZERO_CMS_REMOTE_URL`:
+ * Wraps the write adapter so any publish-affecting op (ADR 0010/0011: the same
+ * set git-sync used to trigger a commit on, before Redis replaced git) also
+ * revalidates the ISR cache — guaranteed at the RPC layer for every caller,
+ * not dependent on a browser client remembering to call `revalidateCms()`
+ * afterward (that one's for the editor's own immediate `router.refresh()`).
  *
- * - **unset** -> local `nodeFsAdapter`, reading `zero-cms-store/` directly off disk.
- *   This is only ever actually exercised at **build time**, on the production
- *   (static export) build — production ships no server at runtime to call it from.
- * - **set** -> `httpAdapter` against cms (staging: live, every request, no
- *   cache — see `lib/cms/query.ts`). Server-to-server, not a browser call, so no
- *   CORS involved. Auth is a dedicated **viewer-role service account** on cms
- *   (`ZERO_CMS_SERVICE_EMAIL`/`ZERO_CMS_SERVICE_PASSWORD`), never an Editor's own
- *   login — logged in once per warm process and cached until near expiry.
+ * Two separate cache layers both need busting: `revalidatePath` for the
+ * Full Route Cache (the rendered HTML/RSC per page), and `revalidateTag` for
+ * the `unstable_cache`'d CMS reads inside `query.ts` (Next's Data Cache,
+ * which `revalidatePath` doesn't reliably reach on its own since our reads
+ * don't go through `fetch()` directly).
+ */
+const REVALIDATE_TRIGGERS = new Set([
+  "publish",
+  "unpublish",
+  "delete",
+  "saveSchema",
+  "putMedia",
+  "deleteMedia",
+] as const);
+
+/**
+ * ADR 0012: purging isn't enough on its own — the *next* visitor to any
+ * invalidated route pays a synchronous full render, and since invalidation
+ * above is whole-site (ADR 0010), that cost lands on every route, not just
+ * the one entry that changed. This warms the Full Route Cache back up right
+ * after the purge instead of waiting for organic traffic to trigger it.
  *
- * cms itself owns the RPC/auth/media/graphql/admin surface now (this app no
- * longer serves any of that) — see root README -> Architecture.
+ * Runs via `after()`, not a bare un-awaited fetch: Vercel can freeze the
+ * function's execution environment the instant the RPC response is sent, and
+ * a plain fire-and-forget promise can get killed mid-flight — `after()` is
+ * the supported way to keep the invocation alive for trailing background
+ * work like this.
+ *
+ * Self-fetches use `VERCEL_URL` (set on every Vercel deployment, preview and
+ * prod) as the origin, falling back to localhost for local dev — where this
+ * is a no-op in effect anyway, since dev mode doesn't cache renders the same
+ * way, but it keeps the code path uniform across environments.
+ */
+function warmSiteCache(): void {
+  after(async () => {
+    const origin = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT ?? 3000}`;
+    const paths = await getAllSitePaths();
+    // /sitemap.xml isn't part of the crawlable-page list (it describes those
+    // pages, it isn't one), so it's warmed explicitly alongside them.
+    await Promise.allSettled(
+      [...paths, "/sitemap.xml"].map((path) =>
+        fetch(`${origin}${path}`, { cache: "no-store" })
+      )
+    );
+  });
+}
+
+function withRevalidate(adapter: EngineAdapter): EngineAdapter {
+  const wrapped = { ...adapter };
+  for (const op of REVALIDATE_TRIGGERS) {
+    const original = adapter[op].bind(adapter) as (...args: unknown[]) => Promise<unknown>;
+    (wrapped[op] as (...args: unknown[]) => Promise<unknown>) = async (...args: unknown[]) => {
+      const result = await original(...args);
+      // { expire: 0 }, not the recommended `"max"` profile: publish is meant
+      // to reflect immediately (ADR 0010), not on a stale-while-revalidate
+      // delay until some later visit happens to re-trigger it.
+      revalidateTag(ZERO_CMS_CACHE_TAG, { expire: 0 });
+      revalidatePath("/", "layout");
+      warmSiteCache();
+      return result;
+    };
+  }
+  return wrapped;
+}
+
+/**
+ * cms merged back into website (ISR gave production a real server again —
+ * the reasons for a separate static-export-safe app are gone). Two adapters,
+ * both Redis+Blob (ADR 0008), split by credential, not by environment:
+ *
+ * - **read-only token** — every page render, public *and* the /admin-mirrored
+ *   preview routes (proxy.ts rewrites those to the same (site) pages). Page
+ *   rendering never writes, so it never needs write-capable credentials, even
+ *   in preview — defense in depth, not just convention.
+ * - **read-write token** — only the auth-gated RPC surface (/zero-cms/rpc,
+ *   /api/cms/auth) ever touches this. The real security boundary is the RPC
+ *   handler's own session check (ADR 0009), the token split is a second layer.
+ *
+ * Same origin now, so no CORS, no service-account login dance, no remote-URL
+ * branching — one process, one place these live.
  */
 type Cache = {
-  local?: Promise<EngineAdapter>;
-  remote?: { adapter: Adapter; expiresAtMs: number };
+  readOnly?: Promise<EngineAdapter>;
+  readWrite?: Promise<EngineAdapter>;
+  auth?: Promise<Auth>;
+  handler?: (req: Request) => Promise<Response>;
+  authHandler?: (req: Request) => Promise<Response>;
 };
 
-const g = globalThis as typeof globalThis & { __zeroCmsWebsite?: Cache };
-g.__zeroCmsWebsite ??= {};
+const g = globalThis as typeof globalThis & { __zeroCms?: Cache };
+g.__zeroCms ??= {};
 
-/** Decode a JWT's `exp` (seconds) without verifying — we trust our own login response. */
-function decodeExpiryMs(token: string): number {
-  try {
-    const body = token.split(".")[1];
-    const { exp } = JSON.parse(Buffer.from(body, "base64url").toString()) as {
-      exp: number;
-    };
-    return exp * 1000;
-  } catch {
-    return Date.now() + 60_000; // conservative if the token shape ever changes
-  }
+function requireEnv(name: string): string {
+  const v = process.env[name];
+  if (!v) throw new Error(`website: ${name} is required`);
+  return v;
 }
 
-async function loginService(remoteUrl: string): Promise<{ token: string; expiresAtMs: number }> {
-  const email = process.env.ZERO_CMS_SERVICE_EMAIL;
-  const password = process.env.ZERO_CMS_SERVICE_PASSWORD;
-  if (!email || !password) {
-    throw new Error(
-      "website: ZERO_CMS_SERVICE_EMAIL / ZERO_CMS_SERVICE_PASSWORD are required " +
-        "when ZERO_CMS_REMOTE_URL is set — create a dedicated viewer-role account " +
-        "on cms for this, not an Editor's own login."
-    );
-  }
-  const res = await fetch(`${remoteUrl.replace(/\/$/, "")}/api/cms/auth`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ op: "login", args: [email, password] }),
-  });
-  if (!res.ok) {
-    throw new Error(`website: zero-cms service login failed (${res.status})`);
-  }
-  const { token } = (await res.json()) as { token: string };
-  return { token, expiresAtMs: decodeExpiryMs(token) };
+function blobOpts() {
+  return { token: requireEnv("BLOB_READ_WRITE_TOKEN") };
 }
 
-async function getRemoteAdapter(remoteUrl: string): Promise<Adapter> {
-  const cached = g.__zeroCmsWebsite!.remote;
-  // Refresh 5 minutes ahead of expiry rather than waiting for a 401 mid-request.
-  if (cached && cached.expiresAtMs - Date.now() > 5 * 60_000) return cached.adapter;
-
-  const { token, expiresAtMs } = await loginService(remoteUrl);
-  const adapter = createHttpAdapter({
-    baseUrl: remoteUrl,
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  g.__zeroCmsWebsite!.remote = { adapter, expiresAtMs };
-  return adapter;
+/** Public + admin-preview page rendering. Never mutates — read-only token. */
+export async function getZeroCmsReadAdapter(): Promise<EngineAdapter> {
+  return (g.__zeroCms!.readOnly ??= createRedisAdapter(
+    {
+      url: requireEnv("STORAGE_KV_REST_API_URL"),
+      token: requireEnv("STORAGE_KV_REST_API_READ_ONLY_TOKEN"),
+    },
+    blobOpts()
+  ));
 }
 
-async function getLocalAdapter(): Promise<EngineAdapter> {
-  return (g.__zeroCmsWebsite!.local ??= (async () => {
-    const config = await loadConfig();
-    const port = createFsStoragePort(config);
-    return createNodeAdapter(port);
+/** The RPC surface only. Auth-gated (createRequestHandler + Auth), read-write token. */
+async function getZeroCmsWriteAdapter(): Promise<EngineAdapter> {
+  return (g.__zeroCms!.readWrite ??= createRedisAdapter(
+    {
+      url: requireEnv("STORAGE_KV_REST_API_URL"),
+      token: requireEnv("STORAGE_KV_REST_API_TOKEN"),
+    },
+    blobOpts()
+  ));
+}
+
+export async function getZeroCmsAuth(): Promise<Auth> {
+  return (g.__zeroCms!.auth ??= (async () => {
+    const secret = requireEnv("ZERO_CMS_AUTH_SECRET");
+    const port = createRedisStoragePort({
+      url: requireEnv("STORAGE_KV_REST_API_URL"),
+      token: requireEnv("STORAGE_KV_REST_API_TOKEN"),
+    });
+    const auth = await Auth.load(port, { secret });
+    await auth.seedFromEnv();
+    return auth;
   })());
 }
 
-export async function getZeroCmsAdapter(): Promise<Adapter> {
-  const remoteUrl = process.env.ZERO_CMS_REMOTE_URL;
-  return remoteUrl ? getRemoteAdapter(remoteUrl) : getLocalAdapter();
+/** RPC handler — enforces a Bearer session + roles (always on, no dev bypass here). */
+export async function getZeroCmsHandler(): Promise<(req: Request) => Promise<Response>> {
+  if (g.__zeroCms!.handler) return g.__zeroCms!.handler;
+  const [adapter, auth] = await Promise.all([getZeroCmsWriteAdapter(), getZeroCmsAuth()]);
+  return (g.__zeroCms!.handler = createRequestHandler(withRevalidate(adapter), { auth }));
+}
+
+/** Auth handler (login / me / changePassword / user admin). */
+export async function getZeroCmsAuthHandler(): Promise<(req: Request) => Promise<Response>> {
+  if (g.__zeroCms!.authHandler) return g.__zeroCms!.authHandler;
+  const auth = await getZeroCmsAuth();
+  return (g.__zeroCms!.authHandler = createAuthHandler(auth));
 }

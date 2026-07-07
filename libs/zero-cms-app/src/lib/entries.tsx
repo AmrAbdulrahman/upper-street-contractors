@@ -2,8 +2,8 @@
 
 /** Content section: entry listing (search + status filter) and the entry editor. */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { OutputEntry, Type } from '@usc/zero-cms-core';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ZeroCmsError, type OutputEntry, type Type } from '@usc/zero-cms-core';
 import { useZeroCms } from './context';
 import { useDraftRegistryOptional } from './draft-registry';
 import { EntryForm, entryLabel, titleField, type FormValues } from './fields';
@@ -27,28 +27,67 @@ export function EntriesList({
   type,
   onOpen,
   onNew,
+  refreshToken,
 }: {
   type: Type;
   onOpen: (id: string) => void;
   onNew: () => void;
+  /**
+   * Bump this (e.g. on every autosave) to have the list quietly re-fetch in
+   * place. Deliberately NOT a `key` change on this component — that used to
+   * be how the host forced a refresh, but remounting on every autosave wiped
+   * `search`/`status` and re-showed the loading spinner on every keystroke's
+   * debounced save, which read as "the whole page reloaded" on any edit.
+   */
+  refreshToken?: number;
 }) {
   const { adapter } = useZeroCms();
   const [entries, setEntries] = useState<OutputEntry[] | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
 
-  const load = useCallback(async () => {
-    setEntries(null);
-    const { data } = await adapter.query(type.__name, {
-      status: 'draft',
-      includeUnpublished: true,
-    });
-    setEntries(data);
-  }, [adapter, type.__name]);
+  // `quiet`: a refreshToken-triggered reload keeps showing the current list
+  // while re-fetching, swapping in fresh data once it arrives — no spinner
+  // flash. Only the very first (mount) load shows the loading state.
+  const load = useCallback(
+    async (quiet = false) => {
+      if (!quiet) setEntries(null);
+      const { data } = await adapter.query(type.__name, {
+        status: 'draft',
+        includeUnpublished: true,
+      });
+      // The storage port's iteration order isn't guaranteed stable (Redis
+      // `SMEMBERS` on a Set has no defined order, and can differ between two
+      // back-to-back calls with the exact same underlying data — dev's
+      // StrictMode double-invoke made this visible as the list rendering
+      // once, then immediately re-rendering in a different order). Sort here
+      // so repeat fetches of the same data always land in the same order.
+      const sorted = [...data].sort((a, b) =>
+        entryLabel(type, a).localeCompare(entryLabel(type, b))
+      );
+      setEntries(sorted);
+    },
+    [adapter, type.__name]
+  );
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Skip the first run (the mount effect above already loaded) — only react
+  // to refreshToken actually changing afterward.
+  const mounted = useRef(false);
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    if (refreshToken === undefined) return;
+    void load(true);
+    // Only re-run when refreshToken itself changes, not on every `load` identity
+    // change (that's already handled by the mount effect above).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshToken]);
 
   const filtered = useMemo(() => {
     if (!entries) return [];
@@ -149,7 +188,7 @@ export function EntryEditor({
   /** Field `__name` to scroll to + highlight on open. */
   focusField?: string;
 }) {
-  const { adapter, refreshMedia, notify } = useZeroCms();
+  const { adapter, refreshMedia, notify, currentUserId } = useZeroCms();
   const draftReg = useDraftRegistryOptional();
   const isNew = !entryId;
   const creating = createMode ?? isNew;
@@ -184,6 +223,9 @@ export function EntryEditor({
     };
   }, [adapter, type.__name, entryId, isNew]);
 
+  // A CONFLICT means someone else changed this entry since it was loaded here —
+  // reload it so the form reflects the fresh state, ready for the user to redo
+  // their edit against it, rather than leaving them staring at stale data.
   const run = async (fn: () => Promise<unknown>, successMsg?: string) => {
     setBusy(true);
     setError(null);
@@ -196,6 +238,7 @@ export function EntryEditor({
       const msg = errorMessage(err);
       setError(msg);
       notify('error', msg);
+      if (err instanceof ZeroCmsError && err.code === 'CONFLICT') await reloadEntry();
     } finally {
       setBusy(false);
     }
@@ -205,7 +248,7 @@ export function EntryEditor({
     run(async () => {
       const clean = cleanValues(values);
       if (isNew) {
-        const created = await adapter.create(type.__name, clean);
+        const created = await adapter.create(type.__name, clean, currentUserId);
         draftReg?.markDraft(type.__name, created.__id);
         // Link-on-save: hand the new id to the opener (e.g. a references editor),
         // which links it and dismisses this panel. Fall back to closing for the
@@ -213,7 +256,7 @@ export function EntryEditor({
         if (onCreated) onCreated(created.__id);
         else onClose();
       } else {
-        await adapter.update(type.__name, entryId, clean);
+        await adapter.update(type.__name, entryId, clean, currentUserId, entry!.__lastEditedAt);
         draftReg?.markDraft(type.__name, entryId);
         onClose();
       }
@@ -222,19 +265,27 @@ export function EntryEditor({
   // Autosave (existing entries only): persist to __draft without closing. Errors
   // surface inline and rethrow so EntryForm keeps the edit dirty for a retry.
   const saveQuiet = async (values: FormValues) => {
-    if (isNew || !entryId) return;
+    if (isNew || !entryId || !entry) return;
     setError(null);
     try {
-      await adapter.update(type.__name, entryId, cleanValues(values));
-      // Reflect the new draft at once: flip the header badge and register it so the
-      // bar's publish count updates instantly, no re-query round-trip.
-      setEntry((prev) => (prev ? { ...prev, hasDraft: true } : prev));
+      const saved = await adapter.update(
+        type.__name,
+        entryId,
+        cleanValues(values),
+        currentUserId,
+        entry.__lastEditedAt
+      );
+      // Reflect the new draft (and the bumped CAS token) at once: flip the header
+      // badge and register it so the bar's publish count updates instantly, no
+      // re-query round-trip.
+      setEntry((prev) => (prev ? { ...prev, ...saved, hasDraft: true } : prev));
       draftReg?.markDraft(type.__name, entryId);
       onChanged();
     } catch (err) {
       const msg = errorMessage(err);
       setError(msg);
       notify('error', msg);
+      if (err instanceof ZeroCmsError && err.code === 'CONFLICT') await reloadEntry();
       throw err;
     }
   };
@@ -291,7 +342,7 @@ export function EntryEditor({
                 disabled={busy}
                 onClick={() =>
                   act(async () => {
-                    await adapter.publish(type.__name, entryId!);
+                    await adapter.publish(type.__name, entryId!, currentUserId, entry.__lastEditedAt);
                     draftReg?.clearDraft(type.__name, entryId!);
                   }, false, 'Published')
                 }
@@ -303,7 +354,12 @@ export function EntryEditor({
                   variant="outline"
                   disabled={busy}
                   onClick={() =>
-                    act(() => adapter.unpublish(type.__name, entryId!), false, 'Unpublished')
+                    act(
+                      () =>
+                        adapter.unpublish(type.__name, entryId!, currentUserId, entry.__lastEditedAt),
+                      false,
+                      'Unpublished'
+                    )
                   }
                 >
                   Unpublish
@@ -315,7 +371,12 @@ export function EntryEditor({
                   disabled={busy}
                   onClick={() =>
                     act(async () => {
-                      await adapter.discardDraft(type.__name, entryId!);
+                      await adapter.discardDraft(
+                        type.__name,
+                        entryId!,
+                        currentUserId,
+                        entry.__lastEditedAt
+                      );
                       draftReg?.clearDraft(type.__name, entryId!);
                     }, false, 'Draft discarded')
                   }
@@ -329,7 +390,7 @@ export function EntryEditor({
                 className="ml-auto"
                 onClick={() =>
                   act(async () => {
-                    await adapter.delete(type.__name, entryId!);
+                    await adapter.delete(type.__name, entryId!, currentUserId, entry.__lastEditedAt);
                     draftReg?.clearDraft(type.__name, entryId!);
                   }, true, 'Entry deleted')
                 }

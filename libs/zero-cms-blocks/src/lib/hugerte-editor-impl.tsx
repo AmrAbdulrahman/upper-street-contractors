@@ -29,10 +29,8 @@ const INIT = {
   plugins: 'lists link',
   toolbar: TOOLBAR,
   block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3',
-  // Skins are served from each host app's /public/hugerte (Next serves public/
-  // per-app-root) — apps/cms-app symlinks apps/website/public/hugerte so both
-  // hosts serve identical files from one source of truth. Loaded by URL (not
-  // the bundler chunk path) to avoid HugeRTE's asset-fetching 404ing.
+  // Skins are served from apps/website/public/hugerte. Loaded by URL (not the
+  // bundler chunk path) to avoid HugeRTE's asset-fetching 404ing.
   skin_url: '/hugerte/skins/ui/oxide',
   content_css: '/hugerte/skins/content/default/content.min.css',
   formats: { inlinecode: { inline: 'code' } },

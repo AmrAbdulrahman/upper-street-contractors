@@ -48,6 +48,12 @@ export interface FieldMetaBase {
   required?: boolean;
   /** Free-form description shown in the app. */
   description?: string;
+  /**
+   * Value injected for entries stored before this field existed (ADR 0011,
+   * read-time projection) — and the value an eager backfill-on-save writes
+   * into existing entries, if requested. `null` (not this field) when unset.
+   */
+  default?: unknown;
 }
 
 export interface TextField extends FieldMetaBase {

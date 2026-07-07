@@ -1,7 +1,7 @@
 /**
- * Resolve a zero-cms media URL for use in <Image>. zero-cms serves media from a
- * site-relative route (`/api/cms/media/<id>`), so already-rooted (`/…`) and
- * absolute (`http(s)://…`) URLs pass through unchanged.
+ * Resolve a zero-cms media URL for use in <Image>. Media URLs are real,
+ * absolute Vercel Blob URLs (ADR 0008) — this passes those through unchanged;
+ * the rooted (`/…`) branch just covers any already-relative value defensively.
  */
 export function resolveMediaUrl(
   url: string | null | undefined,

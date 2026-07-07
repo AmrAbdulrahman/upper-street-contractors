@@ -2,99 +2,72 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Architecture
 
-Content editing is split from the public site so `website` production can stay a static
-export while edits still happen live. `cms` (Railway, always-on, single writer) owns
-the zero-cms store, auth, and the RPC surface; it commits + pushes published changes to
-`main`, which is the only thing production's static build depends on.
+One Next.js app (`website`) serves both the public site and the zero-cms editor —
+there's no separate CMS process, no persistent volume, no git-sync. Content lives in
+Upstash Redis (schema + entries + users, per-record keys with optimistic concurrency)
+and Vercel Blob (media bytes) — see [ADR 0008](./docs/adr/0008-zero-cms-redis-blob-store.md)
+/ [ADR 0009](./docs/adr/0009-zero-cms-multi-writer-optimistic-concurrency.md). Production
+uses **ISR**, not a static export — publishing calls `revalidatePath("/", "layout")`
+inline, in the same request, no webhook — see
+[ADR 0010](./docs/adr/0010-vercel-only-deployment-isr.md).
+
+Editing happens at `/admin/*`, which **Proxy** (`src/proxy.ts`, Next 16's renamed
+Middleware) gates on a session cookie and rewrites to the exact same public pages —
+in Draft Mode, so they render draft/unpublished content instead. `/admin/cms` is the
+one real distinct route: the dashboard app (Types, Entries, Media, Users).
 
 ```mermaid
 flowchart TB
     subgraph Browser
-        Editor["Editor browser<br/>(Bearer token, localStorage)"]
+        Editor["Editor browser<br/>(session cookie + localStorage token)"]
         Visitor["Site visitor"]
     end
 
-    subgraph Vercel["Vercel"]
-        Staging["website — staging<br/>Next SSR, force-dynamic, no cache<br/>branch: staging"]
-        Prod["website — production<br/>Next static export<br/>branch: main"]
+    subgraph Vercel["Vercel — website (staging + production)"]
+        Proxy["proxy.ts<br/>gate /admin/* on session cookie,<br/>enable Draft Mode, rewrite -> (site) page"]
+        Pages["(site) pages — ISR<br/>Draft Mode off: published only<br/>Draft Mode on: draft + unpublished"]
+        Admin["/admin/cms<br/>dashboard (CmsApp)"]
+        RPC["/zero-cms/rpc · /api/cms/auth<br/>/api/cms/media/[id] · /api/cms/graphql"]
     end
 
-    subgraph Railway["Railway (Hobby, 1 replica, always-on)"]
-        CmsApp["cms (Next)<br/>/zero-cms/rpc · /api/cms/auth<br/>/api/cms/media/[id] · /admin<br/>+ git-sync module"]
-        Vol[("Persistent volume<br/>.zero-cms-store/<br/>data.json · types/ · media/")]
+    subgraph Storage["Upstash Redis + Vercel Blob"]
+        RedisRO[("Redis — read-only token<br/>all page rendering")]
+        RedisRW[("Redis — read-write token<br/>RPC surface only")]
+        Blob[("Vercel Blob<br/>media bytes, public URLs")]
     end
 
-    GH["GitHub repo<br/>main (code+content) / staging (code)"]
+    Visitor -- "GET" --> Proxy --> Pages
+    Editor -- "GET /admin/*" --> Proxy
+    Editor -. "loads dashboard" .-> Admin
+    Editor -- "Bearer + cookie" --> RPC
 
-    Editor -- "HTTPS + CORS<br/>Authorization: Bearer" --> CmsApp
-    Editor -. "loads admin/inspect UI" .-> Staging
-
-    Staging -- "httpAdapter RPC<br/>live read, every request" --> CmsApp
-
-    Visitor -- "static HTML, no CMS call" --> Prod
-
-    CmsApp -- "nodeFsAdapter<br/>read/write" --> Vol
-    CmsApp -- "git pull on boot" --> GH
-    CmsApp -- "git commit+push on publish<br/>bot token, Contents R/W only" --> GH
-
-    GH -- "push to main →<br/>auto build+deploy" --> Prod
-    Prod -. "build-time local fs read<br/>of .zero-cms-store (no network)" .-> Vol
-    GH -- "push to staging →<br/>code-only rebuild" --> Staging
+    Pages -- "read-only, every request" --> RedisRO
+    RPC -- "read-write, session-verified" --> RedisRW
+    RPC -- "revalidatePath on publish" --> Pages
+    RPC -- "media put/get/delete" --> Blob
 ```
 
-Local dev mirrors the same two-process shape, minus the git-sync push:
-
-```mermaid
-flowchart TB
-    subgraph Dev["Developer machine"]
-        Browser["Browser<br/>localhost:3000"]
-
-        subgraph Website["nx dev website<br/>(port 3000)"]
-            WebSSR["Next dev server<br/>httpAdapter → localhost:3001"]
-        end
-
-        subgraph CmsAppLocal["nx dev cms<br/>(port 3001)"]
-            RPC["/zero-cms/rpc · /api/cms/auth<br/>/api/cms/media/[id] · /admin"]
-            GitSyncOff["git-sync module<br/>ZERO_CMS_GIT_SYNC=false → disabled"]
-        end
-
-        Store[(".zero-cms-store/<br/>repo root, plain local fs<br/>(same dir committed to git)")]
-    end
-
-    GH["GitHub — main/staging"]
-
-    Browser -- "site + Inspect overlay" --> WebSSR
-    Browser -. "admin UI / auth (CORS: localhost)" .-> RPC
-
-    WebSSR -- "RPC, live read" --> RPC
-    RPC -- "nodeFsAdapter read/write" --> Store
-    GitSyncOff -. "no auto commit/push" .-> Store
-
-    Store -- "manual git add/commit/push<br/>(normal PR flow, human)" --> GH
-```
-
-See [ADR 0003](./docs/adr/0003-zero-cms-filesystem-store.md) and
-[ADR 0004](./docs/adr/0004-zero-cms-pluggable-adapter.md) for the design constraints this
-topology satisfies (single writer, pluggable adapter). Deploying `cms` itself
-(Railway service setup, git-sync credentials, secrets) is a manual/infra runbook,
-not code — see [`docs/cms-railway.md`](./docs/cms-railway.md).
+Local dev is the same shape, one process: `npm run dev` runs `website` against the
+same live Redis + Blob as staging/production (no local-only mode — see
+`.env.local`).
 
 ## Environment setup
 
-Website env vars live in a **single root file** — no per-app duplication.
+Env vars live in a **single root file** — one app, no per-app duplication.
 
 1. **Install [direnv](https://direnv.net/)** and hook it into your shell ([setup guide](https://direnv.net/docs/hook.html)).
 2. **Create secrets file** at the repo root:
    ```bash
    cp .env.example .env.local
    ```
-   Edit `.env.local` and fill in `STRAPI_API_TOKEN` and any other values.
+   Fill in the Upstash Redis + Vercel Blob values (Vercel Marketplace → Storage tab
+   on the project — see `docs/agents/project-stack.md` → Environment variables) and
+   `ZERO_CMS_AUTH_SECRET`.
 3. **Allow direnv** (once per machine):
    ```bash
    direnv allow          # repo root — loads .env.local via .envrc
-   cd apps/website && direnv allow   # inherits root via source_up
    ```
-4. **Run the website** from the repo root:
+4. **Run the app** from the repo root:
    ```bash
    npm run dev
    ```
@@ -105,42 +78,13 @@ Website env vars live in a **single root file** — no per-app duplication.
 | ---- | ------- |
 | `.env.example` | Committed template — copy to `.env.local` |
 | `.env.local` | Your secrets (gitignored) |
-| `.envrc` | Root direnv loader: `dotenv .env.local` |
-| `apps/website/.envrc` | `source_up` — walks up to root `.envrc` |
+| `.envrc` | direnv loader: `dotenv .env.local` |
 
-When you `cd` into `apps/website`, direnv loads the same vars as at the repo root. Next.js, codegen, and Nx scripts all read `process.env` from the shell.
+Next.js, codegen, and Nx scripts all read `process.env` from the shell.
 
-`apps/cms` (zero-cms) reads the same root `.env.local` as `website` — no per-app duplication there either.
-
-### zero-cms local dev: two modes
-
-- **Default (simplest):** `npm run dev` — just `website`, reading `.zero-cms-store/` directly
-  off local disk. No `cms` process needed. Leave `ZERO_CMS_REMOTE_URL` unset.
-- **Full topology:** `npm run dev:all` — runs `website` (:3000) + `cms` (:3001) together,
-  matching staging's real shape (`website` talks to `cms` over `httpAdapter`). Set
-  `ZERO_CMS_REMOTE_URL`/`NEXT_PUBLIC_ZERO_CMS_URL=http://localhost:3001` and
-  `ZERO_CMS_ALLOWED_ORIGINS=http://localhost:3000` in `.env.local`, plus a dedicated
-  **viewer-role** service account on `cms` (log into `http://localhost:3001/admin`
-  with the seeded `ZERO_CMS_ADMIN_EMAIL`/`PASSWORD`, create a viewer user, put its
-  credentials in `.env.local` as `ZERO_CMS_SERVICE_EMAIL`/`PASSWORD`). Worth doing before
-  shipping any change that touches the zero-cms integration itself — see root README ->
-  Architecture.
-
-`ZERO_CMS_GIT_SYNC` should stay unset/`false` locally — it auto-pushes published content
-to `main` and is meant for the Railway deployment only.
-
-## CMS data transfer
-
-```bash
-npm run cms:push    # LOCAL  → CLOUD
-npm run cms:pull    # CLOUD  → LOCAL
-```
-
-> [!WARNING]
-> These do a **full, destructive database mirror** — not a content-only sync. Each run overwrites
-> the target with the source, including **admin users/roles, U&P roles, webhooks, and auth
-> providers**. No merge, no undo. See [`docs/cms-transfer.md`](docs/cms-transfer.md) for exactly
-> what moves and the footguns (admin lockout, wiped webhooks, traveling secrets).
+Local dev talks to the **same live Redis + Blob** as staging/production — there's no
+local-only storage mode (ADR 0008 dropped the filesystem store `website` used to read
+directly). `npm run dev` is the only entrypoint; there's nothing else to run alongside it.
 
 ## Getting Started
 

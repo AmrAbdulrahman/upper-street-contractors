@@ -14,7 +14,7 @@ import { buildCmsSchema } from './schema';
 
 /** Structural — the core `Auth` instance satisfies this. */
 export interface SessionVerifier {
-  verify(token: string | null): Session | null;
+  verify(token: string | null): Promise<Session | null>;
 }
 
 export interface GraphQLHandlerOptions {
@@ -104,7 +104,7 @@ export function createGraphQLHandler(
       operationName: body.operationName,
       contextValue: {
         authEnabled: Boolean(opts.auth),
-        session: opts.auth ? opts.auth.verify(bearer(req)) : null,
+        session: opts.auth ? await opts.auth.verify(bearer(req)) : null,
       },
     });
     return json(result);

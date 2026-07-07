@@ -5,8 +5,12 @@
  * `hasDraft`) alongside the chosen-version field values. Reference fields hold
  * ids by default; `populate` paths replace them with nested OutputEntries.
  *
- * The data is fully in memory, so resolution is O(1) map lookups (no N+1); a
- * cycle guard prevents infinite recursion on reference loops.
+ * Entries are no longer all resident in memory (ADR 0009 — per-entry storage,
+ * no single-writer full-load) — resolving a populate path means fetching the
+ * referenced entry through the port, so this is a real N+1 fetch pattern now,
+ * not O(1) map lookups. A cycle guard still prevents infinite recursion on
+ * reference loops; batching/caching within one resolution is a possible future
+ * optimization, not required for correctness at this content scale.
  */
 
 import type { Entry, ReadStatus } from '../model/entry';
@@ -19,11 +23,19 @@ export interface OutputEntry {
   __type: string;
   __status: Entry['__status'];
   hasDraft: boolean;
+  __createdAt: string;
+  /**
+   * The optimistic-concurrency token (ADR 0009) — callers must hold onto this
+   * and resend it as `expectedLastEditedAt` on their next mutation of this entry.
+   */
+  __lastEditedAt: string;
+  __lastEditedBy: string;
   [field: string]: unknown;
 }
 
 export interface ResolveCtx {
-  byId: Map<string, Entry>;
+  /** Fetch a single entry by id, or `null` if it doesn't exist. */
+  fetchEntry: (id: string) => Promise<Entry | null>;
   schema: SchemaIndex;
 }
 
@@ -36,6 +48,9 @@ export function buildOutput(entry: Entry, status: ReadStatus): OutputEntry {
     __type: entry.__type,
     __status: entry.__status,
     hasDraft: hasDraft(entry),
+    __createdAt: entry.__createdAt,
+    __lastEditedAt: entry.__lastEditedAt,
+    __lastEditedBy: entry.__lastEditedBy,
   };
 }
 
@@ -53,13 +68,13 @@ function groupPaths(paths: string[]): Map<string, string[]> {
   return groups;
 }
 
-export function resolveOutput(
+export async function resolveOutput(
   entry: Entry,
   status: ReadStatus,
   populate: string[] | undefined,
   ctx: ResolveCtx,
   visited: ReadonlySet<string> = new Set()
-): OutputEntry {
+): Promise<OutputEntry> {
   const out = buildOutput(entry, status);
   if (!populate?.length) return out;
   if (!ctx.schema.has(entry.__type)) return out;
@@ -74,19 +89,20 @@ export function resolveOutput(
     if (!field) continue; // not a reference field — ignore
     const raw = out[head];
 
-    const resolveOne = (id: unknown): OutputEntry | null => {
+    const resolveOne = async (id: unknown): Promise<OutputEntry | null> => {
       if (typeof id !== 'string') return null;
       if (branch.has(id)) return null; // cycle guard
-      const target = ctx.byId.get(id);
+      const target = await ctx.fetchEntry(id);
       if (!target || !visibleAt(target, status)) return null;
       return resolveOutput(target, status, rest, ctx, branch);
     };
 
     if (field.__type === 'references') {
       const ids = Array.isArray(raw) ? raw : [];
-      out[head] = ids.map(resolveOne).filter((x): x is OutputEntry => x !== null);
+      const resolved = await Promise.all(ids.map(resolveOne));
+      out[head] = resolved.filter((x): x is OutputEntry => x !== null);
     } else {
-      out[head] = resolveOne(raw);
+      out[head] = await resolveOne(raw);
     }
   }
   return out;

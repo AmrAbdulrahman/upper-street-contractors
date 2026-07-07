@@ -8,77 +8,76 @@ Reference for agents working in **upper-street-contractors**.
 | ----- | ---- |
 | Framework | Next.js 16 (App Router), React 19, TypeScript 5 |
 | Styling | Tailwind CSS 4 (`apps/website/src/app/globals.css`, `@tailwindcss/postcss`) |
-| CMS | zero-cms — self-hosted, file-system-backed engine (no DB), served by `apps/cms` |
+| CMS | zero-cms — self-hosted engine, one Next.js app (`apps/website`) serves both the public site and the editor |
+| CMS storage | Upstash Redis (per-record keys, CAS via Lua `EVAL`) + Vercel Blob (media) — ADR 0008/0009. No filesystem, no database server to run. |
 | Client/server data | In-process GraphQL execution against zero-cms's generated schema (`@/lib/cms/query`), no separate API client library |
-| Codegen | `@graphql-codegen/*` — colocated `apps/website/src/**/*.graphql` → `apps/website/src/generated/` (schema introspected from the local zero-cms store, not a remote server) |
+| Codegen | `@graphql-codegen/*` — colocated `apps/website/src/**/*.graphql` → `apps/website/src/generated/` (schema introspected from live Redis via `scripts/generate-cms-schema.mjs`, not a local fixture) |
 | Lint | ESLint 9 + `eslint-config-next` |
-| Monorepo | Nx workspace — `apps/website` (Next.js, public site), `apps/cms` (Next.js, zero-cms editor + RPC server), shared config at repo root |
+| Monorepo | Nx workspace — one app, `apps/website`; shared config at repo root |
 
 See root [`README.md`](../../README.md) → Architecture for the full system diagram
-(website ↔ cms, Railway deployment, staging vs production).
+(single app, Draft Mode preview, Vercel deployment).
 
-## Build modes
+## Preview / Draft Mode
 
-Controlled by `NEXT_PUBLIC_APP_ENV` in `.env.local` (see `apps/website/src/lib/app-env.ts`):
+Preview is Next's built-in **Draft Mode** (`draftMode()` from `next/headers`), not a
+build-time env var — see `apps/website/src/lib/app-env.ts`.
 
-- **Production** (unset/anything but `preview`): published content only, no editor UI mounted.
-- **Preview** (`NEXT_PUBLIC_APP_ENV=preview`): draft + unpublished content readable, zero-cms
-  editor bar + Inspect-mode overlay mounted.
+- **Production** (`/`, `/about`, `/projects/[id]`, ...): published content only, no
+  editor UI.
+- **`/admin/*`** (except `/admin/cms`, the dashboard app): `proxy.ts` gates on the
+  `zero_cms_session` cookie, enables Draft Mode via `/admin/enable-preview`
+  (the only place `draftMode().enable()` can run — Route Handler requirement), then
+  **rewrites** to the matching `(site)` page — `/admin/projects/1` renders the exact
+  same page as `/projects/1`, just with Draft Mode on, so `isPreview()` is true and
+  the zero-cms editor bar + Inspect overlay mount.
+- **`/admin/cms`**: the real dashboard (Types, Entries, Media, Users) — `CmsApp` from
+  `@usc/zero-cms-app`, gated client-side by `AuthGate` (its own login form).
 
-Production is intended to eventually build as `output: "export"` (fully static) with
-`apps/cms` as the only write surface — not yet flipped, see
-[`docs/cms-railway.md`](../cms-railway.md) for the current blockers.
+`/admin/*` is `disallow`ed in `robots.ts` and never appears in the generated sitemap.
 
 ## Environment variables
 
 Copy `.env.example` → `.env.local`. Key ones:
 
-- `NEXT_PUBLIC_APP_ENV` — `preview` to enable draft content + the editor UI, otherwise production
-- `ZERO_CMS_AUTH_SECRET` / `ZERO_CMS_ADMIN_EMAIL` / `ZERO_CMS_ADMIN_PASSWORD` — `apps/cms` auth
-- `ZERO_CMS_REMOTE_URL` / `NEXT_PUBLIC_ZERO_CMS_URL` / `ZERO_CMS_SERVICE_EMAIL` / `ZERO_CMS_SERVICE_PASSWORD` — `apps/website` → `apps/cms` (optional locally, required on staging)
-- `ZERO_CMS_ALLOWED_ORIGINS` — CORS allow-list on `apps/cms`
-- `ZERO_CMS_GIT_SYNC` — auto-commit+push published changes to `main` (Railway only, never local)
+- `STORAGE_KV_REST_API_URL` / `STORAGE_KV_REST_API_TOKEN` / `STORAGE_KV_REST_API_READ_ONLY_TOKEN` — Upstash Redis (Vercel Marketplace integration). Read-only token for all page rendering (public + `/admin` preview), read-write only for the RPC surface.
+- `BLOB_READ_WRITE_TOKEN` — Vercel Blob (media bytes).
+- `ZERO_CMS_AUTH_SECRET` — signs session JWTs; also verified in `proxy.ts`.
+- `ZERO_CMS_ADMIN_EMAIL` / `ZERO_CMS_ADMIN_PASSWORD` — first-admin seed (only used once, when the Redis `users` set is empty).
 
-Codegen (`codegen.ts`) introspects the zero-cms schema by reading `.zero-cms-store/`
-directly (via `scripts/generate-cms-schema.mjs`) — no running server needed for codegen.
+Codegen (`codegen.ts`) introspects the zero-cms schema by reading **live Redis**
+(`scripts/generate-cms-schema.mjs`, via `createRedisAdapter` + the read-only token) —
+needs network access to Upstash, same as `next build` itself.
 
 ## Directory layout
 
 ```
-apps/cms/                   # zero-cms editor + reference server (Railway)
+apps/website/                # Next.js — public site + zero-cms editor, one app
 ├── src/
+│   ├── proxy.ts              # Next 16 Proxy (was middleware.ts) — gates + rewrites /admin/*
 │   ├── app/
-│   │   ├── admin/           # Management UI (CmsApp from @usc/zero-cms-app)
-│   │   ├── zero-cms/rpc/    # RPC endpoint (create/update/publish/query/...)
-│   │   └── api/cms/         # auth, media, graphql, sync-status
-│   └── lib/zero-cms/        # server.ts (adapter+auth wiring), git-sync.ts, cors.ts
-├── zero-cms.config.mjs      # dir -> ../../.zero-cms-store (shared with website)
-└── project.json             # Nx targets: dev (-p 3001), build, start
-
-apps/website/                # Next.js public site + editor-facing preview
-├── src/
-│   ├── app/                 # App Router pages
-│   │   ├── page.tsx
-│   │   ├── page.graphql     # Page-level queries
-│   │   └── api/enquiry/     # contact-form email (nodemailer)
+│   │   ├── (site)/           # Public pages — also what /admin/* rewrites into
+│   │   ├── admin/
+│   │   │   ├── cms/[[...rest]]/  # CmsApp dashboard (Types, Entries, Media, Users)
+│   │   │   └── enable-preview/   # Route Handler: draftMode().enable(), then redirect
+│   │   ├── zero-cms/rpc/     # RPC endpoint (create/update/publish/query/...)
+│   │   └── api/cms/          # auth (sets the session cookie too), media, graphql
 │   ├── components/
-│   │   ├── sections/        # one folder per zero-cms section Type
-│   │   ├── ui/               # Reusable UI primitives (Button, Badge, ...)
-│   │   └── cms/              # Inspect-mode overlay wiring (CmsInspectShell)
-│   ├── generated/            # DO NOT EDIT — graphql.ts, schema.graphql
+│   │   ├── sections/         # one folder per zero-cms section Type
+│   │   ├── ui/                # Reusable UI primitives (Button, Badge, ...)
+│   │   └── cms/               # Inspect-mode overlay wiring (CmsInspectShell)
+│   ├── generated/             # DO NOT EDIT — graphql.ts, schema.graphql
 │   └── lib/
-│       ├── cms/query.ts      # in-process GraphQL exec against zero-cms schema
-│       └── zero-cms/server.ts  # local-fs adapter (build) or httpAdapter (staging)
-├── public/                   # Static assets + generated sitemap.xml
+│       ├── cms/query.ts       # in-process GraphQL exec against zero-cms schema
+│       ├── app-env.ts         # isPreview() — Draft Mode check
+│       └── zero-cms/server.ts # dual Redis adapters (read-only / read-write) + auth
+├── public/                    # Static assets
 ├── next.config.mjs
 └── project.json
 
-.zero-cms-store/              # data.json, types/*.json, media/ — git-tracked, shared
-                               # by both apps (repo root, not under either app)
-
 # Root (workspace-wide)
-codegen.ts                    # GraphQL codegen config
-scripts/                      # generate-sitemap.mjs, generate-cms-schema.mjs, ...
+codegen.ts                     # GraphQL codegen config
+scripts/                       # generate-cms-schema.mjs, ...
 nx.json
 tsconfig.base.json
 ```
@@ -89,15 +88,14 @@ tsconfig.base.json
 - **Fragment naming**: `PascalCase` matching the component (e.g. `HomeHeroSection` on `HomeHeaderSection`).
 - **Preview variable**: page/collection queries take `$status: CmsReadStatus` (`published` or `draft`)
   and `$includeUnpublished: Boolean` — `apps/website/src/lib/cms/query.ts` injects both
-  automatically on a preview deploy.
+  automatically whenever `isPreview()` is true.
 - **Shared fragments**: compose from `apps/website/src/components/ui/**/*.graphql` (e.g. `...Button`, `...Icon`).
 - **Codegen**: after any `.graphql` change, run `npm run codegen`. Generated types land in
   `apps/website/src/generated/graphql.ts`; schema SDL in `apps/website/src/generated/schema.graphql`.
 
 ## Adding a new content Type
 
-1. **Type** — add a Type file under `.zero-cms-store/types/<name>.json` (or author it via the
-   `/admin` UI on `apps/cms`, which writes the file for you).
+1. **Type** — author it via the Types tab at `/admin/cms` (writes straight to Redis).
 2. **Fragment** — create `apps/website/src/components/sections/<name>/<name>.graphql`.
 3. **Component** — create `apps/website/src/components/sections/<name>/<name>.tsx` — accept
    fragment type from `@/generated/graphql`.
@@ -106,7 +104,7 @@ tsconfig.base.json
    `apps/website/src/components/sections/page-section.tsx`.
 6. **Page query** — add the relation field + fragment spread in the owning page query.
 7. **Flatten refs** — add the new relation to `apps/website/src/helpers/flatten-section-refs.ts`.
-8. **Codegen** — run `npm run codegen`.
+8. **Codegen** — run `npm run codegen` (reads the new Type straight from Redis).
 
 Wrap editable fields with the zero-cms-widget Inspect overlay when edit pencils are needed.
 Use `RichText` from `@/components/ui/rich-text-viewer` for `blocks` fields.
@@ -122,16 +120,14 @@ Use `RichText` from `@/components/ui/rich-text-viewer` for `blocks` fields.
 
 | Command | When |
 | ------- | ---- |
-| `npm run dev` | Website dev server only, local-fs read (`nx dev website`) — the simple/default local setup |
-| `npm run dev:cms` | zero-cms editor server (`nx dev cms`, port 3001) |
-| `npm run dev:all` | Both together — matches staging's real shape |
-| `npm run build` | Generates the sitemap from `.zero-cms-store/` then builds `website` |
+| `npm run dev` | The only dev entrypoint — one app, one process (`nx dev website`) |
+| `npm run build` | Builds `website` (also regenerates the zero-cms GraphQL SDL as a dependent Nx target); `app/sitemap.ts` reads live Redis at request time, no separate build step |
 | `npm run lint` | ESLint |
-| `npm run codegen` | After `.graphql` changes — reads the local zero-cms store, no server needed |
+| `npm run codegen` | After `.graphql` changes — reads live Redis for the schema, no local fixture |
 
 ## Next.js agent rules
 
-Read `node_modules/next/dist/docs/` before writing Next.js code — this project uses Next.js 16 with breaking changes from earlier versions. `AGENTS.md` has the pointer.
+Read `node_modules/next/dist/docs/` before writing Next.js code — this project uses Next.js 16 with breaking changes from earlier versions. `AGENTS.md` has the pointer. In particular: Middleware is renamed **Proxy** (`proxy.ts`, not `middleware.ts`), runs on the **Node.js runtime by default**, and `draftMode().enable()`/`.disable()` only work inside a Route Handler.
 
 ## Slash commands
 

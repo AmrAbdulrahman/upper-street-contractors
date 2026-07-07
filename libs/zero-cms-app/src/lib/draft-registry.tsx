@@ -28,6 +28,14 @@ import {
 export interface DraftRef {
   type: string;
   id: string;
+  /**
+   * CAS token for publish (ADR 0009). Present when `setDrafts` populated this ref
+   * from an authoritative query (the query result already carries
+   * `__lastEditedAt`); absent when `markDraft` added it optimistically from a
+   * save that only knows the id. Consumers that need to publish must re-fetch
+   * to get a fresh token when this is missing, rather than guessing one.
+   */
+  lastEditedAt?: string;
 }
 
 const keyOf = (type: string, id: string) => `${type}:${id}`;

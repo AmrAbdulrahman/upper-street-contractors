@@ -5,6 +5,7 @@ export const RPC_PATH = '/zero-cms/rpc';
 /** Adapter methods exposed over the wire. Media bytes travel as base64. */
 export type RpcOp =
   | 'getSchema'
+  | 'getSchemaVersion'
   | 'saveSchema'
   | 'create'
   | 'update'
@@ -15,6 +16,7 @@ export type RpcOp =
   | 'discardDraft'
   | 'get'
   | 'query'
+  | 'listDrafts'
   | 'validateRefs'
   | 'locate'
   | 'listMedia'

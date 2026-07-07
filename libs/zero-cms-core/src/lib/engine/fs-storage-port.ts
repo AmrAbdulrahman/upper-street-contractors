@@ -1,23 +1,24 @@
 /**
- * Filesystem StoragePort.
+ * Filesystem StoragePort + BlobStore — local dev / tests only (ADR 0008: the
+ * deployed reference server uses the Redis-backed port + Vercel Blob instead).
  *
- * Schema is split across **per-type files** (one Type per file). On read we merge
- * the configured glob (default `<dir>/types/**\/*.json`) plus a legacy single
- * `types.json` (back-compat). Each Type remembers its source file; edits write back
- * there. New types — and any types that came from a multi-type ("shared") file or the
- * legacy `types.json` — are written to per-type files under `typesDir`, migrating the
- * schema to the split layout on first save.
+ * Per-entry files, one JSON file per record — `data/<id>.json`, `users/<id>.json`,
+ * `media/<id>/item.json` + `media/<id>/<filename>` — matching the Redis port's
+ * per-record shape so both backends satisfy the same `StoragePort` contract
+ * (ADR 0009: per-entry optimistic concurrency, not a single writer/whole-file
+ * write-through as in the original ADR 0003 design). Schema stays one file
+ * (`types.json`) — ADR 0011, a whole-document CAS is the right granularity there.
  *
- * `data.json` and `media/` are single locations. All writes are crash-safe (temp file
- * + atomic `rename`).
+ * The "compare-and-swap" here is a plain read-check-write, not truly atomic —
+ * fine for local dev/tests (still effectively single-writer in practice); the
+ * real cross-process guarantee is Redis's Lua `EVAL` in the production port.
  */
 
-import { mkdir, readFile, writeFile, rename, unlink } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rename, unlink, readdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { globFiles } from './glob';
-import type { StoragePort } from './storage-port';
-import type { Schema, Type } from '../model/schema';
+import type { StoragePort, SchemaRecord, BlobStore } from './storage-port';
+import type { Schema } from '../model/schema';
 import type { Entry } from '../model/entry';
 import type { MediaItem } from '../model/media';
 import type { User } from '../model/user';
@@ -25,12 +26,7 @@ import type { User } from '../model/user';
 /** The subset of {@link ZeroCmsConfig} the fs port needs. */
 export interface FsStorageConfig {
   dir: string;
-  typesGlob: string;
-  typesDir: string;
-  dataFile: string;
   mediaDir: string;
-  usersFile: string;
-  legacyTypesFile: string;
 }
 
 async function readJson<T>(file: string): Promise<T | null> {
@@ -54,176 +50,291 @@ async function writeAtomic(file: string, data: string | Uint8Array): Promise<voi
   }
 }
 
-function isType(v: unknown): v is Type {
-  return (
-    !!v &&
-    typeof v === 'object' &&
-    typeof (v as Type).__name === 'string' &&
-    Array.isArray((v as Type).fields)
-  );
+async function listJsonIds(dir: string): Promise<string[]> {
+  try {
+    const files = await readdir(dir);
+    return files.filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -'.json'.length));
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw err;
+  }
 }
 
 export function createFsStoragePort(config: FsStorageConfig): StoragePort {
-  const mediaIndexFile = join(config.mediaDir, 'index.json');
+  const dataDir = join(config.dir, 'data');
+  const usersDir = join(config.dir, 'users');
+  const mediaDir = config.mediaDir;
+  const schemaFile = join(config.dir, 'types.json');
 
-  // Per-type provenance, rebuilt on every read.
-  let originByName = new Map<string, string>();
-  let sharedFiles = new Set<string>();
-
-  async function listTypeFiles(): Promise<string[]> {
-    return globFiles(config.typesGlob, config.dir);
-  }
+  const entryFile = (id: string) => join(dataDir, `${id}.json`);
+  const userFile = (id: string) => join(usersDir, `${id}.json`);
+  const mediaItemFile = (id: string) => join(mediaDir, id, 'item.json');
 
   return {
-    async readSchema(): Promise<Schema | null> {
-      originByName = new Map();
-      sharedFiles = new Set();
-      const merged = new Map<string, Type>();
-      let any = false;
-
-      const ingest = (path: string, parsed: unknown, legacy: boolean) => {
-        const types = (Array.isArray(parsed) ? parsed : [parsed]).filter(isType);
-        if (types.length === 0) return;
-        any = true;
-        const shared = legacy || types.length > 1;
-        if (shared) sharedFiles.add(path);
-        for (const t of types) {
-          merged.set(t.__name, t);
-          originByName.set(t.__name, path);
-        }
+    async readSchema(): Promise<SchemaRecord | null> {
+      return readJson<SchemaRecord>(schemaFile);
+    },
+    async writeSchema(schema: Schema, expectedVersion: string | null) {
+      const current = await readJson<SchemaRecord>(schemaFile);
+      if ((current?.version ?? null) !== expectedVersion) return null;
+      const record: SchemaRecord = {
+        schema,
+        version: new Date().toISOString(),
+        lastEditedBy: current?.lastEditedBy ?? 'system',
       };
+      await writeAtomic(schemaFile, JSON.stringify(record, null, 2) + '\n');
+      return record;
+    },
 
-      // Legacy single file first (so glob files override on name clash).
-      const legacy = await readJson<unknown>(config.legacyTypesFile);
-      if (legacy != null) ingest(config.legacyTypesFile, legacy, true);
+    async readEntry(id) {
+      return readJson<Entry>(entryFile(id));
+    },
+    async listEntryIds(type) {
+      const ids = await listJsonIds(dataDir);
+      const entries = await Promise.all(ids.map((id) => readJson<Entry>(entryFile(id))));
+      return ids.filter((_, i) => entries[i]?.__type === type);
+    },
+    // Local dev/tests only — a plain scan is fine here (small datasets); the
+    // Redis port maintains a real index since it's the one that actually
+    // needs to avoid an all-Types scan (see redis-storage-port.ts).
+    async listDraftEntryIds() {
+      const ids = await listJsonIds(dataDir);
+      const entries = await Promise.all(ids.map((id) => readJson<Entry>(entryFile(id))));
+      return ids.filter((_, i) => entries[i]?.__draft != null);
+    },
+    async readEntries(ids) {
+      const entries = await Promise.all(ids.map((id) => readJson<Entry>(entryFile(id))));
+      return entries.filter((e): e is Entry => e !== null);
+    },
+    async createEntry(entry) {
+      await writeAtomic(entryFile(entry.__id), JSON.stringify(entry, null, 2) + '\n');
+    },
+    async writeEntry(id, expectedLastEditedAt, next) {
+      const current = await readJson<Entry>(entryFile(id));
+      if (current?.__lastEditedAt !== expectedLastEditedAt) return false;
+      await writeAtomic(entryFile(id), JSON.stringify(next, null, 2) + '\n');
+      return true;
+    },
+    async deleteEntry(id, expectedLastEditedAt) {
+      const current = await readJson<Entry>(entryFile(id));
+      if (current?.__lastEditedAt !== expectedLastEditedAt) return false;
+      await unlink(entryFile(id)).catch(() => undefined);
+      return true;
+    },
 
-      for (const file of await listTypeFiles()) {
-        if (file === config.legacyTypesFile) continue;
-        const parsed = await readJson<unknown>(file);
-        if (parsed != null) ingest(file, parsed, false);
+    async readUser(id) {
+      return readJson<User>(userFile(id));
+    },
+    async readUserByEmail(email) {
+      const ids = await listJsonIds(usersDir);
+      const users = await Promise.all(ids.map((id) => readJson<User>(userFile(id))));
+      const e = email.trim().toLowerCase();
+      return users.find((u) => u?.email.toLowerCase() === e) ?? null;
+    },
+    async listUserIds() {
+      return listJsonIds(usersDir);
+    },
+    async createUser(user) {
+      await writeAtomic(userFile(user.__id), JSON.stringify(user, null, 2) + '\n');
+    },
+    async writeUser(id, expectedUpdatedAt, next) {
+      const current = await readJson<User>(userFile(id));
+      if (current?.updatedAt !== expectedUpdatedAt) return false;
+      await writeAtomic(userFile(id), JSON.stringify(next, null, 2) + '\n');
+      return true;
+    },
+    async deleteUser(id, expectedUpdatedAt) {
+      const current = await readJson<User>(userFile(id));
+      if (current?.updatedAt !== expectedUpdatedAt) return false;
+      await unlink(userFile(id)).catch(() => undefined);
+      return true;
+    },
+
+    async readMediaItem(id) {
+      return readJson<MediaItem>(mediaItemFile(id));
+    },
+    async listMediaIds() {
+      try {
+        return await readdir(mediaDir);
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') return [];
+        throw err;
       }
-
-      return any ? [...merged.values()] : null;
     },
-
-    async writeSchema(schema: Schema): Promise<void> {
-      // Decide the destination file for each type: keep a dedicated origin, else
-      // write a per-type file under typesDir (migrating shared/legacy/new types).
-      const desired = new Map<string, { type: Type; path: string }>();
-      for (const t of schema) {
-        const origin = originByName.get(t.__name);
-        const perType = join(config.typesDir, `${t.__name}.json`);
-        const path = origin && !sharedFiles.has(origin) ? origin : perType;
-        desired.set(t.__name, { type: t, path });
-      }
-
-      for (const { type, path } of desired.values()) {
-        await writeAtomic(path, JSON.stringify(type, null, 2) + '\n');
-      }
-
-      const writtenPaths = new Set([...desired.values()].map((d) => d.path));
-
-      // Remove per-type files for deleted types.
-      for (const [name, origin] of originByName) {
-        if (desired.has(name)) continue;
-        if (!sharedFiles.has(origin) && !writtenPaths.has(origin)) {
-          await unlink(origin).catch(() => undefined);
-        }
-      }
-      // Remove now-migrated shared/legacy files.
-      for (const shared of sharedFiles) {
-        if (!writtenPaths.has(shared)) await unlink(shared).catch(() => undefined);
-      }
-
-      originByName = new Map(
-        [...desired.entries()].map(([name, d]) => [name, d.path])
-      );
-      sharedFiles = new Set();
+    async createMediaItem(item) {
+      await writeAtomic(mediaItemFile(item.id), JSON.stringify(item, null, 2) + '\n');
     },
-
-    async readData(): Promise<Entry[] | null> {
-      return readJson<Entry[]>(config.dataFile);
+    async writeMediaItem(id, expectedUpdatedAt, next) {
+      const current = await readJson<MediaItem>(mediaItemFile(id));
+      if (current?.updatedAt !== expectedUpdatedAt) return false;
+      await writeAtomic(mediaItemFile(id), JSON.stringify(next, null, 2) + '\n');
+      return true;
     },
-    async writeData(entries: Entry[]): Promise<void> {
-      await writeAtomic(config.dataFile, JSON.stringify(entries, null, 2) + '\n');
-    },
-
-    async readUsers(): Promise<User[] | null> {
-      return readJson<User[]>(config.usersFile);
-    },
-    async writeUsers(users: User[]): Promise<void> {
-      await writeAtomic(config.usersFile, JSON.stringify(users, null, 2) + '\n');
-    },
-
-    async readMediaIndex(): Promise<MediaItem[]> {
-      return (await readJson<MediaItem[]>(mediaIndexFile)) ?? [];
-    },
-    async writeMediaIndex(items: MediaItem[]): Promise<void> {
-      await writeAtomic(mediaIndexFile, JSON.stringify(items, null, 2) + '\n');
-    },
-    async writeMediaFile(filename: string, bytes: Uint8Array): Promise<void> {
-      await writeAtomic(join(config.mediaDir, filename), bytes);
-    },
-    async readMediaFile(filename: string): Promise<Uint8Array> {
-      return new Uint8Array(await readFile(join(config.mediaDir, filename)));
-    },
-    async deleteMediaFile(filename: string): Promise<void> {
-      await unlink(join(config.mediaDir, filename)).catch((err) => {
-        if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
-      });
+    async deleteMediaItem(id, expectedUpdatedAt) {
+      const current = await readJson<MediaItem>(mediaItemFile(id));
+      if (current?.updatedAt !== expectedUpdatedAt) return false;
+      await unlink(mediaItemFile(id)).catch(() => undefined);
+      return true;
     },
   };
 }
 
-/** In-memory StoragePort for tests and ephemeral use. */
+/**
+ * Local-disk BlobStore for the fs-backed adapter (local dev / tests). Keys
+ * (`media/<id>/<filename>`, fully qualified by the caller — Engine — same as
+ * the real Vercel Blob key convention) are rooted at `config.dir` directly,
+ * *not* `config.mediaDir` — that dir is where media *metadata* (`item.json`)
+ * lives, a separate namespace from blob bytes even though both start with
+ * "media/" in their respective keys/paths.
+ */
+export function createFsBlobStore(config: FsStorageConfig): BlobStore {
+  const path = (key: string) => join(config.dir, 'blobs', key);
+  return {
+    async put(key, bytes, _contentType) {
+      void _contentType; // fs has no content-type metadata slot; url alone identifies it
+      const file = path(key);
+      await writeAtomic(file, bytes);
+      return { url: `file://${file}` };
+    },
+    async get(url) {
+      const file = url.replace(/^file:\/\//, '');
+      return new Uint8Array(await readFile(file));
+    },
+    async delete(url) {
+      const file = url.replace(/^file:\/\//, '');
+      await unlink(file).catch(() => undefined);
+    },
+  };
+}
+
+/** In-memory StoragePort for tests. */
 export function createMemoryStoragePort(seed?: {
   schema?: Schema;
-  data?: Entry[];
+  entries?: Entry[];
   media?: MediaItem[];
   users?: User[];
-  files?: Record<string, Uint8Array>;
 }): StoragePort {
-  let schema: Schema | null = seed?.schema ?? null;
-  let data: Entry[] | null = seed?.data ?? null;
-  let media: MediaItem[] = seed?.media ?? [];
-  let users: User[] | null = seed?.users ?? null;
-  const files: Record<string, Uint8Array> = { ...(seed?.files ?? {}) };
-  const clone = <T>(v: T): T => (v == null ? v : JSON.parse(JSON.stringify(v)));
+  let schemaRecord: SchemaRecord | null = seed?.schema
+    ? { schema: seed.schema, version: 'seed', lastEditedBy: 'system' }
+    : null;
+  const entries = new Map<string, Entry>((seed?.entries ?? []).map((e) => [e.__id, e]));
+  const users = new Map<string, User>((seed?.users ?? []).map((u) => [u.__id, u]));
+  const media = new Map<string, MediaItem>((seed?.media ?? []).map((m) => [m.id, m]));
+  const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
+
   return {
     async readSchema() {
-      return clone(schema);
+      return schemaRecord ? clone(schemaRecord) : null;
     },
-    async writeSchema(s) {
-      schema = clone(s);
+    async writeSchema(schema, expectedVersion) {
+      if ((schemaRecord?.version ?? null) !== expectedVersion) return null;
+      schemaRecord = {
+        schema: clone(schema),
+        version: randomUUID(),
+        lastEditedBy: schemaRecord?.lastEditedBy ?? 'system',
+      };
+      return clone(schemaRecord);
     },
-    async readData() {
-      return clone(data);
+
+    async readEntry(id) {
+      const e = entries.get(id);
+      return e ? clone(e) : null;
     },
-    async writeData(d) {
-      data = clone(d);
+    async listEntryIds(type) {
+      return [...entries.values()].filter((e) => e.__type === type).map((e) => e.__id);
     },
-    async readUsers() {
-      return clone(users);
+    async listDraftEntryIds() {
+      return [...entries.values()].filter((e) => e.__draft != null).map((e) => e.__id);
     },
-    async writeUsers(u) {
-      users = clone(u);
+    async readEntries(ids) {
+      return ids.map((id) => entries.get(id)).filter((e): e is Entry => e !== undefined).map(clone);
     },
-    async readMediaIndex() {
-      return clone(media);
+    async createEntry(entry) {
+      entries.set(entry.__id, clone(entry));
     },
-    async writeMediaIndex(items) {
-      media = clone(items);
+    async writeEntry(id, expectedLastEditedAt, next) {
+      const current = entries.get(id);
+      if (current?.__lastEditedAt !== expectedLastEditedAt) return false;
+      entries.set(id, clone(next));
+      return true;
     },
-    async writeMediaFile(filename, bytes) {
-      files[filename] = bytes;
+    async deleteEntry(id, expectedLastEditedAt) {
+      const current = entries.get(id);
+      if (current?.__lastEditedAt !== expectedLastEditedAt) return false;
+      entries.delete(id);
+      return true;
     },
-    async readMediaFile(filename) {
-      const f = files[filename];
-      if (!f) throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
-      return f;
+
+    async readUser(id) {
+      const u = users.get(id);
+      return u ? clone(u) : null;
     },
-    async deleteMediaFile(filename) {
-      delete files[filename];
+    async readUserByEmail(email) {
+      const e = email.trim().toLowerCase();
+      const u = [...users.values()].find((x) => x.email.toLowerCase() === e);
+      return u ? clone(u) : null;
+    },
+    async listUserIds() {
+      return [...users.keys()];
+    },
+    async createUser(user) {
+      users.set(user.__id, clone(user));
+    },
+    async writeUser(id, expectedUpdatedAt, next) {
+      const current = users.get(id);
+      if (current?.updatedAt !== expectedUpdatedAt) return false;
+      users.set(id, clone(next));
+      return true;
+    },
+    async deleteUser(id, expectedUpdatedAt) {
+      const current = users.get(id);
+      if (current?.updatedAt !== expectedUpdatedAt) return false;
+      users.delete(id);
+      return true;
+    },
+
+    async readMediaItem(id) {
+      const m = media.get(id);
+      return m ? clone(m) : null;
+    },
+    async listMediaIds() {
+      return [...media.keys()];
+    },
+    async createMediaItem(item) {
+      media.set(item.id, clone(item));
+    },
+    async writeMediaItem(id, expectedUpdatedAt, next) {
+      const current = media.get(id);
+      if (current?.updatedAt !== expectedUpdatedAt) return false;
+      media.set(id, clone(next));
+      return true;
+    },
+    async deleteMediaItem(id, expectedUpdatedAt) {
+      const current = media.get(id);
+      if (current?.updatedAt !== expectedUpdatedAt) return false;
+      media.delete(id);
+      return true;
+    },
+  };
+}
+
+/** In-memory BlobStore for tests. */
+export function createMemoryBlobStore(): BlobStore {
+  const files = new Map<string, { bytes: Uint8Array; contentType: string }>();
+  let counter = 0;
+  return {
+    async put(key, bytes, contentType) {
+      const url = `memory://${++counter}/${key}`;
+      files.set(url, { bytes, contentType });
+      return { url };
+    },
+    async get(url) {
+      const f = files.get(url);
+      if (!f) throw Object.assign(new Error(`No blob at ${url}`), { code: 'ENOENT' });
+      return f.bytes;
+    },
+    async delete(url) {
+      files.delete(url);
     },
   };
 }

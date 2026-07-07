@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { graphql } from 'graphql';
-import { createNodeAdapter, createMemoryStoragePort } from '@usc/zero-cms-core/node';
+import {
+  createNodeAdapter,
+  createMemoryStoragePort,
+  createMemoryBlobStore,
+} from '@usc/zero-cms-core/node';
 import type { Schema } from '@usc/zero-cms-core';
 import { buildCmsSchema } from './schema';
 import { generateSdl } from './sdl';
@@ -19,8 +23,13 @@ const schema: Schema = [
   },
 ];
 
+const ACTOR = 'tester';
+
 async function setup() {
-  const adapter = await createNodeAdapter(createMemoryStoragePort({ schema }));
+  const adapter = await createNodeAdapter(
+    createMemoryStoragePort({ schema }),
+    createMemoryBlobStore()
+  );
   const gql = buildCmsSchema({ schema, adapter });
   const exec = (source: string, variableValues?: Record<string, unknown>) =>
     graphql({ schema: gql, source, variableValues });
@@ -43,15 +52,19 @@ describe('generateSdl', () => {
 describe('graphql execution', () => {
   it('queries a list with where filter + resolves a nested reference', async () => {
     const { adapter, exec } = await setup();
-    const a = await adapter.create('author', { name: 'Jo' });
-    await adapter.publish('author', a.__id);
-    const p = await adapter.create('project', {
-      title: 'Loft job',
-      category: 'Loft',
-      startedOn: '2024-05-01',
-      author: a.__id,
-    });
-    await adapter.publish('project', p.__id);
+    const a = await adapter.create('author', { name: 'Jo' }, ACTOR);
+    await adapter.publish('author', a.__id, ACTOR, a.__lastEditedAt as string);
+    const p = await adapter.create(
+      'project',
+      {
+        title: 'Loft job',
+        category: 'Loft',
+        startedOn: '2024-05-01',
+        author: a.__id,
+      },
+      ACTOR
+    );
+    await adapter.publish('project', p.__id, ACTOR, p.__lastEditedAt as string);
 
     const res = await exec(`{
       projects(filters: { category: { eq: "Loft" } }) {
@@ -82,22 +95,33 @@ describe('graphql execution', () => {
         ],
       },
     ];
-    const adapter = await createNodeAdapter(createMemoryStoragePort({ schema: mediaSchema }));
+    const adapter = await createNodeAdapter(
+      createMemoryStoragePort({ schema: mediaSchema }),
+      createMemoryBlobStore()
+    );
     const gql = buildCmsSchema({ schema: mediaSchema, adapter });
-    const m = await adapter.putMedia(new Uint8Array([1, 2, 3]), {
-      filename: 'h.png',
-      mime: 'image/png',
-      width: 800,
-      height: 600,
-      alternativeText: 'Hero alt',
-    });
-    const c = await adapter.create('card', {
-      title: 'C',
-      order: 3,
-      hero: m.id,
-      body: [{ type: 'paragraph', children: [{ type: 'text', text: 'Hi' }] }],
-      extra: { a: 1, b: ['x'] },
-    });
+    const m = await adapter.putMedia(
+      new Uint8Array([1, 2, 3]),
+      {
+        filename: 'h.png',
+        mime: 'image/png',
+        width: 800,
+        height: 600,
+        alternativeText: 'Hero alt',
+      },
+      ACTOR
+    );
+    const c = await adapter.create(
+      'card',
+      {
+        title: 'C',
+        order: 3,
+        hero: m.id,
+        body: [{ type: 'paragraph', children: [{ type: 'text', text: 'Hi' }] }],
+        extra: { a: 1, b: ['x'] },
+      },
+      ACTOR
+    );
 
     const res = await graphql({
       schema: gql,
@@ -116,7 +140,7 @@ describe('graphql execution', () => {
     expect(Array.isArray(card.body)).toBe(true);
     expect(card.hero).toMatchObject({
       id: m.id,
-      url: `/api/cms/media/${m.id}`,
+      url: m.url,
       alt: 'Hero alt',
       width: 800,
       height: 600,
@@ -126,9 +150,12 @@ describe('graphql execution', () => {
   });
 
   it('enforces auth: anonymous reads clamp to published, mutations need editor', async () => {
-    const adapter = await createNodeAdapter(createMemoryStoragePort({ schema }));
+    const adapter = await createNodeAdapter(
+      createMemoryStoragePort({ schema }),
+      createMemoryBlobStore()
+    );
     const gql = buildCmsSchema({ schema, adapter });
-    const draft = await adapter.create('author', { name: 'Hidden' }); // unpublished draft
+    const draft = await adapter.create('author', { name: 'Hidden' }, ACTOR); // unpublished draft
     void draft;
 
     const anon = { authEnabled: true, session: null };
@@ -164,14 +191,17 @@ describe('graphql execution', () => {
   it('creates + publishes through mutations', async () => {
     const { exec } = await setup();
     const created = await exec(`mutation {
-      createAuthor(values: { name: "Mara" }) { id status hasDraft }
+      createAuthor(values: { name: "Mara" }) { id status hasDraft lastEditedAt }
     }`);
     expect(created.errors).toBeUndefined();
-    const id = (created.data as { createAuthor: { id: string } }).createAuthor.id;
+    const author = (created.data as { createAuthor: { id: string; lastEditedAt: string } })
+      .createAuthor;
 
     const published = await exec(
-      `mutation ($id: ID!) { publishAuthor(id: $id) { status hasDraft } }`,
-      { id }
+      `mutation ($id: ID!, $token: String!) {
+        publishAuthor(id: $id, expectedLastEditedAt: $token) { status hasDraft }
+      }`,
+      { id: author.id, token: author.lastEditedAt }
     );
     expect(published.errors).toBeUndefined();
     expect(

@@ -6,11 +6,9 @@
  * with next/dynamic({ ssr: false }) — this thin wrapper keeps `import "hugerte"`
  * out of the server bundle and matches the lib's BlocksComponent signature.
  *
- * Shared between apps/website (Inspect-mode overlay) and apps/cms-app (admin
- * dashboard) — both host it, so it lives here rather than duplicated per app.
- * Each host app must serve the same HugeRTE skin assets at `/hugerte/...` in its
- * own `public/` (Next serves public/ per-app-root); apps/cms-app symlinks
- * apps/website/public/hugerte so there's one source of truth for the assets too.
+ * Used by both the Inspect-mode overlay and the /admin/cms dashboard — one app
+ * (website) now hosts both, so the HugeRTE skin assets just live once at
+ * apps/website/public/hugerte (no more per-app symlink now that cms merged in).
  */
 
 import dynamic from 'next/dynamic';

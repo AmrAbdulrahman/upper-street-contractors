@@ -8,8 +8,10 @@
 export interface MediaItem {
   /** Stable id stored by `asset` fields. */
   id: string;
-  /** File name within `media/`. */
+  /** Original uploaded filename (display/download only — not a storage path). */
   filename: string;
+  /** Blob URL the actual bytes live at (ADR 0008 — ​Vercel Blob, not local fs). */
+  url: string;
   mime: string;
   /** Bytes. */
   size: number;
@@ -19,8 +21,15 @@ export interface MediaItem {
   height?: number;
   /** Alt text for images (accessibility). */
   alternativeText?: string;
-  /** ISO timestamp. */
+  /** ISO timestamp, set once at upload. */
   createdAt: string;
+  /**
+   * Bumped on every mutation (currently just `updateMediaMeta`). Doubles as the
+   * optimistic-concurrency token (ADR 0009), same role as Entry's `__lastEditedAt`.
+   */
+  updatedAt: string;
+  /** Caller identity responsible for the last mutation. Required, no anonymous default. */
+  lastEditedBy: string;
 }
 
 export function kindFromMime(mime: string): MediaItem['kind'] {
