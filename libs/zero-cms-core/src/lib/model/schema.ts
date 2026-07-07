@@ -147,6 +147,15 @@ export interface Type {
   /** Human label for the app UI. Defaults to `__name`. */
   label?: string;
   fields: Field[];
+  /**
+   * Stamped by `Engine.saveSchema`, matching Types by `__name` against the
+   * previously stored schema — there's no other stable identity, so renaming
+   * a Type is indistinguishable from replacing it and resets both. Absent on
+   * Types saved before this was tracked (backfilled on their next save).
+   */
+  __createdAt?: string;
+  /** Bumped whenever `label`/`fields` change; untouched on a no-op save. */
+  __updatedAt?: string;
 }
 
 export type Schema = Type[];

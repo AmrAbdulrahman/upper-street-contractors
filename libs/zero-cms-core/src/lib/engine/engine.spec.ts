@@ -245,3 +245,52 @@ describe('schema evolution (ADR 0011)', () => {
     expect(got?.featured).toBe(true);
   });
 });
+
+describe('schema Type timestamps', () => {
+  it('stamps a brand-new Type with matching createdAt/updatedAt', async () => {
+    const e = await freshEngine();
+    const saved = await e.saveSchema(
+      [...schema, { __name: 'tag', fields: [{ __name: 'name', __type: 'text' }] }],
+      ACTOR,
+      await e.getSchemaVersion()
+    );
+    const tag = saved.find((t) => t.__name === 'tag')!;
+    expect(tag.__createdAt).toBeTruthy();
+    expect(tag.__createdAt).toBe(tag.__updatedAt);
+  });
+
+  it('preserves createdAt and bumps updatedAt when a Type changes', async () => {
+    const e = await freshEngine();
+    const v1 = await e.getSchemaVersion();
+    const afterCreate = await e.saveSchema(schema, ACTOR, v1);
+    const createdAt = afterCreate.find((t) => t.__name === 'project')!.__createdAt;
+
+    const v2 = await e.getSchemaVersion();
+    const nextSchema: Schema = afterCreate.map((t) =>
+      t.__name === 'project' ? { ...t, label: 'Project' } : t
+    );
+    const afterEdit = await e.saveSchema(nextSchema, ACTOR, v2);
+    const project = afterEdit.find((t) => t.__name === 'project')!;
+
+    expect(project.__createdAt).toBe(createdAt);
+    expect(project.__updatedAt).not.toBe(createdAt);
+  });
+
+  it('leaves both timestamps untouched on a no-op save', async () => {
+    const e = await freshEngine();
+    const v1 = await e.getSchemaVersion();
+    const afterCreate = await e.saveSchema(schema, ACTOR, v1);
+    const author = afterCreate.find((t) => t.__name === 'author')!;
+
+    const v2 = await e.getSchemaVersion();
+    // Re-save the exact same schema, only the unrelated `project` type edited.
+    const nextSchema: Schema = afterCreate.map((t) =>
+      t.__name === 'project' ? { ...t, label: 'Project' } : t
+    );
+    const afterEdit = await e.saveSchema(nextSchema, ACTOR, v2);
+    const authorAfter = afterEdit.find((t) => t.__name === 'author')!;
+
+    expect(authorAfter.__createdAt).toBe(author.__createdAt);
+    expect(authorAfter.__updatedAt).toBe(author.__updatedAt);
+  });
+});

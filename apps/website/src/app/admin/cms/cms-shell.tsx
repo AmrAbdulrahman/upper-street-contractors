@@ -35,8 +35,8 @@ export function CmsShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <main className="p-4 md:p-8">
-      <div className="mb-4 flex items-center justify-between gap-4">
+    <main className="flex min-h-0 flex-1 flex-col p-4 md:p-8">
+      <div className="mb-4 flex shrink-0 items-center justify-between gap-4">
         <h1 className="text-xl font-semibold text-neutral-900">Content admin</h1>
         <Link
           href="/admin"
@@ -52,6 +52,7 @@ export function CmsShell({ children }: { children: ReactNode }) {
         notify={cmsNotify}
         path={path}
         onNavigate={(p) => router.push("/admin/cms" + (p.length ? "/" + p.join("/") : ""))}
+        className="min-h-0 flex-1"
       >
         {children}
       </ZeroCmsAdminLayout>
