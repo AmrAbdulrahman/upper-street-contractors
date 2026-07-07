@@ -19,6 +19,7 @@ const RPC_MIN_ROLE: Record<string, Role> = {
   getSchema: 'viewer',
   get: 'viewer',
   query: 'viewer',
+  listDrafts: 'viewer',
   validateRefs: 'viewer',
   locate: 'viewer',
   listMedia: 'viewer',

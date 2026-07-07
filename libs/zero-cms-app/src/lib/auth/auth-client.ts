@@ -94,6 +94,16 @@ export function createAuthClient(opts: AuthClientOptions = {}): AuthClient {
     },
     logout() {
       setToken(null);
+      // Best-effort — clears the httpOnly session cookie proxy.ts checks for
+      // /admin/* (localStorage alone is invisible server-side, so leaving this
+      // out would let the cookie outlive a "logged out" browser for its full
+      // Max-Age). Not awaited: logout must clear local state immediately
+      // regardless of network state.
+      void doFetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ op: 'logout', args: [] }),
+      }).catch(() => undefined);
     },
   };
 }

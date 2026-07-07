@@ -39,7 +39,12 @@ const anon = (ctx?: CmsGraphQLContext) => Boolean(ctx?.authEnabled) && !ctx?.ses
 export interface BuildArgs {
   schema: Schema;
   adapter: Adapter;
-  /** Build a public URL for a media item. Default `/api/cms/media/<id>`. */
+  /**
+   * Build a public URL for a media item. Default: `item.url` — the real,
+   * public, CDN-backed Vercel Blob URL (ADR 0008) already stored on the
+   * MediaItem itself. Override only if a host wants to proxy media through
+   * its own route for some reason (caching, access control, etc).
+   */
   mediaUrl?: (item: MediaItem) => string;
 }
 
@@ -109,7 +114,7 @@ export function buildResolvers({ schema, adapter, mediaUrl }: BuildArgs) {
   const Mutation: Record<string, unknown> = {};
   const typeResolvers: Record<string, unknown> = {};
 
-  const urlOf = mediaUrl ?? ((m: MediaItem) => `/api/cms/media/${m.id}`);
+  const urlOf = mediaUrl ?? ((m: MediaItem) => m.url);
   let mediaCache: { at: number; map: Map<string, MediaItem> } | null = null;
   const mediaMap = async () => {
     if (!mediaCache || Date.now() - mediaCache.at > 1000) {
@@ -160,62 +165,68 @@ export function buildResolvers({ schema, adapter, mediaUrl }: BuildArgs) {
       return data; // flat array (Strapi-shaped)
     };
 
+    // Actor is derived from the verified session (ADR 0009) — never trusted
+    // from GraphQL args, same principle as the REST RPC handler. `ensureWrite`
+    // already guarantees a session exists whenever auth is enabled; the
+    // 'system' fallback only matters for an intentionally open/dev schema.
+    const actorOf = (ctx?: CmsGraphQLContext) => ctx?.session?.userId ?? 'system';
+
     Mutation[`create${T}`] = (
       _p: unknown,
       a: { values: AnyArgs },
       ctx: CmsGraphQLContext
     ) => {
       ensureWrite(ctx);
-      return adapter.create(cms, clean(a.values));
+      return adapter.create(cms, clean(a.values), actorOf(ctx));
     };
     Mutation[`update${T}`] = (
       _p: unknown,
-      a: { id: string; values: AnyArgs },
+      a: { id: string; values: AnyArgs; expectedLastEditedAt: string },
       ctx: CmsGraphQLContext
     ) => {
       ensureWrite(ctx);
-      return adapter.update(cms, a.id, clean(a.values));
+      return adapter.update(cms, a.id, clean(a.values), actorOf(ctx), a.expectedLastEditedAt);
     };
     Mutation[`patch${T}`] = (
       _p: unknown,
-      a: { id: string; values: AnyArgs },
+      a: { id: string; values: AnyArgs; expectedLastEditedAt: string },
       ctx: CmsGraphQLContext
     ) => {
       ensureWrite(ctx);
-      return adapter.patch(cms, a.id, clean(a.values));
+      return adapter.patch(cms, a.id, clean(a.values), actorOf(ctx), a.expectedLastEditedAt);
     };
     Mutation[`delete${T}`] = async (
       _p: unknown,
-      a: { id: string },
+      a: { id: string; expectedLastEditedAt: string },
       ctx: CmsGraphQLContext
     ) => {
       ensureWrite(ctx);
-      await adapter.delete(cms, a.id);
+      await adapter.delete(cms, a.id, actorOf(ctx), a.expectedLastEditedAt);
       return true;
     };
     Mutation[`publish${T}`] = (
       _p: unknown,
-      a: { id: string },
+      a: { id: string; expectedLastEditedAt: string },
       ctx: CmsGraphQLContext
     ) => {
       ensureWrite(ctx);
-      return adapter.publish(cms, a.id);
+      return adapter.publish(cms, a.id, actorOf(ctx), a.expectedLastEditedAt);
     };
     Mutation[`unpublish${T}`] = (
       _p: unknown,
-      a: { id: string },
+      a: { id: string; expectedLastEditedAt: string },
       ctx: CmsGraphQLContext
     ) => {
       ensureWrite(ctx);
-      return adapter.unpublish(cms, a.id);
+      return adapter.unpublish(cms, a.id, actorOf(ctx), a.expectedLastEditedAt);
     };
     Mutation[`discardDraft${T}`] = (
       _p: unknown,
-      a: { id: string },
+      a: { id: string; expectedLastEditedAt: string },
       ctx: CmsGraphQLContext
     ) => {
       ensureWrite(ctx);
-      return adapter.discardDraft(cms, a.id);
+      return adapter.discardDraft(cms, a.id, actorOf(ctx), a.expectedLastEditedAt);
     };
 
     // Object meta fields (mapped from __id/__type/__status) + asset resolution.
@@ -224,6 +235,7 @@ export function buildResolvers({ schema, adapter, mediaUrl }: BuildArgs) {
       type: (s: OutputEntry) => s.__type,
       status: (s: OutputEntry) => s.__status,
       hasDraft: (s: OutputEntry) => s.hasDraft,
+      lastEditedAt: (s: OutputEntry) => s.__lastEditedAt,
     };
     for (const f of type.fields) {
       if (f.__type === 'asset') {

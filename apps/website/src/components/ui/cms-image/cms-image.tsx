@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
+import { resolveMediaUrl } from "@/helpers/media-url";
 
 /**
  * The shape of a zero-cms `asset` field once resolved to GraphQL `Media`
@@ -40,7 +40,7 @@ export function CmsImage({
   placeholderLabel = "Image placeholder",
   sizes = "(max-width: 1024px) 100vw, 536px",
 }: CmsImageProps) {
-  const url = resolveStrapiMediaUrl(data?.url);
+  const url = resolveMediaUrl(data?.url);
   const alt = data?.alt?.trim() || fallbackAlt || "";
 
   if (!url) {

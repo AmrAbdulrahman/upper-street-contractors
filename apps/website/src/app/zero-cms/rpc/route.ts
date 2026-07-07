@@ -1,6 +1,6 @@
 import { getZeroCmsHandler } from "@/lib/zero-cms/server";
 
-// fs-backed store -> Node runtime, never cached.
+// Redis-backed store -> Node runtime, never cached.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 

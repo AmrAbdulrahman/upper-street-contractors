@@ -6,18 +6,31 @@
  * pending draft. The zero-cms replacement for the old Strapi "preview admin" bar.
  *
  * Router-independent: the host owns the inspect flag (`inspect`/`onToggleInspect`,
- * e.g. driven by a `?inspect` param). Publish actions use the widget's adapter, so
- * they require an editor session (hidden until then).
+ * e.g. driven by a `?inspect` param) and the Close destination (`closeHref`, a plain
+ * URL — the host resolves it from its own router, this component doesn't import
+ * one). Publish actions use the widget's adapter, so they require an editor session
+ * (hidden until then); Log out and the signed-in email both read from the widget's
+ * own auth context (`<ZeroCmsWidget auth={...}>`) — absent (and hidden) for the
+ * plain-adapter variant.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 import { useZeroCms, useDraftRegistry, errorMessage, type DraftRef } from '@usc/zero-cms-app';
+import { ZeroCmsError } from '@usc/zero-cms-core';
+import { useZeroCmsWidget } from './context';
 
 export interface ZeroCmsBarProps {
   inspect: boolean;
   onToggleInspect: () => void;
   /** Called after drafts are published, so the host can revalidate/refresh. */
   onChange?: () => void;
+  /**
+   * Where Close/Log out send the browser — a real `<a href>`, not a client
+   * navigation, so it always reaches the host's exit-preview Route Handler
+   * (e.g. `/admin/exit-preview?next=/bathrooms`) even when that's outside
+   * this component's own routing knowledge. Omit to hide the Close button.
+   */
+  closeHref?: string;
   className?: string;
 }
 
@@ -30,9 +43,11 @@ export function ZeroCmsBar({
   inspect,
   onToggleInspect,
   onChange,
+  closeHref,
   className,
 }: ZeroCmsBarProps) {
-  const { adapter, schema, notify } = useZeroCms();
+  const { adapter, notify, currentUserId } = useZeroCms();
+  const { logout, currentUserEmail } = useZeroCmsWidget();
   // Which entries currently have drafts is a shared store: the drawer marks them
   // optimistically on every (auto)save, and this bar re-syncs authoritatively.
   const { drafts, setDrafts, clearDraft } = useDraftRegistry();
@@ -58,24 +73,19 @@ export function ZeroCmsBar({
   }, [minimized]);
 
   // Authoritative re-sync of the draft set (self-heals the optimistic registry).
+  // `listDrafts()` reads a maintained index (2 round trips total) instead of
+  // querying every single Type in the schema to find which ones have a
+  // hasDraft entry — with dozens of Types, that used to mean dozens of RPC
+  // round trips just to render this bar's count.
   const refresh = useCallback(async () => {
     try {
-      const found: DraftRef[] = [];
-      // `hasDraft` is a derived filterable field in the query DSL (query-engine).
-      for (const t of schema) {
-        const { data } = await adapter.query(t.__name, {
-          status: 'draft',
-          where: { hasDraft: { eq: true } },
-          includeUnpublished: true,
-        });
-        for (const e of data) found.push({ type: t.__name, id: e.__id });
-      }
-      setDrafts(found);
+      const drafts = await adapter.listDrafts();
+      setDrafts(drafts.map((d): DraftRef => ({ ...d })));
       setSynced(true);
     } catch {
       setSynced(false); // not signed in / no access — hide publish
     }
-  }, [adapter, schema, setDrafts]);
+  }, [adapter, setDrafts]);
 
   // Sync on mount + whenever inspect toggles; between those the drawer keeps the
   // count live via the shared registry, so publishing reacts without a re-query.
@@ -87,14 +97,38 @@ export function ZeroCmsBar({
     if (!drafts.length) return;
     const n = drafts.length;
     setBusy(true);
+    let conflicted = false;
     try {
       for (const d of drafts) {
-        await adapter.publish(d.type, d.id);
-        clearDraft(d.type, d.id);
+        try {
+          // The registry's token may be stale (optimistic markDraft entries carry
+          // none at all) — refetch when missing so we CAS against a real value.
+          let token = d.lastEditedAt;
+          if (!token) {
+            const fresh = await adapter.get(d.type, d.id, {
+              status: 'draft',
+              includeUnpublished: true,
+            });
+            token = fresh?.__lastEditedAt;
+          }
+          if (!token) continue; // entry vanished since the last sync
+          await adapter.publish(d.type, d.id, currentUserId, token);
+          clearDraft(d.type, d.id);
+        } catch (err) {
+          if (err instanceof ZeroCmsError && err.code === 'CONFLICT') {
+            conflicted = true;
+            continue; // someone else touched it — leave it, refresh() below re-syncs
+          }
+          throw err;
+        }
       }
       await refresh();
       onChange?.();
-      notify('success', `Published ${n} item${n > 1 ? 's' : ''}`);
+      if (conflicted) {
+        notify('error', 'Some items changed elsewhere and were skipped — re-check and retry');
+      } else {
+        notify('success', `Published ${n} item${n > 1 ? 's' : ''}`);
+      }
     } catch (err) {
       notify('error', errorMessage(err));
     } finally {
@@ -138,7 +172,7 @@ export function ZeroCmsBar({
       </button>
 
       <a
-        href="/admin"
+        href="/admin/cms"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Open the CMS admin in a new tab"
@@ -165,6 +199,45 @@ export function ZeroCmsBar({
               ? 'Nothing to publish'
               : `Publish ${drafts.length} item${drafts.length > 1 ? 's' : ''}`}
         </button>
+      ) : null}
+
+      {currentUserEmail ? (
+        <span
+          className="max-w-[14rem] truncate text-xs text-white/60"
+          title={currentUserEmail}
+        >
+          {currentUserEmail}
+        </span>
+      ) : null}
+
+      {logout ? (
+        <button
+          type="button"
+          onClick={() => {
+            // Clears the local bearer token + the httpOnly session cookie
+            // (AuthClient.logout(), see ZeroCmsWidget.tsx), then leaves the
+            // Draft Mode mirror the same way Close does — staying on an
+            // /admin/* page with no session left is a dead end (proxy.ts
+            // would just bounce the *next* navigation to the sign-in form
+            // anyway; this skips straight there).
+            logout();
+            if (closeHref) window.location.href = closeHref;
+          }}
+          aria-label="Log out"
+          className={`${btn} border-white/60 text-white hover:bg-white/15`}
+        >
+          Log out
+        </button>
+      ) : null}
+
+      {closeHref ? (
+        <a
+          href={closeHref}
+          aria-label="Close preview and return to the site"
+          className={`${btn} border-white/60 text-white hover:bg-white/15`}
+        >
+          Close
+        </a>
       ) : null}
 
       <button

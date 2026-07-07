@@ -20,7 +20,7 @@ describe('Auth', () => {
       firstName: 'Jo',
     });
     expect(u).not.toHaveProperty('hashedPassword');
-    expect(auth.count()).toBe(1);
+    expect(await auth.count()).toBe(1);
 
     await expect(auth.login('jo@example.com', 'wrong')).rejects.toMatchObject({
       code: 'UNAUTHORIZED',
@@ -28,7 +28,7 @@ describe('Auth', () => {
 
     const { token, user } = await auth.login('jo@example.com', 'pw1'); // case-insensitive
     expect(user.role).toBe('admin');
-    const session = auth.verify(token);
+    const session = await auth.verify(token);
     expect(session).toMatchObject({ userId: u.__id, role: 'admin' });
   });
 
@@ -37,8 +37,8 @@ describe('Auth', () => {
     await expect(
       auth.createUser({ email: 'a@b.com', password: 'y' })
     ).rejects.toMatchObject({ code: 'CONFLICT' });
-    expect(auth.verify('not.a.token')).toBeNull();
-    expect(auth.verify(null)).toBeNull();
+    expect(await auth.verify('not.a.token')).toBeNull();
+    expect(await auth.verify(null)).toBeNull();
   });
 
   it('changes own password and clears forcePasswordUpdate', async () => {
@@ -48,7 +48,7 @@ describe('Auth', () => {
       forcePasswordUpdate: true,
     });
     const { token } = await auth.login('c@d.com', 'old');
-    expect(auth.verify(token)?.forcePasswordUpdate).toBe(true);
+    expect((await auth.verify(token))?.forcePasswordUpdate).toBe(true);
 
     await expect(
       auth.changeOwnPassword(token, 'nope', 'new')
@@ -56,7 +56,7 @@ describe('Auth', () => {
 
     const after = await auth.changeOwnPassword(token, 'old', 'newpass');
     expect(after.user.forcePasswordUpdate).toBe(false);
-    expect(auth.verify(after.token)?.forcePasswordUpdate).toBe(false);
+    expect((await auth.verify(after.token))?.forcePasswordUpdate).toBe(false);
     await expect(auth.login('c@d.com', 'newpass')).resolves.toBeTruthy();
     expect(u.email).toBe('c@d.com');
   });
@@ -75,10 +75,19 @@ describe('Auth', () => {
   it('disabled users cannot log in or verify', async () => {
     const u = await auth.createUser({ email: 'e@f.com', password: 'pw' });
     const { token } = await auth.login('e@f.com', 'pw');
-    await auth.updateUser(u.__id, { disabled: true });
-    expect(auth.verify(token)).toBeNull();
+    await auth.updateUser(u.__id, { disabled: true }, 'admin-id', u.updatedAt);
+    expect(await auth.verify(token)).toBeNull();
     await expect(auth.login('e@f.com', 'pw')).rejects.toMatchObject({
       code: 'UNAUTHORIZED',
     });
+  });
+
+  it('updateUser rejects a stale expectedUpdatedAt (ADR 0009)', async () => {
+    const u = await auth.createUser({ email: 'g@h.com', password: 'pw' });
+    await auth.updateUser(u.__id, { firstName: 'First' }, 'admin-id', u.updatedAt);
+    // u.updatedAt is now stale — the update above already bumped it.
+    await expect(
+      auth.updateUser(u.__id, { firstName: 'Second' }, 'admin-id', u.updatedAt)
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
   });
 });

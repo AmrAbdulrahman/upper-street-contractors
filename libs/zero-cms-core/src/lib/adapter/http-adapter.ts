@@ -9,7 +9,8 @@ import type { GetOptions, QueryInput, QueryResult } from '../model/query';
 import type { MediaItem } from '../model/media';
 import type { OutputEntry } from '../engine/output';
 import { ZeroCmsError, type ZeroCmsErrorCode } from '../model/errors';
-import type { Adapter, DanglingRef, MediaUpload, MediaMetaUpdate } from './adapter';
+import type { Adapter, DanglingRef, DraftEntryRef, MediaUpload, MediaMetaUpdate } from './adapter';
+import type { BackfillSpec } from '../engine/engine';
 import { RPC_PATH, type RpcErrorBody, type RpcOp } from './protocol';
 import { base64ToBytes, bytesToBase64 } from './base64';
 
@@ -45,30 +46,37 @@ export function createHttpAdapter(opts: HttpAdapterOptions): Adapter {
 
   return {
     getSchema: () => rpc('getSchema', []),
-    saveSchema: (schema: Schema) => rpc('saveSchema', [schema]),
-    create: (t, v: EntryValues) => rpc('create', [t, v]),
-    update: (t, id, v: EntryValues) => rpc('update', [t, id, v]),
-    patch: (t, id, v: EntryValues) => rpc('patch', [t, id, v]),
-    delete: (t, id) => rpc('delete', [t, id]),
-    publish: (t, id) => rpc('publish', [t, id]),
-    unpublish: (t, id) => rpc('unpublish', [t, id]),
-    discardDraft: (t, id) => rpc('discardDraft', [t, id]),
+    getSchemaVersion: () => rpc('getSchemaVersion', []),
+    saveSchema: (schema: Schema, actor: string, expectedVersion: string | null, backfill?: BackfillSpec[]) =>
+      rpc('saveSchema', [schema, actor, expectedVersion, backfill]),
+    create: (t, v: EntryValues, actor: string) => rpc('create', [t, v, actor]),
+    update: (t, id, v: EntryValues, actor: string, expected: string) =>
+      rpc('update', [t, id, v, actor, expected]),
+    patch: (t, id, v: EntryValues, actor: string, expected: string) =>
+      rpc('patch', [t, id, v, actor, expected]),
+    delete: (t, id, actor: string, expected: string) => rpc('delete', [t, id, actor, expected]),
+    publish: (t, id, actor: string, expected: string) => rpc('publish', [t, id, actor, expected]),
+    unpublish: (t, id, actor: string, expected: string) =>
+      rpc('unpublish', [t, id, actor, expected]),
+    discardDraft: (t, id, actor: string, expected: string) =>
+      rpc('discardDraft', [t, id, actor, expected]),
     get: (t, id, opts?: GetOptions) =>
       rpc<OutputEntry | null>('get', [t, id, opts ?? {}]),
     query: (t, input?: QueryInput) =>
       rpc<QueryResult<OutputEntry>>('query', [t, input ?? {}]),
+    listDrafts: () => rpc<DraftEntryRef[]>('listDrafts', []),
     validateRefs: (t, id) => rpc<DanglingRef[]>('validateRefs', [t, id]),
     locate: (id) => rpc<{ id: string; type: string } | null>('locate', [id]),
     listMedia: () => rpc<MediaItem[]>('listMedia', []),
-    async putMedia(bytes: Uint8Array, meta: MediaUpload) {
-      return rpc<MediaItem>('putMedia', [bytesToBase64(bytes), meta]);
+    async putMedia(bytes: Uint8Array, meta: MediaUpload, actor: string) {
+      return rpc<MediaItem>('putMedia', [bytesToBase64(bytes), meta, actor]);
     },
-    updateMedia: (id: string, meta: MediaMetaUpdate) =>
-      rpc<MediaItem>('updateMedia', [id, meta]),
+    updateMedia: (id: string, meta: MediaMetaUpdate, actor: string, expected: string) =>
+      rpc<MediaItem>('updateMedia', [id, meta, actor, expected]),
     async getMedia(id: string) {
       const r = await rpc<{ item: MediaItem; bytesBase64: string }>('getMedia', [id]);
       return { item: r.item, bytes: base64ToBytes(r.bytesBase64) };
     },
-    deleteMedia: (id) => rpc('deleteMedia', [id]),
+    deleteMedia: (id, actor: string, expected: string) => rpc('deleteMedia', [id, actor, expected]),
   };
 }

@@ -3,8 +3,14 @@
  * over the RPC protocol. Mount it in a Next route handler, Bun, Deno, or node.
  *
  *   const adapter = await createNodeFsAdapter(baseDir);
- *   const handle = createRequestHandler(adapter);
+ *   const handle = createRequestHandler(adapter, { auth });
  *   // Next: export const POST = (req) => handle(req);
+ *
+ * When `auth` is configured, the caller identity stamped on every mutation
+ * (ADR 0009) is derived from the **verified session**, never trusted from the
+ * client-sent args — a client claiming to be someone else would otherwise be
+ * trivial. Only when `auth` is omitted entirely (dev/trusted environments, no
+ * session to derive from) does the client-supplied actor get used as-is.
  */
 
 import type { Adapter } from '../adapter/adapter';
@@ -44,30 +50,75 @@ function errorResponse(err: unknown): Response {
   );
 }
 
-async function dispatch(adapter: Adapter, op: string, args: unknown[]): Promise<unknown> {
+async function dispatch(
+  adapter: Adapter,
+  op: string,
+  args: unknown[],
+  actorOverride: string | undefined
+): Promise<unknown> {
+  const actorOf = (fromArgs: unknown) => actorOverride ?? (fromArgs as string);
+
   switch (op) {
     case 'getSchema':
       return adapter.getSchema();
+    case 'getSchemaVersion':
+      return adapter.getSchemaVersion();
     case 'saveSchema':
-      return adapter.saveSchema(args[0] as never);
+      return adapter.saveSchema(
+        args[0] as never,
+        actorOf(args[1]),
+        args[2] as string | null,
+        args[3] as never
+      );
     case 'create':
-      return adapter.create(args[0] as string, args[1] as never);
+      return adapter.create(args[0] as string, args[1] as never, actorOf(args[2]));
     case 'update':
-      return adapter.update(args[0] as string, args[1] as string, args[2] as never);
+      return adapter.update(
+        args[0] as string,
+        args[1] as string,
+        args[2] as never,
+        actorOf(args[3]),
+        args[4] as string
+      );
     case 'patch':
-      return adapter.patch(args[0] as string, args[1] as string, args[2] as never);
+      return adapter.patch(
+        args[0] as string,
+        args[1] as string,
+        args[2] as never,
+        actorOf(args[3]),
+        args[4] as string
+      );
     case 'delete':
-      return adapter.delete(args[0] as string, args[1] as string).then(() => ({ ok: true }));
+      return adapter
+        .delete(args[0] as string, args[1] as string, actorOf(args[2]), args[3] as string)
+        .then(() => ({ ok: true }));
     case 'publish':
-      return adapter.publish(args[0] as string, args[1] as string);
+      return adapter.publish(
+        args[0] as string,
+        args[1] as string,
+        actorOf(args[2]),
+        args[3] as string
+      );
     case 'unpublish':
-      return adapter.unpublish(args[0] as string, args[1] as string);
+      return adapter.unpublish(
+        args[0] as string,
+        args[1] as string,
+        actorOf(args[2]),
+        args[3] as string
+      );
     case 'discardDraft':
-      return adapter.discardDraft(args[0] as string, args[1] as string);
+      return adapter.discardDraft(
+        args[0] as string,
+        args[1] as string,
+        actorOf(args[2]),
+        args[3] as string
+      );
     case 'get':
       return adapter.get(args[0] as string, args[1] as string, args[2] as never);
     case 'query':
       return adapter.query(args[0] as string, args[1] as never);
+    case 'listDrafts':
+      return adapter.listDrafts();
     case 'validateRefs':
       return adapter.validateRefs(args[0] as string, args[1] as string);
     case 'locate':
@@ -75,15 +126,22 @@ async function dispatch(adapter: Adapter, op: string, args: unknown[]): Promise<
     case 'listMedia':
       return adapter.listMedia();
     case 'putMedia':
-      return adapter.putMedia(base64ToBytes(args[0] as string), args[1] as never);
+      return adapter.putMedia(base64ToBytes(args[0] as string), args[1] as never, actorOf(args[2]));
     case 'updateMedia':
-      return adapter.updateMedia(args[0] as string, args[1] as never);
+      return adapter.updateMedia(
+        args[0] as string,
+        args[1] as never,
+        actorOf(args[2]),
+        args[3] as string
+      );
     case 'getMedia': {
       const { item, bytes } = await adapter.getMedia(args[0] as string);
       return { item, bytesBase64: bytesToBase64(bytes) };
     }
     case 'deleteMedia':
-      return adapter.deleteMedia(args[0] as string).then(() => ({ ok: true }));
+      return adapter
+        .deleteMedia(args[0] as string, actorOf(args[1]), args[2] as string)
+        .then(() => ({ ok: true }));
     default:
       throw new ZeroCmsError('VALIDATION', `Unknown op "${op}"`);
   }
@@ -93,8 +151,10 @@ export interface RequestHandlerOptions {
   path?: string;
   /**
    * When provided, every RPC call requires a valid Bearer session and is
-   * role-checked ({@link authorizeRpc}). Omit to leave the RPC surface open
-   * (dev / trusted environments).
+   * role-checked ({@link authorizeRpc}); the session's `userId` becomes the
+   * stamped actor on every mutation, ignoring whatever the client sent. Omit
+   * to leave the RPC surface open (dev / trusted environments) — the client's
+   * own claimed actor is trusted as-is in that case.
    */
   auth?: Auth;
 }
@@ -111,8 +171,13 @@ export function createRequestHandler(
       return json({ error: { code: 'VALIDATION', message: 'POST only' } }, 405);
     try {
       const { op, args } = (await req.json()) as RpcRequest;
-      if (options.auth) authorizeRpc(op, options.auth.verify(getBearer(req)));
-      const result = await dispatch(adapter, op, args ?? []);
+      let actorOverride: string | undefined;
+      if (options.auth) {
+        const session = await options.auth.verify(getBearer(req));
+        authorizeRpc(op, session);
+        actorOverride = session?.userId;
+      }
+      const result = await dispatch(adapter, op, args ?? [], actorOverride);
       return json(result ?? null);
     } catch (err) {
       return errorResponse(err);

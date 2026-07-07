@@ -1,0 +1,18 @@
+{
+  "__name": "accreditation-list",
+  "label": "Accreditation List",
+  "fields": [
+    {
+      "__name": "title",
+      "__type": "text",
+      "required": true
+    },
+    {
+      "__name": "list",
+      "__type": "references",
+      "allowedTypes": [
+        "accreditation"
+      ]
+    }
+  ]
+}

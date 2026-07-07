@@ -23,6 +23,24 @@ export interface Entry {
   values: EntryValues | null;
   /** Pending edits, full snapshot. `null` when there are no pending edits. */
   __draft: EntryValues | null;
+  /** ISO timestamp, set once at `create` and never changed after. */
+  __createdAt: string;
+  /**
+   * ISO timestamp of the last mutation (create/update/patch/publish/unpublish/
+   * discardDraft/delete) to *either* axis of this entry — not split per
+   * draft/published, since `__draft` is a full-snapshot overlay and two
+   * concurrent edits to the same entry can't be merged safely either way
+   * (ADR 0009). This is the optimistic-concurrency token: a mutating call must
+   * present the value it last read here, checked atomically against the
+   * current stored value at write time — never against an in-memory cache.
+   */
+  __lastEditedAt: string;
+  /**
+   * Caller identity (a real user id, or a fixed sentinel like `"system"`/
+   * `"migration"` for non-interactive callers) responsible for the last
+   * mutation. Required — no anonymous default (ADR 0009).
+   */
+  __lastEditedBy: string;
 }
 
 /** Read-time version selector (NOT a filter). See ADR 0006. */

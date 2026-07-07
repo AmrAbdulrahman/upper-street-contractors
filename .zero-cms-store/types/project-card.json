@@ -1,0 +1,33 @@
+{
+  "__name": "cta",
+  "label": "CTA",
+  "fields": [
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "cost",
+      "label": "Cost",
+      "__type": "text"
+    },
+    {
+      "__name": "subtitle",
+      "__type": "text"
+    },
+    {
+      "__name": "banner",
+      "__type": "reference",
+      "allowedTypes": [
+        "banner"
+      ]
+    },
+    {
+      "__name": "buttons",
+      "__type": "references",
+      "allowedTypes": [
+        "button"
+      ]
+    }
+  ]
+}

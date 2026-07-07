@@ -1,7 +1,7 @@
 import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import type { ProjectDetailFragment } from "@/generated/graphql";
 import { getDuration } from "@/helpers/project-meta";
-import { resolveStrapiMediaUrl } from "@/helpers/strapi-media-url";
+import { resolveMediaUrl } from "@/helpers/media-url";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -31,7 +31,7 @@ function GalleryFigure({
   sizes: string;
   priority?: boolean;
 }) {
-  const url = resolveStrapiMediaUrl(img.image?.url);
+  const url = resolveMediaUrl(img.image?.url);
   return (
     <figure
       className={`relative overflow-hidden border border-white/10 bg-white/5 ${className ?? ""}`}

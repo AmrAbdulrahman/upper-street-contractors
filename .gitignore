@@ -21,6 +21,7 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -37,7 +38,6 @@ yarn-error.log*
 .env*
 !.env.example
 !.envrc
-!apps/website/.envrc
 
 # graphql codegen output
 apps/website/src/generated/*
@@ -54,16 +54,6 @@ apps/website/next-env.d.ts
 # puppeteer
 .puppeteer-cache/
 
-# strapi (apps/cms)
-apps/cms/.cache/
-apps/cms/.tmp/
-apps/cms/build/
-apps/cms/dist/
-apps/cms/.strapi/
-apps/cms/.strapi-updater.json
-apps/cms/.strapi-cloud.json
-apps/cms/.local-api-token
-apps/cms/public/uploads/*
-!apps/cms/public/uploads/.gitkeep
 vitest.config.*.timestamp*
 
+.zero-cms-store/generated

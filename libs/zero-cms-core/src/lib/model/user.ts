@@ -24,7 +24,15 @@ export interface User {
   /** Disabled users cannot log in. */
   disabled?: boolean;
   createdAt: string;
+  /**
+   * Bumped on every mutation. Doubles as the optimistic-concurrency token
+   * (ADR 0009) — a mutating call must present the value it last read here.
+   * Not `__`-prefixed like Entry's system fields: Users aren't Type-schema-driven,
+   * so there's no user-defined-field collision risk to guard against.
+   */
   updatedAt: string;
+  /** Caller identity responsible for the last mutation. Required, no anonymous default. */
+  lastEditedBy: string;
 }
 
 /** A user without secrets — the shape returned over the API. */

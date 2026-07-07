@@ -145,6 +145,9 @@ export function generateSdl(schema: Schema): string {
       '  type: String!',
       '  status: CmsStatus!',
       '  hasDraft: Boolean!',
+      // The optimistic-concurrency token (ADR 0009) — callers must read this
+      // before they can pass `expectedLastEditedAt` to any mutation below.
+      '  lastEditedAt: String!',
       ...type.fields.map((f) => `  ${f.__name}: ${outputType(type, f)}`),
     ].join('\n');
     blocks.push(`type ${T} {\n${objFields}\n}`);
@@ -191,14 +194,17 @@ export function generateSdl(schema: Schema): string {
   const mutationFields = schema
     .map((type) => {
       const T = typeName(type.__name);
+      // expectedLastEditedAt is the optimistic-concurrency token (ADR 0009) —
+      // the value the caller last read for this entry's __lastEditedAt.
+      // create has none (a fresh id can't conflict).
       return [
         `  create${T}(values: ${T}Input!): ${T}!`,
-        `  update${T}(id: ID!, values: ${T}Input!): ${T}!`,
-        `  patch${T}(id: ID!, values: ${T}Input!): ${T}!`,
-        `  delete${T}(id: ID!): Boolean!`,
-        `  publish${T}(id: ID!): ${T}!`,
-        `  unpublish${T}(id: ID!): ${T}!`,
-        `  discardDraft${T}(id: ID!): ${T}!`,
+        `  update${T}(id: ID!, values: ${T}Input!, expectedLastEditedAt: String!): ${T}!`,
+        `  patch${T}(id: ID!, values: ${T}Input!, expectedLastEditedAt: String!): ${T}!`,
+        `  delete${T}(id: ID!, expectedLastEditedAt: String!): Boolean!`,
+        `  publish${T}(id: ID!, expectedLastEditedAt: String!): ${T}!`,
+        `  unpublish${T}(id: ID!, expectedLastEditedAt: String!): ${T}!`,
+        `  discardDraft${T}(id: ID!, expectedLastEditedAt: String!): ${T}!`,
       ].join('\n');
     })
     .join('\n');

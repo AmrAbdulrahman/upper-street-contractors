@@ -11,8 +11,17 @@ export { Engine } from './lib/engine/engine';
 export type { StoragePort } from './lib/engine/storage-port';
 export {
   createFsStoragePort,
+  createFsBlobStore,
   createMemoryStoragePort,
+  createMemoryBlobStore,
 } from './lib/engine/fs-storage-port';
+export type { BlobStore, SchemaRecord } from './lib/engine/storage-port';
+export {
+  createRedisStoragePort,
+  createVercelBlobStore,
+  type RedisStorageOptions,
+  type VercelBlobOptions,
+} from './lib/engine/redis-storage-port';
 
 // Config
 export {
@@ -29,6 +38,7 @@ export {
   createNodeFsAdapter,
   createAdapterFromConfig,
   createNodeAdapter,
+  createRedisAdapter,
   createEngineAdapter,
   type EngineAdapter,
 } from './lib/adapter/node-adapter';

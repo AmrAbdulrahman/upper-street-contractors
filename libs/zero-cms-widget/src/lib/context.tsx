@@ -19,6 +19,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { ZeroCmsError } from '@usc/zero-cms-core';
 import { useZeroCms, errorMessage } from '@usc/zero-cms-app';
 
 export interface OpenOptions {
@@ -76,6 +77,16 @@ interface WidgetContextValue {
   unlink: (opts: UnlinkOptions) => Promise<void>;
   /** Close the whole stack. */
   close: () => void;
+  /**
+   * Sign out of the widget's own auth session (clears the local bearer token
+   * + the httpOnly session cookie via `AuthClient.logout()`). Only present
+   * when `<ZeroCmsWidget auth={...}>` is actually gating the widget — the
+   * plain `adapter`-prop variant has no session to log out of, so this is
+   * `undefined` there (`ZeroCmsBar` hides its Log out button accordingly).
+   */
+  logout?: () => void;
+  /** The signed-in user's email (auth-gated variant only — see {@link logout}). */
+  currentUserEmail?: string;
 }
 
 const WidgetContext = createContext<WidgetContextValue | null>(null);
@@ -99,13 +110,19 @@ export function WidgetProvider({
   children,
   inspect = false,
   onChanged,
+  onLogout,
+  currentUserEmail,
 }: {
   children: ReactNode;
   inspect?: boolean;
   /** Called after a mutation the widget performs itself (e.g. unlink) so the host can revalidate. */
   onChanged?: () => void;
+  /** Wired to `AuthClient.logout()` by `<ZeroCmsWidget auth={...}>`; absent for the plain-adapter variant. */
+  onLogout?: () => void;
+  /** Passed straight through to {@link WidgetContextValue.currentUserEmail}. */
+  currentUserEmail?: string;
 }) {
-  const { adapter, schema, notify } = useZeroCms();
+  const { adapter, schema, notify, currentUserId } = useZeroCms();
   const [stack, setStack] = useState<DrawerTarget[]>([]);
   const seq = useRef(0);
 
@@ -205,27 +222,43 @@ export function WidgetProvider({
       if (!createdId) return;
 
       try {
+        const parent = await adapter.get(pType, parentId, {
+          status: 'draft',
+          includeUnpublished: true,
+        });
+        if (!parent) throw new Error(`"${parentId}" no longer exists`);
         if (isRefs) {
-          const parent = await adapter.get(pType, parentId, {
-            status: 'draft',
-            includeUnpublished: true,
-          });
-          const current = Array.isArray(parent?.[parentField])
+          const current = Array.isArray(parent[parentField])
             ? (parent[parentField] as string[])
             : [];
-          await adapter.patch(pType, parentId, {
-            [parentField]: [...current, createdId],
-          });
+          await adapter.patch(
+            pType,
+            parentId,
+            { [parentField]: [...current, createdId] },
+            currentUserId,
+            parent.__lastEditedAt
+          );
         } else {
-          await adapter.patch(pType, parentId, { [parentField]: createdId });
+          await adapter.patch(
+            pType,
+            parentId,
+            { [parentField]: createdId },
+            currentUserId,
+            parent.__lastEditedAt
+          );
         }
         onChanged?.();
         notify('success', 'Item added');
       } catch (err) {
         notify('error', errorMessage(err));
+        // A conflict here just means the parent changed elsewhere since we
+        // fetched it above — the new child entry itself was still created
+        // successfully; onChanged() lets the host re-sync and the editor can
+        // retry the link from fresh data.
+        if (err instanceof ZeroCmsError && err.code === 'CONFLICT') onChanged?.();
       }
     },
-    [adapter, schema, notify, onChanged, pushCreate]
+    [adapter, schema, notify, onChanged, pushCreate, currentUserId]
   );
 
   const unlink = useCallback(
@@ -239,19 +272,30 @@ export function WidgetProvider({
         // Drop the child id from the parent field (inverse of openCreate's link step).
         const parentSchema = schema.find((t) => t.__name === pType);
         const fieldDef = parentSchema?.fields.find((f) => f.__name === parentField);
+        const parent = await adapter.get(pType, parentId, {
+          status: 'draft',
+          includeUnpublished: true,
+        });
+        if (!parent) throw new Error(`"${parentId}" no longer exists`);
         if (fieldDef?.__type === 'references') {
-          const parent = await adapter.get(pType, parentId, {
-            status: 'draft',
-            includeUnpublished: true,
-          });
-          const current = Array.isArray(parent?.[parentField])
+          const current = Array.isArray(parent[parentField])
             ? (parent[parentField] as string[])
             : [];
-          await adapter.patch(pType, parentId, {
-            [parentField]: current.filter((id) => id !== childId),
-          });
+          await adapter.patch(
+            pType,
+            parentId,
+            { [parentField]: current.filter((id) => id !== childId) },
+            currentUserId,
+            parent.__lastEditedAt
+          );
         } else {
-          await adapter.patch(pType, parentId, { [parentField]: null });
+          await adapter.patch(
+            pType,
+            parentId,
+            { [parentField]: null },
+            currentUserId,
+            parent.__lastEditedAt
+          );
         }
 
         // No drawer to close; ask the host to revalidate so the item disappears.
@@ -259,9 +303,10 @@ export function WidgetProvider({
         notify('success', 'Item removed');
       } catch (err) {
         notify('error', errorMessage(err));
+        if (err instanceof ZeroCmsError && err.code === 'CONFLICT') onChanged?.();
       }
     },
-    [adapter, schema, onChanged, notify]
+    [adapter, schema, onChanged, notify, currentUserId]
   );
 
   const close = useCallback(() => {
@@ -275,8 +320,17 @@ export function WidgetProvider({
   const isOpen = stack.length > 0;
 
   const publicValue = useMemo<WidgetContextValue>(
-    () => ({ inspect: inspectActive, isOpen, openEntry, openCreate, unlink, close }),
-    [inspectActive, isOpen, openEntry, openCreate, unlink, close]
+    () => ({
+      inspect: inspectActive,
+      isOpen,
+      openEntry,
+      openCreate,
+      unlink,
+      close,
+      logout: onLogout,
+      currentUserEmail,
+    }),
+    [inspectActive, isOpen, openEntry, openCreate, unlink, close, onLogout, currentUserEmail]
   );
   const internalValue = useMemo<WidgetInternal>(
     () => ({ ...publicValue, stack, pop, pushEntry: openEntry, pushCreate }),

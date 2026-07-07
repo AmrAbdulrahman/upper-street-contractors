@@ -2,10 +2,10 @@
 
 /** Media section: upload, preview, and delete media (blocked while referenced). */
 
-import { useEffect, useRef, useState } from 'react';
-import type { MediaItem } from '@usc/zero-cms-core';
+import { useRef, useState } from 'react';
+import { ZeroCmsError, type MediaItem } from '@usc/zero-cms-core';
 import { useZeroCms } from '../../context';
-import { Badge, Button, EmptyState, Field, Spinner, Textarea, cls, cx } from '../ui';
+import { Badge, Button, EmptyState, Field, Textarea, cls, cx } from '../ui';
 import { errorMessage } from '../../util';
 
 /** Human-readable byte size (B / KB / MB). */
@@ -15,19 +15,12 @@ function formatBytes(n: number): string {
   return kb < 1024 ? `${kb.toFixed(1)} KB` : `${(kb / 1024).toFixed(1)} MB`;
 }
 
-/** Original upload name — media files are stored as `<id>__<name>`. */
-function mediaName(item: MediaItem): string {
-  const prefix = `${item.id}__`;
-  return item.filename.startsWith(prefix)
-    ? item.filename.slice(prefix.length)
-    : item.filename;
-}
-
 /**
- * Thumbnail for one media item. Images are fetched through the adapter and shown
- * via an object URL (the lib is framework-agnostic — no public media route to
- * point an <img src> at); non-images show a kind placeholder. `className` sets the
- * box size so the same component serves the library grid and the asset picker.
+ * Thumbnail for one media item — `item.url` is a real, public, CDN-backed
+ * Vercel Blob URL (ADR 0008), so this just points an `<img>` at it directly;
+ * no adapter round-trip/object-URL dance needed the way local-fs bytes did.
+ * `className` sets the box size so the same component serves the library
+ * grid and the asset picker.
  */
 export function MediaThumb({
   item,
@@ -36,32 +29,14 @@ export function MediaThumb({
   item: MediaItem;
   className?: string;
 }) {
-  const { adapter } = useZeroCms();
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => {
-    if (item.kind !== 'image') return;
-    let revoke: string | null = null;
-    let live = true;
-    void adapter.getMedia(item.id).then(({ bytes }) => {
-      if (!live) return;
-      const u = URL.createObjectURL(new Blob([bytes as BlobPart], { type: item.mime }));
-      revoke = u;
-      setUrl(u);
-    });
-    return () => {
-      live = false;
-      if (revoke) URL.revokeObjectURL(revoke);
-    };
-  }, [adapter, item.id, item.kind, item.mime]);
-
   if (item.kind === 'image')
-    return url ? (
+    return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={url} alt={item.filename} className={cx(className, 'rounded object-cover')} />
-    ) : (
-      <div className={cx(className, 'flex items-center justify-center rounded bg-neutral-100')}>
-        <Spinner />
-      </div>
+      <img
+        src={item.url}
+        alt={item.filename}
+        className={cx(className, 'rounded object-cover')}
+      />
     );
 
   return (
@@ -77,7 +52,7 @@ export function MediaThumb({
 }
 
 export function MediaLibrary() {
-  const { media, adapter, refreshMedia, notify } = useZeroCms();
+  const { media, adapter, refreshMedia, notify, currentUserId } = useZeroCms();
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,10 +64,11 @@ export function MediaLibrary() {
     try {
       for (const file of Array.from(files)) {
         const bytes = new Uint8Array(await file.arrayBuffer());
-        await adapter.putMedia(bytes, {
-          filename: file.name,
-          mime: file.type || 'application/octet-stream',
-        });
+        await adapter.putMedia(
+          bytes,
+          { filename: file.name, mime: file.type || 'application/octet-stream' },
+          currentUserId
+        );
       }
       await refreshMedia();
       notify('success', `Uploaded ${files.length} file${files.length > 1 ? 's' : ''}`);
@@ -106,16 +82,21 @@ export function MediaLibrary() {
     }
   };
 
-  const remove = async (id: string) => {
+  // Takes the whole item, not just the id — deleteMedia needs its current
+  // updatedAt as the optimistic-concurrency token (ADR 0009).
+  const remove = async (item: MediaItem) => {
     setError(null);
     try {
-      await adapter.deleteMedia(id);
-      await refreshMedia();
+      await adapter.deleteMedia(item.id, currentUserId, item.updatedAt);
       notify('success', 'Media deleted');
     } catch (err) {
       const msg = errorMessage(err);
       setError(msg);
       notify('error', msg);
+    } finally {
+      // Re-syncs the list either way — including after a conflict, so a stale
+      // "updated elsewhere" or "already deleted" item's card reflects reality.
+      await refreshMedia();
     }
   };
 
@@ -147,8 +128,8 @@ export function MediaLibrary() {
             <div key={m.id} className={cx(cls.card, 'space-y-2 p-2')}>
               <MediaThumb item={m} />
               <div className="flex items-center gap-1">
-                <span className="flex-1 truncate text-xs text-neutral-600" title={mediaName(m)}>
-                  {mediaName(m)}
+                <span className="flex-1 truncate text-xs text-neutral-600" title={m.filename}>
+                  {m.filename}
                 </span>
                 <Badge>{m.kind}</Badge>
               </div>
@@ -160,7 +141,7 @@ export function MediaLibrary() {
                   edit
                 </button>
                 <button
-                  onClick={() => remove(m.id)}
+                  onClick={() => remove(m)}
                   className="text-xs text-red-600 hover:underline"
                 >
                   delete
@@ -191,22 +172,26 @@ function MediaEditDrawer({
   item: MediaItem;
   onClose: () => void;
 }) {
-  const { adapter, refreshMedia, notify } = useZeroCms();
+  const { adapter, refreshMedia, notify, currentUserId } = useZeroCms();
   const [alt, setAlt] = useState(item.alternativeText ?? '');
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
     setSaving(true);
     try {
-      await adapter.updateMedia(item.id, {
-        alternativeText: alt.trim() ? alt.trim() : undefined,
-      });
-      await refreshMedia();
+      await adapter.updateMedia(
+        item.id,
+        { alternativeText: alt.trim() ? alt.trim() : undefined },
+        currentUserId,
+        item.updatedAt
+      );
       notify('success', 'Alt text saved');
       onClose();
     } catch (err) {
       notify('error', errorMessage(err));
+      if (err instanceof ZeroCmsError && err.code === 'CONFLICT') onClose(); // stale — force a re-open
     } finally {
+      await refreshMedia();
       setSaving(false);
     }
   };
@@ -234,8 +219,8 @@ function MediaEditDrawer({
 
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-sm">
           <dt className="text-neutral-500">Name</dt>
-          <dd className="truncate text-neutral-800" title={mediaName(item)}>
-            {mediaName(item)}
+          <dd className="truncate text-neutral-800" title={item.filename}>
+            {item.filename}
           </dd>
           <dt className="text-neutral-500">Type</dt>
           <dd className="text-neutral-800">{item.mime}</dd>

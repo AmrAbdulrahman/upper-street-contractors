@@ -9,8 +9,8 @@
  * content still renders; the drawer shows a sign-in form until authenticated).
  */
 
-import { useMemo, useState, type ReactNode } from 'react';
-import { createHttpAdapter, type Adapter } from '@usc/zero-cms-core';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createHttpAdapter, type Adapter, type SafeUser } from '@usc/zero-cms-core';
 import {
   EntryEditor,
   ZeroCmsProvider,
@@ -89,9 +89,51 @@ function AuthedWidget({
     [token, auth.baseUrl]
   );
 
+  // Unlike AuthGate (the real dashboard), this widget previously never
+  // fetched *who* the token belongs to — it only ever needed the token
+  // itself to authorize RPC calls. Mirrors AuthGate.tsx's own `client.me()`
+  // effect: needed now so the bar can show the signed-in email, and so
+  // mutations from here carry the real actor instead of ZeroCmsProvider's
+  // 'anonymous' fallback (`currentUserId` below).
+  const [user, setUser] = useState<SafeUser | null>(null);
+  useEffect(() => {
+    let live = true;
+    if (!token) {
+      setUser(null);
+      return;
+    }
+    void (async () => {
+      const me = await client.me();
+      if (live) setUser(me);
+    })();
+    return () => {
+      live = false;
+    };
+  }, [client, token]);
+
+  // client.logout() clears its own local state + localStorage token, but
+  // AuthedWidget's `token` (drives the `adapter` useMemo + DrawerBody's login
+  // gate) is separate React state — must be nulled here too, not just inside
+  // the client.
+  const handleLogout = useMemo(() => () => {
+    client.logout();
+    setToken(null);
+  }, [client]);
+
   return (
-    <ZeroCmsProvider adapter={adapter} richText={richText} blocks={blocks} notify={notify}>
-      <WidgetProvider inspect={inspect} onChanged={onSaved}>
+    <ZeroCmsProvider
+      adapter={adapter}
+      richText={richText}
+      blocks={blocks}
+      notify={notify}
+      currentUserId={user?.__id}
+    >
+      <WidgetProvider
+        inspect={inspect}
+        onChanged={onSaved}
+        onLogout={handleLogout}
+        currentUserEmail={user?.email}
+      >
         {children}
         <DrawerBody onSaved={onSaved} client={client} token={token} onAuthed={setToken} />
       </WidgetProvider>

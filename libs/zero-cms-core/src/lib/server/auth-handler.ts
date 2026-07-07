@@ -56,13 +56,13 @@ export type AuthOp =
 export function createAuthHandler(
   auth: Auth
 ): (req: Request) => Promise<Response> {
-  const session = (req: Request): Session => {
-    const s = auth.verify(getBearer(req));
+  const session = async (req: Request): Promise<Session> => {
+    const s = await auth.verify(getBearer(req));
     if (!s) throw new ZeroCmsError('UNAUTHORIZED', 'Sign in required');
     return s;
   };
-  const admin = (req: Request): Session => {
-    const s = session(req);
+  const admin = async (req: Request): Promise<Session> => {
+    const s = await session(req);
     if (!roleAtLeast(s.role, 'admin'))
       throw new ZeroCmsError('FORBIDDEN', 'Requires "admin" role');
     return s;
@@ -73,30 +73,33 @@ export function createAuthHandler(
       case 'login':
         return auth.login(args[0] as string, args[1] as string);
       case 'me':
-        session(req);
+        await session(req);
         return auth.me(getBearer(req));
       case 'changePassword':
-        session(req);
+        await session(req);
         return auth.changeOwnPassword(
           getBearer(req) as string,
           args[0] as string,
           args[1] as string
         );
       case 'listUsers':
-        admin(req);
+        await admin(req);
         return auth.list();
-      case 'createUser':
-        admin(req);
-        return auth.createUser(args[0] as never);
-      case 'updateUser':
-        admin(req);
-        return auth.updateUser(args[0] as string, args[1] as never);
-      case 'setPassword':
-        admin(req);
-        return auth.setPassword(args[0] as string, args[1] as string);
+      case 'createUser': {
+        const s = await admin(req);
+        return auth.createUser(args[0] as never, s.userId);
+      }
+      case 'updateUser': {
+        const s = await admin(req);
+        return auth.updateUser(args[0] as string, args[1] as never, s.userId, args[2] as string);
+      }
+      case 'setPassword': {
+        const s = await admin(req);
+        return auth.setPassword(args[0] as string, args[1] as string, s.userId, args[2] as string);
+      }
       case 'deleteUser':
-        admin(req);
-        return auth.deleteUser(args[0] as string).then(() => ({ ok: true }));
+        await admin(req);
+        return auth.deleteUser(args[0] as string, args[1] as string).then(() => ({ ok: true }));
       default:
         throw new ZeroCmsError('VALIDATION', `Unknown auth op "${op}"`);
     }

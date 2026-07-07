@@ -4,7 +4,6 @@
  */
 
 import { watch } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { generateFromConfig, type GenerateOptions } from './write';
 import { loadConfig, resolveConfig, type ZeroCmsConfig } from '../config/config';
@@ -40,10 +39,9 @@ async function watchConfig(
     .then((out) => opts.onGenerate?.(out))
     .catch((err) => opts.onError?.(err));
 
-  await mkdir(config.typesDir, { recursive: true });
+  // Schema is a single `types.json` directly under `dir` (ADR 0011 — one
+  // whole-document record, not a per-type file glob).
   const watchers = [
-    watch(config.typesDir, { persistent: true, recursive: true }, regen),
-    // legacy single-file types.json lives directly under dir
     watch(config.dir, { persistent: true }, (_e, file) => {
       if (file && basename(file) === 'types.json') regen();
     }),

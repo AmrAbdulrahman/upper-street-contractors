@@ -27,7 +27,7 @@ export function AssetPicker({
   onChange: (id: string) => void;
   accept?: 'image' | 'video' | 'any';
 }) {
-  const { media, adapter, refreshMedia } = useZeroCms();
+  const { media, adapter, refreshMedia, currentUserId } = useZeroCms();
   const pool = media.filter((m) => accept === 'any' || m.kind === accept);
   const current = media.find((m) => m.id === value) ?? null;
 
@@ -53,10 +53,11 @@ export function AssetPicker({
     startUpload(async () => {
       try {
         const bytes = new Uint8Array(await file.arrayBuffer());
-        const item = await adapter.putMedia(bytes, {
-          filename: file.name,
-          mime: file.type || 'application/octet-stream',
-        });
+        const item = await adapter.putMedia(
+          bytes,
+          { filename: file.name, mime: file.type || 'application/octet-stream' },
+          currentUserId
+        );
         await refreshMedia();
         choose(item.id);
       } catch (err) {

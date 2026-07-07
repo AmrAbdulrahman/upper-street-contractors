@@ -78,39 +78,3 @@ export function Badge({
     </span>
   );
 }
-
-export function badgePropsFromStrapi(
-  data:
-    | {
-        text?: string | null;
-        variant?: string | null;
-        href?: string | null;
-        borderRadius?: number | null;
-      }
-    | null
-    | undefined,
-  options?: { href?: string | null; className?: string; stripHref?: boolean },
-): BadgeProps | null {
-  if (!data) {
-    return null;
-  }
-
-  const text = data.text?.trim();
-
-  if (!text) {
-    return null;
-  }
-
-  const href =
-    options?.stripHref || options?.href === null
-      ? undefined
-      : (options?.href ?? data.href ?? undefined);
-
-  return {
-    variant: normalizeBadgeVariant(data.variant),
-    radius: resolveBadgeRadius(data.borderRadius),
-    href,
-    className: options?.className,
-    children: text,
-  };
-}

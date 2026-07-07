@@ -1,7 +1,7 @@
-import { getZeroCmsAdapter, getZeroCmsAuth } from "@/lib/zero-cms/server";
+import { getZeroCmsReadAdapter, getZeroCmsAuth } from "@/lib/zero-cms/server";
 import { createGraphQLHandler } from "@usc/zero-cms-graphql";
 
-// GraphQL over the fs-backed store -> Node runtime, never cached.
+// GraphQL over the Redis-backed store -> Node runtime, never cached.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -10,7 +10,7 @@ let handle: ((req: Request) => Promise<Response>) | undefined;
 async function getHandle() {
   if (!handle) {
     handle = createGraphQLHandler({
-      adapter: await getZeroCmsAdapter(),
+      adapter: await getZeroCmsReadAdapter(),
       auth: await getZeroCmsAuth(),
     });
   }

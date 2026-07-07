@@ -18,7 +18,7 @@ export function getDesktopNavLinkClassName(isActive: boolean): string {
   return [
     desktopNavLinkBaseClass,
     isActive
-      ? "text-gold font-bold nav-link-selected"
+      ? "text-gold font-semibold tracking-[0.5px] nav-link-selected"
       : "text-muted font-medium hover:bg-border-light/25 hover:text-dark",
   ].join(" ");
 }

@@ -7,7 +7,7 @@ Read `docs/agents/project-stack.md`. Use caveman mode. Match existing patterns i
 ## Gather from user
 
 - Component name (PascalCase)
-- Whether it maps to a Strapi content type (needs `.graphql` fragment)
+- Whether it maps to a zero-cms Type (needs `.graphql` fragment)
 - Props / variants needed
 
 ## Steps
@@ -19,8 +19,8 @@ Read `docs/agents/project-stack.md`. Use caveman mode. Match existing patterns i
    - Tailwind utilities; use design tokens from `globals.css` (`bg-surface`, `text-foreground`, etc.)
    - TypeScript props interface
 
-3. **GraphQL** (if Strapi-backed) — `<kebab-name>.graphql`:
-   - Fragment on Strapi type with `documentId`
+3. **GraphQL** (if zero-cms-backed) — `<kebab-name>.graphql`:
+   - Fragment on the zero-cms Type
    - Compose child fragments (`...Icon`, etc.) as needed
 
 4. **Barrel** — `index.ts` re-exporting public API

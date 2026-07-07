@@ -1,0 +1,39 @@
+{
+  "__name": "image-container",
+  "label": "Image Container",
+  "fields": [
+    {
+      "__name": "imageFile",
+      "__type": "asset",
+      "accept": "any"
+    },
+    {
+      "__name": "imgDescription",
+      "__type": "text"
+    },
+    {
+      "__name": "width",
+      "__type": "number",
+      "integer": true
+    },
+    {
+      "__name": "height",
+      "__type": "number",
+      "integer": true
+    },
+    {
+      "__name": "imageRadius",
+      "__type": "lookup",
+      "options": [
+        "none",
+        "sm",
+        "md",
+        "lg",
+        "xl",
+        "xl2",
+        "xl3",
+        "full"
+      ]
+    }
+  ]
+}

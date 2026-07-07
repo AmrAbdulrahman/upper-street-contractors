@@ -20,6 +20,12 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     rules: {
       userAgent: "*",
       allow: "/",
+      // /admin/* is the editor surface (dashboard + Draft Mode mirror of the
+      // public routes, proxy.ts) — never meant to be crawled/indexed, even
+      // though the mirrored pages render the same content as their public
+      // counterparts (a rewrite, so it has no metadata of its own to mark
+      // noindex on — path-based robots.txt exclusion is what actually works).
+      disallow: "/admin",
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   };

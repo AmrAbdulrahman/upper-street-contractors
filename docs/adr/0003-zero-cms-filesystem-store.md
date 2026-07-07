@@ -4,7 +4,11 @@ Date: 2026-06-28
 
 ## Status
 
-Accepted
+Accepted, at the time — the file-system-store decision is superseded by
+[ADR 0008](./0008-zero-cms-redis-blob-store.md) (Redis + Blob) and the single-writer
+assumption by [ADR 0009](./0009-zero-cms-multi-writer-optimistic-concurrency.md)
+(multi-writer, per-entry optimistic concurrency). Kept here as the historical record of
+why file-system-and-single-writer was the right call for v1 (no remote editing yet).
 
 ## Context
 

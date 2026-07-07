@@ -1,15 +1,15 @@
 /**
- * zero-cms configuration (node-only).
+ * zero-cms configuration (node-only) — local dev / tests only, the fs-backed
+ * adapter's config. The deployed reference server is Redis/Blob-backed (ADR 0008)
+ * and doesn't use this at all.
  *
  * A `zero-cms.config.mjs` (or `.js`) exports a {@link ZeroCmsUserConfig}. Paths are
  * resolved relative to the config file's directory; `dir` defaults to that directory.
  *
  *   // zero-cms.config.mjs
  *   export default {
- *     dir: '.zero-cms-store',        // base dir (data.json, media/, types)
+ *     dir: '.zero-cms-store',        // base dir (types.json, data/, users/, media/)
  *     generated: 'generated',        // where the typed client is emitted
- *     types: 'types/**\/*.json',     // glob for type files (relative to dir)
- *     typesDir: 'types',             // where new types are written
  *   };
  */
 
@@ -22,30 +22,18 @@ export interface ZeroCmsUserConfig {
   dir?: string;
   /** Output directory for the generated typed client. Default: `<dir>/generated`. */
   generated?: string;
-  /** Glob for type files, relative to `dir`. Default: `types/**\/*.json`. */
-  types?: string;
-  /** Directory new/migrated type files are written to. Default: `types`. */
-  typesDir?: string;
 }
 
 /** Fully-resolved, absolute configuration used by the engine + tooling. */
 export interface ZeroCmsConfig {
   dir: string;
   generated: string;
-  /** Glob pattern (relative), evaluated with `cwd: dir`. */
-  typesGlob: string;
-  typesDir: string;
-  dataFile: string;
+  /** `<dir>/media` — blob-store root for the fs-backed `BlobStore`. */
   mediaDir: string;
-  usersFile: string;
-  /** Legacy single-file schema, read for back-compat and migrated on first save. */
-  legacyTypesFile: string;
 }
 
 export const DEFAULT_CONFIG: Required<Omit<ZeroCmsUserConfig, 'dir'>> = {
   generated: 'generated',
-  types: 'types/**/*.json',
-  typesDir: 'types',
 };
 
 export function resolveConfig(
@@ -53,16 +41,10 @@ export function resolveConfig(
   configDir: string
 ): ZeroCmsConfig {
   const dir = resolve(configDir, user.dir ?? '.');
-  const typesDir = resolve(dir, user.typesDir ?? DEFAULT_CONFIG.typesDir);
   return {
     dir,
     generated: resolve(dir, user.generated ?? DEFAULT_CONFIG.generated),
-    typesGlob: user.types ?? DEFAULT_CONFIG.types,
-    typesDir,
-    dataFile: join(dir, 'data.json'),
     mediaDir: join(dir, 'media'),
-    usersFile: join(dir, 'users.json'),
-    legacyTypesFile: join(dir, 'types.json'),
   };
 }
 
