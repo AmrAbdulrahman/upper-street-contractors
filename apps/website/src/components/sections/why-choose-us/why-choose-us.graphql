@@ -1,11 +1,14 @@
 fragment WhyChooseUsSection on WhyChooseUsSection {
-  documentId
+  id
   overline
   listOfPoints {
     ...BulletList
   }
   cardImage {
-    ...ImageContainer
+    url
+    alt
+    width
+    height
   }
   cardTitle
   cardRole

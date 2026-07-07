@@ -1,0 +1,14 @@
+{
+  "__name": "meta-data",
+  "label": "Meta Data",
+  "fields": [
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "description",
+      "__type": "longtext"
+    }
+  ]
+}

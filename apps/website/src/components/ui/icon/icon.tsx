@@ -9,7 +9,6 @@ import { ShieldIcon } from "./icons/shield";
 import { StarIcon } from "./icons/star";
 import { WhatsappIcon } from "./icons/whatsapp";
 import type { IconCode, IconSvgProps } from "./types";
-import { IconFragment } from "@/generated/graphql";
 
 const iconMap: Record<IconCode, ComponentType<IconSvgProps>> = {
   "arrow-right": ArrowRightIcon,
@@ -24,7 +23,7 @@ const iconMap: Record<IconCode, ComponentType<IconSvgProps>> = {
 };
 
 export type IconProps = {
-  data: Pick<IconFragment, "code"> | null | undefined;
+  data: { code?: string | null } | null | undefined;
   className?: string;
 };
 

@@ -1,0 +1,11 @@
+[
+  {
+    "__id": "44acd5c7-99c9-4b72-b2dc-bda501ecf2f6",
+    "email": "amr.abdurahman@gmail.com",
+    "role": "admin",
+    "hashedPassword": "scrypt$OXTQS58PCnfVThBC2e2+Og==$8+VL9Itp5WcyxO/nElPKir6GP+aYTW4z90z+DPEsArw=",
+    "forcePasswordUpdate": false,
+    "createdAt": "2026-06-28T21:20:18.506Z",
+    "updatedAt": "2026-06-28T21:23:23.591Z"
+  }
+]

@@ -1,9 +1,8 @@
 import {
-  AddStrapiEntry,
-  StrapiEntry,
-  StrapiEntryField,
-  StrapiRelationEntry,
-} from "@/components/strapi";
+  ZeroCmsEntry,
+  ZeroCmsEntryField,
+  ZeroCmsList,
+} from "@usc/zero-cms-widget";
 import { Button } from "@/components/ui/button";
 import { ReviewCard } from "@/components/ui/review-card";
 import { ClientReviewSectionFragment } from "@/generated/graphql";
@@ -18,62 +17,60 @@ export function ClientReviewsSection({ data }: ClientReviewsSectionProps) {
   const links = reviewLinks?.filter(Boolean) ?? [];
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <section className="bg-surface">
         <div className="mx-auto max-w-container px-6 py-[88px]">
           <div className="mx-auto max-w-2xl text-center">
             {overline ? (
-              <StrapiEntryField field="overline">
-                <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+              <ZeroCmsEntryField field="overline">
+                <p className="text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
                   {overline}
                 </p>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {title ? (
-              <StrapiEntryField field="title">
+              <ZeroCmsEntryField field="title">
                 <h2 className="mt-2.5 text-[clamp(26px,3.5vw,42px)] leading-tight text-dark">
                   {title}
                 </h2>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {description ? (
-              <StrapiEntryField field="description">
+              <ZeroCmsEntryField field="description">
                 <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted">
                   {description}
                 </p>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
           </div>
 
-          {cards.length > 0 ? (
-            <div className="mt-12 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
-              {cards.map((card) =>
-                card ? <ReviewCard key={card.documentId} data={card} /> : null,
-              )}
+          <ZeroCmsList
+            className="mt-12 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3"
+            field="reviewCards"
+            items={cards}
+          >
+            {cards.map((card) =>
+              card ? <ReviewCard key={card.id} data={card} /> : null,
+            )}
+          </ZeroCmsList>
 
-              <AddStrapiEntry field="reviewCards" />
-            </div>
-          ) : null}
-
-          {links.length > 0 ? (
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
-              {links.map((link) =>
-                link ? (
-                  <StrapiRelationEntry
-                    key={link.documentId}
-                    entry={link}
-                    field="reviewLinks"
-                  >
-                    <Button data={link} />
-                  </StrapiRelationEntry>
-                ) : null,
-              )}
-            </div>
-          ) : null}
+          <ZeroCmsList
+            className="mt-9 flex flex-wrap justify-center gap-3"
+            field="reviewLinks"
+            items={links}
+          >
+            {links.map((link) =>
+              link ? (
+                <ZeroCmsEntry key={link.id} entry={link}>
+                  <Button data={link} />
+                </ZeroCmsEntry>
+              ) : null,
+            )}
+          </ZeroCmsList>
         </div>
       </section>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

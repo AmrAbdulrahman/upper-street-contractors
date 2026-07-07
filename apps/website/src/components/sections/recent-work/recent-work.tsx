@@ -1,9 +1,9 @@
 import {
-  AddStrapiEntry,
-  StrapiEntry,
-  StrapiEntryField,
-  StrapiRelationEntry,
-} from "@/components/strapi";
+  ZeroCmsEntry,
+  ZeroCmsEntryField,
+  ZeroCmsList,
+  ZeroCmsRelationEntry,
+} from "@usc/zero-cms-widget";
 import { Button } from "@/components/ui/button";
 import { ProjectCard } from "@/components/ui/project-card";
 import { RecentWorkSectionFragment } from "@/generated/graphql";
@@ -17,56 +17,54 @@ export function RecentWorkSection({ data }: RecentWorkSectionProps) {
   const projectItems = projects?.filter(Boolean) ?? [];
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <section className="bg-white">
         <div className="mx-auto max-w-container px-6 py-[88px]">
           <div className="mx-auto max-w-2xl text-center">
             {overline ? (
-              <StrapiEntryField field="overline">
-                <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+              <ZeroCmsEntryField field="overline">
+                <p className="text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
                   {overline}
                 </p>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {title ? (
-              <StrapiEntryField field="title">
+              <ZeroCmsEntryField field="title">
                 <h2 className="mt-2.5 text-[clamp(26px,3.5vw,42px)] leading-tight text-dark">
                   {title}
                 </h2>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {description ? (
-              <StrapiEntryField field="description">
+              <ZeroCmsEntryField field="description">
                 <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted">
                   {description}
                 </p>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
           </div>
 
-          {projectItems.length > 0 ? (
-            <div className="mt-12 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
-              {projectItems.map((project) =>
-                project ? (
-                  <ProjectCard key={project.documentId} data={project} />
-                ) : null,
-              )}
-
-              <AddStrapiEntry field="projects" />
-            </div>
-          ) : null}
+          <ZeroCmsList
+            className="mt-12 grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3"
+            field="projects"
+            items={projectItems}
+          >
+            {projectItems.map((project) =>
+              project ? <ProjectCard key={project.id} data={project} /> : null,
+            )}
+          </ZeroCmsList>
 
           {viewAllProjects ? (
             <div className="mt-9 flex justify-center">
-              <StrapiRelationEntry entry={viewAllProjects} field="viewAllProjects">
+              <ZeroCmsRelationEntry entry={viewAllProjects} field="viewAllProjects">
                 <Button data={viewAllProjects} />
-              </StrapiRelationEntry>
+              </ZeroCmsRelationEntry>
             </div>
           ) : null}
         </div>
       </section>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

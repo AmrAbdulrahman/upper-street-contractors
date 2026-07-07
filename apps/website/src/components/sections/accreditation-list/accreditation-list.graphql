@@ -1,5 +1,5 @@
 fragment AccreditationList on AccreditationList {
-  documentId
+  id
   list {
     ...Accreditation
   }

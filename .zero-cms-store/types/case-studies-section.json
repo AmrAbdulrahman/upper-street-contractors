@@ -1,0 +1,31 @@
+{
+  "__name": "case-studies-section",
+  "label": "Case Studies Section",
+  "fields": [
+    {
+      "__name": "overline",
+      "__type": "text"
+    },
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "category",
+      "label": "Category",
+      "__type": "lookup",
+      "options": [
+        "Bathroom",
+        "Loft",
+        "Refurbishment",
+        "Kitchen",
+        "Plumbing",
+        "Heating",
+        "Electrical",
+        "Carpentry",
+        "Roofing",
+        "Handyman"
+      ]
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 fragment HomeHeroSection on HomeHeaderSection {
-  documentId
+  id
   subtitle
-  title
+  # aliased: HomeHeaderSection.title is `blocks` (JSON), which would clash with the
+  # String `title` on other sections in the page `sections` union.
+  headerTitle: title
   overline
   footer
   buttons {

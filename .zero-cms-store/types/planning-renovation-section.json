@@ -1,0 +1,29 @@
+{
+  "__name": "planning-renovation-section",
+  "label": "Planning Renovation Section",
+  "fields": [
+    {
+      "__name": "overline",
+      "__type": "text"
+    },
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "description",
+      "__type": "text"
+    },
+    {
+      "__name": "buttons",
+      "__type": "references",
+      "allowedTypes": [
+        "button"
+      ]
+    },
+    {
+      "__name": "footer",
+      "__type": "blocks"
+    }
+  ]
+}

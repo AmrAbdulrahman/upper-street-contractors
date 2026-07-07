@@ -1,0 +1,16 @@
+{
+  "__name": "accreditation",
+  "label": "Accreditation",
+  "fields": [
+    {
+      "__name": "accreditationTitle",
+      "label": "Name (used as image alt text)",
+      "__type": "text"
+    },
+    {
+      "__name": "image",
+      "__type": "asset",
+      "accept": "image"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 fragment StaticStep on StaticStep {
-  documentId
+  id
   stepOrder
   stepTitle
   stepDescription

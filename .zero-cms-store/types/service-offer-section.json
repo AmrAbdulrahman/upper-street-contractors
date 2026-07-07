@@ -1,0 +1,38 @@
+{
+  "__name": "service-offer-section",
+  "label": "Service Offer Section",
+  "fields": [
+    {
+      "__name": "overline",
+      "__type": "text"
+    },
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "intro",
+      "__type": "longtext"
+    },
+    {
+      "__name": "items",
+      "label": "Scope items",
+      "__type": "references",
+      "allowedTypes": [
+        "deliverable"
+      ]
+    },
+    {
+      "__name": "callout",
+      "__type": "longtext"
+    },
+    {
+      "__name": "costCards",
+      "label": "Cost cards",
+      "__type": "references",
+      "allowedTypes": [
+        "cta"
+      ]
+    }
+  ]
+}

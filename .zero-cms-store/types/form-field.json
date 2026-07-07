@@ -1,0 +1,45 @@
+{
+  "__name": "form-field",
+  "label": "Form Field",
+  "fields": [
+    {
+      "__name": "label",
+      "__type": "text"
+    },
+    {
+      "__name": "fieldKey",
+      "label": "Field key (identifier used in the enquiry email)",
+      "__type": "text"
+    },
+    {
+      "__name": "inputType",
+      "__type": "lookup",
+      "options": [
+        "text",
+        "email",
+        "tel",
+        "textarea",
+        "boolean",
+        "file"
+      ]
+    },
+    {
+      "__name": "placeholder",
+      "__type": "text"
+    },
+    {
+      "__name": "required",
+      "__type": "boolean"
+    },
+    {
+      "__name": "dependsOnFieldKey",
+      "label": "Conditional: only show when this other field key is set",
+      "__type": "text"
+    },
+    {
+      "__name": "dependsOnValue",
+      "label": "Conditional: ...and equals this value (use \"true\" for a toggle)",
+      "__type": "text"
+    }
+  ]
+}

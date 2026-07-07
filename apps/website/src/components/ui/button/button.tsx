@@ -16,7 +16,7 @@ import {
   type ButtonVariant,
   type IconPosition,
 } from "@/helpers";
-import { ButtonFragment, IconFragment } from "@/generated/graphql";
+import { ButtonFragment } from "@/generated/graphql";
 import Link from "next/link";
 import { forwardRef, type CSSProperties, type ForwardedRef } from "react";
 
@@ -132,7 +132,7 @@ function ButtonContent({
   iconPosition,
 }: {
   label: string | null;
-  icon?: IconFragment | null;
+  icon?: { code?: string | null } | null;
   iconPosition: IconPosition;
 }) {
   const iconElement = <Icon data={icon} className="h-4 w-4 shrink-0" />;

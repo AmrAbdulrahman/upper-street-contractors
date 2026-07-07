@@ -1,0 +1,27 @@
+{
+  "__name": "client-review-info",
+  "label": "Client Review Info",
+  "fields": [
+    {
+      "__name": "name",
+      "__type": "text"
+    },
+    {
+      "__name": "reviewSource",
+      "__type": "text"
+    },
+    {
+      "__name": "location",
+      "__type": "text"
+    },
+    {
+      "__name": "image",
+      "__type": "asset",
+      "accept": "image"
+    },
+    {
+      "__name": "reviewLink",
+      "__type": "text"
+    }
+  ]
+}

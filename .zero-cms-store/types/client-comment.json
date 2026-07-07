@@ -1,0 +1,15 @@
+{
+  "__name": "client-comment",
+  "label": "Client Comment",
+  "fields": [
+    {
+      "__name": "name",
+      "__type": "text",
+      "required": true
+    },
+    {
+      "__name": "comment",
+      "__type": "longtext"
+    }
+  ]
+}

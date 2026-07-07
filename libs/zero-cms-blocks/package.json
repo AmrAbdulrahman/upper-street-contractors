@@ -1,0 +1,6 @@
+{
+  "name": "@usc/zero-cms-blocks",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module"
+}

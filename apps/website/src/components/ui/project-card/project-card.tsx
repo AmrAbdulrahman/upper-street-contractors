@@ -1,8 +1,9 @@
 "use client";
 
-import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
-import { Badge, badgePropsFromStrapi } from "@/components/ui/badge";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { Badge } from "@/components/ui/badge";
 import { ProjectCardFragment } from "@/generated/graphql";
+import { getProjectMetaChips } from "@/helpers/project-meta";
 import Link from "next/link";
 import { ProjectBanner } from "./project-banner";
 
@@ -17,66 +18,54 @@ const titleClasses =
   "mb-1.5 font-sans text-[15px] font-semibold leading-snug text-dark";
 
 export function ProjectCard({ data }: ProjectCardProps) {
-  const {
-    title,
-    description,
-    projectBanner,
-    projectCategory,
-    projectBadges,
-    documentId,
-  } = data;
-  const badges = projectBadges?.filter(Boolean) ?? [];
-  const href = `/projects/${documentId}`;
+  const { id, title, summary, category, hero } = data;
+  const chips = getProjectMetaChips(data);
+  const href = `/projects/${id}`;
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <article className={cardClasses}>
         <Link href={href} className="block">
-          <StrapiEntryField field="projectBanner">
-            <ProjectBanner banner={projectBanner} category={projectCategory} />
-          </StrapiEntryField>
+          <ZeroCmsEntryField field="hero">
+            <ProjectBanner banner={hero} category={category} />
+          </ZeroCmsEntryField>
         </Link>
 
         <div className="p-[18px]">
-          {badges.length > 0 ? (
-            <div className="relative z-10 mb-2.5 flex flex-wrap gap-1.5">
-              {badges.map((badge) => {
-                const badgeProps = badgePropsFromStrapi(badge, {
-                  className: "border border-border bg-surface text-subtle",
-                });
-
-                if (!badgeProps) {
-                  return null;
-                }
-
-                return (
-                  <StrapiEntry key={badge.documentId} entry={badge}>
-                    <StrapiEntryField field="text">
-                      <Badge {...badgeProps} />
-                    </StrapiEntryField>
-                  </StrapiEntry>
-                );
-              })}
-            </div>
+          {chips.length > 0 ? (
+            <ul
+              className="relative z-10 mb-2.5 flex flex-wrap gap-1.5"
+              aria-label="Project details"
+            >
+              {chips.map((chip) => (
+                <li key={chip.key}>
+                  <Badge
+                    variant="light"
+                    radius={8}
+                    className="border border-border bg-surface text-subtle"
+                  >
+                    {chip.text}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
           ) : null}
 
           <Link href={href} className="block">
             {title ? (
-              <StrapiEntryField field="title">
+              <ZeroCmsEntryField field="title">
                 <h3 className={titleClasses}>{title}</h3>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
-            {description ? (
-              <StrapiEntryField field="description">
-                <p className="text-[13px] leading-[1.55] text-muted">
-                  {description}
-                </p>
-              </StrapiEntryField>
+            {summary ? (
+              <ZeroCmsEntryField field="summary">
+                <p className="text-[13px] leading-[1.55] text-muted">{summary}</p>
+              </ZeroCmsEntryField>
             ) : null}
           </Link>
         </div>
       </article>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

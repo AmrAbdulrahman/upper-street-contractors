@@ -1,21 +1,73 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Architecture
+
+One Next.js app (`website`) serves both the public site and the zero-cms editor —
+there's no separate CMS process, no persistent volume, no git-sync. Content lives in
+Upstash Redis (schema + entries + users, per-record keys with optimistic concurrency)
+and Vercel Blob (media bytes) — see [ADR 0008](./docs/adr/0008-zero-cms-redis-blob-store.md)
+/ [ADR 0009](./docs/adr/0009-zero-cms-multi-writer-optimistic-concurrency.md). Production
+uses **ISR**, not a static export — publishing calls `revalidatePath("/", "layout")`
+inline, in the same request, no webhook — see
+[ADR 0010](./docs/adr/0010-vercel-only-deployment-isr.md).
+
+Editing happens at `/admin/*`, which **Proxy** (`src/proxy.ts`, Next 16's renamed
+Middleware) gates on a session cookie and rewrites to the exact same public pages —
+in Draft Mode, so they render draft/unpublished content instead. `/admin/cms` is the
+one real distinct route: the dashboard app (Types, Entries, Media, Users).
+
+```mermaid
+flowchart TB
+    subgraph Browser
+        Editor["Editor browser<br/>(session cookie + localStorage token)"]
+        Visitor["Site visitor"]
+    end
+
+    subgraph Vercel["Vercel — website (staging + production)"]
+        Proxy["proxy.ts<br/>gate /admin/* on session cookie,<br/>enable Draft Mode, rewrite -> (site) page"]
+        Pages["(site) pages — ISR<br/>Draft Mode off: published only<br/>Draft Mode on: draft + unpublished"]
+        Admin["/admin/cms<br/>dashboard (CmsApp)"]
+        RPC["/zero-cms/rpc · /api/cms/auth<br/>/api/cms/media/[id] · /api/cms/graphql"]
+    end
+
+    subgraph Storage["Upstash Redis + Vercel Blob"]
+        RedisRO[("Redis — read-only token<br/>all page rendering")]
+        RedisRW[("Redis — read-write token<br/>RPC surface only")]
+        Blob[("Vercel Blob<br/>media bytes, public URLs")]
+    end
+
+    Visitor -- "GET" --> Proxy --> Pages
+    Editor -- "GET /admin/*" --> Proxy
+    Editor -. "loads dashboard" .-> Admin
+    Editor -- "Bearer + cookie" --> RPC
+
+    Pages -- "read-only, every request" --> RedisRO
+    RPC -- "read-write, session-verified" --> RedisRW
+    RPC -- "revalidatePath on publish" --> Pages
+    RPC -- "media put/get/delete" --> Blob
+```
+
+Local dev is the same shape, one process: `npm run dev` runs `website` against the
+same live Redis + Blob as staging/production (no local-only mode — see
+`.env.local`).
+
 ## Environment setup
 
-Website env vars live in a **single root file** — no per-app duplication.
+Env vars live in a **single root file** — one app, no per-app duplication.
 
 1. **Install [direnv](https://direnv.net/)** and hook it into your shell ([setup guide](https://direnv.net/docs/hook.html)).
 2. **Create secrets file** at the repo root:
    ```bash
    cp .env.example .env.local
    ```
-   Edit `.env.local` and fill in `STRAPI_API_TOKEN` and any other values.
+   Fill in the Upstash Redis + Vercel Blob values (Vercel Marketplace → Storage tab
+   on the project — see `docs/agents/project-stack.md` → Environment variables) and
+   `ZERO_CMS_AUTH_SECRET`.
 3. **Allow direnv** (once per machine):
    ```bash
    direnv allow          # repo root — loads .env.local via .envrc
-   cd apps/website && direnv allow   # inherits root via source_up
    ```
-4. **Run the website** from the repo root:
+4. **Run the app** from the repo root:
    ```bash
    npm run dev
    ```
@@ -26,12 +78,13 @@ Website env vars live in a **single root file** — no per-app duplication.
 | ---- | ------- |
 | `.env.example` | Committed template — copy to `.env.local` |
 | `.env.local` | Your secrets (gitignored) |
-| `.envrc` | Root direnv loader: `dotenv .env.local` |
-| `apps/website/.envrc` | `source_up` — walks up to root `.envrc` |
+| `.envrc` | direnv loader: `dotenv .env.local` |
 
-When you `cd` into `apps/website`, direnv loads the same vars as at the repo root. Next.js, codegen, and Nx scripts all read `process.env` from the shell.
+Next.js, codegen, and Nx scripts all read `process.env` from the shell.
 
-**CMS is separate:** Strapi uses its own `apps/cms/.env` (HOST, APP_KEYS, JWT secrets, etc.). See `apps/cms/.env.example`.
+Local dev talks to the **same live Redis + Blob** as staging/production — there's no
+local-only storage mode (ADR 0008 dropped the filesystem store `website` used to read
+directly). `npm run dev` is the only entrypoint; there's nothing else to run alongside it.
 
 ## Getting Started
 

@@ -1,15 +1,18 @@
 fragment ReviewCard on ReviewCard {
-  documentId
+  id
   score
   clientReview
   clientInfo {
-    documentId
+    id
     name
     reviewSource
     location
     reviewLink
     image {
-      ...ImageContainer
+      url
+      alt
+      width
+      height
     }
   }
 }

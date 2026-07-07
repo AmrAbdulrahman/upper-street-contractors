@@ -1,0 +1,16 @@
+{
+  "__name": "project-image",
+  "label": "Project Image",
+  "fields": [
+    {
+      "__name": "image",
+      "__type": "asset",
+      "accept": "image",
+      "required": true
+    },
+    {
+      "__name": "caption",
+      "__type": "text"
+    }
+  ]
+}

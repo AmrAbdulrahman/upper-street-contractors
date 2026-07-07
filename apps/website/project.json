@@ -5,36 +5,55 @@
   "projectType": "application",
   "tags": [],
   "targets": {
-    "wait-for-cms": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node scripts/wait-for-cms-before-build.mjs",
-        "cwd": "{workspaceRoot}"
-      },
-      "inputs": [
-        "{workspaceRoot}/scripts/wait-for-cms-before-build.mjs",
-        "{workspaceRoot}/scripts/wait-for-graphql-server.mjs",
-        "{workspaceRoot}/scripts/strapi-health.mjs",
-        { "env": "ENABLE_PREVIEW" },
-        { "env": "STRAPI_URL" },
-        { "env": "STRAPI_API_TOKEN" }
-      ]
-    },
-    "build": {
-      "dependsOn": ["wait-for-cms", "codegen"],
+    "dev": {
+      "dependsOn": ["codegen"],
       "inputs": [
         "default",
         "^default",
         "{projectRoot}/env.mjs",
         { "externalDependencies": ["next"] },
-        { "dependentTasksOutputFiles": "**/*.d.ts", "transitive": true },
-        { "env": "ENABLE_PREVIEW" },
-        { "env": "STRAPI_URL" },
-        { "env": "NEXT_PUBLIC_STRAPI_URL" },
-        { "env": "NEXT_PUBLIC_STRAPI_INSPECTION_MODE" },
-        { "env": "STRAPI_API_TOKEN" }
+        { "dependentTasksOutputFiles": "**/*.d.ts", "transitive": true }
       ]
     },
-    "codegen": {}
+    "build": {
+      "dependsOn": ["codegen"],
+      "inputs": [
+        "default",
+        "^default",
+        "{projectRoot}/env.mjs",
+        { "externalDependencies": ["next"] },
+        { "dependentTasksOutputFiles": "**/*.d.ts", "transitive": true }
+      ]
+    },
+    "cms-schema": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "inputs": [
+        "{workspaceRoot}/scripts/generate-cms-schema.mjs",
+        "{workspaceRoot}/libs/zero-cms-core/src/**/*.ts",
+        "{workspaceRoot}/libs/zero-cms-graphql/src/**/*.ts"
+      ],
+      "outputs": ["{projectRoot}/src/generated/schema.graphql"],
+      "options": {
+        "command": "node scripts/generate-cms-schema.mjs apps/website",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "codegen": {
+      "dependsOn": ["cms-schema"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "{projectRoot}/codegen.ts",
+        "{projectRoot}/src/**/*.graphql",
+        "{projectRoot}/src/generated/schema.graphql"
+      ],
+      "outputs": ["{projectRoot}/src/generated/graphql.ts"],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "graphql-codegen --config {projectRoot}/codegen.ts",
+        "cwd": "{workspaceRoot}"
+      }
+    }
   }
 }

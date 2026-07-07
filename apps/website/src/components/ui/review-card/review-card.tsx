@@ -1,10 +1,6 @@
-import {
-  StrapiEntry,
-  StrapiEntryField,
-  StrapiRelationEntry,
-} from "@/components/strapi";
-import { RichText } from "@/components/strapi/rich-text";
-import { ImageContainer } from "@/components/ui/image-container";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { RichTextViewer } from "@/components/ui/rich-text-viewer";
+import { CmsImage } from "@/components/ui/cms-image";
 import { ReviewCardFragment } from "@/generated/graphql";
 import Link from "next/link";
 
@@ -103,38 +99,38 @@ function ReviewProfile({
   const meta =
     [reviewSource, location].filter(Boolean).join(" · ") || null;
 
-  // Wrap in the clientInfo entry's own StrapiEntry so clicking the reviewer
+  // Wrap in the clientInfo entry's own ZeroCmsEntry so clicking the reviewer
   // block opens the Client Review Info entry (its name/source/image fields)
   // rather than the parent review card. Inner fields are now relative to it.
   return (
-    <StrapiEntry entry={clientInfo}>
+    <ZeroCmsEntry entry={clientInfo}>
       <div className="mt-auto flex items-center gap-3 pt-6">
-        <StrapiRelationEntry entry={image} field="image">
+        <ZeroCmsEntryField field="image">
           <div className="size-10 shrink-0 overflow-hidden rounded-full">
-            <ImageContainer
+            <CmsImage
               data={image}
-              alt={name ?? "Reviewer"}
+              fallbackAlt={name ?? "Reviewer"}
               placeholderLabel={name?.charAt(0)?.toUpperCase() ?? "?"}
-              className="!size-10 !h-10 !w-10 rounded-full"
+              className="size-10 rounded-full object-cover"
             />
           </div>
-        </StrapiRelationEntry>
+        </ZeroCmsEntryField>
 
         <div className="min-w-0">
           {name ? (
-            <StrapiEntryField field="name">
+            <ZeroCmsEntryField field="name">
               <p className="truncate text-sm font-bold text-dark">{name}</p>
-            </StrapiEntryField>
+            </ZeroCmsEntryField>
           ) : null}
 
           {meta ? (
-            <StrapiEntryField field="reviewSource">
+            <ZeroCmsEntryField field="reviewSource">
               <p className="truncate text-xs text-subtle">{meta}</p>
-            </StrapiEntryField>
+            </ZeroCmsEntryField>
           ) : null}
         </div>
       </div>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }
 
@@ -152,18 +148,18 @@ export function ReviewCard({ data }: ReviewCardProps) {
           : cardClassName
       }
     >
-      <StrapiEntryField field="score">
+      <ZeroCmsEntryField field="score">
         <StarRating score={score} />
-      </StrapiEntryField>
+      </ZeroCmsEntryField>
 
       {clientReview ? (
-        <StrapiEntryField field="clientReview" className="mt-4 min-w-0 flex-1">
-          <RichText
+        <ZeroCmsEntryField field="clientReview" className="mt-4 min-w-0 flex-1">
+          <RichTextViewer
             content={clientReview}
             variant="review-card-body"
             className="text-[15px] leading-relaxed text-muted"
           />
-        </StrapiEntryField>
+        </ZeroCmsEntryField>
       ) : null}
 
       {clientInfo ? <ReviewProfile clientInfo={clientInfo} /> : null}
@@ -172,7 +168,7 @@ export function ReviewCard({ data }: ReviewCardProps) {
 
   if (clientInfo?.reviewLink) {
     return (
-      <StrapiEntry entry={data}>
+      <ZeroCmsEntry entry={data}>
         <Link
           href={clientInfo.reviewLink}
           target="_blank"
@@ -186,9 +182,9 @@ export function ReviewCard({ data }: ReviewCardProps) {
         >
           {card}
         </Link>
-      </StrapiEntry>
+      </ZeroCmsEntry>
     );
   }
 
-  return <StrapiEntry entry={data}>{card}</StrapiEntry>;
+  return <ZeroCmsEntry entry={data}>{card}</ZeroCmsEntry>;
 }

@@ -1,17 +1,16 @@
-fragment ProjectCard on ProjectCard {
-  documentId
+fragment ProjectCard on Project {
+  id
   title
-  description
-  projectBanner {
+  summary
+  category
+  location
+  beginDate
+  endDate
+  projectValue
+  hero {
     url
-    alternativeText
+    alt
     width
     height
-  }
-  projectCategory {
-    ...Badge
-  }
-  projectBadges {
-    ...Badge
   }
 }

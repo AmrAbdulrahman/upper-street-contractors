@@ -1,0 +1,9 @@
+{
+  "name": "zero-cms-blocks",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/zero-cms-blocks/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project zero-cms-blocks --web",
+  "targets": {}
+}

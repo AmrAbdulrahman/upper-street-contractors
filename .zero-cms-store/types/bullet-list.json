@@ -1,0 +1,17 @@
+{
+  "__name": "bullet-list",
+  "label": "Bullet List",
+  "fields": [
+    {
+      "__name": "text",
+      "__type": "text"
+    },
+    {
+      "__name": "listIcon",
+      "__type": "reference",
+      "allowedTypes": [
+        "icon"
+      ]
+    }
+  ]
+}

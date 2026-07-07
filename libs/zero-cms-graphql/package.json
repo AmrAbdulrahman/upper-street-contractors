@@ -1,0 +1,10 @@
+{
+  "name": "@usc/zero-cms-graphql",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "peerDependencies": {
+    "graphql": "^16",
+    "@graphql-tools/schema": "^10"
+  }
+}

@@ -1,0 +1,15 @@
+fragment ServiceOfferSection on ServiceOfferSection {
+  id
+  overline
+  title
+  intro
+  items {
+    id
+    title
+    description
+  }
+  callout
+  costCards {
+    ...Cta
+  }
+}

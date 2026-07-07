@@ -1,10 +1,13 @@
 fragment WhoWeAreSection on WhoWeAreSection {
-  documentId
+  id
   overline
   title
   body
   imageContainer {
-    ...ImageContainer
+    url
+    alt
+    width
+    height
   }
   buttons {
     ...Button

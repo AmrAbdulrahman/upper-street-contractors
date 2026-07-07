@@ -1,0 +1,19 @@
+fragment ClientLogo on ClientLogo {
+  id
+  name
+  url
+  image {
+    url
+    alt
+    width
+    height
+  }
+}
+
+fragment ClientsCarousel on ClientsCarousel {
+  id
+  title
+  logos {
+    ...ClientLogo
+  }
+}

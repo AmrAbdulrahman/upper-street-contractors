@@ -1,0 +1,10 @@
+fragment PageHeroSection on PageHero {
+  id
+  breadcrumbLabel
+  overline
+  title
+  subtitle
+  buttons {
+    ...Button
+  }
+}

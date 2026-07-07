@@ -1,0 +1,15 @@
+#import "../button/button.graphql"
+#import "../banner/banner.graphql"
+
+fragment Cta on Cta {
+  id
+  title
+  cost
+  subtitle
+  banner {
+    ...Banner
+  }
+  buttons {
+    ...Button
+  }
+}

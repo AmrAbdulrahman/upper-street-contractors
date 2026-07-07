@@ -8,7 +8,7 @@ import {
   FALLBACK_SITE_URL,
   NOINDEX_ROBOTS,
 } from "@/lib/site-config";
-import { resolveStrapiMediaUrl } from "./strapi-media-url";
+import { resolveMediaUrl } from "./media-url";
 
 export function normalizeSiteUrl(url: string | null | undefined): string {
   const value = url?.trim() || FALLBACK_SITE_URL;
@@ -22,7 +22,7 @@ function getOgImages(
     return undefined;
   }
 
-  const imageUrl = resolveStrapiMediaUrl(defaultImage.url);
+  const imageUrl = resolveMediaUrl(defaultImage.url);
   if (!imageUrl) {
     return undefined;
   }
@@ -32,7 +32,7 @@ function getOgImages(
       url: imageUrl,
       width: defaultImage.width ?? undefined,
       height: defaultImage.height ?? undefined,
-      alt: defaultImage.alternativeText ?? undefined,
+      alt: defaultImage.alt ?? undefined,
     },
   ];
 }

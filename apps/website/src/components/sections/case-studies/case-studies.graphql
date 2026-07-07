@@ -1,0 +1,6 @@
+fragment CaseStudiesSection on CaseStudiesSection {
+  id
+  overline
+  title
+  category
+}

@@ -1,0 +1,41 @@
+{
+  "__name": "why-choose-us-section",
+  "label": "Why Choose Us Section",
+  "fields": [
+    {
+      "__name": "overline",
+      "__type": "text"
+    },
+    {
+      "__name": "listOfPoints",
+      "__type": "references",
+      "allowedTypes": [
+        "bullet-list"
+      ]
+    },
+    {
+      "__name": "cardImage",
+      "__type": "asset",
+      "accept": "image"
+    },
+    {
+      "__name": "cardTitle",
+      "__type": "text"
+    },
+    {
+      "__name": "cardRole",
+      "__type": "text"
+    },
+    {
+      "__name": "cardParagraph",
+      "__type": "blocks"
+    },
+    {
+      "__name": "cardBanner",
+      "__type": "reference",
+      "allowedTypes": [
+        "banner"
+      ]
+    }
+  ]
+}

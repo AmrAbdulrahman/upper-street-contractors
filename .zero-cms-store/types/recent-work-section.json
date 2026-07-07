@@ -1,0 +1,32 @@
+{
+  "__name": "recent-work-section",
+  "label": "Recent Work Section",
+  "fields": [
+    {
+      "__name": "overline",
+      "__type": "text"
+    },
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "description",
+      "__type": "text"
+    },
+    {
+      "__name": "projects",
+      "__type": "references",
+      "allowedTypes": [
+        "project"
+      ]
+    },
+    {
+      "__name": "viewAllProjects",
+      "__type": "reference",
+      "allowedTypes": [
+        "button"
+      ]
+    }
+  ]
+}

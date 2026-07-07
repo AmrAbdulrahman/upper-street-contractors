@@ -1,5 +1,5 @@
 fragment PageMetadata on MetaData {
-  documentId
+  id
   title
   description
 }

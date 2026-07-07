@@ -1,0 +1,46 @@
+{
+  "__name": "page",
+  "label": "page",
+  "fields": [
+    {
+      "__name": "key",
+      "__type": "text"
+    },
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "description",
+      "__type": "longtext"
+    },
+    {
+      "__name": "meta",
+      "__type": "reference",
+      "allowedTypes": [
+        "meta-data"
+      ]
+    },
+    {
+      "__name": "sections",
+      "__type": "references",
+      "allowedTypes": [
+        "page-hero",
+        "wizard",
+        "contact-details",
+        "home-header-section",
+        "who-we-are-section",
+        "accreditation-list",
+        "what-we-do-section",
+        "why-choose-us-section",
+        "how-it-works-section",
+        "recent-work-section",
+        "client-review-section",
+        "planning-renovation-section",
+        "clients-carousel",
+        "service-offer-section",
+        "case-studies-section"
+      ]
+    }
+  ]
+}

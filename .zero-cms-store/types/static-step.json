@@ -1,0 +1,18 @@
+{
+  "__name": "static-step",
+  "label": "Static Step",
+  "fields": [
+    {
+      "__name": "stepOrder",
+      "__type": "text"
+    },
+    {
+      "__name": "stepTitle",
+      "__type": "text"
+    },
+    {
+      "__name": "stepDescription",
+      "__type": "text"
+    }
+  ]
+}

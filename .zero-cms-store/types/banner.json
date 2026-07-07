@@ -1,0 +1,40 @@
+{
+  "__name": "banner",
+  "label": "Banner",
+  "fields": [
+    {
+      "__name": "variant",
+      "__type": "lookup",
+      "options": [
+        "dark",
+        "light",
+        "note",
+        "transparent",
+        "glass"
+      ]
+    },
+    {
+      "__name": "emoji",
+      "__type": "text"
+    },
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "body",
+      "__type": "blocks"
+    },
+    {
+      "__name": "button",
+      "__type": "reference",
+      "allowedTypes": [
+        "button"
+      ]
+    },
+    {
+      "__name": "hoverable",
+      "__type": "boolean"
+    }
+  ]
+}

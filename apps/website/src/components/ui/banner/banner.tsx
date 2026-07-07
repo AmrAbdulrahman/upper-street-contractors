@@ -1,9 +1,15 @@
-import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
-import { RichText } from "@/components/strapi/rich-text";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Button } from "@/components/ui/button";
 import { BannerFragment } from "@/generated/graphql";
 
-export const BANNER_VARIANTS = ["dark", "light", "note", "transparent"] as const;
+export const BANNER_VARIANTS = [
+  "dark",
+  "light",
+  "note",
+  "transparent",
+  "glass",
+] as const;
 export type BannerVariant = (typeof BANNER_VARIANTS)[number];
 
 type BannerProps = {
@@ -18,6 +24,7 @@ export function normalizeBannerVariant(variant?: string | null): BannerVariant {
   if (key === "light") return "light";
   if (key === "note") return "note";
   if (key === "transparent") return "transparent";
+  if (key === "glass") return "glass";
 
   return "light";
 }
@@ -45,6 +52,10 @@ const variantContainerClasses: Record<
     base: "rounded-sm border-2 border-border bg-transparent text-muted",
     hoverable: "hover:border-gold/60",
   },
+  glass: {
+    base: "rounded-lg border border-white/10 bg-white/[0.06] text-white/80",
+    hoverable: "hover:border-white/25",
+  },
 };
 
 const titleClasses: Record<BannerVariant, string> = {
@@ -52,6 +63,7 @@ const titleClasses: Record<BannerVariant, string> = {
   light: "font-bold text-dark",
   note: "font-bold text-dark",
   transparent: "font-bold text-dark",
+  glass: "font-bold text-white",
 };
 
 function getRichTextVariant(
@@ -62,7 +74,9 @@ function getRichTextVariant(
     return "banner-body-inline";
   }
 
-  return bannerVariant === "dark" ? "banner-body-dark" : "banner-body-light";
+  return bannerVariant === "dark" || bannerVariant === "glass"
+    ? "banner-body-dark"
+    : "banner-body-light";
 }
 
 export function Banner({ data, className = "" }: BannerProps) {
@@ -90,59 +104,59 @@ export function Banner({ data, className = "" }: BannerProps) {
     <div className="min-w-0 flex flex-col gap-1">
       <div className="flex items-center gap-2.5">
         {emoji ? (
-          <StrapiEntryField field="emoji" as="span">
+          <ZeroCmsEntryField field="emoji" as="span">
             <span aria-hidden className="shrink-0 text-lg leading-none">
               {emoji}
             </span>
-          </StrapiEntryField>
+          </ZeroCmsEntryField>
         ) : null}
 
         {title ? (
-          <StrapiEntryField field="title" as="span">
+          <ZeroCmsEntryField field="title" as="span">
             <span className={titleClasses[bannerVariant]}>{title}</span>
-          </StrapiEntryField>
+          </ZeroCmsEntryField>
         ) : null}
       </div>
 
       {body ? (
-        <StrapiEntryField field="body" className="min-w-0">
-          <RichText
+        <ZeroCmsEntryField field="body" className="min-w-0">
+          <RichTextViewer
             content={body}
             variant={richTextVariant}
             className={hasButton ? "max-w-2xl" : undefined}
           />
-        </StrapiEntryField>
+        </ZeroCmsEntryField>
       ) : null}
     </div>
   ) : (
     <div className="flex min-w-0 items-center gap-2.5">
       {emoji ? (
-        <StrapiEntryField field="emoji" as="span">
+        <ZeroCmsEntryField field="emoji" as="span">
           <span aria-hidden className="shrink-0 text-lg leading-none">
             {emoji}
           </span>
-        </StrapiEntryField>
+        </ZeroCmsEntryField>
       ) : null}
 
       {body ? (
-        <StrapiEntryField field="body" className="min-w-0">
-          <RichText content={body} variant={richTextVariant} />
-        </StrapiEntryField>
+        <ZeroCmsEntryField field="body" className="min-w-0">
+          <RichTextViewer content={body} variant={richTextVariant} />
+        </ZeroCmsEntryField>
       ) : null}
     </div>
   );
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <div className={containerClasses}>
         {contentBlock}
 
         {hasButton && button ? (
-          <StrapiEntry entry={button}>
+          <ZeroCmsEntry entry={button}>
             <Button data={button} className="w-full shrink-0 md:w-auto" />
-          </StrapiEntry>
+          </ZeroCmsEntry>
         ) : null}
       </div>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

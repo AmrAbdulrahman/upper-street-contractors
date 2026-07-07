@@ -1,5 +1,5 @@
 import type { SiteMetaConfigFragment } from "@/generated/graphql";
-import { normalizeSiteUrl, resolveStrapiMediaUrl } from "@/helpers";
+import { normalizeSiteUrl, resolveMediaUrl } from "@/helpers";
 
 type LocalBusinessJsonLdProps = {
   config: SiteMetaConfigFragment;
@@ -24,7 +24,7 @@ export function LocalBusinessJsonLd({ config }: LocalBusinessJsonLdProps) {
     url: siteUrl,
     telephone: config.phoneNumber ?? undefined,
     email: config.email ?? undefined,
-    image: resolveStrapiMediaUrl(config.defaultImage?.url),
+    image: resolveMediaUrl(config.defaultImage?.url),
     address: {
       "@type": "PostalAddress",
       streetAddress: config.addressLine ?? undefined,

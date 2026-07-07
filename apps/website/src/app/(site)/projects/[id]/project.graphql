@@ -1,0 +1,59 @@
+#import "../../components/ui/project-card/project-card.graphql"
+#import "../../components/ui/cta/cta.graphql"
+
+fragment ProjectDetail on Project {
+  ...ProjectCard
+  subCategory
+  description
+  deliveredSummary
+  featured
+  clientRating
+  occupancy
+  deliverables {
+    id
+    title
+    description
+  }
+  clientComments {
+    id
+    name
+    comment
+  }
+  projectTimeline {
+    id
+    step
+    title
+    description
+  }
+  projectImages {
+    id
+    caption
+    image {
+      url
+      alt
+      width
+      height
+    }
+  }
+  similarWork {
+    ...ProjectCard
+  }
+  cta {
+    ...Cta
+  }
+  sidebarCta {
+    ...Cta
+  }
+}
+
+query GetProject($id: ID!, $status: CmsReadStatus = published) {
+  project(id: $id, status: $status) {
+    ...ProjectDetail
+  }
+}
+
+query GetProjectIds($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
+  projects(pagination: { limit: 100 }, status: $status, includeUnpublished: $includeUnpublished) {
+    id
+  }
+}

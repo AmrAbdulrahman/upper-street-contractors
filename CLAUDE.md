@@ -28,7 +28,7 @@ Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agen
 
 ### Project stack
 
-Next.js 16 + Strapi + Apollo + colocated GraphQL. See `docs/agents/project-stack.md`. Use stack-specific slash commands in `.cursor/commands/` (Cursor) or `.claude/commands/` (Claude CLI).
+Next.js 16 + zero-cms (self-hosted, file-system-backed) + colocated GraphQL. See `docs/agents/project-stack.md`. Use stack-specific slash commands in `.cursor/commands/` (Cursor) or `.claude/commands/` (Claude CLI).
 
 ### Claude CLI parity
 

@@ -1,0 +1,19 @@
+{
+  "name": "zero-cms-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/zero-cms-core/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/zero-cms-core",
+        "main": "libs/zero-cms-core/src/index.ts",
+        "tsConfig": "libs/zero-cms-core/tsconfig.lib.json",
+        "assets": ["libs/zero-cms-core/*.md"]
+      }
+    }
+  }
+}

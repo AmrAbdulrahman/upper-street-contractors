@@ -1,9 +1,9 @@
 import {
-  AddStrapiEntry,
-  StrapiEntry,
-  StrapiEntryField,
-} from "@/components/strapi";
-import { RichText } from "@/components/strapi/rich-text";
+  AddZeroCmsEntry,
+  ZeroCmsEntry,
+  ZeroCmsEntryField,
+} from "@usc/zero-cms-widget";
+import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import { Banner } from "@/components/ui/banner";
 import { StaticSteps } from "@/components/ui/static-steps";
 import { HowItWorksSectionFragment } from "@/generated/graphql";
@@ -17,45 +17,45 @@ export function HowItWorksSection({ data }: HowItWorksSectionProps) {
   const steps = processList?.filter(Boolean) ?? [];
 
   return (
-    <StrapiEntry entry={data}>
+    <ZeroCmsEntry entry={data}>
       <section className="bg-surface">
         <div className="mx-auto max-w-container px-6 py-[88px]">
           <div className="mx-auto max-w-2xl text-center">
             {overline ? (
-              <StrapiEntryField field="overline">
-                <p className="text-[11px] font-bold tracking-[0.12em] text-gold uppercase">
+              <ZeroCmsEntryField field="overline">
+                <p className="text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
                   {overline}
                 </p>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {title ? (
-              <StrapiEntryField field="title">
+              <ZeroCmsEntryField field="title">
                 <h2 className="mt-2.5 text-[clamp(26px,3.5vw,42px)] leading-tight text-dark">
                   {title}
                 </h2>
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
 
             {sectionSummary ? (
-              <StrapiEntryField field="sectionSummary" className="mt-4">
-                <RichText
+              <ZeroCmsEntryField field="sectionSummary" className="mt-4">
+                <RichTextViewer
                   content={sectionSummary}
                   variant="what-we-do-body"
                   className="mx-auto mt-2.5 flex flex-col gap-4"
                 />
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
             ) : null}
           </div>
 
           {steps.length > 0 ? (
             <div className="mt-12">
               <StaticSteps steps={steps} />
-              <AddStrapiEntry field="processList" />
+              <AddZeroCmsEntry field="processList" />
             </div>
           ) : null}
 
-          {/* Banner self-wraps in its own StrapiEntry → opens the banner entry. */}
+          {/* Banner self-wraps in its own ZeroCmsEntry → opens the banner entry. */}
           {sectionBanner ? (
             <div className="mt-10">
               <Banner data={sectionBanner} />
@@ -63,6 +63,6 @@ export function HowItWorksSection({ data }: HowItWorksSectionProps) {
           ) : null}
         </div>
       </section>
-    </StrapiEntry>
+    </ZeroCmsEntry>
   );
 }

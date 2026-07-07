@@ -1,0 +1,32 @@
+{
+  "__name": "client-review-section",
+  "label": "Client Review Section",
+  "fields": [
+    {
+      "__name": "overline",
+      "__type": "text"
+    },
+    {
+      "__name": "title",
+      "__type": "text"
+    },
+    {
+      "__name": "description",
+      "__type": "text"
+    },
+    {
+      "__name": "reviewCards",
+      "__type": "references",
+      "allowedTypes": [
+        "review-card"
+      ]
+    },
+    {
+      "__name": "reviewLinks",
+      "__type": "references",
+      "allowedTypes": [
+        "button"
+      ]
+    }
+  ]
+}

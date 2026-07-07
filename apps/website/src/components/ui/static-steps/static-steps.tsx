@@ -1,4 +1,4 @@
-import { StrapiEntry, StrapiEntryField } from "@/components/strapi";
+import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import { StaticStepFragment } from "@/generated/graphql";
 import type { CSSProperties } from "react";
 
@@ -42,15 +42,15 @@ function StepContent({
   return (
     <>
       {step.stepTitle ? (
-        <StrapiEntryField field="stepTitle">
+        <ZeroCmsEntryField field="stepTitle">
           <p className={titleClassName}>{step.stepTitle}</p>
-        </StrapiEntryField>
+        </ZeroCmsEntryField>
       ) : null}
 
       {step.stepDescription ? (
-        <StrapiEntryField field="stepDescription">
+        <ZeroCmsEntryField field="stepDescription">
           <p className={descriptionClassName}>{step.stepDescription}</p>
-        </StrapiEntryField>
+        </ZeroCmsEntryField>
       ) : null}
     </>
   );
@@ -69,12 +69,12 @@ export function StaticSteps({ steps }: StaticStepsProps) {
       {/* Mobile: vertical stepper */}
       <ol className="flex flex-col md:hidden" aria-label="Process steps">
         {sortedSteps.map((step, index) => (
-          <StrapiEntry key={step.documentId} entry={step}>
+          <ZeroCmsEntry key={step.id} entry={step}>
             <li className="flex gap-3.5">
               <div className="flex w-12 shrink-0 flex-col items-center">
-                <StrapiEntryField field="stepOrder" as="span">
+                <ZeroCmsEntryField field="stepOrder" as="span">
                   <StepCircle order={step.stepOrder} />
-                </StrapiEntryField>
+                </ZeroCmsEntryField>
 
                 {index < lastIndex ? (
                   <span
@@ -88,7 +88,7 @@ export function StaticSteps({ steps }: StaticStepsProps) {
                 <StepContent step={step} />
               </div>
             </li>
-          </StrapiEntry>
+          </ZeroCmsEntry>
         ))}
       </ol>
 
@@ -104,11 +104,11 @@ export function StaticSteps({ steps }: StaticStepsProps) {
         />
 
         {sortedSteps.map((step) => (
-          <StrapiEntry key={step.documentId} entry={step}>
+          <ZeroCmsEntry key={step.id} entry={step}>
             <li className="relative z-10 flex min-w-0 flex-col items-center px-4 text-center first:pl-0 last:pr-0">
-              <StrapiEntryField field="stepOrder" as="span">
+              <ZeroCmsEntryField field="stepOrder" as="span">
                 <StepCircle order={step.stepOrder} />
-              </StrapiEntryField>
+              </ZeroCmsEntryField>
 
               <div className="mt-4 w-full">
                 <StepContent
@@ -118,7 +118,7 @@ export function StaticSteps({ steps }: StaticStepsProps) {
                 />
               </div>
             </li>
-          </StrapiEntry>
+          </ZeroCmsEntry>
         ))}
       </ol>
     </>
