@@ -1,6 +1,3 @@
-/** Build-time fallback when CMS SiteMetaConfig is unavailable. */
-export const FALLBACK_SITE_URL = "https://upperstreet.contractors";
-
 export const DEFAULT_ROBOTS = {
   index: true,
   follow: true,

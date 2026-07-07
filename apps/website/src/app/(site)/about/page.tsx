@@ -24,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
     });
   } catch {
     const siteMetaConfig = await getSiteMetaConfig();
+
     return pageMetaToMetadata(null, {
       path: PAGE_PATH,
       siteName: siteMetaConfig?.siteName ?? undefined,
