@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { ZeroCmsEntry } from "@usc/zero-cms-widget";
 import { CmsImage } from "@/components/ui/cms-image";
 import { ContactDetailsPanel } from "../contact-details";
@@ -12,6 +12,26 @@ type WizardSectionProps = { data: WizardSectionFragment };
 const MAX_FILES = 5;
 const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10 MB
 const FILE_ACCEPT = "image/*,.pdf,.doc,.docx";
+
+// Postcode lookup (postcodes.io): matched by CMS fieldKey convention.
+const POSTCODE_RE = /^post.?code$/i;
+const TOWN_RE = /^(town|city)$/i;
+const REGION_RE = /^(region|county)$/i;
+// Loose UK postcode shape (e.g. "N1 1AA", "SW1A 1AA"); postcodes.io is the source of truth.
+const UK_POSTCODE_RE = /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/;
+const POSTCODE_DEBOUNCE_MS = 700;
+
+type PostcodeStatus = "idle" | "loading" | "found" | "notfound" | "error";
+
+/** Map an address-ish fieldKey to an HTML autocomplete token (UX + a11y). */
+function addressAutoComplete(fieldKey: string | null | undefined): string | undefined {
+  const k = fieldKey ?? "";
+  if (POSTCODE_RE.test(k)) return "postal-code";
+  if (TOWN_RE.test(k)) return "address-level2";
+  if (REGION_RE.test(k)) return "address-level1";
+  if (/^address/i.test(k)) return "address-line1";
+  return undefined;
+}
 
 type CollectedAnswers = {
   fields: { label: string; value: string }[];
@@ -31,6 +51,26 @@ export function WizardSection({ data }: WizardSectionProps) {
   const [optionText, setOptionText] = useState<Record<string, string>>({});
   const [formAnswers, setFormAnswers] = useState<Record<string, string>>({});
   const [fileAnswers, setFileAnswers] = useState<Record<string, File[]>>({});
+  const [pcStatus, setPcStatus] = useState<Record<string, PostcodeStatus>>({});
+  const [pcSuggestions, setPcSuggestions] = useState<Record<string, string[]>>({});
+  const [pcOpen, setPcOpen] = useState<Record<string, boolean>>({});
+  const pcTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pcSuppressOpen = useRef(false);
+
+  // Close any open postcode dropdown when clicking outside its widget.
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest("[data-pc-widget]")) return;
+      pcSuppressOpen.current = true;
+      setPcOpen({});
+      window.setTimeout(() => {
+        pcSuppressOpen.current = false;
+      }, 300);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
 
   const total = questions.length;
   if (total === 0) return null;
@@ -64,6 +104,107 @@ export function WizardSection({ data }: WizardSectionProps) {
 
   const setField = (key: string, value: string) =>
     setFormAnswers((prev) => ({ ...prev, [key]: value }));
+
+  // Validate a UK postcode via postcodes.io and auto-fill sibling Town/Region
+  // fields (matched by fieldKey) in the same FormQuestion. Free, no API key.
+  const lookupPostcode = async (questionId: string, raw: string) => {
+    const pc = raw.trim();
+    const statusKey = `${questionId}:__postcode`;
+    if (!UK_POSTCODE_RE.test(pc)) {
+      setPcStatus((s) => ({ ...s, [statusKey]: "idle" }));
+      return;
+    }
+    setPcStatus((s) => ({ ...s, [statusKey]: "loading" }));
+    try {
+      const res = await fetch(
+        `https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`,
+      );
+      if (!res.ok) {
+        setPcStatus((s) => ({ ...s, [statusKey]: "notfound" }));
+        return;
+      }
+      const body = (await res.json()) as {
+        result?: {
+          admin_district?: string | null;
+          parish?: string | null;
+          region?: string | null;
+          country?: string | null;
+        } | null;
+      };
+      const result = body.result;
+      if (!result) {
+        setPcStatus((s) => ({ ...s, [statusKey]: "notfound" }));
+        return;
+      }
+      const q = questions.find((x) => x.id === questionId);
+      const siblings =
+        q && q.__typename === "FormQuestion"
+          ? (q.fields ?? []).filter(Boolean)
+          : [];
+      const townField = siblings.find((f) => TOWN_RE.test(f!.fieldKey ?? ""));
+      const regionField = siblings.find((f) => REGION_RE.test(f!.fieldKey ?? ""));
+      // postcodes.io has no PAF "post town"; admin_district is the closest area name.
+      const town = result.admin_district || result.parish || "";
+      // region is null outside England — fall back to the country name.
+      const region = result.region || result.country || "";
+      if (townField?.fieldKey && town) {
+        setField(`${questionId}:${townField.fieldKey}`, town);
+      }
+      if (regionField?.fieldKey && region) {
+        setField(`${questionId}:${regionField.fieldKey}`, region);
+      }
+      setPcStatus((s) => ({ ...s, [statusKey]: "found" }));
+    } catch {
+      setPcStatus((s) => ({ ...s, [statusKey]: "error" }));
+    }
+  };
+
+  // postcodes.io autocomplete: candidate postcodes for a partial input (free).
+  const fetchPostcodeSuggestions = async (questionId: string, query: string) => {
+    const q = query.trim();
+    const statusKey = `${questionId}:__postcode`;
+    if (q.length < 2) {
+      setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
+      setPcOpen((s) => ({ ...s, [questionId]: false }));
+      setPcStatus((s) => ({ ...s, [statusKey]: "idle" }));
+      return;
+    }
+    setPcStatus((s) => ({ ...s, [statusKey]: "loading" }));
+    try {
+      const res = await fetch(
+        `https://api.postcodes.io/postcodes/${encodeURIComponent(q)}/autocomplete`,
+      );
+      if (!res.ok) {
+        setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
+        setPcOpen((s) => ({ ...s, [questionId]: true }));
+        setPcStatus((s) => ({ ...s, [statusKey]: "notfound" }));
+        return;
+      }
+      const body = (await res.json()) as { result?: string[] | null };
+      const list = body.result ?? [];
+      setPcSuggestions((s) => ({ ...s, [questionId]: list }));
+      setPcOpen((s) => ({ ...s, [questionId]: true }));
+      setPcStatus((s) => ({ ...s, [statusKey]: list.length ? "idle" : "notfound" }));
+    } catch {
+      setPcStatus((s) => ({ ...s, [statusKey]: "error" }));
+    }
+  };
+
+  const schedulePostcodeSuggestions = (questionId: string, query: string) => {
+    if (pcTimer.current) clearTimeout(pcTimer.current);
+    pcTimer.current = setTimeout(() => {
+      void fetchPostcodeSuggestions(questionId, query);
+    }, POSTCODE_DEBOUNCE_MS);
+  };
+
+  // Pick a postcode from the dropdown → set the field + fill Town/Region.
+  const selectPostcode = (questionId: string, fieldKey: string, pc: string) => {
+    if (pcTimer.current) clearTimeout(pcTimer.current);
+    setField(`${questionId}:${fieldKey}`, pc);
+    setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
+    setPcOpen((s) => ({ ...s, [questionId]: false }));
+    void lookupPostcode(questionId, pc);
+  };
 
   const handleFiles = (key: string, list: FileList | null) => {
     const files = list ? Array.from(list) : [];
@@ -211,21 +352,21 @@ export function WizardSection({ data }: WizardSectionProps) {
                     {i > 0 ? (
                       <li
                         aria-hidden
-                        className="mt-[17px] h-0.5 flex-1 rounded"
+                        className="mt-[13px] h-0.5 flex-1 rounded md:mt-[17px]"
                         style={{ background: connectorLit ? "var(--color-gold)" : "var(--color-border)" }}
                       />
                     ) : null}
-                    <li className="flex w-20 shrink-0 flex-col items-center gap-2 text-center">
+                    <li className="flex w-9 shrink-0 flex-col items-center gap-1.5 text-center md:w-20 md:gap-2">
                       <button
                         type="button"
                         disabled={!canClick}
                         aria-current={state === "current" ? "step" : undefined}
                         onClick={() => goToStep(i)}
-                        className={`flex h-[34px] w-[34px] items-center justify-center rounded-full border text-sm font-semibold transition-colors ${dotClass[state]} ${canClick ? "cursor-pointer" : "cursor-default"}`}
+                        className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors md:h-[34px] md:w-[34px] md:text-sm ${dotClass[state]} ${canClick ? "cursor-pointer" : "cursor-default"}`}
                       >
                         {i === nodes.length - 1 || state === "complete" ? "✓" : i + 1}
                       </button>
-                      <span className={`text-[10px] font-bold tracking-[0.1em] uppercase ${state === "pending" ? "text-subtle" : "text-dark"}`}>
+                      <span className={`text-[10px] font-bold tracking-[0.1em] uppercase sr-only md:not-sr-only ${state === "pending" ? "text-subtle" : "text-dark"}`}>
                         {node.label}
                       </span>
                     </li>
@@ -400,6 +541,114 @@ export function WizardSection({ data }: WizardSectionProps) {
                           );
                         }
 
+                        const isPostcode = POSTCODE_RE.test(field!.fieldKey ?? "");
+
+                        if (isPostcode) {
+                          const listId = `${id}-pc-list`;
+                          const pcState =
+                            pcStatus[`${current.id}:__postcode`] ?? "idle";
+                          const suggestions = pcSuggestions[current.id] ?? [];
+                          const listOpen =
+                            Boolean(pcOpen[current.id]) && suggestions.length > 0;
+                          const pcMessage =
+                            pcState === "loading"
+                              ? "Searching postcodes…"
+                              : pcState === "found"
+                                ? "Town & region filled in below."
+                                : pcState === "notfound"
+                                  ? "No matching postcodes — check and try again."
+                                  : pcState === "error"
+                                    ? "Couldn't reach the postcode service — type your address manually."
+                                    : "";
+                          return (
+                            <label
+                              key={field!.id}
+                              className="flex flex-col gap-1.5"
+                              data-pc-widget
+                            >
+                              {labelText}
+                              <div className="relative">
+                                <input
+                                  id={id}
+                                  type="text"
+                                  role="combobox"
+                                  aria-expanded={listOpen}
+                                  aria-controls={listId}
+                                  aria-autocomplete="list"
+                                  className={inputClass}
+                                  required={Boolean(field!.required)}
+                                  placeholder={
+                                    field!.placeholder ?? "Start typing a postcode…"
+                                  }
+                                  autoComplete="postal-code"
+                                  value={formAnswers[key] ?? ""}
+                                  onChange={(e) => {
+                                    setField(key, e.target.value);
+                                    schedulePostcodeSuggestions(
+                                      current.id,
+                                      e.target.value,
+                                    );
+                                  }}
+                                  onBlur={() => {
+                                    if (!pcSuppressOpen.current) {
+                                      void fetchPostcodeSuggestions(
+                                        current.id,
+                                        formAnswers[key] ?? "",
+                                      );
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Escape") {
+                                      setPcOpen((s) => ({
+                                        ...s,
+                                        [current.id]: false,
+                                      }));
+                                    }
+                                  }}
+                                />
+                                {listOpen ? (
+                                  <ul
+                                    id={listId}
+                                    role="listbox"
+                                    className="absolute top-full right-0 left-0 z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-border bg-white py-1 shadow-lg"
+                                  >
+                                    {suggestions.map((pc) => (
+                                      <li
+                                        key={pc}
+                                        role="option"
+                                        aria-selected={false}
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        onClick={() =>
+                                          selectPostcode(
+                                            current.id,
+                                            field!.fieldKey ?? "",
+                                            pc,
+                                          )
+                                        }
+                                        className="cursor-pointer px-4 py-2 text-sm text-dark hover:bg-surface"
+                                      >
+                                        {pc}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : null}
+                              </div>
+                              {pcMessage ? (
+                                <span
+                                  aria-live="polite"
+                                  className={`text-xs ${
+                                    pcState === "notfound" || pcState === "error"
+                                      ? "text-red-600"
+                                      : "text-muted"
+                                  }`}
+                                >
+                                  {pcMessage}
+                                </span>
+                              ) : null}
+                            </label>
+                          );
+                        }
+
                         return (
                           <label key={field!.id} className="flex flex-col gap-1.5">
                             {labelText}
@@ -420,6 +669,7 @@ export function WizardSection({ data }: WizardSectionProps) {
                                 className={inputClass}
                                 required={Boolean(field!.required)}
                                 placeholder={field!.placeholder ?? undefined}
+                                autoComplete={addressAutoComplete(field!.fieldKey)}
                                 value={formAnswers[key] ?? ""}
                                 onChange={(e) => setField(key, e.target.value)}
                               />

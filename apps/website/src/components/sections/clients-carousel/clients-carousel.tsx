@@ -18,7 +18,7 @@ function LogoMark({ logo }: { logo: ClientLogoItem }) {
       fallbackAlt={logo.name ?? "Client"}
       placeholderLabel=""
       sizes="180px"
-      className="h-12 w-auto max-w-[160px] object-contain opacity-70 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+      className="h-12 w-auto max-w-[160px] object-contain opacity-70 grayscale transition-all duration-300"
     />
   );
 
@@ -29,6 +29,7 @@ function LogoMark({ logo }: { logo: ClientLogoItem }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={logo.name ?? "Client"}
+        className="rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
       >
         {image}
       </Link>

@@ -46,6 +46,9 @@
 @layer base {
   html {
     background-color: var(--color-surface);
+    /* Kill the default translucent tap highlight on mobile (links, buttons,
+       carousel logos, stepper dots). Keyboard :focus-visible is unaffected. */
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -195,6 +198,17 @@
 .clients-marquee:hover .clients-marquee-track,
 .clients-marquee:focus-within .clients-marquee-track {
   animation-play-state: paused;
+}
+
+/* Reveal a logo's colour only on true hover devices. On touch, a tap triggers
+   a "sticky" :hover that would leave the logo stuck in colour — gating on
+   (hover: hover) means mobile taps never recolour the image. */
+@media (hover: hover) {
+  .clients-marquee a:hover img,
+  .clients-marquee img:hover {
+    opacity: 1;
+    filter: grayscale(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
