@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Footer, Header, QuickContact } from "@/components/layout";
+import { CookieConsent } from "@/components/consent/cookie-consent";
 import { LocalBusinessJsonLd } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { resolveWhatsAppUrl } from "@/helpers";
@@ -26,6 +27,7 @@ async function SiteChromeContent({ children }: SiteChromeProps) {
       </main>
       <Footer config={siteMetaConfig} />
       <QuickContact whatsappUrl={resolveWhatsAppUrl(siteMetaConfig)} />
+      <CookieConsent />
     </>
   );
 }

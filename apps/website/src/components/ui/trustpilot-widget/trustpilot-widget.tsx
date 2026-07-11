@@ -2,6 +2,8 @@
 
 import Script from "next/script";
 import { useEffect, useRef } from "react";
+import { ConsentPlaceholder } from "@/components/consent/consent-placeholder";
+import { useHasConsent } from "@/lib/consent/use-consent";
 
 const TRUSTPILOT_BOOTSTRAP =
   "https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js";
@@ -75,12 +77,26 @@ export function TrustpilotWidget({
   className,
   variant = "mini",
 }: TrustpilotWidgetProps) {
+  const allowed = useHasConsent("functional");
   const widgetRef = useRef<HTMLDivElement>(null);
   const config = VARIANT_CONFIG[variant];
 
   useEffect(() => {
+    // Consent gate: only touch the vendor API once functional cookies are allowed.
+    if (!allowed) return;
     loadTrustpilotWidget(widgetRef.current);
-  }, [variant]);
+  }, [variant, allowed]);
+
+  // No consent → render an inert badge-sized prompt, never the vendor <Script>.
+  if (!allowed) {
+    return (
+      <ConsentPlaceholder
+        variant="inline"
+        label="Trustpilot reviews"
+        className={className}
+      />
+    );
+  }
 
   return (
     <>

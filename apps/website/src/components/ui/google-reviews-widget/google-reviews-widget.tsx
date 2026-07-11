@@ -2,6 +2,8 @@
 
 import Script from "next/script";
 import { useEffect, useRef } from "react";
+import { ConsentPlaceholder } from "@/components/consent/consent-placeholder";
+import { useHasConsent } from "@/lib/consent/use-consent";
 
 const GIZMO_SCRIPT = "https://embed.gizmosauce.com/gs.js";
 // Fixed Google Reviews gizmo for Upper Street Contractors.
@@ -131,9 +133,12 @@ type GoogleReviewsWidgetProps = {
  * owned wrapper is what we scope the scroll guards to (see above).
  */
 export function GoogleReviewsWidget({ className }: GoogleReviewsWidgetProps) {
+  const allowed = useHasConsent("functional");
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Consent gate: install the scroll guards only while the embed is shown.
+    if (!allowed) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -144,7 +149,14 @@ export function GoogleReviewsWidget({ className }: GoogleReviewsWidgetProps) {
       containers.delete(container);
       if (containers.size === 0) restoreScrollGuards();
     };
-  }, []);
+  }, [allowed]);
+
+  // No consent → render an inert panel, never the vendor <Script>.
+  if (!allowed) {
+    return (
+      <ConsentPlaceholder label="Google reviews" className={className} />
+    );
+  }
 
   return (
     <>

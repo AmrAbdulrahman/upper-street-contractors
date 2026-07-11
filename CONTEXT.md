@@ -223,3 +223,33 @@ _Avoid_: Modal, dialog, drawer, inspector
 **Real HTTP vs cached call**:
 A recorded CMS call is _real HTTP_ when it actually reached Strapi, or _cached_ when Next `unstable_cache` served it without a network hit. The CMS Call panel can filter by either.
 _Avoid_: Hit/miss (ambiguous), live call
+
+## Consent & cookies
+
+**Cookie Banner**:
+The first-visit consent bar pinned to the bottom of every public page, offering equal-prominence Reject all / Manage / Accept all actions. Governs whether non-essential technologies may run; Strictly-necessary technologies are never gated. Distinct from the Site Banner (the brand crest) and the Badge (the pill base component).
+_Avoid_: cookie popup, consent popup, Site Banner, Banner (the pill base)
+
+**Cookie Preferences**:
+The consent dialog opened from the Cookie Banner's Manage action or the footer's "Cookie preferences" link, listing each Consent category with its purpose and a toggle, plus Save. The one surface for changing or withdrawing consent after the first visit.
+_Avoid_: settings modal, cookie settings, preferences panel
+
+**Consent category**:
+A group of technologies a visitor allows or refuses as a unit. Two exist: Strictly necessary (always on, uneditable) and Functional. The banner offers only categories that have technologies behind them.
+_Avoid_: cookie type, purpose group, tier
+
+**Strictly necessary** (Consent category):
+Technologies essential to deliver what the visitor asked for — the Editor session cookies and the Consent choice itself. Exempt from consent under PECR; shown as always-on and uneditable.
+_Avoid_: essential (loose), required, mandatory cookies
+
+**Functional** (Consent category):
+The non-essential category covering the third-party review embeds — the Trustpilot widget and the Google Reviews widget. Off until the visitor opts in; refusing it suppresses those embeds. The site has no Analytics or Marketing category yet (none of that tech is used).
+_Avoid_: third-party, social, marketing (a category the site does not have), analytics (ditto)
+
+**Consent choice**:
+The visitor's recorded decision per Consent category, remembered across visits and re-requested when it expires or the category set changes.
+_Avoid_: consent state, cookie prefs (implementation phrasing)
+
+**Consent gate**:
+The check a non-essential embed makes against the Consent choice before loading its third-party script; when the matching Consent category is refused the embed renders an inert placeholder offering to open Cookie Preferences instead.
+_Avoid_: guard, wrapper, feature flag

@@ -17,6 +17,8 @@ import {
 
 import { SiteBanner } from "@/components/layout/site-banner";
 
+import { CookiePreferencesLink } from "@/components/consent/cookie-preferences-link";
+
 import {
   formatAddress,
   formatPhoneDisplay,
@@ -209,7 +211,10 @@ export function Footer({ config }: FooterProps) {
             © {currentYear} {copyrightName}. All rights reserved.
           </p>
 
-          <p className="text-white/35">{FOOTER_COMPANY_REGISTRATION}</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <CookiePreferencesLink />
+            <p className="text-white/35">{FOOTER_COMPANY_REGISTRATION}</p>
+          </div>
         </div>
       </div>
     </footer>
