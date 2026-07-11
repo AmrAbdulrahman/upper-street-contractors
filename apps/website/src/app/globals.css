@@ -200,10 +200,11 @@
   animation-play-state: paused;
 }
 
-/* Reveal a logo's colour only on true hover devices. On touch, a tap triggers
-   a "sticky" :hover that would leave the logo stuck in colour — gating on
-   (hover: hover) means mobile taps never recolour the image. */
-@media (hover: hover) {
+/* Desktop (lg+) shows logos grayscale/dimmed and reveals a logo's colour on
+   hover. Below lg (tablet + mobile) logos are already full colour, so this rule
+   is scoped to desktop widths. Gating on (hover: hover) also stops a touch tap's
+   "sticky" :hover from leaving a logo stuck mid-state. */
+@media (hover: hover) and (min-width: 1024px) {
   .clients-marquee a:hover img,
   .clients-marquee img:hover {
     opacity: 1;

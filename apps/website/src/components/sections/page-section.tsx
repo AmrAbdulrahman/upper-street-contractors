@@ -11,6 +11,7 @@ import {
   type PlanningRenovationSectionFragment,
   type RecentWorkSectionFragment,
   type ServiceOfferSectionFragment,
+  type SplitSectionFragment,
   type WhatWeDoSectionFragment,
   type WhoWeAreSectionFragment,
   type WhyChooseUsSectionFragment,
@@ -28,6 +29,7 @@ import { PageHeroSection } from "./page-hero";
 import { PlanningRenovationSection } from "./planning-renovation";
 import { RecentWorkSection } from "./recent-work";
 import { ServiceOfferSection } from "./service-offer";
+import { SplitSection } from "./split-section";
 import { WhatWeDoSection } from "./what-we-do";
 import { WhoWeAreSection } from "./who-we-are";
 import { WhyChooseUsSection } from "./why-choose-us";
@@ -46,6 +48,7 @@ export type PageSectionData = (
   | PlanningRenovationSectionFragment
   | RecentWorkSectionFragment
   | ServiceOfferSectionFragment
+  | SplitSectionFragment
   | WhatWeDoSectionFragment
   | WhoWeAreSectionFragment
   | WhyChooseUsSectionFragment
@@ -110,6 +113,9 @@ export function PageSection({ section }: { section: PageSectionData }) {
       return (
         <CaseStudiesSection data={section as CaseStudiesSectionFragment} />
       );
+
+    case "SplitSection":
+      return <SplitSection data={section as SplitSectionFragment} />;
 
     case "GoogleReviews":
       return <GoogleReviewsSection data={section as GoogleReviewsFragment} />;

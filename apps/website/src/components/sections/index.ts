@@ -7,6 +7,7 @@ export { HeroHeroSection } from "./home-hero";
 export { HowItWorksSection } from "./how-it-works";
 export { PageHeroSection } from "./page-hero";
 export { RecentWorkSection } from "./recent-work";
+export { SplitSection } from "./split-section";
 export { PageSection, type PageSectionData } from "./page-section";
 export { WhatWeDoSection } from "./what-we-do";
 export { WhoWeAreSection } from "./who-we-are";

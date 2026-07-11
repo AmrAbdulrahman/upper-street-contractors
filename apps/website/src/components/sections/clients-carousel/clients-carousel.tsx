@@ -18,7 +18,9 @@ function LogoMark({ logo }: { logo: ClientLogoItem }) {
       fallbackAlt={logo.name ?? "Client"}
       placeholderLabel=""
       sizes="180px"
-      className="h-12 w-auto max-w-[160px] object-contain opacity-70 grayscale transition-all duration-300"
+      // Full colour on tablet + mobile; grayscale/dimmed only on desktop (lg+),
+      // where the hover rule in globals.css recolours on hover.
+      className="h-12 w-auto max-w-[160px] object-contain opacity-100 grayscale-0 transition-all duration-300 lg:opacity-70 lg:grayscale"
     />
   );
 

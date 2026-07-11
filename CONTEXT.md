@@ -124,6 +124,10 @@ _Avoid_: pricing table, quote box
 The Service-page strip of Projects whose Category matches the page's service (most recent first, capped at three), reusing the Similar Work card grid with its own headings. A `case-studies-section` carries an overline, title and a Category; the Projects are looked up automatically, not pinned. Distinct from Similar Work (project-detail, ranked) and the Recent Work section (home, curated).
 _Avoid_: related projects, portfolio, gallery
 
+**Split Section**:
+A page section (`split-section` CMS type) pairing a gold overline — spanning the full width, on top — with a body and an image sitting side by side beneath it. `imagePosition` (`start` | `end`) chooses which side the image takes on desktop, the body always taking the opposite side; the columns stack to one on mobile. The body is rich content (blocks), like the Who We Are section's. Rendered by `SplitSection`. Two are seeded as examples immediately before the Case Studies section on every service page in the nav.
+_Avoid_: hero, banner, feature row, Who We Are section (a distinct home-page section)
+
 **Review card**:
 A single testimonial tile showing a star score, quoted review text, and the reviewer's profile.
 _Avoid_: Testimonial card, quote card, feedback tile
