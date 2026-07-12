@@ -43,7 +43,7 @@ const baseClasses =
 
 const buttonStyles: Record<ButtonVariant, Record<ButtonColor, string>> = {
   contained: {
-    green: "bg-whatsapp text-white hover:brightness-110",
+    green: "bg-whatsapp text-dark hover:brightness-110",
     dark_blue: "bg-dark text-white hover:bg-dark/90",
     white: "border border-border bg-white text-dark hover:bg-border-light",
     black: "bg-dark-2 text-white hover:bg-dark-2/90",

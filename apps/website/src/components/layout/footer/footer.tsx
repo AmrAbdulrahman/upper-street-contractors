@@ -39,7 +39,7 @@ function formatTelHref(phone: string): string {
 
 function FooterColumnHeading({ children }: { children: ReactNode }) {
   return (
-    <p className="mb-3.5 font-sans text-[11px] font-bold tracking-[0.1em] text-white/35 uppercase">
+    <p className="mb-3.5 font-sans text-[11px] font-bold tracking-[0.1em] text-white/60 uppercase">
       {children}
     </p>
   );
@@ -108,7 +108,7 @@ export function Footer({ config }: FooterProps) {
             />
 
             {description ? (
-              <p className="text-[13px] leading-[1.75] text-muted mt-3">
+              <p className="text-[13px] leading-[1.75] text-white/70 mt-3">
                 {description}
               </p>
             ) : null}
@@ -223,7 +223,7 @@ export function Footer({ config }: FooterProps) {
               </Link>
             ))}
             <CookiePreferencesLink />
-            <p className="text-white/35">{FOOTER_COMPANY_REGISTRATION}</p>
+            <p className="text-white/60">{FOOTER_COMPANY_REGISTRATION}</p>
           </div>
         </div>
       </div>

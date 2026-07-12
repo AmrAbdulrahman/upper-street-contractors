@@ -33,7 +33,7 @@ function resolveBadgeRadius(radius?: number | null): number {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  light: "bg-surface text-subtle",
+  light: "bg-surface text-muted",
   dark: "bg-dark text-white",
 };
 

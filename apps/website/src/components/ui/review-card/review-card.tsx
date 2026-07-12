@@ -125,7 +125,7 @@ function ReviewProfile({
 
           {meta ? (
             <ZeroCmsEntryField field="reviewSource">
-              <p className="truncate text-xs text-subtle">{meta}</p>
+              <p className="truncate text-xs text-muted">{meta}</p>
             </ZeroCmsEntryField>
           ) : null}
         </div>

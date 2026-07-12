@@ -39,7 +39,7 @@ const paragraphClasses: Record<RichTextVariant, string> = {
   "banner-body-light": "text-sm leading-relaxed text-muted",
   "banner-body-inline": "text-sm leading-relaxed text-inherit",
   "review-card-body": "italic text-[15px] leading-relaxed text-muted",
-  "planning-renovation-footer": "text-[13px] leading-relaxed text-white/40",
+  "planning-renovation-footer": "text-[13px] leading-relaxed text-white/60",
   prose: "mb-5 text-[16px] leading-[1.75] text-muted",
 };
 
@@ -56,7 +56,7 @@ const headingClasses: Record<RichTextVariant, string> = {
   "banner-body-light": "text-sm leading-relaxed text-muted",
   "banner-body-inline": "text-sm leading-relaxed text-inherit",
   "review-card-body": "italic text-[15px] leading-relaxed text-muted",
-  "planning-renovation-footer": "text-[13px] leading-relaxed text-white/40",
+  "planning-renovation-footer": "text-[13px] leading-relaxed text-white/60",
   prose: "mt-10 mb-4 font-serif text-2xl text-dark",
 };
 
@@ -151,7 +151,7 @@ export function RichTextViewer({
               variant === "at-a-glance-footer" ||
               variant === "banner-body-inline"
             ) {
-              return <span className="font-bold text-gold">{children}</span>;
+              return <span className="font-bold text-gold-mid">{children}</span>;
             }
             return <strong>{children}</strong>;
           },
