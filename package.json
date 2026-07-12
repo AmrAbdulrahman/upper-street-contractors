@@ -13,6 +13,7 @@
     "sync:claude-cli": "node scripts/sync-claude-cli.mjs"
   },
   "dependencies": {
+    "@daypicker/react": "^10.0.1",
     "@dnd-kit/helpers": "^0.5.0",
     "@dnd-kit/react": "^0.5.0",
     "@hugerte/hugerte-react": "^2.0.2",

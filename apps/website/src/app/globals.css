@@ -46,6 +46,9 @@
 @layer base {
   html {
     background-color: var(--color-surface);
+    /* Kill the default translucent tap highlight on mobile (links, buttons,
+       carousel logos, stepper dots). Keyboard :focus-visible is unaffected. */
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -197,6 +200,18 @@
   animation-play-state: paused;
 }
 
+/* Desktop (lg+) shows logos grayscale/dimmed and reveals a logo's colour on
+   hover. Below lg (tablet + mobile) logos are already full colour, so this rule
+   is scoped to desktop widths. Gating on (hover: hover) also stops a touch tap's
+   "sticky" :hover from leaving a logo stuck mid-state. */
+@media (hover: hover) and (min-width: 1024px) {
+  .clients-marquee a:hover img,
+  .clients-marquee img:hover {
+    opacity: 1;
+    filter: grayscale(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .clients-marquee-track {
     animation: none;
@@ -206,6 +221,33 @@
     row-gap: 1.25rem;
   }
 
+  .clients-marquee-track > [aria-hidden="true"] {
+    display: none;
+  }
+}
+
+/* Mobile + tablet (< 1024px): drop the marquee for a static 3-column grid with
+   5px gaps all around (inter-cell gap + matching outer padding). Placed after
+   the reduced-motion rule so it wins there too. Desktop (>= 1024px) keeps the
+   animated strip above. */
+@media (max-width: 1023.98px) {
+  .clients-marquee-track {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    place-items: center;
+    width: 100%;
+    padding: 5px;
+    animation: none;
+  }
+
+  /* Each logo cell is one grid item — drop the marquee's right-spacer so the
+     5px gap is exact. */
+  .clients-marquee-track > * {
+    padding-right: 0;
+  }
+
+  /* Show each logo once — the duplicated set only exists for the loop. */
   .clients-marquee-track > [aria-hidden="true"] {
     display: none;
   }

@@ -120,8 +120,10 @@ export async function POST(request: Request) {
 
   const senderEmail =
     typeof payload.senderEmail === "string" ? payload.senderEmail.trim() : "";
-  const senderName =
+  const fullName =
     typeof payload.senderName === "string" ? payload.senderName.trim() : "";
+  // Greet with the first name only; the full name still appears in the details table.
+  const senderName = fullName.split(/\s+/)[0] ?? "";
 
   const business = renderEnquiryEmail({
     fields,

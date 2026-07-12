@@ -55,6 +55,18 @@ query GetPage($key: String!, $status: CmsReadStatus = published, $includeUnpubli
       ... on CaseStudiesSection {
         ...CaseStudiesSection
       }
+      ... on SplitSection {
+        ...SplitSection
+      }
+      ... on ProseSection {
+        ...ProseSection
+      }
+      ... on GoogleReviews {
+        ...GoogleReviews
+      }
+      ... on Faq {
+        ...FaqSection
+      }
     }
   }
 }

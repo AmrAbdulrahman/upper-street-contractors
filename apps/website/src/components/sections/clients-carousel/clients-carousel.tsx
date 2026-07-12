@@ -18,7 +18,9 @@ function LogoMark({ logo }: { logo: ClientLogoItem }) {
       fallbackAlt={logo.name ?? "Client"}
       placeholderLabel=""
       sizes="180px"
-      className="h-12 w-auto max-w-[160px] object-contain opacity-70 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+      // Full colour on tablet + mobile; grayscale/dimmed only on desktop (lg+),
+      // where the hover rule in globals.css recolours on hover.
+      className="h-12 w-auto max-w-[160px] object-contain opacity-100 grayscale-0 transition-all duration-300 lg:opacity-70 lg:grayscale"
     />
   );
 
@@ -29,6 +31,7 @@ function LogoMark({ logo }: { logo: ClientLogoItem }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={logo.name ?? "Client"}
+        className="rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
       >
         {image}
       </Link>

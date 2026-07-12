@@ -1,0 +1,12 @@
+fragment SplitSection on SplitSection {
+  id
+  overline
+  body
+  imagePosition
+  image {
+    url
+    alt
+    width
+    height
+  }
+}

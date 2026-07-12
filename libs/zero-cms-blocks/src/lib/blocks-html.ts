@@ -121,67 +121,67 @@ const PASSTHROUGH_TAGS = new Set(['DIV', 'SECTION', 'ARTICLE', 'BODY', 'MAIN', '
 
 type Marks = Partial<Record<Mark, boolean>>;
 
-function inlineFromNode(node: Node, marks: Marks, dropped: Set<string>): InlineNode[] {
-  const result: InlineNode[] = [];
+/**
+ * Convert a SINGLE DOM node (text or inline element) to inline blocks. Split out
+ * from {@link inlineFromNode} so callers holding an individual child node — e.g.
+ * a text node sitting directly inside an `<li>` — can convert it directly. The
+ * old code only had a childNodes-iterating form, so `listItemFrom` passing it a
+ * bare text node hit `node.childNodes` (empty) and silently dropped the text.
+ */
+function inlineFromChild(child: Node, marks: Marks, dropped: Set<string>): InlineNode[] {
+  if (child.nodeType === 3 /* text */) {
+    const text = child.textContent ?? '';
+    return text.length > 0 ? [{ type: 'text', text, ...marks }] : [];
+  }
+  if (child.nodeType !== 1 /* element */) return [];
 
-  node.childNodes.forEach((child) => {
-    if (child.nodeType === 3 /* text */) {
-      const text = child.textContent ?? '';
-      if (text.length > 0) {
-        result.push({ type: 'text', text, ...marks });
-      }
-      return;
-    }
-    if (child.nodeType !== 1 /* element */) return;
+  const el = child as Element;
+  const tag = el.tagName;
 
-    const el = child as Element;
-    const tag = el.tagName;
-
-    switch (tag) {
-      case 'STRONG':
-      case 'B':
-        result.push(...inlineFromNode(el, { ...marks, bold: true }, dropped));
-        return;
-      case 'EM':
-      case 'I':
-        result.push(...inlineFromNode(el, { ...marks, italic: true }, dropped));
-        return;
-      case 'S':
-      case 'DEL':
-      case 'STRIKE':
-        result.push(...inlineFromNode(el, { ...marks, strikethrough: true }, dropped));
-        return;
-      case 'U':
-        result.push(...inlineFromNode(el, { ...marks, underline: true }, dropped));
-        return;
-      case 'CODE':
-        result.push(...inlineFromNode(el, { ...marks, code: true }, dropped));
-        return;
-      case 'SPAN':
-        result.push(...inlineFromNode(el, marks, dropped));
-        return;
-      case 'BR':
-        result.push({ type: 'text', text: '\n', ...marks });
-        return;
-      case 'A': {
-        const url = el.getAttribute('href') ?? '';
-        const children = inlineFromNode(el, marks, dropped).filter(
-          (n): n is TextNode => n.type === 'text'
-        );
-        result.push({
+  switch (tag) {
+    case 'STRONG':
+    case 'B':
+      return inlineFromNode(el, { ...marks, bold: true }, dropped);
+    case 'EM':
+    case 'I':
+      return inlineFromNode(el, { ...marks, italic: true }, dropped);
+    case 'S':
+    case 'DEL':
+    case 'STRIKE':
+      return inlineFromNode(el, { ...marks, strikethrough: true }, dropped);
+    case 'U':
+      return inlineFromNode(el, { ...marks, underline: true }, dropped);
+    case 'CODE':
+      return inlineFromNode(el, { ...marks, code: true }, dropped);
+    case 'SPAN':
+      return inlineFromNode(el, marks, dropped);
+    case 'BR':
+      return [{ type: 'text', text: '\n', ...marks }];
+    case 'A': {
+      const url = el.getAttribute('href') ?? '';
+      const children = inlineFromNode(el, marks, dropped).filter(
+        (n): n is TextNode => n.type === 'text'
+      );
+      return [
+        {
           type: 'link',
           url,
           children: children.length ? children : [{ type: 'text', text: '' }],
-        });
-        return;
-      }
-      default:
-        // Unknown inline element: record it, but keep any text it wraps.
-        dropped.add(tag.toLowerCase());
-        result.push(...inlineFromNode(el, marks, dropped));
+        },
+      ];
     }
-  });
+    default:
+      // Unknown inline element: record it, but keep any text it wraps.
+      dropped.add(tag.toLowerCase());
+      return inlineFromNode(el, marks, dropped);
+  }
+}
 
+function inlineFromNode(node: Node, marks: Marks, dropped: Set<string>): InlineNode[] {
+  const result: InlineNode[] = [];
+  node.childNodes.forEach((child) => {
+    result.push(...inlineFromChild(child, marks, dropped));
+  });
   return result;
 }
 
@@ -202,7 +202,9 @@ function listItemFrom(li: Element, dropped: Set<string>): ListItemNode {
         return;
       }
     }
-    inline.push(...inlineFromNode(child as Node, {}, dropped));
+    // Per-child (NOT inlineFromNode, which would iterate the child's OWN
+    // children — a bare text node has none, so its text would vanish).
+    inline.push(...inlineFromChild(child, {}, dropped));
   });
 
   const children: BlockChild[] = inline.length

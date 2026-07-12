@@ -4,12 +4,16 @@ import {
   type ClientReviewSectionFragment,
   type ClientsCarouselFragment,
   type ContactDetailsSectionFragment,
+  type FaqSectionFragment,
+  type GoogleReviewsFragment,
   type HomeHeroSectionFragment,
   type HowItWorksSectionFragment,
   type PageHeroSectionFragment,
   type PlanningRenovationSectionFragment,
+  type ProseSectionFragment,
   type RecentWorkSectionFragment,
   type ServiceOfferSectionFragment,
+  type SplitSectionFragment,
   type WhatWeDoSectionFragment,
   type WhoWeAreSectionFragment,
   type WhyChooseUsSectionFragment,
@@ -20,12 +24,16 @@ import { CaseStudiesSection } from "./case-studies";
 import { ClientReviewsSection } from "./client-reviews";
 import { ClientsCarousel } from "./clients-carousel";
 import { ContactDetailsSection } from "./contact-details";
+import { FaqSection } from "./faq";
+import { GoogleReviewsSection } from "./google-reviews";
 import { HeroHeroSection } from "./home-hero";
 import { HowItWorksSection } from "./how-it-works";
 import { PageHeroSection } from "./page-hero";
 import { PlanningRenovationSection } from "./planning-renovation";
+import { ProseSection } from "./prose-section";
 import { RecentWorkSection } from "./recent-work";
 import { ServiceOfferSection } from "./service-offer";
+import { SplitSection } from "./split-section";
 import { WhatWeDoSection } from "./what-we-do";
 import { WhoWeAreSection } from "./who-we-are";
 import { WhyChooseUsSection } from "./why-choose-us";
@@ -37,12 +45,16 @@ export type PageSectionData = (
   | ClientReviewSectionFragment
   | ClientsCarouselFragment
   | ContactDetailsSectionFragment
+  | FaqSectionFragment
+  | GoogleReviewsFragment
   | HomeHeroSectionFragment
   | HowItWorksSectionFragment
   | PageHeroSectionFragment
   | PlanningRenovationSectionFragment
+  | ProseSectionFragment
   | RecentWorkSectionFragment
   | ServiceOfferSectionFragment
+  | SplitSectionFragment
   | WhatWeDoSectionFragment
   | WhoWeAreSectionFragment
   | WhyChooseUsSectionFragment
@@ -107,6 +119,18 @@ export function PageSection({ section }: { section: PageSectionData }) {
       return (
         <CaseStudiesSection data={section as CaseStudiesSectionFragment} />
       );
+
+    case "SplitSection":
+      return <SplitSection data={section as SplitSectionFragment} />;
+
+    case "ProseSection":
+      return <ProseSection data={section as ProseSectionFragment} />;
+
+    case "GoogleReviews":
+      return <GoogleReviewsSection data={section as GoogleReviewsFragment} />;
+
+    case "Faq":
+      return <FaqSection data={section as FaqSectionFragment} />;
 
     default:
       return null;

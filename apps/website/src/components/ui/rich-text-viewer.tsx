@@ -14,7 +14,8 @@ type RichTextVariant =
   | "banner-body-light"
   | "banner-body-inline"
   | "review-card-body"
-  | "planning-renovation-footer";
+  | "planning-renovation-footer"
+  | "prose";
 
 type RichTextElement = "div" | "h1" | "h2" | "p";
 
@@ -39,6 +40,7 @@ const paragraphClasses: Record<RichTextVariant, string> = {
   "banner-body-inline": "text-sm leading-relaxed text-inherit",
   "review-card-body": "italic text-[15px] leading-relaxed text-muted",
   "planning-renovation-footer": "text-[13px] leading-relaxed text-white/40",
+  prose: "mb-5 text-[16px] leading-[1.75] text-muted",
 };
 
 const headingClasses: Record<RichTextVariant, string> = {
@@ -55,6 +57,20 @@ const headingClasses: Record<RichTextVariant, string> = {
   "banner-body-inline": "text-sm leading-relaxed text-inherit",
   "review-card-body": "italic text-[15px] leading-relaxed text-muted",
   "planning-renovation-footer": "text-[13px] leading-relaxed text-white/40",
+  prose: "mt-10 mb-4 font-serif text-2xl text-dark",
+};
+
+// Prose headings size by level (legal / long-form pages). The single
+// per-variant class above can't tell an h2 from an h3, so the "prose" variant
+// resolves its heading class from here instead — giving real hierarchy for SEO
+// + a11y without changing any other variant.
+const proseHeadingClasses: Record<number, string> = {
+  1: "mt-10 mb-4 font-serif text-3xl text-dark",
+  2: "mt-10 mb-4 font-serif text-2xl text-dark",
+  3: "mt-8 mb-3 font-serif text-xl text-dark",
+  4: "mt-6 mb-2 text-lg font-semibold text-dark",
+  5: "mt-6 mb-2 text-base font-semibold text-dark",
+  6: "mt-6 mb-2 text-base font-semibold text-dark",
 };
 
 function isBlocksContent(value: unknown): value is unknown[] {
@@ -87,10 +103,12 @@ export function RichTextViewer({
             }
 
             const HeadingTag = `h${level}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+            const headingClass =
+              variant === "prose"
+                ? (proseHeadingClasses[level] ?? proseHeadingClasses[6])
+                : headingClasses[variant];
             return (
-              <HeadingTag className={headingClasses[variant]}>
-                {children}
-              </HeadingTag>
+              <HeadingTag className={headingClass}>{children}</HeadingTag>
             );
           },
           list: ({ children, format }) => {

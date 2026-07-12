@@ -43,6 +43,9 @@ query GetHomePage($status: CmsReadStatus = published, $includeUnpublished: Boole
       ... on ClientsCarousel {
         ...ClientsCarousel
       }
+      ... on GoogleReviews {
+        ...GoogleReviews
+      }
     }
   }
 }
