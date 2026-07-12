@@ -12,6 +12,7 @@ import {
 
 import {
   FOOTER_COMPANY_LINKS,
+  FOOTER_LEGAL_LINKS,
   FOOTER_SERVICE_LINKS,
 } from "@/components/layout/nav-links";
 
@@ -212,6 +213,15 @@ export function Footer({ config }: FooterProps) {
           </p>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {FOOTER_LEGAL_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="underline-offset-2 transition-colors hover:text-white hover:underline"
+              >
+                {link.label}
+              </Link>
+            ))}
             <CookiePreferencesLink />
             <p className="text-white/35">{FOOTER_COMPANY_REGISTRATION}</p>
           </div>

@@ -6,6 +6,7 @@ export { GoogleReviewsSection } from "./google-reviews";
 export { HeroHeroSection } from "./home-hero";
 export { HowItWorksSection } from "./how-it-works";
 export { PageHeroSection } from "./page-hero";
+export { ProseSection } from "./prose-section";
 export { RecentWorkSection } from "./recent-work";
 export { SplitSection } from "./split-section";
 export { PageSection, type PageSectionData } from "./page-section";

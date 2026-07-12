@@ -30,6 +30,8 @@ const STATIC_ROUTES = [
   "/contact",
   "/rates",
   "/repairs-and-smaller-works",
+  "/privacy-policy",
+  "/terms-and-conditions",
   "/projects",
   "/refurbishments",
   "/kitchens",

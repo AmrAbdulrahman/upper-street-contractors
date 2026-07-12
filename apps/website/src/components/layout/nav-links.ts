@@ -60,3 +60,8 @@ export const FOOTER_COMPANY_LINKS: NavLink[] = [
   { label: "Contact", href: "/contact" },
   { label: "Rates", href: "/rates" },
 ];
+
+export const FOOTER_LEGAL_LINKS: NavLink[] = [
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms & Conditions", href: "/terms-and-conditions" },
+];

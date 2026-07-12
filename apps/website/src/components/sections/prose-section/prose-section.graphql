@@ -1,0 +1,5 @@
+fragment ProseSection on ProseSection {
+  id
+  overline
+  body
+}

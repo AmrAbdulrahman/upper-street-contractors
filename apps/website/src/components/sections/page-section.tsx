@@ -9,6 +9,7 @@ import {
   type HowItWorksSectionFragment,
   type PageHeroSectionFragment,
   type PlanningRenovationSectionFragment,
+  type ProseSectionFragment,
   type RecentWorkSectionFragment,
   type ServiceOfferSectionFragment,
   type SplitSectionFragment,
@@ -27,6 +28,7 @@ import { HeroHeroSection } from "./home-hero";
 import { HowItWorksSection } from "./how-it-works";
 import { PageHeroSection } from "./page-hero";
 import { PlanningRenovationSection } from "./planning-renovation";
+import { ProseSection } from "./prose-section";
 import { RecentWorkSection } from "./recent-work";
 import { ServiceOfferSection } from "./service-offer";
 import { SplitSection } from "./split-section";
@@ -46,6 +48,7 @@ export type PageSectionData = (
   | HowItWorksSectionFragment
   | PageHeroSectionFragment
   | PlanningRenovationSectionFragment
+  | ProseSectionFragment
   | RecentWorkSectionFragment
   | ServiceOfferSectionFragment
   | SplitSectionFragment
@@ -116,6 +119,9 @@ export function PageSection({ section }: { section: PageSectionData }) {
 
     case "SplitSection":
       return <SplitSection data={section as SplitSectionFragment} />;
+
+    case "ProseSection":
+      return <ProseSection data={section as ProseSectionFragment} />;
 
     case "GoogleReviews":
       return <GoogleReviewsSection data={section as GoogleReviewsFragment} />;

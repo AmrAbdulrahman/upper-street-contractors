@@ -128,6 +128,14 @@ _Avoid_: related projects, portfolio, gallery
 A page section (`split-section` CMS type) pairing a gold overline — spanning the full width, on top — with a body and an image sitting side by side beneath it. `imagePosition` (`start` | `end`) chooses which side the image takes on desktop, the body always taking the opposite side; the columns stack to one on mobile. The body is rich content (blocks), like the Who We Are section's. Rendered by `SplitSection`. Two are seeded as examples immediately before the Case Studies section on every service page in the nav.
 _Avoid_: hero, banner, feature row, Who We Are section (a distinct home-page section)
 
+**Prose Section**:
+A full-width page section (`prose-section` CMS type) pairing a gold overline with a rich-text `body` (blocks) in a narrow reading column — no image. Rendered by `ProseSection` via `<RichTextViewer variant="prose">`, the one variant that sizes headings by level (h2/h3), giving real hierarchy for long-form copy. Powers the Legal pages and any other prose page.
+_Avoid_: Split Section (pairs the body with an image), Who We Are section (home-page; has title/image/buttons), rich text (the field kind / RichTextViewer component)
+
+**Legal pages**:
+The Privacy Policy (`/privacy-policy`) and Terms & Conditions (`/terms-and-conditions`) pages — each a CMS `page` (key matching the path) whose `sections` are a Page Hero + a Prose Section, linked from the footer's bottom legal bar beside the Cookie preferences link. Privacy copy is grounded in the site's real data flows (Enquiry Wizard emails, Consent cookies, Trustpilot / Google embeds).
+_Avoid_: policy page, legal, T&Cs (informal), terms page
+
 **Review card**:
 A single testimonial tile showing a star score, quoted review text, and the reviewer's profile.
 _Avoid_: Testimonial card, quote card, feedback tile

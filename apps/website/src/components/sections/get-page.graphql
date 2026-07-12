@@ -58,6 +58,9 @@ query GetPage($key: String!, $status: CmsReadStatus = published, $includeUnpubli
       ... on SplitSection {
         ...SplitSection
       }
+      ... on ProseSection {
+        ...ProseSection
+      }
       ... on GoogleReviews {
         ...GoogleReviews
       }
