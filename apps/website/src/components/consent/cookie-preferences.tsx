@@ -179,7 +179,7 @@ export function CookiePreferences() {
                   </p>
                   <ul className="mt-2 space-y-0.5">
                     {category.providers.map((provider) => (
-                      <li key={provider.name} className="text-[12px] text-subtle">
+                      <li key={provider.name} className="text-[12px] text-muted">
                         <span className="font-medium text-muted">
                           {provider.name}
                         </span>{" "}
@@ -201,7 +201,7 @@ export function CookiePreferences() {
           })}
         </ul>
 
-        <p className="px-6 pt-3 text-[12px] leading-relaxed text-subtle">
+        <p className="px-6 pt-3 text-[12px] leading-relaxed text-muted">
           Turning a category off after you allowed it reloads the page to stop
           those widgets. Third parties set their own cookies once loaded — we
           can&rsquo;t delete those, but refusing stops them loading at all.

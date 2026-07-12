@@ -42,7 +42,7 @@ export function ProjectCard({ data }: ProjectCardProps) {
                   <Badge
                     variant="light"
                     radius={8}
-                    className="border border-border bg-surface text-subtle"
+                    className="border border-border bg-surface text-muted"
                   >
                     {chip.text}
                   </Badge>

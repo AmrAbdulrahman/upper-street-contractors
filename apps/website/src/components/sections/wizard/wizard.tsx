@@ -369,7 +369,7 @@ export function WizardSection({ data }: WizardSectionProps) {
   const dotClass = {
     complete: "bg-gold text-white border-gold",
     current: "bg-dark text-white border-dark",
-    pending: "bg-white text-subtle border-border",
+    pending: "bg-white text-muted border-border",
   } as const;
 
   const inputClass =
@@ -405,7 +405,7 @@ export function WizardSection({ data }: WizardSectionProps) {
                       >
                         {i === nodes.length - 1 || state === "complete" ? "✓" : i + 1}
                       </button>
-                      <span className={`text-[10px] font-bold tracking-[0.1em] uppercase sr-only md:not-sr-only ${state === "pending" ? "text-subtle" : "text-dark"}`}>
+                      <span className={`text-[10px] font-bold tracking-[0.1em] uppercase sr-only md:not-sr-only ${state === "pending" ? "text-muted" : "text-dark"}`}>
                         {node.label}
                       </span>
                     </li>
@@ -572,7 +572,7 @@ export function WizardSection({ data }: WizardSectionProps) {
                                   ))}
                                 </ul>
                               ) : (
-                                <span className="text-xs text-subtle">
+                                <span className="text-xs text-muted">
                                   Up to {MAX_FILES} files, 10 MB total (images, PDF, Word).
                                 </span>
                               )}

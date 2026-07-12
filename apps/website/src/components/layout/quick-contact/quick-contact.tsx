@@ -12,7 +12,7 @@ type QuickContactProps = {
 // label stretches out to the left (max-width transition, ease-in-out). CSS-only,
 // so this stays a server component with zero client JS.
 const pillBase =
-  "group flex items-center rounded-l-full text-white shadow-lg outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-white";
+  "group flex items-center rounded-l-full shadow-lg outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-white";
 const labelWrap =
   "max-w-0 overflow-hidden transition-[max-width] duration-300 ease-in-out group-hover:max-w-[16rem] group-focus-visible:max-w-[16rem] motion-reduce:transition-none";
 const labelText = "block whitespace-nowrap pl-5 pr-2 text-sm font-semibold";
@@ -31,7 +31,7 @@ export function QuickContact({
           rel="noopener noreferrer"
           aria-label="Contact Us On WhatsApp"
           title="Contact Us On WhatsApp"
-          className={`${pillBase} bg-whatsapp`}
+          className={`${pillBase} bg-whatsapp text-dark`}
         >
           <span className={labelWrap}>
             <span className={labelText}>Contact Us On WhatsApp</span>
@@ -46,7 +46,7 @@ export function QuickContact({
         href={quoteHref}
         aria-label="Request a Quote"
         title="Request a Quote"
-        className={`${pillBase} bg-gold`}
+        className={`${pillBase} bg-gold text-white`}
       >
         <span className={labelWrap}>
           <span className={labelText}>Request a Quote</span>

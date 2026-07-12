@@ -20,7 +20,7 @@ const quoteButtonClass =
   "inline-flex h-11 w-full items-center justify-center rounded-full border border-border bg-white px-5 text-sm font-semibold text-dark transition-colors hover:bg-border-light";
 
 const whatsappButtonClass =
-  "inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-whatsapp px-5 text-sm font-semibold text-white transition-[filter] hover:brightness-110";
+  "inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-whatsapp px-5 text-sm font-semibold text-dark transition-[filter] hover:brightness-110";
 
 function MenuIcon() {
   return (
