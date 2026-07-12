@@ -36,9 +36,17 @@ export default async function AboutPage() {
   const data = await getPage();
   const sections = data.pages[0]?.sections ?? [];
 
+  // FAQ renders at the very bottom of the page, beneath the reviews block.
+  const faqIndex = sections.findIndex(
+    (s) => (s as { __typename?: string }).__typename === "Faq",
+  );
+  const faqSection = faqIndex >= 0 ? sections[faqIndex] : null;
+  const aboveSections =
+    faqIndex >= 0 ? sections.filter((_, i) => i !== faqIndex) : sections;
+
   return (
     <>
-      {sections.map((section, i) => (
+      {aboveSections.map((section, i) => (
         <PageSection key={i} section={section as PageSectionData} />
       ))}
       {/* Existing Trustpilot widgets kept below the hero (dev scaffolding — replace with real About sections later). */}
@@ -48,6 +56,9 @@ export default async function AboutPage() {
         <TrustpilotWidget variant="micro-review-count" />
         <TrustpilotWidget variant="review-collector" />
       </div>
+      {faqSection ? (
+        <PageSection section={faqSection as PageSectionData} />
+      ) : null}
     </>
   );
 }

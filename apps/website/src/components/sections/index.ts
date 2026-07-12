@@ -2,6 +2,7 @@ export { AccreditationList } from "./accreditation-list";
 export { ClientReviewsSection } from "./client-reviews";
 export { ClientsCarousel } from "./clients-carousel";
 export { ContactDetailsSection } from "./contact-details";
+export { FaqSection } from "./faq";
 export { GoogleReviewsSection } from "./google-reviews";
 export { HeroHeroSection } from "./home-hero";
 export { HowItWorksSection } from "./how-it-works";

@@ -1,0 +1,14 @@
+fragment FaqItem on FaqItem {
+  id
+  question
+  answer
+}
+
+fragment FaqSection on Faq {
+  id
+  overline
+  title
+  items {
+    ...FaqItem
+  }
+}

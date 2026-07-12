@@ -64,6 +64,9 @@ query GetPage($key: String!, $status: CmsReadStatus = published, $includeUnpubli
       ... on GoogleReviews {
         ...GoogleReviews
       }
+      ... on Faq {
+        ...FaqSection
+      }
     }
   }
 }

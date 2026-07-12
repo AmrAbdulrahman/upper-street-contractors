@@ -17,7 +17,7 @@ The banner section at the top of an interior page (Refurbishments, Kitchens, Bat
 _Avoid_: page header, banner, ProjectsHeroPlaceholder (the removed UI-only mock)
 
 **Enquiry Wizard**:
-A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which emails a branded HTML enquiry to the business and a confirmation copy to the sender (nodemailer over SMTP), then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
+A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / date / time-window / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which emails a branded HTML enquiry to the business and a confirmation copy to the sender (nodemailer over SMTP), then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
 _Avoid_: form, survey, quiz, multi-step form
 
 **Conditional field**:
@@ -27,6 +27,10 @@ _Avoid_: dependent field, show/hide rule, branching
 **Attachment**:
 A file a visitor adds on the wizard's final step (`file` field type). Client-validated (≤5 files, ≤10 MB total; images/PDF/Word) and sent to the business as email attachments by `/api/enquiry`.
 _Avoid_: upload, file field (implementation phrasing)
+
+**Time window** (Form Question field):
+A `time-window` field offering three fixed slots — 9am–1pm, 1pm–4pm, 4pm–8pm — as multi-select chips; the visitor ticks any slots that suit them for a visit. Paired on the Contact wizard with an Emergency boolean-toggle and a start-date field.
+_Avoid_: time picker, slot, availability, timeslot
 
 **Contact Details panel**:
 The `contact-details` section listing ways to reach the company as items (each a `contact-detail-item`: emoji, label, text), plus a note and a WhatsApp button.
@@ -101,7 +105,7 @@ The home page section that surfaces homeowner testimonials with star ratings and
 _Avoid_: Testimonials section, reviews block, social proof
 
 **Clients Carousel**:
-A page section (`clients-carousel` CMS type) showing an editor-chosen list of client logos (`client-logo` children: image + optional name + link) in an infinitely rotating, pause-on-hover strip; collapses to a static wrapped row under `prefers-reduced-motion`.
+A page section (`clients-carousel` CMS type) showing an editor-chosen list of client logos (`client-logo` children: image + optional name + link) in an infinitely rotating, pause-on-hover strip on desktop (≥1024px); collapses to a static 3-column grid (5px gaps all around) below 1024px, and to a static wrapped row under `prefers-reduced-motion`.
 _Avoid_: logo slider, partners marquee, brand ticker
 
 **Site Banner**:
@@ -131,6 +135,14 @@ _Avoid_: hero, banner, feature row, Who We Are section (a distinct home-page sec
 **Prose Section**:
 A full-width page section (`prose-section` CMS type) pairing a gold overline with a rich-text `body` (blocks) in a narrow reading column — no image. Rendered by `ProseSection` via `<RichTextViewer variant="prose">`, the one variant that sizes headings by level (h2/h3), giving real hierarchy for long-form copy. Powers the Legal pages and any other prose page.
 _Avoid_: Split Section (pairs the body with an image), Who We Are section (home-page; has title/image/buttons), rich text (the field kind / RichTextViewer component)
+
+**FAQ section**:
+A page section (`faq` CMS type) pairing a gold overline and a serif title with a One-to-Many relation to FAQ items, rendered as a single-open accordion (native `<details>`, one row open at a time). Seeded on the About page (5 items, at the page foot) and as a 3-item, service-specific block directly above the Case Studies section on every nav service page.
+_Avoid_: accordion (the UI pattern only), questions section, help section, references (the implementation relation name)
+
+**FAQ item**:
+One question-and-answer pair inside a FAQ section (a `faq-item`: a `question` and a rich `answer`), shown as one collapsible accordion row.
+_Avoid_: Q&A, question, accordion item (UI phrasing)
 
 **Legal pages**:
 The Privacy Policy (`/privacy-policy`) and Terms & Conditions (`/terms-and-conditions`) pages — each a CMS `page` (key matching the path) whose `sections` are a Page Hero + a Prose Section, linked from the footer's bottom legal bar beside the Cookie preferences link. Privacy copy is grounded in the site's real data flows (Enquiry Wizard emails, Consent cookies, Trustpilot / Google embeds).

@@ -4,6 +4,7 @@ import {
   type ClientReviewSectionFragment,
   type ClientsCarouselFragment,
   type ContactDetailsSectionFragment,
+  type FaqSectionFragment,
   type GoogleReviewsFragment,
   type HomeHeroSectionFragment,
   type HowItWorksSectionFragment,
@@ -23,6 +24,7 @@ import { CaseStudiesSection } from "./case-studies";
 import { ClientReviewsSection } from "./client-reviews";
 import { ClientsCarousel } from "./clients-carousel";
 import { ContactDetailsSection } from "./contact-details";
+import { FaqSection } from "./faq";
 import { GoogleReviewsSection } from "./google-reviews";
 import { HeroHeroSection } from "./home-hero";
 import { HowItWorksSection } from "./how-it-works";
@@ -43,6 +45,7 @@ export type PageSectionData = (
   | ClientReviewSectionFragment
   | ClientsCarouselFragment
   | ContactDetailsSectionFragment
+  | FaqSectionFragment
   | GoogleReviewsFragment
   | HomeHeroSectionFragment
   | HowItWorksSectionFragment
@@ -125,6 +128,9 @@ export function PageSection({ section }: { section: PageSectionData }) {
 
     case "GoogleReviews":
       return <GoogleReviewsSection data={section as GoogleReviewsFragment} />;
+
+    case "Faq":
+      return <FaqSection data={section as FaqSectionFragment} />;
 
     default:
       return null;

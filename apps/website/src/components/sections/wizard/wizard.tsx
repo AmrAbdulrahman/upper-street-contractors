@@ -1,6 +1,8 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
+import { DayPicker } from "@daypicker/react";
+import "@daypicker/react/style.css";
 import { ZeroCmsEntry } from "@usc/zero-cms-widget";
 import { CmsImage } from "@/components/ui/cms-image";
 import { ContactDetailsPanel } from "../contact-details";
@@ -12,6 +14,41 @@ type WizardSectionProps = { data: WizardSectionFragment };
 const MAX_FILES = 5;
 const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10 MB
 const FILE_ACCEPT = "image/*,.pdf,.doc,.docx";
+
+// Fixed booking slots for the `timeWindow` field (multi-select). En-dash by design.
+const TIME_WINDOWS = ["9am–1pm", "1pm–4pm", "4pm–8pm"] as const;
+
+// Store a picked date as local YYYY-MM-DD (no UTC shift from toISOString()).
+const toISODate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+
+// Parse a stored YYYY-MM-DD back to a local Date for the controlled picker.
+const fromISODate = (s: string): Date | undefined => {
+  const [y, m, d] = s.split("-").map(Number);
+  return y && m && d ? new Date(y, m - 1, d) : undefined;
+};
+
+// Human-readable date for the confirmation line + the emailed enquiry.
+const formatDateLong = (s: string): string => {
+  const d = fromISODate(s);
+  return d
+    ? d.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : s;
+};
+
+// Gold-tinted theme for the DayPicker calendar (CSS vars inherit into .rdp-root).
+const DAYPICKER_THEME = {
+  "--rdp-accent-color": "var(--color-gold)",
+  "--rdp-accent-background-color": "color-mix(in srgb, var(--color-gold) 14%, white)",
+  "--rdp-today-color": "var(--color-gold-deep)",
+} as CSSProperties;
 
 // Postcode lookup (postcodes.io): matched by CMS fieldKey convention.
 const POSTCODE_RE = /^post.?code$/i;
@@ -283,7 +320,9 @@ export function WizardSection({ data }: WizardSectionProps) {
             continue;
           }
           const value = (formAnswers[key] ?? "").trim();
-          if (value) fields.push({ label: f.label || f.fieldKey, value });
+          const displayValue =
+            f.inputType === "date" && value ? formatDateLong(value) : value;
+          if (displayValue) fields.push({ label: f.label || f.fieldKey, value: displayValue });
           if (f.inputType === "email" && !senderEmail && value) senderEmail = value;
           if (!senderName && value && /name/i.test(f.fieldKey)) senderName = value;
         }
@@ -537,6 +576,73 @@ export function WizardSection({ data }: WizardSectionProps) {
                                   Up to {MAX_FILES} files, 10 MB total (images, PDF, Word).
                                 </span>
                               )}
+                            </div>
+                          );
+                        }
+
+                        if (field!.inputType === "date") {
+                          const value = formAnswers[key] ?? "";
+                          const selected = value ? fromISODate(value) : undefined;
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          return (
+                            <div key={field!.id} className="flex flex-col gap-1.5">
+                              {labelText}
+                              <div className="w-fit rounded-lg border border-border bg-white p-2">
+                                <DayPicker
+                                  mode="single"
+                                  selected={selected}
+                                  onSelect={(d) => setField(key, d ? toISODate(d) : "")}
+                                  disabled={{ before: today }}
+                                  style={DAYPICKER_THEME}
+                                />
+                              </div>
+                              {value ? (
+                                <span className="text-xs text-muted">
+                                  Selected: {formatDateLong(value)}
+                                </span>
+                              ) : null}
+                            </div>
+                          );
+                        }
+
+                        if (field!.inputType === "timeWindow") {
+                          const selectedWindows = (formAnswers[key] ?? "")
+                            .split(", ")
+                            .filter(Boolean);
+                          const toggleWindow = (w: string) => {
+                            const nextSel = selectedWindows.includes(w)
+                              ? selectedWindows.filter((x) => x !== w)
+                              : [...selectedWindows, w];
+                            // Persist in canonical slot order regardless of click order.
+                            setField(
+                              key,
+                              TIME_WINDOWS.filter((x) => nextSel.includes(x)).join(", "),
+                            );
+                          };
+                          return (
+                            <div key={field!.id} className="flex flex-col gap-1.5">
+                              {labelText}
+                              <div
+                                role="group"
+                                aria-label={field!.label ?? "Preferred time"}
+                                className="flex flex-wrap gap-2"
+                              >
+                                {TIME_WINDOWS.map((w) => {
+                                  const on = selectedWindows.includes(w);
+                                  return (
+                                    <button
+                                      type="button"
+                                      key={w}
+                                      aria-pressed={on}
+                                      onClick={() => toggleWindow(w)}
+                                      className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${on ? "border-gold bg-gold text-white" : "border-border bg-white text-dark hover:border-gold/40"}`}
+                                    >
+                                      {w}
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </div>
                           );
                         }

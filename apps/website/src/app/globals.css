@@ -225,3 +225,30 @@
     display: none;
   }
 }
+
+/* Mobile + tablet (< 1024px): drop the marquee for a static 3-column grid with
+   5px gaps all around (inter-cell gap + matching outer padding). Placed after
+   the reduced-motion rule so it wins there too. Desktop (>= 1024px) keeps the
+   animated strip above. */
+@media (max-width: 1023.98px) {
+  .clients-marquee-track {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    place-items: center;
+    width: 100%;
+    padding: 5px;
+    animation: none;
+  }
+
+  /* Each logo cell is one grid item — drop the marquee's right-spacer so the
+     5px gap is exact. */
+  .clients-marquee-track > * {
+    padding-right: 0;
+  }
+
+  /* Show each logo once — the duplicated set only exists for the loop. */
+  .clients-marquee-track > [aria-hidden="true"] {
+    display: none;
+  }
+}
