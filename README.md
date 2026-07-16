@@ -80,6 +80,11 @@ re-verify before budgeting ([Vercel](https://vercel.com/pricing),
 | Today (Gmail email, monthly billing) | ≈ **$30.65** | ≈ $368 |
 | Today, GizmoSauce billed yearly | ≈ $28.18 | ≈ $338 |
 | With `info@` mailbox (Workspace Starter) | + £5 + VAT | + £60 + VAT |
+| **Overall, everything on (incl. `info@` + VAT)** | ≈ **$38 / £30** | ≈ **$455 / £355** |
+
+Overall row assumes ≈ $1.30/£ (re-check FX) and Workspace VAT included (reclaimable if
+VAT-registered). Vercel usage staying inside Pro's included credit and Redis inside the
+free tier — both true at current traffic/content scale.
 
 Not subscriptions: fonts (self-hosted), WhatsApp links, Google Business Profile, analytics (none used).
 
