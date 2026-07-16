@@ -55,6 +55,34 @@ Local dev is the same shape, one process: `npm run dev` runs `website` against t
 same live Redis + Blob as staging/production (no local-only mode — see
 `.env.local`).
 
+## Services & subscriptions
+
+Everything external the site depends on, and what it costs. Prices checked July 2026 —
+re-verify before budgeting ([Vercel](https://vercel.com/pricing),
+[Upstash](https://upstash.com/pricing/redis), [Porkbun](https://porkbun.com/tld/contractors),
+[Google Workspace](https://workspace.google.com/pricing),
+[GizmoSauce](https://gizmosauce.com/pricing), [Trustpilot](https://business.trustpilot.com/pricing)).
+
+| Service | What it does | Cost |
+| ------- | ------------ | ---- |
+| **Vercel** (Pro) | Hosts the website — production + staging, ISR, serverless RPC. Paid plan required for commercial use. | $20/user/mo (1 seat), includes $20/mo usage credit |
+| **Upstash Redis** (via Vercel Marketplace) | The CMS database — schema, all content entries, CMS user accounts ([ADR 0008](./docs/adr/0008-zero-cms-redis-blob-store.md)). | $0 on free tier (256 MB, 500K commands/mo); then pay-as-you-go $0.20 / 100K commands |
+| **Vercel Blob** | All CMS media bytes (photos, files), CDN-served. | Usage-billed ($0.023/GB stored + per-op); covered by Pro's included credit at current volume |
+| **Domain** | `upperstreet.contractors` registration. | ≈ $28/yr renewal (≈ $2.40/mo) |
+| **Email** | Enquiry-form delivery (nodemailer SMTP). Free Gmail app-password today; production wants `info@upperstreet.contractors`. | $0 now → Google Workspace Business Starter **£5/user/mo** (annual, + VAT) when `info@` goes live |
+| **GizmoSauce** | The Google Reviews widget embedded on the site. | $8.25/mo (Starter, 5 widgets — we use 1); ≈ $5.78/mo billed yearly (30% off) |
+| **Trustpilot** | TrustBox review widget + profile. | $0 — free business plan is enough (50 invites/mo, widget, replies) |
+
+**Totals**
+
+| Scenario | Monthly | Yearly |
+| -------- | ------- | ------ |
+| Today (Gmail email, monthly billing) | ≈ **$30.65** | ≈ $368 |
+| Today, GizmoSauce billed yearly | ≈ $28.18 | ≈ $338 |
+| With `info@` mailbox (Workspace Starter) | + £5 + VAT | + £60 + VAT |
+
+Not subscriptions: fonts (self-hosted), WhatsApp links, Google Business Profile, analytics (none used).
+
 ## Environment setup
 
 Env vars live in a **single root file** — one app, no per-app duplication.
