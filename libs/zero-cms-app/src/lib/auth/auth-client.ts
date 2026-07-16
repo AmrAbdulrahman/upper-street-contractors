@@ -5,7 +5,12 @@
  * stores the Bearer token in localStorage, and exposes login / me / changePassword.
  */
 
-import { ZeroCmsError, type SafeUser } from '@usc/zero-cms-core';
+import {
+  ZeroCmsError,
+  type CreateUserInput,
+  type SafeUser,
+  type UpdateUserInput,
+} from '@usc/zero-cms-core';
 
 export interface AuthClientOptions {
   /** Origin/base for the endpoint (default same-origin ''). */
@@ -28,6 +33,19 @@ export interface AuthClient {
   me(): Promise<SafeUser | null>;
   changePassword(current: string, next: string): Promise<LoginResult>;
   logout(): void;
+  // ---- user administration (server rejects below the `admin` role) ----
+  listUsers(): Promise<SafeUser[]>;
+  createUser(input: CreateUserInput): Promise<SafeUser>;
+  /** `expectedUpdatedAt` = the `updatedAt` last read for this user (ADR 0009 CAS). */
+  updateUser(id: string, patch: UpdateUserInput, expectedUpdatedAt: string): Promise<SafeUser>;
+  /** Admin reset; `forcePasswordUpdate` = require rotation on next login. */
+  setPassword(
+    id: string,
+    newPassword: string,
+    expectedUpdatedAt: string,
+    forcePasswordUpdate: boolean
+  ): Promise<SafeUser>;
+  deleteUser(id: string, expectedUpdatedAt: string): Promise<void>;
 }
 
 export function createAuthClient(opts: AuthClientOptions = {}): AuthClient {
@@ -91,6 +109,15 @@ export function createAuthClient(opts: AuthClientOptions = {}): AuthClient {
       const r = await rpc<LoginResult>('changePassword', [current, next]);
       setToken(r.token);
       return r;
+    },
+    listUsers: () => rpc<SafeUser[]>('listUsers', []),
+    createUser: (input) => rpc<SafeUser>('createUser', [input]),
+    updateUser: (id, patch, expectedUpdatedAt) =>
+      rpc<SafeUser>('updateUser', [id, patch, expectedUpdatedAt]),
+    setPassword: (id, newPassword, expectedUpdatedAt, forcePasswordUpdate) =>
+      rpc<SafeUser>('setPassword', [id, newPassword, expectedUpdatedAt, forcePasswordUpdate]),
+    deleteUser: async (id, expectedUpdatedAt) => {
+      await rpc<{ ok: true }>('deleteUser', [id, expectedUpdatedAt]);
     },
     logout() {
       setToken(null);

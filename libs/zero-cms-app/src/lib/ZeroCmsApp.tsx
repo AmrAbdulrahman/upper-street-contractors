@@ -16,7 +16,7 @@
  */
 
 import { useEffect, type ReactNode } from 'react';
-import type { Adapter, SafeUser } from '@usc/zero-cms-core';
+import { ROLE_LABELS, type Adapter, type SafeUser } from '@usc/zero-cms-core';
 import {
   ZeroCmsProvider,
   useZeroCms,
@@ -30,8 +30,10 @@ import { ReferenceActionsProvider } from './reference-actions';
 import { EntriesList, EntryEditor } from './entries';
 import { TypeBuilder } from './type-builder';
 import { MediaLibrary } from './components/media';
+import { UsersPanel } from './users-panel';
 import { Button, Spinner, cls, cx } from './components/ui';
 import { AuthGate, type AuthConfig } from './auth/AuthGate';
+import type { AuthClient } from './auth/auth-client';
 
 export interface ZeroCmsAppProps {
   /** Inject an adapter directly (no auth), or use `auth` to manage one behind login. */
@@ -102,7 +104,12 @@ export function ZeroCmsAdminLayout({
             currentUserId={ctx.user.__id}
           >
             <AdminNavProvider path={path} onNavigate={onNavigate}>
-              <AdminChrome className={className} user={ctx.user} onLogout={ctx.logout}>
+              <AdminChrome
+                className={className}
+                user={ctx.user}
+                onLogout={ctx.logout}
+                authClient={ctx.client}
+              >
                 {children}
               </AdminChrome>
             </AdminNavProvider>
@@ -121,20 +128,43 @@ export function ZeroCmsAdminLayout({
   );
 }
 
+/** Shown in place of an admin-only pane for lower roles (deep links included). */
+function AdminOnlyPane({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex h-full items-center justify-center">
+      <div className="max-w-sm space-y-2 text-center">
+        <div aria-hidden="true" className="text-2xl">
+          🔒
+        </div>
+        <p className="text-sm font-medium text-neutral-900">{children}</p>
+        <p className="text-xs text-neutral-500">Ask an administrator if you need a change here.</p>
+      </div>
+    </div>
+  );
+}
+
 function AdminChrome({
   className,
   user,
   onLogout,
+  authClient,
   children,
 }: {
   className?: string;
   user?: SafeUser;
   onLogout?: () => void;
+  authClient?: AuthClient;
   children: ReactNode;
 }) {
   const { schema, schemaLoading } = useZeroCms();
   const { nav, go, reloadKey } = useAdminNav();
   const activeType = schema.find((t) => t.__name === nav.typeName);
+
+  // No-auth hosting (a bare `adapter`, dev/tests) has no roles at all — full
+  // access, minus the Users tab (there's no auth endpoint to manage users on).
+  const isAdmin = user ? user.role === 'admin' : true;
+  const showUsers = isAdmin && !!user && !!authClient;
+  const sections = SECTIONS.filter((s) => s.id !== 'users' || showUsers);
 
   // Default to the first type when landing on Content without one selected.
   useEffect(() => {
@@ -157,7 +187,7 @@ function AdminChrome({
         <div className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
           zero-cms
         </div>
-        {SECTIONS.map((s) => (
+        {sections.map((s) => (
           <button
             key={s.id}
             onClick={() => go({ section: s.id, isNew: false })}
@@ -174,7 +204,7 @@ function AdminChrome({
             <div className="truncate px-2 text-xs text-neutral-500" title={user.email}>
               {user.firstName ? `${user.firstName} ${user.lastName ?? ''}` : user.email}
               <span className="ml-1 rounded bg-neutral-100 px-1 text-[10px] uppercase">
-                {user.role}
+                {ROLE_LABELS[user.role]}
               </span>
             </div>
             <Button onClick={onLogout} className="w-full justify-start text-sm">
@@ -216,7 +246,17 @@ function AdminChrome({
             <Spinner />
           </div>
         ) : nav.section === 'types' ? (
-          <TypeBuilder />
+          isAdmin ? (
+            <TypeBuilder />
+          ) : (
+            <AdminOnlyPane>You need admin privileges to edit content types.</AdminOnlyPane>
+          )
+        ) : nav.section === 'users' ? (
+          showUsers && user && authClient ? (
+            <UsersPanel client={authClient} currentUser={user} />
+          ) : (
+            <AdminOnlyPane>You need admin privileges to manage users.</AdminOnlyPane>
+          )
         ) : nav.section === 'media' ? (
           <MediaLibrary />
         ) : activeType ? (

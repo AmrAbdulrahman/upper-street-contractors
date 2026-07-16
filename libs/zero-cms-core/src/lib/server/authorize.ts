@@ -44,6 +44,11 @@ const RPC_MIN_ROLE: Record<string, Role> = {
 /** Throws UNAUTHORIZED (no/invalid session) or FORBIDDEN (insufficient role). */
 export function authorizeRpc(op: string, session: Session | null): void {
   if (!session) throw new ZeroCmsError('UNAUTHORIZED', 'Sign in required');
+  // A temp password (forced-change pending) opens nothing but the change-password
+  // flow — without this, the token issued at login works on every RPC op before
+  // the password is ever rotated.
+  if (session.forcePasswordUpdate)
+    throw new ZeroCmsError('FORBIDDEN', 'Change your password before continuing');
   const min = RPC_MIN_ROLE[op] ?? 'admin';
   if (!roleAtLeast(session.role, min))
     throw new ZeroCmsError('FORBIDDEN', `Requires "${min}" role`);

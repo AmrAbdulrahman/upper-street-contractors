@@ -216,18 +216,46 @@ _Avoid_: nested modal, sub-drawer
 A newly created related Entry is linked into its parent only once the new Entry's own form is saved; cancelling creates no orphan. Applies wherever a Relation field is edited — Inspect mode and the Content admin alike.
 _Avoid_: Deferred link, optimistic create
 
-## Editor access
+## CMS access
 
-**Editor**:
-A Strapi Users & Permissions user (Editor role) who logs into the website to edit content in Inspect mode, using their own token.
-_Avoid_: Admin user (the Strapi `/admin` panel account — a separate account system the website does not use)
+**CMS user**:
+An account in the CMS that signs into the Content admin and Inspect mode. Carries exactly one Role; created and managed by an Admin from the Users tab.
+_Avoid_: Editor (the retired Strapi term — name the Role instead), admin panel account, Strapi user
+
+**Role**:
+What a CMS user is allowed to do — one of Admin, Copy writer, or Viewer.
+_Avoid_: permission level, access tier, rank (implementation phrasing)
+
+**Admin** (Role):
+The super admin. Everything a Copy writer can do, plus editing content types and managing CMS users (the Users tab). The only role that can create accounts or assign Roles.
+_Avoid_: super admin / superadmin (no separate tier exists — Admin is it), root, owner
+
+**Copy writer** (Role):
+Creates, edits, publishes and unpublishes content and media — in the Content admin and Inspect mode alike — but cannot change content types or manage users (the Types pane shows an admin-privileges notice instead of the builder). Stored role value: `editor`; displayed everywhere as Copy writer.
+_Avoid_: editor (the stored value, not the display name), content editor, author
+
+**Viewer** (Role):
+Read-only access to the CMS.
+_Avoid_: guest, read-only user
+
+**Users tab**:
+The Admin-only Content admin section for the account lifecycle: create a CMS user, edit their name/email/Role, disable, delete, and reset passwords. Hidden entirely from other Roles. An Admin cannot demote, disable or delete their own account.
+_Avoid_: user management screen, accounts page, members
+
+**Temp password**:
+The password an Admin types when creating a CMS user or resetting one with "require password change" on. Shared out-of-band (no invite emails); the recipient must replace it at next login.
+_Avoid_: OTP, invite code, magic link
+
+**Force password change**:
+The state where a CMS user must set a new password at next login before the CMS unlocks — every other action is refused until they do. Entered via the Temp password flows (and the very first seeded Admin); cleared by completing the change.
+_Avoid_: password reset (the Admin action that may trigger this), fpu (code shorthand)
 
 **Editor session**:
-The logged-in state of an Editor, carried by the access + refresh tokens stored as httpOnly cookies on the website domain.
+The logged-in state of a CMS user, carried by a signed session token (held by the browser and mirrored as an httpOnly cookie on the website domain so the server can gate `/admin/*`).
 _Avoid_: Login, auth state
 
 **Read-only service token**:
-The server-side-only Strapi token used to render published content for anonymous visitors (production) and builds. Never reaches the browser; distinct from an Editor's token.
+The server-side-only read-only storage credential used to render published content for anonymous visitors and builds. Never reaches the browser; distinct from any CMS user's session.
 _Avoid_: Public API, anon key, API key
 
 ## Dev tooling

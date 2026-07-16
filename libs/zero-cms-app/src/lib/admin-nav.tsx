@@ -30,6 +30,7 @@ export function parsePath(path: string[]): NavState {
   const [section, a, b] = path;
   if (section === 'types') return { section: 'types', typeName: a, isNew: false };
   if (section === 'media') return { section: 'media', isNew: false };
+  if (section === 'users') return { section: 'users', isNew: false };
   return {
     section: 'entries',
     typeName: a,
@@ -41,6 +42,7 @@ export function parsePath(path: string[]): NavState {
 export function toPath(s: NavState): string[] {
   if (s.section === 'types') return s.typeName ? ['types', s.typeName] : ['types'];
   if (s.section === 'media') return ['media'];
+  if (s.section === 'users') return ['users'];
   const p = ['entries'];
   if (s.typeName) {
     p.push(s.typeName);

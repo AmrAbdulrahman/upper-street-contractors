@@ -63,6 +63,10 @@ export function createAuthHandler(
   };
   const admin = async (req: Request): Promise<Session> => {
     const s = await session(req);
+    // Mirrors authorizeRpc: a forced-change-pending session may only rotate its
+    // password (`session` ops stay open for exactly that), never administrate.
+    if (s.forcePasswordUpdate)
+      throw new ZeroCmsError('FORBIDDEN', 'Change your password before continuing');
     if (!roleAtLeast(s.role, 'admin'))
       throw new ZeroCmsError('FORBIDDEN', 'Requires "admin" role');
     return s;
@@ -91,15 +95,35 @@ export function createAuthHandler(
       }
       case 'updateUser': {
         const s = await admin(req);
+        const patch = (args[1] ?? {}) as { role?: unknown; disabled?: unknown };
+        // Lock-out guard: an admin can rename/re-email themselves, but never
+        // strip their own access (demote/disable) — someone else must do it.
+        if (
+          args[0] === s.userId &&
+          (patch.role !== undefined || patch.disabled !== undefined)
+        )
+          throw new ZeroCmsError(
+            'FORBIDDEN',
+            'You cannot change your own role or disable your own account'
+          );
         return auth.updateUser(args[0] as string, args[1] as never, s.userId, args[2] as string);
       }
       case 'setPassword': {
         const s = await admin(req);
-        return auth.setPassword(args[0] as string, args[1] as string, s.userId, args[2] as string);
+        return auth.setPassword(
+          args[0] as string,
+          args[1] as string,
+          s.userId,
+          args[2] as string,
+          (args[3] as boolean | undefined) ?? false
+        );
       }
-      case 'deleteUser':
-        await admin(req);
+      case 'deleteUser': {
+        const s = await admin(req);
+        if (args[0] === s.userId)
+          throw new ZeroCmsError('FORBIDDEN', 'You cannot delete your own account');
         return auth.deleteUser(args[0] as string, args[1] as string).then(() => ({ ok: true }));
+      }
       default:
         throw new ZeroCmsError('VALIDATION', `Unknown auth op "${op}"`);
     }

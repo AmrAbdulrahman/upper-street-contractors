@@ -20,6 +20,9 @@ describe('<ZeroCmsApp>', () => {
     expect(await screen.findByRole('button', { name: 'Content' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Types' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Media' })).toBeTruthy();
+    // Users is auth-only (needs an auth client to manage accounts) — absent
+    // when the app is mounted on a bare adapter.
+    expect(screen.queryByRole('button', { name: 'Users' })).toBeNull();
     // The content type is chosen from a side-panel button (not a type dropdown).
     await waitFor(() => expect(screen.getByRole('button', { name: 'Note' })).toBeTruthy());
   });
