@@ -14,7 +14,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createHttpAdapter, type Adapter, type SafeUser } from '@usc/zero-cms-core';
-import { createAuthClient } from './auth-client';
+import { createAuthClient, type AuthClient } from './auth-client';
 import { Button, Field, Input, Spinner, cls, cx } from '../components/ui';
 import { errorMessage } from '../util';
 
@@ -27,6 +27,8 @@ export interface AuthConfig {
 export interface AuthContext {
   user: SafeUser;
   logout: () => void;
+  /** The signed-in auth client — carries the live token for user-admin ops. */
+  client: AuthClient;
 }
 
 type Phase = 'loading' | 'login' | 'changePassword' | 'ready';
@@ -77,11 +79,20 @@ function LoginForm({
         }}
       >
         <Field label="Email">
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input
+            type="email"
+            name="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </Field>
         <Field label="Password">
           <Input
             type="password"
+            name="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -126,20 +137,33 @@ function ChangePasswordForm({
         <Field label="Current password">
           <Input
             type="password"
+            name="current-password"
+            autoComplete="current-password"
             value={current}
             onChange={(e) => setCurrent(e.target.value)}
             required
           />
         </Field>
         <Field label="New password">
-          <Input type="password" value={next} onChange={(e) => setNext(e.target.value)} required />
+          <Input
+            type="password"
+            name="new-password"
+            autoComplete="new-password"
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+            required
+            minLength={8}
+          />
         </Field>
         <Field label="Confirm new password" error={mismatch ? 'Passwords do not match' : undefined}>
           <Input
             type="password"
+            name="confirm-password"
+            autoComplete="new-password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
+            minLength={8}
           />
         </Field>
         {error && <ErrorMsg>{error}</ErrorMsg>}
@@ -264,5 +288,5 @@ export function AuthGate({
         <Spinner />
       </Centered>
     );
-  return <>{children(adapter, { user, logout })}</>;
+  return <>{children(adapter, { user, logout, client })}</>;
 }

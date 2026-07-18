@@ -170,7 +170,11 @@ export function createRequestHandler(
     if (req.method !== 'POST')
       return json({ error: { code: 'VALIDATION', message: 'POST only' } }, 405);
     try {
-      const { op, args } = (await req.json()) as RpcRequest;
+      // A malformed body is the caller's error (400), not a server fault (500).
+      const body = (await req.json().catch(() => {
+        throw new ZeroCmsError('VALIDATION', 'Invalid JSON body');
+      })) as RpcRequest | null;
+      const { op, args } = body ?? ({} as RpcRequest);
       let actorOverride: string | undefined;
       if (options.auth) {
         const session = await options.auth.verify(getBearer(req));

@@ -9,7 +9,7 @@
 import { useState, type ReactElement } from 'react';
 import { useZeroCmsWidgetOptional } from '../context';
 import { useZeroCmsEntry } from './entry-context';
-import { InspectHost, mergeClassNames } from './inspect-clone';
+import { mergeClassNames, wrapWithInspect } from './inspect-clone';
 
 export interface ZeroCmsEntryFieldProps {
   field: string;
@@ -40,22 +40,22 @@ export function ZeroCmsEntryField({
       : 'outline-transparent before:opacity-0'
   );
 
-  return (
-    <InspectHost
-      as={as}
-      className={className}
-      inspectClassName={inspectClassName}
-      hovered={hovered}
-      setHovered={setHovered}
-      onEdit={() =>
-        void openEntry(ctx.entryId, {
-          type: ctx.typeName ?? undefined,
-          focusField: field,
-        })
-      }
-      editAriaLabel={`Edit ${field}`}
-    >
-      {children}
-    </InspectHost>
-  );
+  // wrapWithInspect clones a single DOM-element child in place (a <p> stays a
+  // <p>, an <li> stays a valid list child) instead of nesting it in a <div>
+  // host — the extra/swapped element was a real SSR/client structural
+  // mismatch (hydration noise) and invalid markup inside lists.
+  return wrapWithInspect({
+    children,
+    className,
+    as,
+    inspectClassName,
+    hovered,
+    setHovered,
+    onEdit: () =>
+      void openEntry(ctx.entryId, {
+        type: ctx.typeName ?? undefined,
+        focusField: field,
+      }),
+    editAriaLabel: `Edit ${field}`,
+  });
 }

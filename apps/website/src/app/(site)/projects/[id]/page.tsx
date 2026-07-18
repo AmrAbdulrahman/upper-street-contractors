@@ -42,8 +42,11 @@ export async function generateMetadata({
   ]);
 
   const project = data?.project;
+  // No fallback title: an unknown id must render as a 404, not leak a
+  // generic "Project | …" title on the not-found page (soft-404 signal).
+  if (!project) notFound();
   const siteName = siteMetaConfig?.siteName ?? "Upper Street Contractors";
-  const title = project?.title ?? "Project";
+  const title = project.title ?? "Project";
   const description = project?.summary ?? undefined;
   const absoluteTitle = `${title} | ${siteName}`;
   const heroUrl = resolveMediaUrl(project?.hero?.url);

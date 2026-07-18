@@ -7,13 +7,17 @@ import { ZeroCmsEntry } from "@usc/zero-cms-widget";
 import { CmsImage } from "@/components/ui/cms-image";
 import { ContactDetailsPanel } from "../contact-details";
 import type { WizardSectionFragment } from "@/generated/graphql";
+import {
+  ENQUIRY_FILE_ACCEPT as FILE_ACCEPT,
+  ENQUIRY_FILE_TYPE_ERROR,
+  isAllowedEnquiryFile,
+} from "@/helpers/enquiry-files";
 
 type WizardQuestion = NonNullable<WizardSectionFragment["questions"]>[number];
 type WizardSectionProps = { data: WizardSectionFragment };
 
 const MAX_FILES = 5;
 const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10 MB
-const FILE_ACCEPT = "image/*,.pdf,.doc,.docx";
 
 // Fixed booking slots for the `timeWindow` field (multi-select). En-dash by design.
 const TIME_WINDOWS = ["9am–1pm", "1pm–4pm", "4pm–8pm"] as const;
@@ -247,6 +251,14 @@ export function WizardSection({ data }: WizardSectionProps) {
     const files = list ? Array.from(list) : [];
     if (files.length > MAX_FILES) {
       setError(`Please attach at most ${MAX_FILES} files.`);
+      return;
+    }
+    // The `accept` attr is only a picker hint — enforce the type contract here.
+    const rejected = files.filter((f) => !isAllowedEnquiryFile(f));
+    if (rejected.length) {
+      setError(
+        `${ENQUIRY_FILE_TYPE_ERROR} Remove: ${rejected.map((f) => f.name).join(", ")}`,
+      );
       return;
     }
     const totalBytes = files.reduce((sum, f) => sum + f.size, 0);

@@ -116,9 +116,11 @@ export function ZeroCmsProvider({
   const refreshSchema = useCallback(async () => {
     setSchemaLoading(true);
     try {
+      // The version is auxiliary — if only it fails (e.g. an op-level 403 like
+      // the F9 regression), keep the schema instead of blanking the dashboard.
       const [next, version] = await Promise.all([
         adapter.getSchema(),
-        adapter.getSchemaVersion(),
+        adapter.getSchemaVersion().catch(() => null),
       ]);
       setSchema(next);
       setSchemaVersion(version);

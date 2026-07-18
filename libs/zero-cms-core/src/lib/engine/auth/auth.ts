@@ -11,9 +11,10 @@ import { ZeroCmsError } from '../../model/errors';
 import type { StoragePort } from '../storage-port';
 import {
   toSafeUser,
-  type Role,
+  type CreateUserInput,
   type SafeUser,
   type Session,
+  type UpdateUserInput,
   type User,
 } from '../../model/user';
 import { hashPassword, verifyPassword } from './password';
@@ -27,27 +28,22 @@ export interface AuthOptions {
   tokenTtlSec?: number;
 }
 
-export interface CreateUserInput {
-  email: string;
-  password: string;
-  role?: Role;
-  firstName?: string;
-  lastName?: string;
-  photo?: string;
-  forcePasswordUpdate?: boolean;
-}
-
-export type UpdateUserInput = Partial<{
-  email: string;
-  firstName: string;
-  lastName: string;
-  photo: string;
-  role: Role;
-  disabled: boolean;
-  forcePasswordUpdate: boolean;
-}>;
+// Moved to model/user.ts (browser-safe, shared with the app's auth client);
+// re-exported here so the `/node` entry's existing import path keeps working.
+export type { CreateUserInput, UpdateUserInput };
 
 const now = nextTimestamp;
+
+/** One shared floor for every path that sets a password (create/reset/change). */
+const MIN_PASSWORD_LENGTH = 8;
+
+function assertPasswordAllowed(password: string): void {
+  if (!password || password.length < MIN_PASSWORD_LENGTH)
+    throw new ZeroCmsError(
+      'VALIDATION',
+      `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
+    );
+}
 
 export class Auth {
   private readonly mutex = new Mutex();
@@ -90,6 +86,7 @@ export class Auth {
     return this.mutex.run(async () => {
       if (!input.email?.trim() || !input.password)
         throw new ZeroCmsError('VALIDATION', 'email and password are required');
+      assertPasswordAllowed(input.password);
       if (await this.port.readUserByEmail(input.email))
         throw new ZeroCmsError('CONFLICT', `User "${input.email}" already exists`);
       const ts = now();
@@ -146,20 +143,26 @@ export class Auth {
     });
   }
 
-  /** Admin sets a user's password (clears the force-update flag). */
+  /**
+   * Admin sets a user's password. `forcePasswordUpdate` decides whether the
+   * user must rotate it on next login (a temp password) or keep it (default
+   * false — the pre-flag behavior, which always cleared it).
+   */
   async setPassword(
     id: string,
     newPassword: string,
     actor: string,
-    expectedUpdatedAt: string
+    expectedUpdatedAt: string,
+    forcePasswordUpdate = false
   ): Promise<SafeUser> {
     return this.mutex.run(async () => {
+      assertPasswordAllowed(newPassword);
       const u = await this.port.readUser(id);
       if (!u) throw new ZeroCmsError('NOT_FOUND', `No user "${id}"`);
       const next: User = {
         ...u,
         hashedPassword: hashPassword(newPassword),
-        forcePasswordUpdate: false,
+        forcePasswordUpdate,
         updatedAt: now(),
         lastEditedBy: actor,
       };
@@ -221,7 +224,7 @@ export class Auth {
   ): Promise<{ token: string; user: SafeUser }> {
     const session = await this.verify(token);
     if (!session) throw new ZeroCmsError('UNAUTHORIZED', 'Not signed in');
-    if (!newPassword) throw new ZeroCmsError('VALIDATION', 'New password is required');
+    assertPasswordAllowed(newPassword);
     return this.mutex.run(async () => {
       const u = await this.port.readUser(session.userId);
       if (!u || !verifyPassword(currentPassword, u.hashedPassword))
