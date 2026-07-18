@@ -7,6 +7,10 @@ import {
   renderEnquiryEmail,
   type EnquiryField,
 } from "@/lib/email/templates";
+import {
+  ENQUIRY_FILE_TYPE_ERROR,
+  isAllowedEnquiryFile,
+} from "@/helpers/enquiry-files";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -88,6 +92,11 @@ export async function POST(request: Request) {
       { error: "Attachments must total under 10 MB." },
       { status: 400 },
     );
+  }
+  // The wizard filters types client-side, but a direct POST bypasses it —
+  // enforce the same images/PDF/Word contract before anything is emailed.
+  if (uploaded.some((f) => !isAllowedEnquiryFile(f))) {
+    return NextResponse.json({ error: ENQUIRY_FILE_TYPE_ERROR }, { status: 400 });
   }
 
   const to = process.env.ENQUIRY_TO;

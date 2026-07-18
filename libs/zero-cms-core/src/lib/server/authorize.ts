@@ -17,6 +17,7 @@ export function getBearer(req: Request): string | null {
 const RPC_MIN_ROLE: Record<string, Role> = {
   // view only
   getSchema: 'viewer',
+  getSchemaVersion: 'viewer',
   get: 'viewer',
   query: 'viewer',
   listDrafts: 'viewer',

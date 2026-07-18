@@ -36,7 +36,20 @@ function setSessionCookie(res: Response, token: string): void {
  */
 export async function POST(req: Request): Promise<Response> {
   const bodyText = await req.clone().text();
-  if (JSON.parse(bodyText || "{}")?.op === "logout") {
+  let parsedBody: { op?: string } | null;
+  try {
+    parsedBody = JSON.parse(bodyText || "{}") as { op?: string } | null;
+  } catch {
+    // Malformed JSON is the caller's error — mirror the handler's 400 shape
+    // instead of throwing before its error mapping can run.
+    return new Response(
+      JSON.stringify({
+        error: { code: "VALIDATION", message: "Invalid JSON body" },
+      }),
+      { status: 400, headers: { "content-type": "application/json" } }
+    );
+  }
+  if (parsedBody?.op === "logout") {
     const res = new Response(JSON.stringify({ ok: true }), {
       headers: { "content-type": "application/json" },
     });

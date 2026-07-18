@@ -42,6 +42,8 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
   return (
     <section className="bg-surface">
       <div className="mx-auto max-w-container px-6 py-[88px]">
+        {/* Card titles are <h3>s; without this the page jumps h1 → h3. */}
+        <h2 className="sr-only">Project case studies</h2>
         <div
           className="mb-9 flex flex-wrap gap-2"
           role="group"

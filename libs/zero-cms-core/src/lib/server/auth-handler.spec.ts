@@ -96,6 +96,27 @@ describe('createAuthHandler', () => {
     expect(session?.forcePasswordUpdate).toBe(true);
   });
 
+  it('rejects a malformed JSON body with 400, not 500 (F7)', async () => {
+    const res = await handle(
+      new Request('http://test/api/cms/auth', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{not json',
+      })
+    );
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({ error: { code: 'VALIDATION' } });
+  });
+
+  it('rejects login with missing/empty credentials as 400 without leaking internals (F6)', async () => {
+    for (const args of [[], [undefined, undefined], ['', ''], ['root@site.com']]) {
+      const res = await call('login', args as unknown[]);
+      expect(res.status, JSON.stringify(args)).toBe(400);
+      expect(res.body).toMatchObject({ error: { code: 'VALIDATION' } });
+      expect(JSON.stringify(res.body)).not.toMatch(/trim/i);
+    }
+  });
+
   it('denies user administration to non-admin roles', async () => {
     await call(
       'createUser',

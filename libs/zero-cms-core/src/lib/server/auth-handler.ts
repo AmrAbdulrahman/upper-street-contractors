@@ -74,8 +74,19 @@ export function createAuthHandler(
 
   async function dispatch(op: AuthOp, args: unknown[], req: Request): Promise<unknown> {
     switch (op) {
-      case 'login':
-        return auth.login(args[0] as string, args[1] as string);
+      case 'login': {
+        const [email, password] = args;
+        // Reject before auth.login: an undefined email would TypeError on
+        // `.trim()` inside the storage ports and surface as a 500.
+        if (
+          typeof email !== 'string' ||
+          !email.trim() ||
+          typeof password !== 'string' ||
+          !password
+        )
+          throw new ZeroCmsError('VALIDATION', 'Email and password are required');
+        return auth.login(email, password);
+      }
       case 'me':
         await session(req);
         return auth.me(getBearer(req));
@@ -133,8 +144,12 @@ export function createAuthHandler(
     if (req.method !== 'POST')
       return json({ error: { code: 'VALIDATION', message: 'POST only' } }, 405);
     try {
-      const { op, args } = (await req.json()) as { op: AuthOp; args?: unknown[] };
-      return json((await dispatch(op, args ?? [], req)) ?? null);
+      // A malformed body is the caller's error (400), not a server fault (500).
+      const body = (await req.json().catch(() => {
+        throw new ZeroCmsError('VALIDATION', 'Invalid JSON body');
+      })) as { op: AuthOp; args?: unknown[] } | null;
+      const { op, args } = body ?? {};
+      return json((await dispatch(op as AuthOp, args ?? [], req)) ?? null);
     } catch (err) {
       return errorResponse(err);
     }

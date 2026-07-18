@@ -7,8 +7,10 @@ import Link from "next/link";
 
 const glassChip =
   "inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80";
+// gold-mid, not gold: #906d37 on the gold/20-over-dark chip bg is 3.34:1 —
+// below WCAG AA (4.5) for 12px text; #b8925a clears it at 5.5:1.
 const goldChip =
-  "inline-flex items-center rounded-full border border-gold/35 bg-gold/20 px-3 py-1 text-xs font-semibold text-gold";
+  "inline-flex items-center rounded-full border border-gold/35 bg-gold/20 px-3 py-1 text-xs font-semibold text-gold-mid";
 
 type GalleryImage = NonNullable<
   NonNullable<ProjectDetailFragment["projectImages"]>[number]
