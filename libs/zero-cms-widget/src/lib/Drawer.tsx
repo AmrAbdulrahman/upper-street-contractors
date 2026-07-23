@@ -33,10 +33,20 @@ export function Drawer({
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
-    // Re-runs when isTop flips true (a child popped), so the parent re-grabs focus.
-    panelRef.current?.focus();
     return () => window.removeEventListener('keydown', onKey);
   }, [open, isTop, onClose]);
+
+  // Focus on open + when isTop flips true (a child popped), so the parent
+  // re-grabs focus. Deliberately NOT keyed on `onClose`: hosts pass inline
+  // closures whose identity changes every render, and re-running focus() then
+  // would yank focus off the field being typed in mid-edit. The contains()
+  // guard keeps re-grabs from stealing focus that's already inside the panel.
+  useEffect(() => {
+    if (!open || !isTop) return;
+    const panel = panelRef.current;
+    if (!panel || panel.contains(document.activeElement)) return;
+    panel.focus();
+  }, [open, isTop]);
 
   if (!open) return null;
 

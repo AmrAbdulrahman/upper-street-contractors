@@ -159,8 +159,8 @@ _Avoid_: Author, user profile, client info (implementation name only)
 ## Inspect mode
 
 **Inspect mode**:
-The in-page editing overlay enabled by `?inspect=true` (or `NEXT_PUBLIC_STRAPI_INSPECTION_MODE`). Wrapped Entries and Fields show an edit pencil that opens the Edit drawer.
-_Avoid_: Edit mode, preview mode, admin mode
+The in-page editing overlay, available while previewing under `/admin/*` and toggled by the zero-cms bar's edit-mode button (`?inspect=true`). Wrapped Entries and Fields show an edit pencil that opens the Edit drawer.
+_Avoid_: Edit mode, preview mode, admin mode, `NEXT_PUBLIC_STRAPI_INSPECTION_MODE` (retired Strapi-era flag)
 
 **Preview mode** (`ENABLE_PREVIEW`):
 Server env flag. `true` → every server GraphQL read requests `status: DRAFT`, so the whole site renders draft content; `false` → `PUBLISHED` only. Injected globally by `createPreviewLink` in `apollo-server.ts` (no per-call-site wiring). Distinct from Inspect mode (the editing overlay); preview can be on with the overlay off.

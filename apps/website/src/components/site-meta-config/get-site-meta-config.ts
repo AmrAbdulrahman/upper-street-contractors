@@ -9,8 +9,8 @@ async function fetchSiteMetaConfig(): Promise<SiteMetaConfigFragment | null> {
   try {
     // Global chrome (header/footer/metadata/robots), rarely changes. Cache it
     // even in inspect mode (safe: it's a non-user-scoped singleton) so it costs
-    // at most one CMS call per 10 min across all renders. Flushed on publish via
-    // revalidateCms() (see lib/cms/revalidate.ts).
+    // at most one CMS call per 10 min across all renders. Flushed on publish by
+    // the RPC layer's revalidateTag (see lib/zero-cms/server.ts withRevalidate).
     const data = await query(
       GetSiteMetaConfigDocument,
       undefined,
