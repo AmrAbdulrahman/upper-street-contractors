@@ -12,8 +12,17 @@ type HeaderProps = {
   config: SiteMetaConfigFragment | null;
 };
 
-/** Toggles once the page is scrolled past a small threshold (rAF-throttled). */
-function useScrolled(threshold = 8): boolean {
+/**
+ * Toggles once the page is scrolled past a threshold (rAF-throttled).
+ *
+ * Collapse and expand use different thresholds (hysteresis): shrinking the
+ * header removes ~60px of document height, and scroll anchoring pulls
+ * scrollY down by the same amount — with a single threshold that drop lands
+ * back below it and the header oscillates. The gap between the two
+ * thresholds must stay larger than the header's collapsed/expanded height
+ * difference.
+ */
+function useScrolled(collapseAt = 96, expandAt = 24): boolean {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -21,7 +30,9 @@ function useScrolled(threshold = 8): boolean {
     const onScroll = () => {
       if (frame) return;
       frame = requestAnimationFrame(() => {
-        setScrolled(window.scrollY > threshold);
+        setScrolled((prev) =>
+          prev ? window.scrollY > expandAt : window.scrollY > collapseAt,
+        );
         frame = 0;
       });
     };
@@ -32,7 +43,7 @@ function useScrolled(threshold = 8): boolean {
       window.removeEventListener("scroll", onScroll);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [threshold]);
+  }, [collapseAt, expandAt]);
 
   return scrolled;
 }
