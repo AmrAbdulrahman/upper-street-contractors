@@ -95,6 +95,30 @@ describe('<ZeroCmsWidget>', () => {
     );
   });
 
+  it('keeps focus in the field while typing (dirty-flag re-renders must not re-grab)', async () => {
+    const adapter = await createNodeAdapter(createMemoryStoragePort({ schema }));
+    const created = await adapter.create('note', { title: 'Focus me' });
+
+    render(
+      <ZeroCmsWidget adapter={adapter}>
+        <Host id={created.__id} />
+      </ZeroCmsWidget>
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'edit' }));
+    await screen.findByRole('dialog');
+    const title = (await screen.findByRole('textbox', { name: /title/i })) as HTMLInputElement;
+    await waitFor(() => expect(title.value).toBe('Focus me'));
+
+    title.focus();
+    // First edit flips the form dirty -> DrawerBody re-renders with a fresh
+    // inline onClose -> the old Drawer effect re-ran panel.focus(), blurring
+    // the input mid-keystroke (the prod "unfocus" bug).
+    fireEvent.change(title, { target: { value: 'Focus me!' } });
+    await waitFor(() => expect(title.value).toBe('Focus me!'));
+    expect(document.activeElement).toBe(title);
+  });
+
   it('inspect mode renders <ZeroCmsEntry>/<ZeroCmsEntryField> children', async () => {
     const adapter = await createNodeAdapter(createMemoryStoragePort({ schema }));
     const created = await adapter.create('note', { title: 'Wrapped', body: 'B' });

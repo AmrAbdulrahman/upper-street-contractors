@@ -17,8 +17,8 @@ import { getAllSitePaths } from "@/lib/cms/site-routes";
  * Wraps the write adapter so any publish-affecting op (ADR 0010/0011: the same
  * set git-sync used to trigger a commit on, before Redis replaced git) also
  * revalidates the ISR cache — guaranteed at the RPC layer for every caller,
- * not dependent on a browser client remembering to call `revalidateCms()`
- * afterward (that one's for the editor's own immediate `router.refresh()`).
+ * not dependent on any browser client remembering to revalidate afterward
+ * (the editor's own view refreshes via a client-side `router.refresh()`).
  *
  * Two separate cache layers both need busting: `revalidatePath` for the
  * Full Route Cache (the rendered HTML/RSC per page), and `revalidateTag` for

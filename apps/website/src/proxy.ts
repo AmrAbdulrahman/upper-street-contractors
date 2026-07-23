@@ -59,6 +59,23 @@ export default function proxy(request: NextRequest) {
   const isAdmin = pathname === ADMIN_PREFIX || pathname.startsWith(`${ADMIN_PREFIX}/`);
   if (!isAdmin) {
     if (!request.cookies.has(DRAFT_COOKIE)) return NextResponse.next();
+    // Only clear on a real document navigation. The (site) pages an editor is
+    // previewing under /admin/* are full of bare-path <Link>s; in production
+    // Next prefetches those, and each prefetch (plus any client-side RSC
+    // fetch) lands here with the Draft Mode cookie attached. Deleting it on
+    // those responses silently killed Draft Mode while the editor never left
+    // /admin — the next router.refresh() then unmounted the whole editing
+    // shell mid-typing (bar + drawer vanish until a manual reload re-enables
+    // preview). A hand-typed/bookmarked bare URL is a document request, so
+    // the original leave-/admin cleanup still fires for it.
+    // `Sec-Fetch-Dest`, not Next's own `RSC`/`Next-Router-Prefetch` headers —
+    // Next strips those from external requests before middleware runs, so a
+    // browser's real prefetch is indistinguishable by them here. The browser
+    // sets Sec-Fetch-Dest itself: `document` only for a real navigation,
+    // `empty` for prefetch/RSC fetches. Absent (curl, bots, legacy browsers)
+    // counts as a navigation, preserving the original cleanup.
+    const dest = request.headers.get("sec-fetch-dest");
+    if (dest !== null && dest !== "document") return NextResponse.next();
     const res = NextResponse.next();
     res.cookies.delete(DRAFT_COOKIE);
     return res;

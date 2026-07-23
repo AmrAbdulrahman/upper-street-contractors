@@ -5,7 +5,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Toaster } from "sonner";
 import { ZeroCmsBar, ZeroCmsWidget } from "@usc/zero-cms-widget";
 import { HugeRTEBlocksEditor } from "@usc/zero-cms-blocks";
-import { revalidateCms } from "@/lib/cms/revalidate";
 import { cmsNotify } from "@/lib/cms/notify";
 
 const ADMIN_PREFIX = "/admin";
@@ -32,10 +31,13 @@ export function CmsInspectShellClient({
   const pathname = usePathname();
   const [inspect, setInspect] = useState(false);
 
-  // After a draft save (drawer) or publish (bar): clear the shared route cache and
-  // refresh so the editor sees their change immediately.
+  // After a draft save (drawer) or publish (bar), refresh so the editor sees
+  // their change immediately — enough on its own: preview reads bypass the
+  // Data Cache entirely (query.ts), and publish-side ISR revalidation is
+  // guaranteed at the RPC layer (server.ts withRevalidate), so no client-side
+  // revalidate call belongs here. (One used to — it purged the whole public
+  // Full Route Cache on every draft autosave.)
   const onContentChange = useCallback(() => {
-    void revalidateCms();
     router.refresh();
   }, [router]);
 
