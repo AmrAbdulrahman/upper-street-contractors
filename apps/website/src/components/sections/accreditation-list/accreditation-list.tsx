@@ -30,7 +30,7 @@ export function AccreditationList({ data }: AccreditationListProps) {
                 — `logoSize` deliberately does not apply to it. Sizing it to the
                 badges only ever added dead space under the ink, which is what
                 made it look misaligned. It sizes itself; the row centres it. */}
-            <TrustpilotWidget variant="micro-combo" />
+            <TrustpilotWidget variant="mini" />
 
             <ZeroCmsList
               className="flex flex-wrap items-center justify-center gap-3 sm:gap-3.5"
