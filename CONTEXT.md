@@ -17,7 +17,7 @@ The banner section at the top of an interior page (Refurbishments, Kitchens, Bat
 _Avoid_: page header, banner, ProjectsHeroPlaceholder (the removed UI-only mock)
 
 **Enquiry Wizard**:
-A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / date / time-window / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which emails a branded HTML enquiry to the business and a confirmation copy to the sender (nodemailer over SMTP), then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
+A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / date / Availability / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which emails a branded HTML enquiry to the business and a confirmation copy to the sender (nodemailer over SMTP), then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
 _Avoid_: form, survey, quiz, multi-step form
 
 **Conditional field**:
@@ -36,9 +36,17 @@ _Avoid_: small file, embedded file
 An Attachment that did not fit the Inline attachment budget. The browser uploads it directly to blob storage and the enquiry email carries a download link instead of the bytes — the only way a phone video reaches the business at all.
 _Avoid_: link, blob, big file
 
-**Time window** (Form Question field):
-A `time-window` field offering three fixed slots — 9am–1pm, 1pm–4pm, 4pm–8pm — as multi-select chips; the visitor ticks any slots that suit them for a visit. Paired on the Contact wizard with an Emergency boolean-toggle and a start-date field.
-_Avoid_: time picker, slot, availability, timeslot
+**Availability** (Form Question field):
+An `availability` field: a multi-date calendar, and beneath it one "Preferred time of day (date)" row per Preferred date, each offering the same three Time windows as multi-select chips. So a visitor free Monday morning and Thursday evening can say exactly that. Paired on the Contact wizard with an Emergency boolean-toggle, replacing the start-date + standalone Time window pair. An editor tunes the calendar from the Edit drawer: max dates, earliest date, horizon in months, allow weekends — each `0` meaning no limit. Required means ≥1 Preferred date **and** ≥1 Time window across them; an empty calendar is not an answer.
+_Avoid_: availability calendar, date range, booking, time picker, timeslot
+
+**Preferred date**:
+One day a visitor ticked in an Availability field. Holds zero or more Time windows; none ticked is a real answer meaning "Any time" that day, which the field says on the row. Rows always read chronologically, whatever order the days were clicked.
+_Avoid_: start date, visit date, slot, appointment
+
+**Time window**:
+One of three fixed slots — 9am–1pm, 1pm–4pm, 4pm–8pm — tickable on a Preferred date. (The retired standalone `timeWindow` field, which offered the same slots attached to no particular day, still exists for an editor to place; the stored enum value is camelCase because a hyphen would collapse the lookup to a plain String.)
+_Avoid_: time picker, slot, availability (the field that contains them), timeslot
 
 **Contact Details panel**:
 The `contact-details` section listing ways to reach the company as items (each a `contact-detail-item`: emoji, label, text), plus a note and a WhatsApp button.

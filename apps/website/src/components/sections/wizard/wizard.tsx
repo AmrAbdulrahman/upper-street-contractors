@@ -1,12 +1,23 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { DayPicker } from "@daypicker/react";
 import "@daypicker/react/style.css";
 import { ZeroCmsEntry } from "@usc/zero-cms-widget";
 import { CmsImage } from "@/components/ui/cms-image";
 import { ContactDetailsPanel } from "../contact-details";
 import type { WizardSectionFragment } from "@/generated/graphql";
+import { AvailabilityField } from "./availability-field";
+import {
+  DAYPICKER_THEME,
+  TIME_WINDOWS,
+  formatAvailability,
+  formatDateLong,
+  fromISODate,
+  isAvailabilityComplete,
+  toISODate,
+  type AvailabilityEntry,
+} from "./helpers";
 import {
   ENQUIRY_FILE_ACCEPT as FILE_ACCEPT,
   ENQUIRY_MAX_FILES,
@@ -30,41 +41,6 @@ const fileKey = (f: File) => `${f.name}:${f.size}:${f.lastModified}`;
 
 /** Files above this go up in parallel parts, with per-part retry — worth it for video. */
 const MULTIPART_THRESHOLD_BYTES = 5 * 1024 * 1024;
-
-// Fixed booking slots for the `timeWindow` field (multi-select). En-dash by design.
-const TIME_WINDOWS = ["9am–1pm", "1pm–4pm", "4pm–8pm"] as const;
-
-// Store a picked date as local YYYY-MM-DD (no UTC shift from toISOString()).
-const toISODate = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-
-// Parse a stored YYYY-MM-DD back to a local Date for the controlled picker.
-const fromISODate = (s: string): Date | undefined => {
-  const [y, m, d] = s.split("-").map(Number);
-  return y && m && d ? new Date(y, m - 1, d) : undefined;
-};
-
-// Human-readable date for the confirmation line + the emailed enquiry.
-const formatDateLong = (s: string): string => {
-  const d = fromISODate(s);
-  return d
-    ? d.toLocaleDateString("en-GB", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-    : s;
-};
-
-// Gold-tinted theme for the DayPicker calendar (CSS vars inherit into .rdp-root).
-const DAYPICKER_THEME = {
-  "--rdp-accent-color": "var(--color-gold)",
-  "--rdp-accent-background-color": "color-mix(in srgb, var(--color-gold) 14%, white)",
-  "--rdp-today-color": "var(--color-gold-deep)",
-} as CSSProperties;
 
 // Postcode lookup (postcodes.io): matched by CMS fieldKey convention.
 const POSTCODE_RE = /^post.?code$/i;
@@ -107,6 +83,10 @@ export function WizardSection({ data }: WizardSectionProps) {
   const [optionText, setOptionText] = useState<Record<string, string>>({});
   const [formAnswers, setFormAnswers] = useState<Record<string, string>>({});
   const [fileAnswers, setFileAnswers] = useState<Record<string, File[]>>({});
+  // Availability answers can't live in `formAnswers` (strings only), same as files.
+  const [availabilityAnswers, setAvailabilityAnswers] = useState<
+    Record<string, AvailabilityEntry[]>
+  >({});
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
   // Honeypot. Both /api/enquiry and the upload-token route have always checked
   // `company_website`, but nothing ever rendered it — so the check was dead.
@@ -337,6 +317,8 @@ export function WizardSection({ data }: WizardSectionProps) {
       if (!f.required) return true;
       const key = `${current.id}:${f.fieldKey}`;
       if (f.inputType === "file") return (fileAnswers[key]?.length ?? 0) > 0;
+      if (f.inputType === "availability")
+        return isAvailabilityComplete(availabilityAnswers[key] ?? []);
       if (f.inputType === "boolean") return formAnswers[key] === "true";
       return (formAnswers[key] ?? "").trim().length > 0;
     });
@@ -382,6 +364,11 @@ export function WizardSection({ data }: WizardSectionProps) {
             if (list.length) {
               fields.push({ label: f.label || f.fieldKey, value: list.map((x) => x.name).join(", ") });
             }
+            continue;
+          }
+          if (f.inputType === "availability") {
+            const value = formatAvailability(availabilityAnswers[key] ?? []);
+            if (value) fields.push({ label: f.label || f.fieldKey, value });
             continue;
           }
           if (f.inputType === "boolean") {
@@ -741,6 +728,21 @@ export function WizardSection({ data }: WizardSectionProps) {
                                 ) : null}
                               </span>
                             </div>
+                          );
+                        }
+
+                        if (field!.inputType === "availability") {
+                          return (
+                            <AvailabilityField
+                              key={field!.id}
+                              id={id}
+                              labelText={labelText}
+                              field={field!}
+                              value={availabilityAnswers[key] ?? []}
+                              onChange={(next) =>
+                                setAvailabilityAnswers((prev) => ({ ...prev, [key]: next }))
+                              }
+                            />
                           );
                         }
 
