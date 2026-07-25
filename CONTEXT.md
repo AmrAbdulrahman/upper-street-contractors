@@ -117,11 +117,11 @@ A page section (`clients-carousel` CMS type) showing an editor-chosen list of cl
 _Avoid_: logo slider, partners marquee, brand ticker
 
 **Accreditations section**:
-The trust-badge strip (`accreditation-list` CMS type) sitting under the hero — the Trustpilot widget on the same row as an editor-chosen list of accreditation badges (`accreditation` children: image + title). One row from 640px up, wrapping below that. Carries a Logo height.
+The trust-badge strip (`accreditation-list` CMS type) sitting under the hero — the Trustpilot widget on the same row as an editor-chosen list of accreditation badges (`accreditation` children: image + title). One row on desktop, wrapping when it no longer fits. Carries a Logo height, which sizes the badges only.
 _Avoid_: certifications, credentials, badges row, trust bar
 
 **Logo height**:
-The section-level pixel number (`logoSize`) an editor sets to size every logo on a strip — the Accreditations section and the Clients Carousel each have their own. It is a height; each logo's width follows its own aspect ratio, which is what keeps a row of mixed-shape logos looking even. On the Accreditations section the Trustpilot widget derives from it at 1.25×, so one number sizes the whole row.
+The section-level pixel number (`logoSize`) an editor sets to size every logo on a strip — the Accreditations section and the Clients Carousel each have their own. It is a height; each logo's width follows its own aspect ratio, which is what keeps a row of mixed-shape logos looking even. It does **not** apply to the Trustpilot widget, which is a vendor embed at a font size we cannot set.
 _Avoid_: logo size, image width, scale, zoom
 
 **Site Banner**:

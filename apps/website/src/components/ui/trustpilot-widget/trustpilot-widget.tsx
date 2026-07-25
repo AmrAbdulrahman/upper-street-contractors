@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ConsentPlaceholder } from "@/components/consent/consent-placeholder";
 import { useHasConsent } from "@/lib/consent/use-consent";
 
@@ -21,6 +21,22 @@ export const TRUSTPILOT_VARIANTS = [
 
 export type TrustpilotVariant = (typeof TRUSTPILOT_VARIANTS)[number];
 
+/**
+ * `micro-combo` sizing. Unlike `mini`, this template does NOT scale its content
+ * to `data-style-height` — the ink renders at a fixed size, top-anchored, and
+ * any extra height is just dead space below it (which reads as the badge being
+ * misaligned against anything centred beside it). So the box has to match the
+ * ink exactly, and the ink's height depends on whether it wraps:
+ *
+ *   >= 420px wide -> one line  ("Excellent ***** 482 reviews on Trustpilot")
+ *   <  420px wide -> two lines, and 24px would clip the second one.
+ *
+ * Both numbers are measured from the rendered widget, not from Trustpilot docs.
+ */
+const MICRO_COMBO_ONE_LINE_WIDTH = 420;
+const MICRO_COMBO_ONE_LINE_HEIGHT = 24;
+const MICRO_COMBO_TWO_LINE_HEIGHT = 48;
+
 type VariantConfig = {
   templateId: string;
   styleHeight: string;
@@ -37,9 +53,13 @@ const VARIANT_CONFIG: Record<TrustpilotVariant, VariantConfig> = {
   },
   "micro-combo": {
     templateId: "5419b6ffb0d04a076446a9af",
-    styleHeight: "20px",
+    styleHeight: `${MICRO_COMBO_ONE_LINE_HEIGHT}px`,
     styleWidth: "100%",
-    wrapperClassName: "w-fit",
+    // Not `w-fit`: fit-content leaves this template at the vendor's ~300px
+    // default, which is just too narrow for one line. Cap at the one-line width
+    // instead and let it shrink below that. Literal class (Tailwind's JIT can't
+    // scan an interpolated one) — keep in sync with MICRO_COMBO_ONE_LINE_WIDTH.
+    wrapperClassName: "w-full max-w-[420px]",
   },
   "micro-review-count": {
     templateId: "5419b6a8b0d04a076446a9ad",
@@ -58,12 +78,6 @@ const VARIANT_CONFIG: Record<TrustpilotVariant, VariantConfig> = {
 type TrustpilotWidgetProps = {
   className?: string;
   variant?: TrustpilotVariant;
-  /**
-   * Overrides the variant's default `data-style-height`, in px. Used by the
-   * Accreditations line, which derives the badge height from the section's
-   * CMS `logoSize` so Trustpilot scales with the logos beside it.
-   */
-  height?: number;
 };
 
 declare global {
@@ -82,14 +96,30 @@ function loadTrustpilotWidget(element: HTMLDivElement | null) {
 export function TrustpilotWidget({
   className,
   variant = "mini",
-  height,
 }: TrustpilotWidgetProps) {
   const allowed = useHasConsent("functional");
   const widgetRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const config = VARIANT_CONFIG[variant];
+
+  // `micro-combo` only: watch our own box rather than the viewport, since this
+  // widget sits in a wrap-capable row — the same viewport width can leave it
+  // sharing a line or occupying one alone, which changes whether it wraps.
+  const [boxWidth, setBoxWidth] = useState<number | null>(null);
+  useEffect(() => {
+    if (variant !== "micro-combo" || !allowed) return;
+    const el = wrapperRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setBoxWidth(entry.contentRect.width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [variant, allowed]);
+
   const styleHeight =
-    typeof height === "number" && Number.isFinite(height) && height > 0
-      ? `${Math.round(height)}px`
+    variant === "micro-combo" && boxWidth !== null
+      ? `${boxWidth >= MICRO_COMBO_ONE_LINE_WIDTH ? MICRO_COMBO_ONE_LINE_HEIGHT : MICRO_COMBO_TWO_LINE_HEIGHT}px`
       : config.styleHeight;
 
   useEffect(() => {
@@ -117,11 +147,12 @@ export function TrustpilotWidget({
         onReady={() => loadTrustpilotWidget(widgetRef.current)}
       />
       <div
+        ref={wrapperRef}
         className={[config.wrapperClassName, className].filter(Boolean).join(" ")}
       >
         <div
-          // Keyed on both so an editor changing the CMS logo size remounts the
-          // host div — the vendor injects an iframe on load and never re-reads
+          // Keyed on both so crossing the wrap threshold remounts the host div —
+          // the vendor injects an iframe on load and never re-reads
           // `data-style-height` afterwards.
           key={`${variant}:${styleHeight}`}
           ref={widgetRef}

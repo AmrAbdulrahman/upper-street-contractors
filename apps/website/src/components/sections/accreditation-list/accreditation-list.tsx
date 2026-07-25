@@ -7,12 +7,6 @@ import { TrustpilotWidget } from "@/components/ui/trustpilot-widget";
 import { resolveLogoHeight } from "@/helpers";
 import { AccreditationListFragment } from "@/generated/graphql";
 
-/**
- * Trustpilot reads a little larger than the accreditation badges beside it, as
- * the client asked. One CMS number therefore sizes the whole line.
- */
-const TRUSTPILOT_HEIGHT_RATIO = 1.25;
-
 type AccreditationListProps = {
   data: AccreditationListFragment;
 };
@@ -32,10 +26,11 @@ export function AccreditationList({ data }: AccreditationListProps) {
               them. It wraps below `sm:` instead of forcing a scroll — the
               badges then wrap among themselves inside <ZeroCmsList>. */}
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <TrustpilotWidget
-              variant="micro-combo"
-              height={Math.round(logoHeight * TRUSTPILOT_HEIGHT_RATIO)}
-            />
+            {/* Trustpilot is a vendor iframe at a fixed font size, not an image
+                — `logoSize` deliberately does not apply to it. Sizing it to the
+                badges only ever added dead space under the ink, which is what
+                made it look misaligned. It sizes itself; the row centres it. */}
+            <TrustpilotWidget variant="micro-combo" />
 
             <ZeroCmsList
               className="flex flex-wrap items-center justify-center gap-3 sm:gap-3.5"
