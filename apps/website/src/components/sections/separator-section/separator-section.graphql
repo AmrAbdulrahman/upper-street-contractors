@@ -1,0 +1,5 @@
+fragment SeparatorSection on SeparatorSection {
+  id
+  type
+  variant
+}

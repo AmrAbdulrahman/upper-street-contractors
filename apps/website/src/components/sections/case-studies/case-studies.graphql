@@ -1,5 +1,6 @@
 fragment CaseStudiesSection on CaseStudiesSection {
   id
+  type
   overline
   title
   category

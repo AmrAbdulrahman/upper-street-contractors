@@ -1,0 +1,68 @@
+# Card-shaped selection: everything the /blogs index needs and nothing more.
+# Sections are deliberately absent — the index renders 20+ cards and a post's
+# sections are only read on its own page.
+fragment BlogPostCard on BlogPost {
+  id
+  type
+  slug
+  title
+  excerpt
+  category
+  publishedAt
+  hero {
+    url
+    alt
+    width
+    height
+  }
+}
+
+query GetBlogPosts($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
+  blogPosts(
+    sort: [{ field: "publishedAt", dir: desc }]
+    status: $status
+    includeUnpublished: $includeUnpublished
+  ) {
+    ...BlogPostCard
+  }
+}
+
+# `slug` has no unique constraint in zero-cms, so this takes the first match and
+# the route treats a second one as shadowed. See seed-blogs-schema.mjs.
+query GetBlogPost(
+  $slug: String!
+  $status: CmsReadStatus = published
+  $includeUnpublished: Boolean
+) {
+  blogPosts(
+    filters: { slug: { eq: $slug } }
+    pagination: { limit: 1 }
+    status: $status
+    includeUnpublished: $includeUnpublished
+  ) {
+    ...BlogPostCard
+    author {
+      name
+      lastname
+      avatar {
+        url
+        alt
+        width
+        height
+      }
+    }
+    meta {
+      ...PageMetadata
+    }
+    sections {
+      ...BlogPostSectionBlocks
+    }
+  }
+}
+
+# Route generation + the sitemap / cache-warm pass. Slugs only.
+query GetBlogSlugs($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
+  blogPosts(status: $status, includeUnpublished: $includeUnpublished) {
+    slug
+  }
+}

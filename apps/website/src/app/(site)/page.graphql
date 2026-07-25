@@ -6,46 +6,14 @@ query GetHomePage($status: CmsReadStatus = published, $includeUnpublished: Boole
     includeUnpublished: $includeUnpublished
   ) {
     id
+    type
     title
     description
     meta {
       ...PageMetadata
     }
     sections {
-      __typename
-      ... on HomeHeaderSection {
-        ...HomeHeroSection
-      }
-      ... on WhoWeAreSection {
-        ...WhoWeAreSection
-      }
-      ... on AccreditationList {
-        ...AccreditationList
-      }
-      ... on WhatWeDoSection {
-        ...WhatWeDoSection
-      }
-      ... on WhyChooseUsSection {
-        ...WhyChooseUsSection
-      }
-      ... on HowItWorksSection {
-        ...HowItWorksSection
-      }
-      ... on RecentWorkSection {
-        ...RecentWorkSection
-      }
-      ... on ClientReviewSection {
-        ...ClientReviewSection
-      }
-      ... on PlanningRenovationSection {
-        ...PlanningRenovationSection
-      }
-      ... on ClientsCarousel {
-        ...ClientsCarousel
-      }
-      ... on GoogleReviews {
-        ...GoogleReviews
-      }
+      ...PageSectionBlocks
     }
   }
 }

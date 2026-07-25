@@ -5,13 +5,17 @@ import {
   type ClientsCarouselFragment,
   type ContactDetailsSectionFragment,
   type FaqSectionFragment,
+  type GallerySectionFragment,
   type GoogleReviewsFragment,
+  type ImageSectionFragment,
   type HomeHeroSectionFragment,
   type HowItWorksSectionFragment,
   type PageHeroSectionFragment,
   type PlanningRenovationSectionFragment,
   type ProseSectionFragment,
+  type QuoteSectionFragment,
   type RecentWorkSectionFragment,
+  type SeparatorSectionFragment,
   type ServiceOfferSectionFragment,
   type SplitSectionFragment,
   type WhatWeDoSectionFragment,
@@ -25,13 +29,17 @@ import { ClientReviewsSection } from "./client-reviews";
 import { ClientsCarousel } from "./clients-carousel";
 import { ContactDetailsSection } from "./contact-details";
 import { FaqSection } from "./faq";
+import { GallerySection } from "./gallery-section";
 import { GoogleReviewsSection } from "./google-reviews";
 import { HeroHeroSection } from "./home-hero";
 import { HowItWorksSection } from "./how-it-works";
+import { ImageSection } from "./image-section";
 import { PageHeroSection } from "./page-hero";
 import { PlanningRenovationSection } from "./planning-renovation";
 import { ProseSection } from "./prose-section";
+import { QuoteSection } from "./quote-section";
 import { RecentWorkSection } from "./recent-work";
+import { SeparatorSection } from "./separator-section";
 import { ServiceOfferSection } from "./service-offer";
 import { SplitSection } from "./split-section";
 import { WhatWeDoSection } from "./what-we-do";
@@ -46,13 +54,17 @@ export type PageSectionData = (
   | ClientsCarouselFragment
   | ContactDetailsSectionFragment
   | FaqSectionFragment
+  | GallerySectionFragment
   | GoogleReviewsFragment
+  | ImageSectionFragment
   | HomeHeroSectionFragment
   | HowItWorksSectionFragment
   | PageHeroSectionFragment
   | PlanningRenovationSectionFragment
   | ProseSectionFragment
+  | QuoteSectionFragment
   | RecentWorkSectionFragment
+  | SeparatorSectionFragment
   | ServiceOfferSectionFragment
   | SplitSectionFragment
   | WhatWeDoSectionFragment
@@ -131,6 +143,18 @@ export function PageSection({ section }: { section: PageSectionData }) {
 
     case "Faq":
       return <FaqSection data={section as FaqSectionFragment} />;
+
+    case "ImageSection":
+      return <ImageSection data={section as ImageSectionFragment} />;
+
+    case "GallerySection":
+      return <GallerySection data={section as GallerySectionFragment} />;
+
+    case "QuoteSection":
+      return <QuoteSection data={section as QuoteSectionFragment} />;
+
+    case "SeparatorSection":
+      return <SeparatorSection data={section as SeparatorSectionFragment} />;
 
     default:
       return null;

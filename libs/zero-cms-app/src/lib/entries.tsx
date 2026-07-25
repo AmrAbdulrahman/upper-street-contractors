@@ -182,7 +182,7 @@ export function EntriesList({
  * `ReferenceHit[]` only carries ids, so resolve each referencing entry to its
  * label (falls back to a short id if it can no longer be read).
  */
-async function describeReferenceHits(
+export async function describeReferenceHits(
   hits: ReferenceHit[],
   schema: Type[],
   adapter: ReturnType<typeof useZeroCms>['adapter']

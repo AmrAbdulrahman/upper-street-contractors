@@ -533,8 +533,21 @@ export class Engine {
 }
 
 /** The content that determines whether a Type "changed", excluding its stamps. */
-function withoutStamps(t: Type): Pick<Type, '__name' | 'label' | 'fields'> {
-  return { __name: t.__name, label: t.label, fields: t.fields };
+/**
+ * Every Type key except the stamps. An ALLOWLIST, not an omit — so any new
+ * Type-level meta must be added here or `saveSchema` silently drops it (and
+ * never bumps `__updatedAt` for it either, since the diff below can't see it).
+ */
+function withoutStamps(
+  t: Type
+): Pick<Type, '__name' | 'label' | 'description' | 'thumbnail' | 'fields'> {
+  return {
+    __name: t.__name,
+    label: t.label,
+    description: t.description,
+    thumbnail: t.thumbnail,
+    fields: t.fields,
+  };
 }
 
 /**

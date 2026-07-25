@@ -1,5 +1,6 @@
 fragment ContactDetailsSection on ContactDetails {
   id
+  type
   title
   note
   items {

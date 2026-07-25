@@ -1,5 +1,6 @@
 fragment ClientReviewSection on ClientReviewSection {
   id
+  type
   overline
   title
   description

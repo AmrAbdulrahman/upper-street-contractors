@@ -293,4 +293,27 @@ describe('schema Type timestamps', () => {
     expect(authorAfter.__createdAt).toBe(author.__createdAt);
     expect(authorAfter.__updatedAt).toBe(author.__updatedAt);
   });
+
+  // `withoutStamps` is an allowlist, so a Type-level key it doesn't name is
+  // dropped on every save and never bumps __updatedAt. Guards both halves.
+  it('persists Type-level description/thumbnail and bumps updatedAt for them', async () => {
+    const e = await freshEngine();
+    const afterCreate = await e.saveSchema(schema, ACTOR, await e.getSchemaVersion());
+    const before = afterCreate.find((t) => t.__name === 'project')!;
+
+    const afterEdit = await e.saveSchema(
+      afterCreate.map((t) =>
+        t.__name === 'project'
+          ? { ...t, description: 'A completed renovation', thumbnail: 'imageText' }
+          : t
+      ),
+      ACTOR,
+      await e.getSchemaVersion()
+    );
+    const project = afterEdit.find((t) => t.__name === 'project')!;
+
+    expect(project.description).toBe('A completed renovation');
+    expect(project.thumbnail).toBe('imageText');
+    expect(project.__updatedAt).not.toBe(before.__updatedAt);
+  });
 });

@@ -26,6 +26,7 @@ import {
 } from '@usc/zero-cms-app';
 import { Drawer } from './Drawer';
 import { WidgetProvider, useWidgetInternal } from './context';
+import { TypePickerPanel } from './inspect/TypePickerPanel';
 
 export interface ZeroCmsWidgetProps {
   adapter?: Adapter;
@@ -152,7 +153,7 @@ function DrawerBody({
   token?: string | null;
   onAuthed?: (token: string) => void;
 }) {
-  const { stack, pop, close, pushEntry, pushCreate } = useWidgetInternal();
+  const { stack, pop, close, pushEntry, pushCreate, pushTypePicker } = useWidgetInternal();
   const { schema } = useZeroCms();
   const needsLogin = Boolean(client) && !token;
 
@@ -191,8 +192,12 @@ function DrawerBody({
       openReference: (id: string, type?: string) =>
         void pushEntry(id, type ? { type } : undefined),
       createReference: pushCreate,
+      // Lets a relation field inside a drawer open the same Type picker an
+      // insert slot uses, instead of listing one "add new <Type>" button per
+      // allowed Type.
+      pickReference: pushTypePicker,
     }),
-    [pushEntry, pushCreate]
+    [pushEntry, pushCreate, pushTypePicker]
   );
 
   // Login gate: a single base drawer shown whenever the stack is open but unauthed.
@@ -215,6 +220,7 @@ function DrawerBody({
           if (savingKeys.has(t.key)) return;
           if (dirtyKeys.has(t.key) && !window.confirm('Discard unsaved changes?')) return;
           t.onResult?.(null);
+          t.onPick?.(null);
           pop();
         };
         return (
@@ -225,8 +231,25 @@ function DrawerBody({
             isTop={isTop}
             busy={savingKeys.has(t.key)}
             onClose={settleClose}
-            label={t.mode === 'create' ? 'Add entry' : 'Edit entry'}
+            label={
+              t.mode === 'pick-type'
+                ? 'Add section'
+                : t.mode === 'create'
+                  ? 'Add entry'
+                  : 'Edit entry'
+            }
           >
+            {/* The picker pops itself the moment it resolves — `openCreate`
+                then pushes the create panel, so the two never stack. */}
+            {t.mode === 'pick-type' && t.pick && (
+              <TypePickerPanel
+                pick={t.pick}
+                onPick={(result) => {
+                  t.onPick?.(result);
+                  pop();
+                }}
+              />
+            )}
             {t.loading && (
               <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
             )}

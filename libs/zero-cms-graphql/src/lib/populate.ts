@@ -5,6 +5,7 @@
  * fully-resolved nested entries; GraphQL's default resolvers read them directly.
  */
 
+import { isAbstractType } from 'graphql';
 import type {
   GraphQLResolveInfo,
   SelectionSetNode,
@@ -38,6 +39,25 @@ export function computePopulate(
 
   const out = new Set<string>();
 
+  /**
+   * Does a fragment/inline-fragment condition apply to the type we're currently
+   * walking? Three cases:
+   *  - no condition            → yes, same type.
+   *  - names this CMS Type     → yes.
+   *  - names an ABSTRACT type  → yes, transparently: a fragment declared on a
+   *    union (`fragment X on PageSectionsRef`) carries no type information of
+   *    its own, so descend with the current type and let the inline fragments
+   *    inside it do the narrowing. Without this a union-typed fragment is
+   *    skipped entirely and NOTHING nested inside a section gets populated —
+   *    children come back as bare ids and their non-nullable `id` blows up.
+   */
+  const appliesTo = (condName: string | undefined, cmsType: string): boolean => {
+    if (!condName) return true;
+    if (gqlToCms.get(condName) === cmsType) return true;
+    const condType = info.schema.getType(condName);
+    return Boolean(condType && isAbstractType(condType));
+  };
+
   const collect = (sel: SelectionSetNode, cmsType: string, prefix: string) => {
     const refs = refsOf(cmsType);
     for (const node of sel.selections) {
@@ -50,13 +70,11 @@ export function computePopulate(
               collect(node.selectionSet, at, `${prefix}${node.name.value}.`);
         }
       } else if (node.kind === 'InlineFragment') {
-        const cond = node.typeCondition?.name.value;
-        const condCms = cond ? gqlToCms.get(cond) : cmsType;
-        if (condCms === cmsType && node.selectionSet)
+        if (node.selectionSet && appliesTo(node.typeCondition?.name.value, cmsType))
           collect(node.selectionSet, cmsType, prefix);
       } else if (node.kind === 'FragmentSpread') {
         const frag = fragments[node.name.value];
-        if (frag && gqlToCms.get(frag.typeCondition.name.value) === cmsType)
+        if (frag && appliesTo(frag.typeCondition.name.value, cmsType))
           collect(frag.selectionSet, cmsType, prefix);
       }
     }

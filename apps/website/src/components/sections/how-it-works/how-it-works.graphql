@@ -1,5 +1,6 @@
 fragment HowItWorksSection on HowItWorksSection {
   id
+  type
   overline
   title
   sectionSummary

@@ -9,7 +9,7 @@
 import { useState, type ReactElement } from 'react';
 import { useZeroCmsWidgetOptional } from '../context';
 import { useZeroCmsEntry } from './entry-context';
-import { mergeClassNames, wrapWithInspect } from './inspect-clone';
+import { PencilIcon, mergeClassNames, wrapWithInspect } from './inspect-clone';
 
 export interface ZeroCmsEntryFieldProps {
   field: string;
@@ -51,11 +51,17 @@ export function ZeroCmsEntryField({
     inspectClassName,
     hovered,
     setHovered,
-    onEdit: () =>
-      void openEntry(ctx.entryId, {
-        type: ctx.typeName ?? undefined,
-        focusField: field,
-      }),
-    editAriaLabel: `Edit ${field}`,
+    actions: [
+      {
+        key: 'edit',
+        label: `Edit ${field}`,
+        icon: <PencilIcon />,
+        onClick: () =>
+          void openEntry(ctx.entryId, {
+            type: ctx.typeName ?? undefined,
+            focusField: field,
+          }),
+      },
+    ],
   });
 }

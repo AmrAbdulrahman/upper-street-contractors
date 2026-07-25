@@ -1,0 +1,6 @@
+fragment QuoteSection on QuoteSection {
+  id
+  type
+  quote
+  attribution
+}

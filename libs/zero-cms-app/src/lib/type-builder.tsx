@@ -11,6 +11,7 @@ import { ZeroCmsError, type Field, type FieldType, type Schema, type Type } from
 import ReactSelect from 'react-select';
 import { useZeroCms } from './context';
 import { Badge, Button, EmptyState, Field as FieldShell, Input, Select, cls, cx } from './components/ui';
+import { TypeGlyphSelect } from './components/type-glyphs';
 import { SortControl, type SortDir, type SortField } from './list-controls';
 import { errorMessage, fuzzyMatch } from './util';
 
@@ -203,6 +204,36 @@ export function TypeBuilder() {
               >
                 Delete type
               </Button>
+            </div>
+
+            {/* Type-level presentation meta. All three are read wherever a TYPE
+                is chosen rather than an entry — chiefly the Section builder's
+                Type picker, which shows the glyph, the label and the
+                description for each block an editor can add. */}
+            <div className={cx(cls.card, 'space-y-3 p-3')}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FieldShell label="Label" hint="Shown instead of the type name. Defaults to it.">
+                  <Input
+                    value={type.label ?? ''}
+                    placeholder={type.__name}
+                    onChange={(e) => mutateType({ label: e.target.value || undefined })}
+                  />
+                </FieldShell>
+                <TypeGlyphSelect
+                  value={type.thumbnail}
+                  onChange={(thumbnail) => mutateType({ thumbnail })}
+                />
+              </div>
+              <FieldShell
+                label="Description"
+                hint="One line describing what this block is for."
+              >
+                <Input
+                  value={type.description ?? ''}
+                  placeholder="e.g. Text content with formatting"
+                  onChange={(e) => mutateType({ description: e.target.value || undefined })}
+                />
+              </FieldShell>
             </div>
 
             <div className={cx(cls.card, 'divide-y divide-neutral-100')}>

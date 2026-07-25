@@ -1,5 +1,6 @@
 fragment WhatWeDoSection on WhatWeDoSection {
   id
+  type
   overline
   title
   body

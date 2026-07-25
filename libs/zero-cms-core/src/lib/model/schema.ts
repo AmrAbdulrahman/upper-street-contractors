@@ -146,6 +146,20 @@ export interface Type {
   __name: string;
   /** Human label for the app UI. Defaults to `__name`. */
   label?: string;
+  /**
+   * One-line blurb describing what this Type is for, shown under its label
+   * wherever a Type is *chosen* rather than an Entry — currently the Section
+   * builder's Type picker ("Text content with formatting").
+   */
+  description?: string;
+  /**
+   * Key into the consumer's glyph registry (see `TYPE_GLYPHS` in
+   * `@usc/zero-cms-widget`) giving this Type a wireframe thumbnail in the Type
+   * picker. Deliberately a key, not a media id: a Type only becomes pickable
+   * once a host app ships a component for it, so the glyph ships with that
+   * component and can never dangle. Unknown/absent → the generic glyph.
+   */
+  thumbnail?: string;
   fields: Field[];
   /**
    * Stamped by `Engine.saveSchema`, matching Types by `__name` against the

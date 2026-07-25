@@ -20,7 +20,15 @@ export function HeaderDesktopNav({ links }: HeaderDesktopNavProps) {
       aria-label="Main navigation"
       className="min-w-0"
     >
-      <ul className="flex items-center justify-center gap-4 xl:gap-6">
+      {/*
+        gap-2 / xl:gap-4, not the old gap-4 / xl:gap-6 — both of those overflowed
+        once Blogs made this a ten-item row: at 1024 the items spilled past the
+        viewport on BOTH sides (justify-center, so it clips symmetrically) and at
+        xl they broke out of the max-w-container gutters. The row is
+        `whitespace-nowrap shrink-0` and deliberately never wraps, so the gap is
+        the only slack there is.
+      */}
+      <ul className="flex items-center justify-center gap-2 xl:gap-4">
         {links.map((link) => {
           const isActive = isNavLinkActive(pathname, link.href);
 

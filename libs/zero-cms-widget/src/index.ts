@@ -10,9 +10,16 @@
 export { ZeroCmsWidget, type ZeroCmsWidgetProps } from './lib/ZeroCmsWidget';
 export {
   useZeroCmsWidget,
+  // Null-safe variant — for host components that also render on public pages,
+  // where no <ZeroCmsWidget> is mounted at all.
+  useZeroCmsWidgetOptional,
   type OpenOptions,
+  type ParentFieldRef,
   type CreateOptions,
   type UnlinkOptions,
+  type LinkOptions,
+  type ReorderOptions,
+  type TypePickerContext,
 } from './lib/context';
 export { Drawer, type DrawerProps } from './lib/Drawer';
 export { ZeroCmsBar, type ZeroCmsBarProps } from './lib/ZeroCmsBar';
@@ -32,6 +39,10 @@ export {
   type AddZeroCmsEntryProps,
 } from './lib/inspect/AddZeroCmsEntry';
 export { ZeroCmsList, type ZeroCmsListProps } from './lib/inspect/ZeroCmsList';
+export {
+  ZeroCmsSectionList,
+  type ZeroCmsSectionListProps,
+} from './lib/inspect/ZeroCmsSectionList';
 export {
   ZeroCmsEntryProvider,
   useZeroCmsEntry,

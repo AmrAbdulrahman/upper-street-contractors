@@ -131,6 +131,65 @@ The zero-cms-widget slide-over that edits one Entry in place (by `__id`) without
 the host app, reusing the same field renderers and draft/publish actions as the app.
 _Avoid_: modal, popover, Edit drawer (the Website/Strapi-context term)
 
+## Section builder
+
+**Section builder**:
+The in-place editor for an ordered `references` Field — it makes the LIST editable,
+not just each Entry in it: insert at any position, remove, and drag to reorder, all
+writing straight to the parent's `__draft`. Wraps the host's already-rendered items
+(`<ZeroCmsSectionList>`), so the page stays WYSIWYG. Renders its children untouched
+whenever inspect is off, which is what lets it sit on every page.
+_Avoid_: page builder, block editor, repeater, outline view (a rejected alternative)
+
+**Section slot**:
+One item's place in a Section builder — the sortable wrapper holding a rendered item,
+its always-mounted drag handle, and the compact card it collapses to mid-drag. The
+handle belongs to the slot rather than the hover cluster precisely because the cluster
+unmounts on pointer-out, which would drop an in-flight drag.
+_Avoid_: row, item wrapper, placeholder
+
+**Insert slot**:
+The dashed "+ Add" bar the Section builder puts before the first item, between every
+pair, and after the last — so a new Entry lands where it was clicked rather than always
+at the end. Hidden while a drag is in progress.
+_Avoid_: add button (the always-appends `<AddZeroCmsEntry>` chip), divider, drop zone
+
+**Type picker**:
+The panel an Insert slot opens: a grid of the Field's Allowed types, each showing its
+Thumbnail glyph, label and Type description. Picking one either opens a create form or,
+when Entries of that Type already exist, offers reuse first. It pops itself as soon as
+it resolves. Replaced the old behaviour of silently creating `allowedTypes[0]`.
+
+Reached from **two** places, via `ReferenceActions.pickReference`: an Insert slot, and
+the "+ Add…" on a Relation field inside an Edit drawer — which used to render one
+"add new <Type>" button per Allowed type, i.e. 23 buttons for a page's `sections`.
+_Avoid_: type selection drawer (the working name), pre-drawer, block library
+
+**Standalone create** (`createEntry`):
+Creating an Entry that belongs to no parent's Relation field — a Blog Post from the
+Blogs index, where the content is queried by Type rather than held in a `references`
+list, so there is no "+ Add" to inherit. Without it the only route is the Content admin.
+_Avoid_: new entry (ambiguous), openCreate (that one links into a parent field)
+
+**Thumbnail glyph** (`Type.thumbnail`):
+A Type's wireframe preview in the Type picker, stored as a KEY into the consumer's
+glyph registry (`TYPE_GLYPHS`) rather than a media id — a Type only becomes pickable
+once a host ships a component for it, so the glyph ships alongside and can never
+dangle. Unknown or absent keys fall back to a generic frame.
+_Avoid_: icon, thumbnail image, preview image
+
+**Type description** (`Type.description`):
+A Type's one-line "what this block is for", shown under its label wherever a **Type**
+is chosen rather than an Entry. Distinct from a Field's own `description`.
+_Avoid_: help text, hint, label
+
+**Remove vs Delete** (Section builder):
+Two separate outcomes behind one trash button. **Remove** unlinks only — the Entry
+survives and can be linked back. **Delete** unlinks and then deletes it, which
+Reference integrity refuses while anything still points at it (commonly the parent's
+own *published* version), so the unlink stays applied and the holders are named.
+_Avoid_: delete (ambiguous on its own), archive, trash
+
 **GraphQL layer**:
 The opt-in `zero-cms-graphql` library. Generates a GraphQL schema (SDL + resolvers)
 from the Schema and serves it through the same Adapter — an alternative to the generated

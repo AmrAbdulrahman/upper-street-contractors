@@ -1,5 +1,6 @@
 fragment ServiceOfferSection on ServiceOfferSection {
   id
+  type
   overline
   title
   intro

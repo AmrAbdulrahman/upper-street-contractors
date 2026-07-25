@@ -21,11 +21,11 @@
  * <ZeroCmsEntry>, so this does NOT re-wrap them — that would double the outline.
  */
 
-import { Children, Fragment, useEffect, useState, type ReactNode } from 'react';
-import { useZeroCmsOptional } from '@usc/zero-cms-app';
+import { Children, Fragment, type ReactNode } from 'react';
 import { useZeroCmsWidgetOptional } from '../context';
 import { useZeroCmsEntry, entryRefId, type ZeroCmsEntryRef } from './entry-context';
 import { AddZeroCmsEntry } from './AddZeroCmsEntry';
+import { useReferencesMeta } from './use-references-meta';
 
 export interface ZeroCmsListProps {
   /** Parent `references` field these items belong to (same value as <AddZeroCmsEntry>). */
@@ -44,41 +44,14 @@ export interface ZeroCmsListProps {
   as?: 'div' | 'ul' | 'ol';
 }
 
-// Parent type is not carried in public GraphQL fragments (they select only ids +
-// values), so we resolve it once per entry via `locate` and cache it per session.
-const typeCache = new Map<string, string>();
-
 export function ZeroCmsList({ field, items, children, className, as = 'div' }: ZeroCmsListProps) {
   const widget = useZeroCmsWidgetOptional();
   const ctx = useZeroCmsEntry();
-  const zeroCms = useZeroCmsOptional();
 
   const inspect = Boolean(widget?.inspect && ctx?.entryId);
-  const entryId = ctx?.entryId;
-
-  // Resolve the schema `max` for this field (inspect-only; editor UI, not public).
-  const [max, setMax] = useState<number | undefined>(undefined);
-  useEffect(() => {
-    if (!inspect || !zeroCms || !entryId) {
-      setMax(undefined);
-      return;
-    }
-    let live = true;
-    void (async () => {
-      let pType = ctx?.typeName ?? typeCache.get(entryId) ?? null;
-      if (!pType) {
-        pType = (await zeroCms.adapter.locate(entryId))?.type ?? null;
-        if (pType) typeCache.set(entryId, pType);
-      }
-      const def = zeroCms.schema
-        .find((t) => t.__name === pType)
-        ?.fields.find((f) => f.__name === field);
-      if (live) setMax(def && def.__type === 'references' ? def.max : undefined);
-    })();
-    return () => {
-      live = false;
-    };
-  }, [inspect, zeroCms, entryId, ctx?.typeName, field]);
+  // Schema `max` for this field (inspect-only; editor UI, never public). Shared
+  // with <ZeroCmsSectionList> so the two resolve field meta identically.
+  const { max } = useReferencesMeta(field, inspect);
 
   const childArray = Children.toArray(children);
   const count = items.filter((it) => it != null).length;

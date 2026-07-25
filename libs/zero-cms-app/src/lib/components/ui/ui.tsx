@@ -96,6 +96,7 @@ export function Field({
   required,
   error,
   badge,
+  hint,
   children,
 }: {
   label: string;
@@ -103,6 +104,8 @@ export function Field({
   error?: string;
   /** Optional chip shown beside the label, e.g. the field's type. */
   badge?: ReactNode;
+  /** Optional one-line explanation shown under the control. */
+  hint?: string;
   children: ReactNode;
 }) {
   return (
@@ -115,6 +118,7 @@ export function Field({
         {badge}
       </span>
       {children}
+      {hint && !error && <span className="block text-xs text-neutral-500">{hint}</span>}
       {error && <span className="block text-xs text-red-600">{error}</span>}
     </label>
   );
