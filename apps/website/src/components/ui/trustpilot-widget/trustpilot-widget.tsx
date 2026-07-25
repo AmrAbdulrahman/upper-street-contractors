@@ -58,6 +58,12 @@ const VARIANT_CONFIG: Record<TrustpilotVariant, VariantConfig> = {
 type TrustpilotWidgetProps = {
   className?: string;
   variant?: TrustpilotVariant;
+  /**
+   * Overrides the variant's default `data-style-height`, in px. Used by the
+   * Accreditations line, which derives the badge height from the section's
+   * CMS `logoSize` so Trustpilot scales with the logos beside it.
+   */
+  height?: number;
 };
 
 declare global {
@@ -76,16 +82,21 @@ function loadTrustpilotWidget(element: HTMLDivElement | null) {
 export function TrustpilotWidget({
   className,
   variant = "mini",
+  height,
 }: TrustpilotWidgetProps) {
   const allowed = useHasConsent("functional");
   const widgetRef = useRef<HTMLDivElement>(null);
   const config = VARIANT_CONFIG[variant];
+  const styleHeight =
+    typeof height === "number" && Number.isFinite(height) && height > 0
+      ? `${Math.round(height)}px`
+      : config.styleHeight;
 
   useEffect(() => {
     // Consent gate: only touch the vendor API once functional cookies are allowed.
     if (!allowed) return;
     loadTrustpilotWidget(widgetRef.current);
-  }, [variant, allowed]);
+  }, [variant, styleHeight, allowed]);
 
   // No consent → render an inert badge-sized prompt, never the vendor <Script>.
   if (!allowed) {
@@ -109,13 +120,16 @@ export function TrustpilotWidget({
         className={[config.wrapperClassName, className].filter(Boolean).join(" ")}
       >
         <div
-          key={variant}
+          // Keyed on both so an editor changing the CMS logo size remounts the
+          // host div — the vendor injects an iframe on load and never re-reads
+          // `data-style-height` afterwards.
+          key={`${variant}:${styleHeight}`}
           ref={widgetRef}
           className="trustpilot-widget"
           data-locale="en-GB"
           data-template-id={config.templateId}
           data-businessunit-id={BUSINESS_UNIT_ID}
-          data-style-height={config.styleHeight}
+          data-style-height={styleHeight}
           data-style-width={config.styleWidth}
           data-theme="light"
           data-token={TOKEN}

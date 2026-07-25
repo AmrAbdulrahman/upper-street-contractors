@@ -210,6 +210,7 @@ export function EntryEditor({
   onCreated,
   focusField,
   onDirtyChange,
+  onSavingChange,
 }: {
   type: Type;
   entryId?: string;
@@ -231,6 +232,12 @@ export function EntryEditor({
   focusField?: string;
   /** Reports whether the form has unsaved edits — lets a host guard its own close affordance. */
   onDirtyChange?: (dirty: boolean) => void;
+  /**
+   * Reports whether an autosave write is in flight, so a host can freeze its own
+   * dismiss affordances too (the widget drawer's backdrop + Esc). Closing
+   * mid-write unmounts the form the response is meant to settle into.
+   */
+  onSavingChange?: (saving: boolean) => void;
 }) {
   const { adapter, schema, refreshMedia, notify, currentUserId } = useZeroCms();
   const draftReg = useDraftRegistryOptional();
@@ -244,6 +251,18 @@ export function EntryEditor({
   const [loading, setLoading] = useState(!isNew);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Autosave-in-flight, reported up from EntryForm. Kept separate from `busy`
+  // (which the explicit Publish/Delete actions own) and then OR-ed at every
+  // control, so neither mechanism has to know about the other.
+  const [saving, setSaving] = useState(false);
+  const handleSavingChange = useCallback(
+    (next: boolean) => {
+      setSaving(next);
+      onSavingChange?.(next);
+    },
+    [onSavingChange],
+  );
+  const locked = busy || saving;
 
   const reloadEntry = useCallback(async () => {
     if (isNew || !entryId) return;
@@ -373,7 +392,11 @@ export function EntryEditor({
         </div>
         <div className="flex items-center gap-2">
           {entry && <StatusBadges entry={entry} />}
-          <Button onClick={onClose}>Close</Button>
+          {/* The only control outside EntryForm's disabled fieldset, so it is
+              the one that needs the flag threaded to it by hand. */}
+          <Button onClick={onClose} disabled={locked}>
+            Close
+          </Button>
         </div>
       </div>
 
@@ -391,6 +414,7 @@ export function EntryEditor({
         autosave={!isNew && entryId ? saveQuiet : undefined}
         focusField={focusField}
         onDirtyChange={onDirtyChange}
+        onSavingChange={handleSavingChange}
         submitLabel={isNew ? 'Create draft' : 'Save draft'}
         footer={
           !isNew && entry ? (
@@ -399,7 +423,7 @@ export function EntryEditor({
             <>
               <Button
                 variant="primary"
-                disabled={busy}
+                disabled={locked}
                 onClick={() =>
                   act(async () => {
                     await adapter.publish(type.__name, entryId!, currentUserId, entry.__lastEditedAt);
@@ -412,7 +436,7 @@ export function EntryEditor({
               {entry.__status === 'published' && (
                 <Button
                   variant="outline"
-                  disabled={busy}
+                  disabled={locked}
                   onClick={() =>
                     act(
                       () =>
@@ -428,7 +452,7 @@ export function EntryEditor({
               {entry.hasDraft && (
                 <Button
                   variant="outline"
-                  disabled={busy}
+                  disabled={locked}
                   onClick={() =>
                     act(async () => {
                       await adapter.discardDraft(
@@ -446,7 +470,7 @@ export function EntryEditor({
               )}
               <Button
                 variant="danger"
-                disabled={busy}
+                disabled={locked}
                 className="ml-auto"
                 onClick={() =>
                   act(async () => {

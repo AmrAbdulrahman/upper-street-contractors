@@ -49,6 +49,10 @@
     /* Kill the default translucent tap highlight on mobile (links, buttons,
        carousel logos, stepper dots). Keyboard :focus-visible is unaffected. */
     -webkit-tap-highlight-color: transparent;
+    /* The sticky header animates its height on scroll; scroll anchoring
+       compensates for that layout change every animation frame and fights the
+       user's scroll, which makes the page judder past the collapse threshold. */
+    overflow-anchor: none;
   }
 
   body {

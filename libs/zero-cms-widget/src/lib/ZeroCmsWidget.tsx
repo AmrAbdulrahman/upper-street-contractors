@@ -171,6 +171,21 @@ function DrawerBody({
     });
   }, []);
 
+  // Same shape as `dirtyKeys`, but for an autosave actually in flight. Unlike
+  // dirty (which asks for confirmation) this hard-freezes the panel's exits —
+  // the editor's own controls are already inert via its disabled fieldset, and
+  // this covers the two ways out that live outside it.
+  const [savingKeys, setSavingKeys] = useState<ReadonlySet<string>>(new Set());
+  const setSaving = useCallback((key: string, saving: boolean) => {
+    setSavingKeys((prev) => {
+      if (prev.has(key) === saving) return prev;
+      const next = new Set(prev);
+      if (saving) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }, []);
+
   const refActions = useMemo(
     () => ({
       openReference: (id: string, type?: string) =>
@@ -197,6 +212,7 @@ function DrawerBody({
         // Closing a create panel settles its resolver as cancelled (no orphan);
         // an edit panel has no resolver, so this just pops.
         const settleClose = () => {
+          if (savingKeys.has(t.key)) return;
           if (dirtyKeys.has(t.key) && !window.confirm('Discard unsaved changes?')) return;
           t.onResult?.(null);
           pop();
@@ -207,6 +223,7 @@ function DrawerBody({
             open
             depth={i}
             isTop={isTop}
+            busy={savingKeys.has(t.key)}
             onClose={settleClose}
             label={t.mode === 'create' ? 'Add entry' : 'Edit entry'}
           >
@@ -228,6 +245,7 @@ function DrawerBody({
                 onClose={settleClose}
                 onChanged={() => onSaved?.()}
                 onDirtyChange={(dirty) => setDirty(t.key, dirty)}
+                onSavingChange={(saving) => setSaving(t.key, saving)}
                 onCreated={
                   t.mode === 'create'
                     ? (id) => {

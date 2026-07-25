@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { createNodeAdapter, createMemoryStoragePort } from '@usc/zero-cms-core/node';
 import type { Schema } from '@usc/zero-cms-core';
@@ -117,6 +117,78 @@ describe('<ZeroCmsWidget>', () => {
     fireEvent.change(title, { target: { value: 'Focus me!' } });
     await waitFor(() => expect(title.value).toBe('Focus me!'));
     expect(document.activeElement).toBe(title);
+  });
+
+  it('freezes every control in the drawer while an autosave is in flight', async () => {
+    const base = await createNodeAdapter(createMemoryStoragePort({ schema }));
+    const created = await base.create('note', { title: 'Freeze me' });
+
+    // Hold the autosave write open so the in-flight state can be inspected,
+    // then let it land. Only `update` is gated — `get` still needs to resolve
+    // for the drawer to load at all.
+    let release: (() => void) | undefined;
+    const adapter = {
+      ...base,
+      update: ((...args: Parameters<typeof base.update>) =>
+        new Promise((resolve, reject) => {
+          release = () => base.update(...args).then(resolve, reject);
+        })) as typeof base.update,
+    };
+
+    render(
+      <ZeroCmsWidget adapter={adapter}>
+        <Host id={created.__id} />
+      </ZeroCmsWidget>
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'edit' }));
+    await screen.findByRole('dialog');
+    const title = (await screen.findByRole('textbox', {
+      name: /title/i,
+    })) as HTMLInputElement;
+    await waitFor(() => expect(title.value).toBe('Freeze me'));
+
+    fireEvent.change(title, { target: { value: 'Freeze me now' } });
+
+    // Real timers: the autosave debounce is ~1.5s and faking it here would mean
+    // faking the 100ms ticker and Date.now() together, which is more machinery
+    // than a single 1.5s wait is worth.
+    await waitFor(() => expect(screen.getByText('Auto-saving…')).toBeTruthy(), {
+      timeout: 5000,
+    });
+
+    // Inside the form: one disabled fieldset covers fields AND footer actions.
+    // Asserted with `:disabled` rather than `.disabled` — the IDL property only
+    // reflects an element's OWN attribute, while the fieldset disables its
+    // descendants from the outside (which is what actually blocks their events).
+    expect(title.matches(':disabled')).toBe(true);
+    for (const label of ['Publish', 'Delete']) {
+      expect(
+        screen.getByRole('button', { name: label, hidden: true }).matches(':disabled')
+      ).toBe(true);
+    }
+
+    // Outside it: the header Close button and the backdrop both go inert too.
+    for (const closer of screen.getAllByRole('button', { name: 'Close', hidden: true })) {
+      expect(closer.matches(':disabled')).toBe(true);
+    }
+
+    // ...and Escape must not unmount the form the write settles into. Stubbed
+    // to SAY YES to discarding, so the panel surviving proves the saving guard
+    // held rather than the unsaved-changes confirm having quietly caught it.
+    const confirmSpy = vi.fn(() => true);
+    const realConfirm = window.confirm;
+    window.confirm = confirmSpy;
+    try {
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(screen.getAllByRole('dialog', { hidden: true })).toHaveLength(1);
+      expect(confirmSpy).not.toHaveBeenCalled();
+    } finally {
+      window.confirm = realConfirm;
+    }
+
+    release?.();
+    await waitFor(() => expect(title.matches(':disabled')).toBe(false));
   });
 
   it('inspect mode renders <ZeroCmsEntry>/<ZeroCmsEntryField> children', async () => {

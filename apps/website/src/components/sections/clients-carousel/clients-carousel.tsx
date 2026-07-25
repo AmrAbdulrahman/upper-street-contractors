@@ -1,7 +1,15 @@
 import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import Link from "next/link";
 import { CmsImage } from "@/components/ui/cms-image";
+import { resolveLogoHeight } from "@/helpers";
 import type { ClientsCarouselFragment } from "@/generated/graphql";
+
+/** Height used when the section has no CMS `logoSize` (was `h-12`). */
+const CLIENT_LOGO_HEIGHT = 48;
+
+/** `max-w-[160px]` at the previous `h-12` height — kept so wide wordmarks
+ *  still cap at the same proportion once the height is editable. */
+const LOGO_MAX_ASPECT = 160 / 48;
 
 type ClientsCarouselProps = {
   data: ClientsCarouselFragment;
@@ -11,16 +19,24 @@ type ClientLogoItem = NonNullable<
   NonNullable<ClientsCarouselFragment["logos"]>[number]
 >;
 
-function LogoMark({ logo }: { logo: ClientLogoItem }) {
+function LogoMark({
+  logo,
+  height,
+}: {
+  logo: ClientLogoItem;
+  height: number;
+}) {
+  const maxWidth = Math.round(height * LOGO_MAX_ASPECT);
   const image = (
     <CmsImage
       data={logo.image}
       fallbackAlt={logo.name ?? "Client"}
       placeholderLabel=""
-      sizes="180px"
+      sizes={`${maxWidth}px`}
       // Full colour on tablet + mobile; grayscale/dimmed only on desktop (lg+),
       // where the hover rule in globals.css recolours on hover.
-      className="h-12 w-auto max-w-[160px] object-contain opacity-100 grayscale-0 transition-all duration-300 lg:opacity-70 lg:grayscale"
+      className="w-auto object-contain opacity-100 grayscale-0 transition-all duration-300 lg:opacity-70 lg:grayscale"
+      style={{ height, maxWidth }}
     />
   );
 
@@ -44,6 +60,7 @@ function LogoMark({ logo }: { logo: ClientLogoItem }) {
 export function ClientsCarousel({ data }: ClientsCarouselProps) {
   const { title, logos } = data;
   const items = (logos?.filter(Boolean) ?? []) as ClientLogoItem[];
+  const logoHeight = resolveLogoHeight(data.logoSize, CLIENT_LOGO_HEIGHT);
 
   if (items.length === 0) {
     return null;
@@ -72,7 +89,7 @@ export function ClientsCarousel({ data }: ClientsCarouselProps) {
                   key={logo.id}
                   className="flex shrink-0 items-center justify-center pr-14"
                 >
-                  <LogoMark logo={logo} />
+                  <LogoMark logo={logo} height={logoHeight} />
                 </div>
               ))}
               {/* Duplicated set makes the translateX(-50%) loop seamless. */}
@@ -82,7 +99,7 @@ export function ClientsCarousel({ data }: ClientsCarouselProps) {
                   aria-hidden="true"
                   className="flex shrink-0 items-center justify-center pr-14"
                 >
-                  <LogoMark logo={logo} />
+                  <LogoMark logo={logo} height={logoHeight} />
                 </div>
               ))}
             </div>

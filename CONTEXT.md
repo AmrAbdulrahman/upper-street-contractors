@@ -25,8 +25,16 @@ A Form Question field (or an Image Question free-text box) that is only shown wh
 _Avoid_: dependent field, show/hide rule, branching
 
 **Attachment**:
-A file a visitor adds on the wizard's final step (`file` field type). Client-validated (≤5 files, ≤10 MB total; images/PDF/Word) and sent to the business as email attachments by `/api/enquiry`.
+A file a visitor adds on the wizard's final step (`file` field type). Any file type; validated on both sides against three caps (≤10 files, ≤50 MB each, ≤200 MB total). Picks accumulate rather than replace, so a visitor can add more on a later click. Each one reaches the business as either an Inline attachment or a Hosted attachment.
 _Avoid_: upload, file field (implementation phrasing)
+
+**Inline attachment**:
+An Attachment small enough to ride the enquiry email as a real attachment. Filled greedily in the visitor's own order up to a fixed budget, because the request that carries them to `/api/enquiry` is itself size-capped.
+_Avoid_: small file, embedded file
+
+**Hosted attachment**:
+An Attachment that did not fit the Inline attachment budget. The browser uploads it directly to blob storage and the enquiry email carries a download link instead of the bytes — the only way a phone video reaches the business at all.
+_Avoid_: link, blob, big file
 
 **Time window** (Form Question field):
 A `time-window` field offering three fixed slots — 9am–1pm, 1pm–4pm, 4pm–8pm — as multi-select chips; the visitor ticks any slots that suit them for a visit. Paired on the Contact wizard with an Emergency boolean-toggle and a start-date field.
@@ -105,8 +113,16 @@ The home page section that surfaces homeowner testimonials with star ratings and
 _Avoid_: Testimonials section, reviews block, social proof
 
 **Clients Carousel**:
-A page section (`clients-carousel` CMS type) showing an editor-chosen list of client logos (`client-logo` children: image + optional name + link) in an infinitely rotating, pause-on-hover strip on desktop (≥1024px); collapses to a static 3-column grid (5px gaps all around) below 1024px, and to a static wrapped row under `prefers-reduced-motion`.
+A page section (`clients-carousel` CMS type) showing an editor-chosen list of client logos (`client-logo` children: image + optional name + link) in an infinitely rotating, pause-on-hover strip on desktop (≥1024px); collapses to a static 3-column grid (5px gaps all around) below 1024px, and to a static wrapped row under `prefers-reduced-motion`. Carries a Logo height.
 _Avoid_: logo slider, partners marquee, brand ticker
+
+**Accreditations section**:
+The trust-badge strip (`accreditation-list` CMS type) sitting under the hero — the Trustpilot widget on the same row as an editor-chosen list of accreditation badges (`accreditation` children: image + title). One row from 640px up, wrapping below that. Carries a Logo height.
+_Avoid_: certifications, credentials, badges row, trust bar
+
+**Logo height**:
+The section-level pixel number (`logoSize`) an editor sets to size every logo on a strip — the Accreditations section and the Clients Carousel each have their own. It is a height; each logo's width follows its own aspect ratio, which is what keeps a row of mixed-shape logos looking even. On the Accreditations section the Trustpilot widget derives from it at 1.25×, so one number sizes the whole row.
+_Avoid_: logo size, image width, scale, zoom
 
 **Site Banner**:
 The SVG brand mark (crest + "Upper Street Contractors" wordmark) that replaced the text wordmark, rendered by `SiteBanner`. Ships in two tones — navy for light backgrounds (header) and white for dark (footer) — plus a crest-only variant. In the header it sits in its own row above the service-links row and shrinks on scroll.
