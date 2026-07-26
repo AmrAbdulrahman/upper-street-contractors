@@ -1,4 +1,4 @@
-# Card-shaped selection: everything the /blogs index needs and nothing more.
+# Card-shaped selection: everything the /blog index needs and nothing more.
 # Sections are deliberately absent — the index renders 20+ cards and a post's
 # sections are only read on its own page.
 fragment BlogPostCard on BlogPost {
@@ -27,8 +27,9 @@ query GetBlogPosts($status: CmsReadStatus = published, $includeUnpublished: Bool
   }
 }
 
-# `slug` has no unique constraint in zero-cms, so this takes the first match and
-# the route treats a second one as shadowed. See seed-blogs-schema.mjs.
+# `slug` has no unique constraint in zero-cms (the `slug` field kind validates its
+# SHAPE, not its uniqueness), so this takes the first match and the route treats a
+# second one as shadowed. See seed-blogs-schema.mjs.
 query GetBlogPost(
   $slug: String!
   $status: CmsReadStatus = published
@@ -41,19 +42,11 @@ query GetBlogPost(
     includeUnpublished: $includeUnpublished
   ) {
     ...BlogPostCard
-    author {
-      name
-      lastname
-      avatar {
-        url
-        alt
-        width
-        height
-      }
-    }
-    meta {
-      ...PageMetadata
-    }
+    # A plain String: the author's display name, captured when it was chosen
+    # (ADR 0016). No nested selection, and no `meta` — a post's metadata is
+    # derived from its title and excerpt rather than pointing at a `meta-data`
+    # entry an editor had to pick.
+    author
     sections {
       ...BlogPostSectionBlocks
     }

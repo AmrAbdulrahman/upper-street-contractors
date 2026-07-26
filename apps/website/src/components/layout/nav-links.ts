@@ -41,7 +41,7 @@ export function getMobileNavLinkClassName(isActive: boolean): string {
 }
 
 /**
- * The header row. Nine trades plus Blogs — the one non-service route here, kept
+ * The header row. Nine trades plus Blog — the one non-service route here, kept
  * in the main row deliberately so the blog gets the prominence its search
  * traffic depends on. Note it therefore outranks /projects, which lives in the
  * footer only.
@@ -56,11 +56,11 @@ export const MAIN_NAV_LINKS: NavLink[] = [
   { label: "Carpentry", href: "/carpentry" },
   { label: "Roofing", href: "/roofing" },
   { label: "Handyman", href: "/handyman" },
-  { label: "Blogs", href: "/blogs" },
+  { label: "Blog", href: "/blog" },
 ];
 
 /**
- * The footer's Services column — every header nav link except Blogs, which is a
+ * The footer's Services column — every header nav link except Blog, which is a
  * content route and lives in {@link FOOTER_COMPANY_LINKS} instead.
  *
  * Derived from `MAIN_NAV_LINKS` rather than hand-listed so the two can't drift:
@@ -70,13 +70,13 @@ export const MAIN_NAV_LINKS: NavLink[] = [
  * header's nine.
  */
 export const FOOTER_SERVICE_LINKS: NavLink[] = MAIN_NAV_LINKS.filter(
-  (link) => link.href !== "/blogs",
+  (link) => link.href !== "/blog",
 );
 
 export const FOOTER_COMPANY_LINKS: NavLink[] = [
   { label: "About Us", href: "/about" },
   { label: "Projects", href: "/projects" },
-  { label: "Blogs", href: "/blogs" },
+  { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
   { label: "Rates", href: "/rates" },
 ];

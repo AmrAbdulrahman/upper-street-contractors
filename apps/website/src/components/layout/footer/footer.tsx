@@ -101,11 +101,18 @@ export function Footer({ config }: FooterProps) {
       <div className="mx-auto max-w-container px-6 pt-14 pb-7">
         <div className="mb-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.5fr] lg:gap-12">
           <div>
-            <SiteBanner
-              tone="light"
-              siteName={config?.siteName}
-              className="mb-3 h-12"
-            />
+            {/* The margin sits on the wrapper, not on the artwork: `className`
+                now sizes the crest alone. */}
+            <div className="mb-3">
+              <SiteBanner
+                tone="light"
+                siteName={config?.siteName}
+                className="h-12"
+                // Matches the crest: the footer never collapses, so the pair can
+                // stay at the proportions the combined lockup had.
+                wordmarkClassName="h-12"
+              />
+            </div>
 
             {description ? (
               <p className="text-[13px] leading-[1.75] text-white/70 mt-3">

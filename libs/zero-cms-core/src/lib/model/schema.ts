@@ -9,6 +9,8 @@ export type FieldType =
   | 'text'
   | 'longtext'
   | 'richtext'
+  | 'slug'
+  | 'user'
   | 'blocks'
   | 'number'
   | 'json'
@@ -18,6 +20,9 @@ export type FieldType =
   | 'lookup'
   | 'reference'
   | 'references';
+
+/** The one shape a `slug` value may take — lowercase words joined by hyphens. */
+export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
  * Structured rich text — a portable, Strapi-blocks-compatible tree. Stored as the
@@ -60,6 +65,33 @@ export interface TextField extends FieldMetaBase {
   __name: string;
   /** `richtext` holds an HTML/markdown string; use `blocks` for structured content. */
   __type: 'text' | 'longtext' | 'richtext';
+}
+
+/**
+ * A URL segment: lowercase words joined by hyphens ({@link SLUG_PATTERN}),
+ * validated rather than merely suggested, because the value ends up in a live URL.
+ *
+ * Its own kind rather than `text` + a pattern because the *derivation* is the
+ * point: the app's editor mirrors `from`'s value (slugified) until the field is
+ * touched, then stops for good — so a title can be reworded without silently
+ * moving a URL that has already been shared.
+ */
+export interface SlugField extends FieldMetaBase {
+  __name: string;
+  __type: 'slug';
+  /** Field `__name` on the same Type to derive from while untouched (e.g. `title`). */
+  from?: string;
+}
+
+/**
+ * A person, stored as the display **name** of the CMS user chosen when the value
+ * was set — not a user id. Users live outside the entry store (`users.json`), so
+ * a live link would mean a public read path over accounts just to print a byline;
+ * the name is the part that is actually published. See ADR 0016.
+ */
+export interface UserField extends FieldMetaBase {
+  __name: string;
+  __type: 'user';
 }
 
 /** Structured rich text ({@link BlocksContent}). */
@@ -131,6 +163,8 @@ export interface ReferencesField extends FieldMetaBase {
 
 export type Field =
   | TextField
+  | SlugField
+  | UserField
   | BlocksField
   | NumberField
   | JsonField

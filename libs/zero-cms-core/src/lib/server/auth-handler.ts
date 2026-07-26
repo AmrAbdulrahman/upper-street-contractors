@@ -1,7 +1,7 @@
 /**
  * Auth Fetch handler. POST `{ op, args }`:
  *   public:   login
- *   session:  me, changePassword
+ *   session:  me, changePassword, listAuthors
  *   admin:    listUsers, createUser, updateUser, setPassword, deleteUser
  *
  *   const handle = createAuthHandler(auth);
@@ -9,7 +9,7 @@
  */
 
 import { ZeroCmsError } from '../model/errors';
-import { roleAtLeast, type Session } from '../model/user';
+import { roleAtLeast, toAuthorOption, type Session } from '../model/user';
 import type { Auth } from '../engine/auth/auth';
 import { getBearer } from './authorize';
 
@@ -47,6 +47,7 @@ export type AuthOp =
   | 'login'
   | 'me'
   | 'changePassword'
+  | 'listAuthors'
   | 'listUsers'
   | 'createUser'
   | 'updateUser'
@@ -97,6 +98,19 @@ export function createAuthHandler(
           args[0] as string,
           args[1] as string
         );
+      // Open to every signed-in Role, unlike `listUsers` — a Copy writer has to
+      // be able to pick a post's author, and this returns names only (see
+      // `toAuthorOption`). Disabled accounts are dropped: they cannot sign in,
+      // so offering them as an author is offering a dead end. The
+      // forcePasswordUpdate gate mirrors `admin`'s — a session that still owes a
+      // password change may only rotate it.
+      case 'listAuthors': {
+        const s = await session(req);
+        if (s.forcePasswordUpdate)
+          throw new ZeroCmsError('FORBIDDEN', 'Change your password before continuing');
+        const users = await auth.list();
+        return users.filter((u) => !u.disabled).map(toAuthorOption);
+      }
       case 'listUsers':
         await admin(req);
         return auth.list();

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ZeroCmsEntryProvider, ZeroCmsSectionList } from "@usc/zero-cms-widget";
-import { BlogPostHeader } from "@/components/sections/blog-post-header";
+import { BlogPostActions, BlogPostHeader } from "@/components/sections/blog-post-header";
 import { PageSection, type PageSectionData } from "@/components/sections/page-section";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { GetBlogPostDocument, GetBlogSlugsDocument } from "@/generated/graphql";
@@ -40,19 +40,23 @@ export async function generateMetadata({
   if (!post) notFound();
 
   const siteName = siteMetaConfig?.siteName ?? "Upper Street Contractors";
-  const title = post.meta?.title ?? post.title ?? "Blog post";
-  const description = post.meta?.description ?? post.excerpt ?? undefined;
+  // Derived, never picked: a post's own title and Excerpt ARE its metadata, so
+  // there is no `meta` relation to hand-select (and no way for the two to
+  // disagree). The Excerpt is already plain text for exactly this reason.
+  const title = post.title ?? "Blog post";
+  const description = post.excerpt ?? undefined;
   const absoluteTitle = `${title} | ${siteName}`;
   const heroUrl = resolveMediaUrl(post.hero?.url);
 
   return {
     title: { absolute: absoluteTitle },
     description,
-    alternates: { canonical: `/blogs/${slug}` },
+    alternates: { canonical: `/blog/${slug}` },
+    ...(post.author ? { authors: [{ name: post.author }] } : {}),
     openGraph: {
       title: absoluteTitle,
       description,
-      url: `/blogs/${slug}`,
+      url: `/blog/${slug}`,
       type: "article",
       ...(post.publishedAt ? { publishedTime: post.publishedAt } : {}),
       ...(heroUrl ? { images: [heroUrl] } : {}),
@@ -80,6 +84,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           and type in context, but an outline + pencil around the entire page
           would swallow every section's own affordance. */}
       <ZeroCmsEntryProvider entry={post}>
+        {/* Inside the provider so it resolves to THIS post; renders nothing
+            unless edit mode is on. */}
+        <div className="mx-auto max-w-container px-6 pt-6 empty:hidden">
+          <BlogPostActions />
+        </div>
         <BlogPostHeader post={post} />
         <ZeroCmsSectionList field="sections" items={sections}>
           {sections.map((section, i) => (

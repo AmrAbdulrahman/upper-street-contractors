@@ -128,6 +128,7 @@ function AuthedWidget({
       blocks={blocks}
       notify={notify}
       currentUserId={user?.__id}
+      listAuthors={client.listAuthors}
     >
       <WidgetProvider
         inspect={inspect}

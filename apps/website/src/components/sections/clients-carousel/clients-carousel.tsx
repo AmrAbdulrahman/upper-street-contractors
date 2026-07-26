@@ -33,9 +33,11 @@ function LogoMark({
       fallbackAlt={logo.name ?? "Client"}
       placeholderLabel=""
       sizes={`${maxWidth}px`}
-      // Full colour on tablet + mobile; grayscale/dimmed only on desktop (lg+),
-      // where the hover rule in globals.css recolours on hover.
-      className="w-auto object-contain opacity-100 grayscale-0 transition-all duration-300 lg:opacity-70 lg:grayscale"
+      // Always full colour, at every width, hover or not. These are the clients'
+      // own marks — greying them out until a visitor happens to hover made the
+      // section look faded rather than restrained, and on touch there is no hover
+      // to reveal them with at all.
+      className="w-auto object-contain"
       style={{ height, maxWidth }}
     />
   );

@@ -17,7 +17,13 @@ import {
   type ComponentType,
   type ReactNode,
 } from 'react';
-import type { Adapter, Schema, MediaItem, BlocksContent } from '@usc/zero-cms-core';
+import type {
+  Adapter,
+  AuthorOption,
+  Schema,
+  MediaItem,
+  BlocksContent,
+} from '@usc/zero-cms-core';
 import { BlocksEditor } from '@usc/zero-cms-blocks';
 import { DraftRegistryProvider } from './draft-registry';
 import { cls, cx } from './components/ui';
@@ -70,6 +76,13 @@ interface ZeroCmsContextValue {
    * path, which has no signed-in user to draw from at all.
    */
   currentUserId: string;
+  /**
+   * Names of the CMS users a `user` field may attribute content to. Injected by
+   * the host because accounts live outside the Adapter (they are not Entries) —
+   * absent on the no-auth `<ZeroCmsProvider adapter>` path, where the `user`
+   * editor degrades to a free-text input rather than an unfillable dropdown.
+   */
+  listAuthors?: () => Promise<AuthorOption[]>;
 }
 
 const ZeroCmsContext = createContext<ZeroCmsContextValue | null>(null);
@@ -93,6 +106,8 @@ export interface ZeroCmsProviderProps {
   notify?: NotifyFn;
   /** The signed-in user's id, when there is one (see {@link ZeroCmsContextValue.currentUserId}). */
   currentUserId?: string;
+  /** See {@link ZeroCmsContextValue.listAuthors}. */
+  listAuthors?: () => Promise<AuthorOption[]>;
   children: ReactNode;
 }
 
@@ -102,6 +117,7 @@ export function ZeroCmsProvider({
   blocks,
   notify,
   currentUserId,
+  listAuthors,
   children,
 }: ZeroCmsProviderProps) {
   const [schema, setSchema] = useState<Schema>([]);
@@ -158,6 +174,7 @@ export function ZeroCmsProvider({
       Blocks: blocks ?? BlocksEditor,
       notify: notify ?? noopNotify,
       currentUserId: currentUserId ?? 'anonymous',
+      listAuthors,
     }),
     [
       adapter,
@@ -171,6 +188,7 @@ export function ZeroCmsProvider({
       blocks,
       notify,
       currentUserId,
+      listAuthors,
     ]
   );
 

@@ -49,10 +49,20 @@ metadata (e.g. `required`).
 _Avoid_: column, property, attribute
 
 **`__type`** (field kind):
-One of: `text`, `longtext`, `richtext`, `blocks`, `number`, `json`, `boolean`,
-`date`, `asset`, `lookup`, `reference`, `references`.
+One of: `text`, `longtext`, `richtext`, `slug`, `user`, `blocks`, `number`, `json`,
+`boolean`, `date`, `asset`, `lookup`, `reference`, `references`.
 - **richtext** — an HTML/markdown string. **blocks** — structured rich text
   ({@link BlocksContent}, Strapi-blocks-compatible) rendered by `@usc/zero-cms-blocks`.
+- **slug** — a URL segment: lowercase words joined by hyphens, validated on every
+  write (not only on publish — an invalid slug is a broken URL, not an incomplete
+  value). Meta `from`: a field `__name` on the same Type to derive from. The app's
+  editor mirrors that field's slugified value while the slug is blank and stops
+  permanently once it is typed in, so rewording a title cannot move a live URL.
+- **user** — a person, stored as the display **name** of the CMS user chosen when
+  the value was set, never a user id. Users are not Entries, so a stored id would
+  need a read path over `users.json` to render; the name is the publishable part.
+  Not validated against the current user list — the person may since have been
+  renamed or removed, and the old credit is still what was true.
 - **number** — numeric. Meta `integer`, `min`, `max`. **json** — any JSON value.
 - **date** — a calendar date stored as an ISO 8601 string (`YYYY-MM-DD`); a `String` in GraphQL.
 - **asset** — points at a file in `media/`. Meta `accept`: `image | video | any`. In
@@ -147,6 +157,25 @@ its always-mounted drag handle, and the compact card it collapses to mid-drag. T
 handle belongs to the slot rather than the hover cluster precisely because the cluster
 unmounts on pointer-out, which would drop an in-flight drag.
 _Avoid_: row, item wrapper, placeholder
+
+**Reorder outline**:
+What the Section builder collapses *into* for the duration of a drag: the list lifts
+out of flow into a fixed, viewport-capped, internally scrollable panel of cards over a
+dimmed page, with a spacer holding its place in the document. The panel is scrolled so
+the grabbed card sits on the exact pixel it was grabbed from — which keeps the editor's
+place and also keeps dnd-kit's cached source rect valid. Nothing in the document moves,
+no scroll position is read or written, and the order is untouched until the pointer
+actually moves. Lives for one gesture; there is no reorder *mode*.
+
+Opens on pointer-down rather than on drag start, because the drag library measures the
+node it animates at activation and has to find the card already there.
+
+Collapsing in flow cannot achieve this, and two attempts established why: shrinking
+twenty screens to one **clamps** the scroll position, so a compensating scroll offset
+no longer exists (the page jumped to the bottom); and reserving the height while
+offsetting the stack pins the grabbed card but displaces every other one, because
+padding shifts them all equally.
+_Avoid_: collapse anchoring (the superseded in-flow attempt), scroll anchoring (the browser feature a scroll correction misused), reorder mode (it is drag-scoped), outline builder screen (a rejected separate route — see ADR 0015)
 
 **Insert slot**:
 The dashed "+ Add" bar the Section builder puts before the first item, between every

@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useZeroCmsWidgetOptional } from "@usc/zero-cms-widget";
+import {
+  useInspect,
+  useSurfaceTone,
+  useZeroCmsWidgetOptional,
+} from "@usc/zero-cms-widget";
 import { BlogCard } from "@/components/ui/blog-card";
 import {
   byNewestFirst,
@@ -18,13 +22,13 @@ type BlogIndexViewProps = {
 };
 
 /**
- * The Blogs index: a text search and a category chip row over every published
+ * The Blog index: a text search and a category chip row over every published
  * post, then a numbered pager.
  *
  * Every post ships in this page's HTML and the filtering is client-side. That is
  * the deliberate trade: search covers the WHOLE archive rather than one page,
  * and there is a single route to revalidate on publish. Crawl discovery does not
- * depend on the pager at all — `getAllSitePaths` feeds every `/blogs/<slug>`
+ * depend on the pager at all — `getAllSitePaths` feeds every `/blog/<slug>`
  * into `sitemap.ts`. Revisit only if the archive grows past a few hundred posts.
  *
  * Filter chips reuse the Projects index's markup so the two indexes stay
@@ -38,6 +42,14 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
   // there is no "+ Add" affordance to inherit — without this an editor has to
   // leave the site for the Content admin just to start a post.
   const widget = useZeroCmsWidgetOptional();
+  // `useInspect`, not `widget.inspect`: the button below is markup the server never
+  // sent, and the context flag flips before deep subtrees finish hydrating.
+  const inspect = useInspect();
+  // This section is `bg-surface` today, but the tone is measured rather than
+  // assumed — same hook the Section builder's own add affordances use, so a
+  // future background change can't quietly make the button unreadable.
+  const [addHost, setAddHost] = useState<HTMLDivElement | null>(null);
+  const addTone = useSurfaceTone(addHost, [inspect]);
 
   const sorted = useMemo(() => [...posts].sort(byNewestFirst), [posts]);
   const categories = useMemo(() => deriveBlogCategories(sorted), [sorted]);
@@ -70,12 +82,16 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
         {/* Card titles are <h3>s; without this the page jumps h1 → h3. */}
         <h2 className="sr-only">Blog posts</h2>
 
-        {widget?.inspect ? (
-          <div className="mb-6">
+        {inspect && widget ? (
+          <div ref={setAddHost} className="mb-6">
             <button
               type="button"
               onClick={() => void widget.createEntry("blog-post")}
-              className="zero-cms inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-400 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:border-neutral-900 hover:text-neutral-900"
+              className={
+                addTone === "dark"
+                  ? "zero-cms inline-flex items-center gap-2 rounded-lg border border-dashed border-white/50 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white/85 transition-colors hover:border-white hover:bg-white/15 hover:text-white"
+                  : "zero-cms inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-400 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:border-neutral-900 hover:text-neutral-900"
+              }
             >
               <span
                 aria-hidden

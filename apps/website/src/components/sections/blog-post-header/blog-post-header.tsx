@@ -8,8 +8,8 @@ import type { GetBlogPostQuery } from "@/generated/graphql";
 type BlogPost = NonNullable<GetBlogPostQuery["blogPosts"][number]>;
 
 /**
- * The banner at the top of a post: breadcrumb, category, title, date, author,
- * hero image.
+ * The banner at the top of a post: breadcrumb (ending in this post's own title),
+ * title, category, excerpt, date, author, hero image.
  *
  * Rendered from the Blog Post's OWN fields rather than from a Hero section, for
  * the same reason `ProjectHero` reads Project fields: the index card and this
@@ -23,36 +23,61 @@ type BlogPost = NonNullable<GetBlogPostQuery["blogPosts"][number]>;
 export function BlogPostHeader({ post }: { post: BlogPost }) {
   const { title, category, publishedAt, hero, author, excerpt } = post;
   const published = formatPublishedDate(publishedAt);
-  const authorName = [author?.name, author?.lastname].filter(Boolean).join(" ");
+  // A plain string now: the display name of the CMS user chosen as the author
+  // (ADR 0016), rather than a related `author` entry with its own avatar.
+  const authorName = author?.trim() ?? "";
+  const heading = title ?? "Untitled post";
 
   return (
     <header className="bg-surface">
       <div className="mx-auto max-w-container px-6 pt-10 pb-[56px]">
+        {/* The post's own title is the last crumb — plain text with
+            aria-current, since a link to the page you are on is noise. Truncated
+            rather than wrapped so a long headline can't push the trail onto a
+            second line. */}
         <nav aria-label="Breadcrumb" className="mb-6 text-[13px] text-muted">
-          <Link href="/" className="transition-colors hover:text-dark">
-            Home
-          </Link>
-          <span aria-hidden> / </span>
-          <Link href="/blogs" className="transition-colors hover:text-dark">
-            Blogs
-          </Link>
+          <ol className="flex flex-wrap items-center gap-x-1">
+            <li>
+              <Link href="/" className="transition-colors hover:text-dark">
+                Home
+              </Link>
+            </li>
+            <li aria-hidden>/</li>
+            <li>
+              <Link href="/blog" className="transition-colors hover:text-dark">
+                Blog
+              </Link>
+            </li>
+            <li aria-hidden>/</li>
+            <li className="min-w-0">
+              <span
+                aria-current="page"
+                title={heading}
+                className="block max-w-[42ch] truncate text-dark"
+              >
+                {heading}
+              </span>
+            </li>
+          </ol>
         </nav>
 
+        <ZeroCmsEntryField field="title">
+          <h1 className="max-w-[28ch] font-serif text-3xl leading-tight text-dark sm:text-4xl">
+            {heading}
+          </h1>
+        </ZeroCmsEntryField>
+
+        {/* Under the title, not above it: the headline is what a reader came for,
+            and the category is how they place it afterwards. */}
         {category ? (
           <ZeroCmsEntryField field="category">
-            <p className="mb-4">
+            <p className="mt-4">
               <Badge variant="dark" radius={6} className="bg-gold-deep text-white uppercase">
                 {category}
               </Badge>
             </p>
           </ZeroCmsEntryField>
         ) : null}
-
-        <ZeroCmsEntryField field="title">
-          <h1 className="max-w-[28ch] font-serif text-3xl leading-tight text-dark sm:text-4xl">
-            {title ?? "Untitled post"}
-          </h1>
-        </ZeroCmsEntryField>
 
         {excerpt ? (
           <ZeroCmsEntryField field="excerpt">
@@ -64,7 +89,11 @@ export function BlogPostHeader({ post }: { post: BlogPost }) {
 
         {published || authorName ? (
           <p className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
-            {authorName ? <span>By {authorName}</span> : null}
+            {authorName ? (
+              <ZeroCmsEntryField field="author">
+                <span>By {authorName}</span>
+              </ZeroCmsEntryField>
+            ) : null}
             {authorName && published ? <span aria-hidden>·</span> : null}
             {published ? (
               <time dateTime={publishedAt ?? undefined}>{published}</time>

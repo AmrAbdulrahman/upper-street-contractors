@@ -33,6 +33,8 @@ const KIND_OPTIONS = [
   'text',
   'longtext',
   'richtext',
+  'slug',
+  'user',
   'blocks',
   'number',
   'json',
@@ -347,6 +349,14 @@ function FieldRow({
                 .filter(Boolean),
             })
           }
+        />
+      )}
+
+      {field.__type === 'slug' && (
+        <Input
+          placeholder="Derive from field (e.g. title) — optional"
+          value={field.from ?? ''}
+          onChange={(e) => onChange({ ...field, from: e.target.value.trim() || undefined })}
         />
       )}
 

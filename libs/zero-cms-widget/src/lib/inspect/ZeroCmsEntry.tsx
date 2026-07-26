@@ -25,6 +25,7 @@ import {
   type InspectAction,
 } from './inspect-clone';
 import { useSectionSlot } from './section-slot-context';
+import { useInspect } from './use-inspect';
 
 export interface ZeroCmsEntryProps {
   entry: ZeroCmsEntryRef;
@@ -56,9 +57,12 @@ function EntryInspect({
   const ctx = useZeroCmsEntry();
   const slot = useSectionSlot();
   const [hovered, setHovered] = useState(false);
+  // Not `widget.inspect` — see `useInspect`. The outline classes this adds to the
+  // cloned host are a hydration mismatch if they land a frame too early.
+  const inspect = useInspect();
 
   const entryId = ctx?.entryId ?? '';
-  if (!widget?.inspect || !entryId) return <>{children}</>;
+  if (!inspect || !widget || !entryId) return <>{children}</>;
   const { openEntry } = widget;
 
   const inspectClassName = mergeClassNames(

@@ -102,6 +102,7 @@ export function ZeroCmsAdminLayout({
             blocks={blocks}
             notify={notify}
             currentUserId={ctx.user.__id}
+            listAuthors={ctx.client.listAuthors}
           >
             <AdminNavProvider path={path} onNavigate={onNavigate}>
               <AdminChrome

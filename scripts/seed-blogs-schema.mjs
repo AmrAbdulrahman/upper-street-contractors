@@ -1,9 +1,10 @@
 /**
- * Schema seed (additive, idempotent) for the Blogs feature + the Section builder.
+ * Schema seed (idempotent) for the Blog feature + the Section builder.
  *
- *   1. `blog-post` — the Blog Post Type: listing fields (slug / title / excerpt /
+ *   1. `blog-post` — the Blog Post Type: listing fields (title / slug / excerpt /
  *      hero / author / publishedAt / category) plus a `sections` One-to-Many
- *      sharing the same allowedTypes as `page.sections`.
+ *      sharing the same allowedTypes as `page.sections`. Reshaped in place when
+ *      it already exists, so field order and kinds converge on one definition.
  *   2. Four new section Types (+ the `figure` child a Gallery section holds):
  *      image-section, gallery-section, quote-section, separator-section.
  *   3. Those four appended to `page.sections` allowedTypes, so they join the
@@ -12,8 +13,10 @@
  *      pickable as a section — the Section builder's Type picker renders exactly
  *      these three (see TYPE_GLYPHS in @usc/zero-cms-app for the glyph keys).
  *
- * All edits are additive, so they clear `Engine.saveSchema`'s destructive-edit
- * guard (it only blocks changes that invalidate existing PUBLISHED entries).
+ * Everything except the `blog-post` reshape is additive. The reshape drops `meta`
+ * and re-kinds `author`, which `Engine.saveSchema`'s destructive-edit guard WILL
+ * refuse while any published post still stores those keys — so
+ * `scripts/migrate-blog-author-and-meta.mjs` has to run first.
  * WRITES TO THE SHARED LIVE Redis (ADR 0008) — but schema only; no entries are
  * created here (see seed-blogs-content.mjs).
  *
@@ -230,63 +233,105 @@ for (const s of NEW_SECTIONS) {
 // can't silently diverge as sections are added.
 const BLOG_SECTIONS = [...pageSections.allowedTypes];
 
-if (!addType({
-  __name: 'blog-post',
-  label: 'Blog Post',
-  description: 'One article on /blogs.',
-  thumbnail: 'richText',
-  fields: [
-    // No unique constraint exists in zero-cms — the route resolves the first
-    // match, so a duplicate slug silently shadows a post. Guarded in
-    // seed-blogs-content.mjs and worth real validation later.
-    { __name: 'slug', __type: 'text', label: 'URL slug', required: true, description: 'Lowercase words joined by hyphens. Becomes /blogs/<slug>.' },
-    { __name: 'title', __type: 'text', label: 'Title', required: true },
-    { __name: 'excerpt', __type: 'longtext', label: 'Excerpt', description: 'Shown on the index card and used as the meta description.' },
-    { __name: 'hero', __type: 'asset', accept: 'image', label: 'Hero image' },
-    { __name: 'author', __type: 'reference', label: 'Author', allowedTypes: ['author'] },
-    { __name: 'publishedAt', __type: 'date', label: 'Published on' },
-    {
-      __name: 'category',
-      __type: 'lookup',
-      label: 'Category',
-      options: [
-        'Kitchens',
-        'Bathrooms',
-        'Refurbishments',
-        'Plumbing',
-        'Heating',
-        'Electrical',
-        'Carpentry',
-        'Roofing',
-        'Guides',
-        'News',
-      ],
-    },
-    { __name: 'sections', __type: 'references', label: 'Sections', allowedTypes: BLOG_SECTIONS },
-    // `meta-data`, not `metadata` — same Type `page.meta` points at.
-    { __name: 'meta', __type: 'reference', label: 'SEO metadata', allowedTypes: ['meta-data'] },
-  ],
-})) {
-  // Already present from an earlier run — keep its sections union in step with
-  // page.sections so a section Type added later reaches posts too.
+/**
+ * The canonical `blog-post` field list — declared once and applied whether the
+ * Type is being created or reshaped, so there is no "new install vs upgrade"
+ * divergence to reason about.
+ *
+ * Field ORDER is the Edit-drawer order (`EntryForm` maps `type.fields`), which is
+ * why `title` comes first: the slug derives from it, and a form that asks for the
+ * URL before the headline reads backwards.
+ *
+ * Three deliberate kinds:
+ *  - `slug` (not `text`) — pattern-validated by core, and derived from `title`
+ *    until an editor touches it, then detached for good so rewording a headline
+ *    never moves a URL that has already been shared.
+ *  - `user` (not a relation to an `author` entry) — stores the chosen CMS user's
+ *    display name. Accounts live outside the entry store, so a live link would
+ *    mean a public read path over `users.json` just to print a byline. ADR 0016.
+ *  - no `meta` at all — a post's metadata is DERIVED from its title and excerpt
+ *    (see `blog/[slug]/page.tsx`), never picked, so there is nothing to pick.
+ */
+const BLOG_POST_FIELDS = () => [
+  { __name: 'title', __type: 'text', label: 'Title', required: true },
+  // No unique constraint exists in zero-cms — the route resolves the first
+  // match, so a duplicate slug silently shadows a post.
+  {
+    __name: 'slug',
+    __type: 'slug',
+    label: 'URL slug',
+    required: true,
+    from: 'title',
+    description: 'Lowercase words joined by hyphens. Becomes /blog/<slug>.',
+  },
+  {
+    __name: 'excerpt',
+    __type: 'longtext',
+    label: 'Excerpt',
+    description: 'Shown on the index card, and used as the page description for search results.',
+  },
+  { __name: 'hero', __type: 'asset', accept: 'image', label: 'Hero image' },
+  { __name: 'author', __type: 'user', label: 'Author' },
+  { __name: 'publishedAt', __type: 'date', label: 'Published on' },
+  {
+    __name: 'category',
+    __type: 'lookup',
+    label: 'Category',
+    options: [
+      'Kitchens',
+      'Bathrooms',
+      'Refurbishments',
+      'Plumbing',
+      'Heating',
+      'Electrical',
+      'Carpentry',
+      'Roofing',
+      'Guides',
+      'News',
+    ],
+  },
+  { __name: 'sections', __type: 'references', label: 'Sections', allowedTypes: BLOG_SECTIONS },
+];
+
+if (
+  !addType({
+    __name: 'blog-post',
+    label: 'Blog Post',
+    description: 'One article on /blog.',
+    thumbnail: 'richText',
+    fields: BLOG_POST_FIELDS(),
+  })
+) {
+  // Already present from an earlier run. Reshape it to the canonical list above,
+  // carrying over the sections union it already had (so a section Type added by
+  // a later seed isn't dropped) plus anything new from page.sections.
   const existing = byName('blog-post');
-  const field = (existing.fields ?? []).find((f) => f.__name === 'sections');
-  if (field) {
-    field.allowedTypes = field.allowedTypes ?? [];
-    for (const s of BLOG_SECTIONS) {
-      if (!field.allowedTypes.includes(s)) {
-        field.allowedTypes.push(s);
-        changed = true;
-        console.log(`schema: added "${s}" to blog-post.sections allowedTypes`);
-      }
-    }
+  const previousSections = (existing.fields ?? []).find((f) => f.__name === 'sections');
+  const union = [...new Set([...(previousSections?.allowedTypes ?? []), ...BLOG_SECTIONS])];
+
+  const next = BLOG_POST_FIELDS();
+  next.find((f) => f.__name === 'sections').allowedTypes = union;
+
+  if (JSON.stringify(existing.fields) !== JSON.stringify(next)) {
+    const before = new Set((existing.fields ?? []).map((f) => `${f.__name}:${f.__type}`));
+    const after = new Set(next.map((f) => `${f.__name}:${f.__type}`));
+    for (const gone of [...before].filter((f) => !after.has(f)))
+      console.log(`schema: blog-post dropped/changed field ${gone}`);
+    for (const added of [...after].filter((f) => !before.has(f)))
+      console.log(`schema: blog-post now has field ${added}`);
+    existing.fields = next;
+    existing.description = 'One article on /blog.';
+    changed = true;
+    console.log('schema: blog-post fields reshaped (order + kinds).');
   }
 }
 
-// Sanity-check the two relation targets exist before we save a dangling union.
-for (const required of ['author', 'meta-data']) {
+// Sanity-check the relation target exists before we save a dangling union.
+// `author` is no longer among them — a Blog Post's author is a `user` name now,
+// though the `author` Type itself stays: `project.author` still points at it.
+for (const required of ['meta-data']) {
   if (!byName(required))
-    throw new Error(`seed-blogs-schema: blog-post references "${required}", which is not in the schema`);
+    throw new Error(`seed-blogs-schema: "${required}" is not in the schema`);
 }
 
 // --- save -------------------------------------------------------------------

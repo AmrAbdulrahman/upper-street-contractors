@@ -1,5 +1,5 @@
 /**
- * Content seed for the Blogs feature: the `blogs` page entry (so /blogs has a
+ * Content seed for the Blog feature: the `blogs` page entry (so /blog has a
  * Page Hero above the index) plus three sample Blog Posts, each built from a few
  * of the new section Types so the Section builder has something real to work on.
  *
@@ -95,7 +95,7 @@ if (blogsPage) {
       'Practical guides and behind-the-scenes write-ups from our building, kitchen, bathroom and refurbishment work across North London.',
   });
   const hero = await createPublished('page-hero', {
-    breadcrumbLabel: 'Blogs',
+    breadcrumbLabel: 'Blog',
     overline: 'Advice & stories',
     title: 'Renovation advice & project stories',
     subtitle:
@@ -103,7 +103,7 @@ if (blogsPage) {
   });
   blogsPage = await createPublished('page', {
     key: 'blogs',
-    title: 'Blogs',
+    title: 'Blog',
     description: 'Renovation advice and project stories from Upper Street Contractors.',
     meta: meta.__id,
     sections: [hero.__id],

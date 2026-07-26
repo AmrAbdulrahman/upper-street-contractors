@@ -15,6 +15,8 @@ import type { FormValues, RendererProps } from './types';
 import { TextRenderer } from '../text';
 import { LongTextRenderer } from '../longtext';
 import { RichTextRenderer } from '../richtext';
+import { SlugRenderer } from '../slug';
+import { UserRenderer } from '../user';
 import { NumberRenderer } from '../number';
 import { JsonRenderer } from '../json';
 import { BlocksFieldRenderer } from '../blocks';
@@ -31,6 +33,8 @@ export const fieldRegistry: Record<FieldType, ComponentType<RendererProps>> = {
   text: TextRenderer,
   longtext: LongTextRenderer,
   richtext: RichTextRenderer,
+  slug: SlugRenderer,
+  user: UserRenderer,
   blocks: BlocksFieldRenderer,
   number: NumberRenderer,
   json: JsonRenderer,
@@ -92,6 +96,10 @@ export function FieldControl({
         label={labelOf(field)}
         required={field.required}
         badge={<TypeBadge field={field} />}
+        // A Field's own `description` had nowhere to render until now, so a rule
+        // like the slug's ("Lowercase words joined by hyphens") only ever reached
+        // an editor as a failed save.
+        hint={field.description}
       >
         <Renderer field={field} control={control} />
       </FieldShell>

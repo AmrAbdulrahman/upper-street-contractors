@@ -7,6 +7,7 @@
 
 import {
   ZeroCmsError,
+  type AuthorOption,
   type CreateUserInput,
   type SafeUser,
   type UpdateUserInput,
@@ -33,6 +34,12 @@ export interface AuthClient {
   me(): Promise<SafeUser | null>;
   changePassword(current: string, next: string): Promise<LoginResult>;
   logout(): void;
+  /**
+   * Names of the enabled CMS users, for attribution (a `user` field's picker).
+   * Open to any signed-in Role — unlike {@link listUsers}, which is admin-only,
+   * so a Copy writer can still choose a post's author.
+   */
+  listAuthors(): Promise<AuthorOption[]>;
   // ---- user administration (server rejects below the `admin` role) ----
   listUsers(): Promise<SafeUser[]>;
   createUser(input: CreateUserInput): Promise<SafeUser>;
@@ -110,6 +117,7 @@ export function createAuthClient(opts: AuthClientOptions = {}): AuthClient {
       setToken(r.token);
       return r;
     },
+    listAuthors: () => rpc<AuthorOption[]>('listAuthors', []),
     listUsers: () => rpc<SafeUser[]>('listUsers', []),
     createUser: (input) => rpc<SafeUser>('createUser', [input]),
     updateUser: (id, patch, expectedUpdatedAt) =>

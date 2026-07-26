@@ -244,6 +244,54 @@ describe('schema evolution (ADR 0011)', () => {
     const got = await e.get('project', p.__id);
     expect(got?.featured).toBe(true);
   });
+
+  it('allows removing a field from a Type with published entries', async () => {
+    const e = await freshEngine();
+    const p = await e.create('project', { title: 'A', category: 'Loft' }, ACTOR);
+    await e.publish('project', p.__id, ACTOR, p.__lastEditedAt as string);
+
+    const nextSchema: Schema = [
+      ...schema.filter((t) => t.__name !== 'project'),
+      {
+        __name: 'project',
+        fields: schema
+          .find((t) => t.__name === 'project')!
+          .fields.filter((f) => f.__name !== 'category'),
+      },
+    ];
+
+    // The stored bag still has `category`, and always will: `publish` writes the
+    // projected values, so every declared field is re-materialised on every
+    // publish. Projection drops it at read time (ADR 0011), so the guard must not
+    // treat it as an offender — otherwise no field could ever be removed.
+    await expect(
+      e.saveSchema(nextSchema, ACTOR, await e.getSchemaVersion())
+    ).resolves.toBeTruthy();
+
+    const got = await e.get('project', p.__id);
+    expect(got?.category).toBeUndefined();
+    expect(got?.title).toBe('A');
+  });
+
+  it('still refuses a schema edit that invalidates a published value', async () => {
+    const e = await freshEngine();
+    const p = await e.create('project', { title: 'A' }, ACTOR);
+    await e.publish('project', p.__id, ACTOR, p.__lastEditedAt as string);
+
+    const nextSchema: Schema = [
+      ...schema.filter((t) => t.__name !== 'project'),
+      {
+        __name: 'project',
+        // `title` holds the string 'A'; re-kinding it to number leaves a stored
+        // value the next schema cannot read.
+        fields: [{ __name: 'title', __type: 'number' }],
+      },
+    ];
+
+    await expect(
+      e.saveSchema(nextSchema, ACTOR, await e.getSchemaVersion())
+    ).rejects.toMatchObject({ code: 'DESTRUCTIVE_SCHEMA_EDIT' });
+  });
 });
 
 describe('schema Type timestamps', () => {

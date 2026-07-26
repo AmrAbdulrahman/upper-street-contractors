@@ -38,6 +38,10 @@ export {
   AddZeroCmsEntry,
   type AddZeroCmsEntryProps,
 } from './lib/inspect/AddZeroCmsEntry';
+export {
+  ZeroCmsEntryActions,
+  type ZeroCmsEntryActionsProps,
+} from './lib/inspect/ZeroCmsEntryActions';
 export { ZeroCmsList, type ZeroCmsListProps } from './lib/inspect/ZeroCmsList';
 export {
   ZeroCmsSectionList,
@@ -56,3 +60,14 @@ export {
   wrapWithInspect,
   mergeClassNames,
 } from './lib/inspect/inspect-clone';
+export {
+  useSurfaceTone,
+  surfaceToneOf,
+  type SurfaceTone,
+} from './lib/inspect/use-surface-tone';
+/**
+ * Host apps that render their own inspect-only UI must gate it on this, never on
+ * `useZeroCmsWidget().inspect` — see the hook's own comment for why the context
+ * flag alone produces hydration mismatches.
+ */
+export { useInspect } from './lib/inspect/use-inspect';

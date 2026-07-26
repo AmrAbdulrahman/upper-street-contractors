@@ -73,10 +73,58 @@ every other CMS ships.
 
 **Bad / accepted costs**
 
-- **Collapse-on-drag needs a scroll correction.** Shrinking every slot shortens
-  the document and slides the dragged section out from under the pointer, so the
-  list measures the dragged slot before and after collapse and `scrollBy`s the
-  difference. That is real machinery a separate screen would not have needed.
+- **Collapse-on-drag cannot happen in flow at all.** Shrinking every slot shortens
+  the document and slides the dragged section out from under the pointer. It took
+  two failures to establish that no in-flow arrangement fixes this:
+
+  1. **`scrollBy` the difference** — measure the dragged slot before and after
+     collapse and correct the scroll. Wrong, and unfixably so: collapsing twenty
+     screens to one drops the maximum scroll offset far below where the editor was
+     standing, so the browser **clamps** `scrollY` and the offset the correction
+     wanted to restore no longer exists. On a long page it threw the editor to the
+     bottom, which read as the drag teleporting them.
+  2. **Reserve the height, offset the stack** — pin `min-height` so the document
+     never shrinks (no clamp, no forced scroll: verified as zero `scrollBy`/
+     `scrollTo` calls) and push the collapsed cards down with `padding-top` so the
+     grabbed one keeps its place. Correct for that one card and useless for the
+     rest: padding shifts *every* card equally, so grabbing a section low on the
+     home page shoved the nine above it out of position into a cluster below a
+     ~2300px blank gap. The editor keeps their scroll position and loses the order.
+
+  The general result: collapsing N sections from ~900px to ~78px **must** move every
+  card but one, so the collapse stops being a reflow. The list lifts out of flow
+  into the **Reorder outline** — fixed, viewport-capped, internally scrollable,
+  over a dimmed page — with a spacer holding its place in the document. The
+  outline's internal scroll is set so the grabbed card lands on the pixel it was
+  grabbed from (`outlineScrollTop`), which preserves the editor's place *and* keeps
+  dnd-kit's cached source rect valid; going full-bleed rather than a narrow centred
+  panel is part of the same argument, since it leaves the card's horizontal box
+  alone too. The geometry is a pure function because dnd-kit needs real pointer
+  capture and an `IntersectionObserver`, so the drag itself cannot be exercised
+  under jsdom.
+
+  This lands close to the separate outline builder screen rejected below — but only
+  close. It exists for the duration of one gesture, so there is still no second
+  route to authorise, style or navigate to, and the editor still sees the real
+  sections at every other moment. The rejection of a standing builder screen
+  stands; what it gained was borrowed for the two seconds a drag lasts.
+
+- **The collapse has to happen before dnd-kit measures**, which is why it runs on
+  `onPointerDownCapture` + `flushSync` rather than in `onDragStart`. dnd-kit's
+  default feedback clones the dragged node and positions the clone from a box
+  measured at activation; collapse after that and a screen-tall snapshot of a
+  section that no longer exists follows the pointer, over an outline of cards.
+  Capture phase beats dnd-kit's own listener on the handle and `flushSync` commits
+  inside the same event, so activation measures the card. The cost is a
+  `dragStarted` ref plus one-shot `pointerup`/`pointercancel` listeners: a plain
+  click on a handle gets no `onDragEnd`, and without them it would leave the page
+  collapsed.
+
+  **Rejected: `feedback: 'none'`** to avoid the mis-placed preview entirely. It
+  reads as the obvious fix — the grabbed card stays in flow, nothing to position —
+  and it silently stops the list sorting at all. Confirmed with identical synthetic
+  pointer drags in a browser: reorders under `clone`, does nothing under `none`.
+  `move` sorts but fixes the real element to the viewport at the same stale origin.
 - **The drag handle cannot live in the hover cluster.** The cluster is mounted
   only while hovered and hover flips during a drag, which would pull dnd-kit's
   pointer capture out from under an in-flight drag. The handle therefore belongs
@@ -93,8 +141,8 @@ every other CMS ships.
   in exchange for a thumbnail that cannot 404, be deleted out from under a Type,
   or cost network bytes.
 - **Reuse makes shared sections possible**, so editing a section on one page can
-  change another. Surfaced with an "in N pages" badge at the moment of linking,
-  not on the page afterwards.
+  change another. Surfaced with a "used in N pages" badge at the moment of
+  linking, not on the page afterwards.
 - **Rejected: a `referencesTo` pre-check** for the delete button. There is no
   adapter op that answers "who references X" (`findReferencesTo` is
   engine-internal), and adding one means an RPC plus an authorize entry for a
@@ -111,7 +159,9 @@ every other CMS ships.
 - **A separate outline builder screen** (the wireframe). Best drag ergonomics
   and clearest overview, but a second surface that is not the page: its own
   route, auth and styling, a new concept beside Inspect mode, and the editor
-  cannot see what a section looks like while arranging it.
+  cannot see what a section looks like while arranging it. (Its ergonomics were
+  eventually needed after all — see the Reorder outline above, which borrows them
+  for the duration of a drag without becoming a surface.)
 - **Drag the rendered sections at full height.** Simplest possible code, truest
   WYSIWYG — and unusable on a post whose sections are each a screen tall, which
   is exactly why the wireframe drew cards.

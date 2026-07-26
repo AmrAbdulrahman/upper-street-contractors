@@ -20,14 +20,18 @@ import { query } from "@/lib/cms/query";
  *   introspect (readdir-based enumeration only works at build time, which is
  *   exactly the mistake the old `scripts/generate-sitemap.mjs` made without
  *   the walk even reaching these routes — see ADR 0012).
- * - **Project pages** (`/projects/:id`) and **Blog posts** (`/blogs/:slug`) —
+ * - **Project pages** (`/projects/:id`) and **Blog posts** (`/blog/:slug`) —
  *   genuinely CMS-driven (a publish can add one with no code change), so this
  *   list queries live via the same `GetProjectIds` / `GetBlogSlugs` used by
  *   those routes' own `generateStaticParams`.
  *
- * Blog posts matter here more than most: the Blogs index paginates client-side,
+ * Blog posts matter here more than most: the Blog index paginates client-side,
  * so a post on page 3 is not linked from the first screen of HTML. The sitemap
  * is what makes every post discoverable regardless of where the pager puts it.
+ *
+ * Only the CURRENT paths belong here. `/blogs/*` still resolves — as a 308 to
+ * `/blog/*` (see `next.config.mjs`) — but a redirect is not a crawlable page and
+ * listing it would ask crawlers to index a URL that only points elsewhere.
  */
 const STATIC_ROUTES = [
   "/",
@@ -38,7 +42,7 @@ const STATIC_ROUTES = [
   "/privacy-policy",
   "/terms-and-conditions",
   "/projects",
-  "/blogs",
+  "/blog",
   "/refurbishments",
   "/kitchens",
   "/bathrooms",
@@ -72,6 +76,6 @@ export async function getAllSitePaths(): Promise<string[]> {
       .map((p) => p?.slug?.trim())
       .filter((slug): slug is string => Boolean(slug)),
   );
-  const blogPaths = [...blogSlugs].map((slug) => `/blogs/${slug}`);
+  const blogPaths = [...blogSlugs].map((slug) => `/blog/${slug}`);
   return [...STATIC_ROUTES, ...projectPaths, ...blogPaths];
 }

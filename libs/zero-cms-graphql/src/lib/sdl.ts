@@ -35,6 +35,8 @@ function outputType(type: Type, field: Field): string {
     case 'text':
     case 'longtext':
     case 'richtext':
+    case 'slug':
+    case 'user':
     case 'date':
       return 'String';
     case 'asset':
@@ -102,6 +104,10 @@ function whereFilter(field: Field): string | null {
     case 'text':
     case 'longtext':
     case 'richtext':
+    // `slug` in particular MUST stay filterable — `/blog/<slug>` resolves a post
+    // with `filters: { slug: { eq: $slug } }`, so dropping it here 404s every post.
+    case 'slug':
+    case 'user':
     case 'asset':
     case 'lookup':
     case 'date':

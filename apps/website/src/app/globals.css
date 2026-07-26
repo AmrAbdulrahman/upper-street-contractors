@@ -204,17 +204,10 @@
   animation-play-state: paused;
 }
 
-/* Desktop (lg+) shows logos grayscale/dimmed and reveals a logo's colour on
-   hover. Below lg (tablet + mobile) logos are already full colour, so this rule
-   is scoped to desktop widths. Gating on (hover: hover) also stops a touch tap's
-   "sticky" :hover from leaving a logo stuck mid-state. */
-@media (hover: hover) and (min-width: 1024px) {
-  .clients-marquee a:hover img,
-  .clients-marquee img:hover {
-    opacity: 1;
-    filter: grayscale(0);
-  }
-}
+/* Client logos have no hover state at all any more: they are full colour at every
+   width (see `clients-carousel.tsx`). The grayscale-until-hover pair that used to
+   live here is gone — a logo the visitor has to hover to see properly is a logo
+   most visitors never see, and on touch there is no hover to give. */
 
 @media (prefers-reduced-motion: reduce) {
   .clients-marquee-track {
@@ -254,5 +247,15 @@
   /* Show each logo once — the duplicated set only exists for the loop. */
   .clients-marquee-track > [aria-hidden="true"] {
     display: none;
+  }
+}
+
+/* Phones (< 640px): one logo per row. Three columns on a 375px screen leaves each
+   cell ~120px wide, which is narrower than most of these wordmarks want and read
+   as clipped; one per row lets each take its natural width up to its own cap.
+   Tablets keep the 3-column grid above. */
+@media (max-width: 639.98px) {
+  .clients-marquee-track {
+    grid-template-columns: 1fr;
   }
 }

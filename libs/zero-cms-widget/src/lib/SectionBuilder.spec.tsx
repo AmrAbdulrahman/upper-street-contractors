@@ -203,12 +203,12 @@ describe('<ZeroCmsSectionList> — the Section builder', () => {
 
     const spare = await screen.findByRole('button', { name: /Spare block/ });
     // Usage counts come from the parent Type's own entries: the two linked
-    // sections read "in 1 page", the unlinked one "unused".
+    // sections read "used in 1 page", the unlinked one "unused".
     expect(spare.textContent).toContain('unused');
     await waitFor(() =>
       expect(
         screen.getByRole('button', { name: /Section one/ }).textContent
-      ).toContain('in 1 page')
+      ).toContain('used in 1 page')
     );
 
     fireEvent.click(spare);
@@ -338,6 +338,22 @@ describe('<ZeroCmsSectionList> — the Section builder', () => {
         })
       ).toBeNull()
     );
+  });
+
+  it('wraps the list in inspect mode and leaves a public page a bare fragment', async () => {
+    const fx = await fixture();
+    const { container, unmount } = render(<Builder fx={fx} />);
+    await waitFor(() =>
+      expect(container.querySelector('[data-zero-cms-section-list="sections"]')).toBeTruthy()
+    );
+    // The wrapper is a plain passthrough until a drag starts — it only becomes the
+    // reorder outline then, and nothing about a resting page is repositioned.
+    expect(container.querySelector('[data-zero-cms-outline]')).toBeNull();
+    unmount();
+
+    const off = render(<Builder fx={fx} inspect={false} />);
+    expect(await off.findByText('Section one')).toBeTruthy();
+    expect(off.container.querySelector('[data-zero-cms-section-list]')).toBeNull();
   });
 
   it('disables every insert slot at the field max', async () => {

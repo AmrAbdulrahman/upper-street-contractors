@@ -211,7 +211,7 @@ function UsageBadge({ count, parentLabel }: { count: number; parentLabel: string
     return <span className="shrink-0 text-xs text-neutral-400">unused</span>;
   return (
     <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-      in {count} {count === 1 ? parentLabel : `${parentLabel}s`}
+      used in {count} {count === 1 ? parentLabel : `${parentLabel}s`}
     </span>
   );
 }

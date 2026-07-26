@@ -9,6 +9,7 @@
 import { useState, type ReactElement } from 'react';
 import { useZeroCmsWidgetOptional } from '../context';
 import { useZeroCmsEntry } from './entry-context';
+import { useInspect } from './use-inspect';
 import { PencilIcon, mergeClassNames, wrapWithInspect } from './inspect-clone';
 
 export interface ZeroCmsEntryFieldProps {
@@ -27,8 +28,11 @@ export function ZeroCmsEntryField({
   const widget = useZeroCmsWidgetOptional();
   const ctx = useZeroCmsEntry();
   const [hovered, setHovered] = useState(false);
+  // Not `widget.inspect` — see `useInspect`. This wrapper can swap an <h1> for a
+  // <div> host, so hydrating a frame too early is a structural mismatch.
+  const inspect = useInspect();
 
-  if (!widget?.inspect || !ctx?.entryId || !field) return children;
+  if (!inspect || !widget || !ctx?.entryId || !field) return children;
   const { openEntry } = widget;
 
   const inspectClassName = mergeClassNames(

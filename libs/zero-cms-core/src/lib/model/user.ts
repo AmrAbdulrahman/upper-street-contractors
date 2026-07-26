@@ -50,6 +50,24 @@ export interface User {
 export type SafeUser = Omit<User, 'hashedPassword'>;
 
 /**
+ * The only thing a non-admin may learn about other accounts: who they are, for
+ * attribution (a `user` field's picker — see ADR 0016). Deliberately not a
+ * {@link SafeUser}: email, role and account state are none of a Copy writer's
+ * business, and `listAuthors` is open to every signed-in Role including Viewer.
+ */
+export interface AuthorOption {
+  id: string;
+  /** Full name, falling back to the email's local part when no name is set. */
+  name: string;
+}
+
+/** Project a user to its {@link AuthorOption}. Never leaks any other field. */
+export function toAuthorOption(user: SafeUser): AuthorOption {
+  const name = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  return { id: user.__id, name: name || user.email.split('@')[0] };
+}
+
+/**
  * Input shapes for the user-admin API. Plain data (no node dependencies) so
  * browser clients (zero-cms-app's auth client) can type their calls; the
  * node-side `Auth` service consumes the same shapes.

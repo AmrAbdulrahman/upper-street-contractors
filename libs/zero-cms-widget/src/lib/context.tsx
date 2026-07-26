@@ -143,6 +143,14 @@ interface WidgetContextValue {
   /** Close the whole stack. */
   close: () => void;
   /**
+   * Tell the host that content changed outside the drawer, so it can revalidate
+   * (the website wires this to `router.refresh()`). The drawer and the relation
+   * mutations call it themselves; this exposes it to in-page controls that write
+   * through the adapter directly — e.g. `<ZeroCmsEntryActions>` publishing an
+   * entry, after which the page must re-render to stop showing it as a draft.
+   */
+  refresh: () => void;
+  /**
    * Sign out of the widget's own auth session (clears the local bearer token
    * + the httpOnly session cookie via `AuthClient.logout()`). Only present
    * when `<ZeroCmsWidget auth={...}>` is actually gating the widget — the
@@ -448,6 +456,8 @@ export function WidgetProvider({
 
   const isOpen = stack.length > 0;
 
+  const refresh = useCallback(() => onChanged?.(), [onChanged]);
+
   const publicValue = useMemo<WidgetContextValue>(
     () => ({
       inspect: inspectActive,
@@ -459,6 +469,7 @@ export function WidgetProvider({
       unlink,
       reorder,
       close,
+      refresh,
       logout: onLogout,
       currentUserEmail,
     }),
@@ -472,6 +483,7 @@ export function WidgetProvider({
       unlink,
       reorder,
       close,
+      refresh,
       onLogout,
       currentUserEmail,
     ]

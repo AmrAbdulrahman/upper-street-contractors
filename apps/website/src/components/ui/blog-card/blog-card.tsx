@@ -10,7 +10,7 @@ type BlogCardProps = {
 };
 
 /**
- * One post on the Blogs index. Mirrors the Project card's proportions and hover
+ * One post on the Blog index. Mirrors the Project card's proportions and hover
  * so the two grids read as the same site, but carries a date rather than meta
  * chips — a post's useful facet is when it was written.
  */
@@ -18,7 +18,7 @@ export function BlogCard({ data }: BlogCardProps) {
   const { slug, title, excerpt, category, publishedAt, hero } = data;
   // A post with no slug has no URL to link to; still rendered so an editor can
   // see and fix it in inspect mode rather than having it silently vanish.
-  const href = slug ? `/blogs/${slug}` : undefined;
+  const href = slug ? `/blog/${slug}` : undefined;
   const published = formatPublishedDate(publishedAt);
 
   const body = (
@@ -33,7 +33,11 @@ export function BlogCard({ data }: BlogCardProps) {
 
       {excerpt ? (
         <ZeroCmsEntryField field="excerpt">
-          <p className="text-[13px] leading-[1.55] text-muted">{excerpt}</p>
+          {/* Clamped so a long Excerpt can't make one card taller than the rest
+              of its row. The post's own page shows it in full. */}
+          <p className="line-clamp-3 text-[13px] leading-[1.55] text-muted">
+            {excerpt}
+          </p>
         </ZeroCmsEntryField>
       ) : null}
     </>

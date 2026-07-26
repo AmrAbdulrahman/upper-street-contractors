@@ -25,6 +25,7 @@ import { Children, Fragment, type ReactNode } from 'react';
 import { useZeroCmsWidgetOptional } from '../context';
 import { useZeroCmsEntry, entryRefId, type ZeroCmsEntryRef } from './entry-context';
 import { AddZeroCmsEntry } from './AddZeroCmsEntry';
+import { useInspect } from './use-inspect';
 import { useReferencesMeta } from './use-references-meta';
 
 export interface ZeroCmsListProps {
@@ -48,7 +49,9 @@ export function ZeroCmsList({ field, items, children, className, as = 'div' }: Z
   const widget = useZeroCmsWidgetOptional();
   const ctx = useZeroCmsEntry();
 
-  const inspect = Boolean(widget?.inspect && ctx?.entryId);
+  // `useInspect`, not `widget.inspect`: this injects an "+ Add" element, so it must
+  // not appear until after this component's own hydration.
+  const inspect = Boolean(useInspect() && ctx?.entryId);
   // Schema `max` for this field (inspect-only; editor UI, never public). Shared
   // with <ZeroCmsSectionList> so the two resolve field meta identically.
   const { max } = useReferencesMeta(field, inspect);
