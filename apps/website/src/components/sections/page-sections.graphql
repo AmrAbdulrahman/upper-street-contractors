@@ -1,0 +1,158 @@
+# Every member of a sections union, in one place.
+#
+# `GetPage` and `GetHomePage` used to each carry their own partial list, and they
+# had drifted: ClientsCarousel was selected on the home page only, so the same
+# section added to /about would have fetched as an empty object and rendered
+# nothing. That was survivable while sections could only be changed in the CMS;
+# it is not, now that the Section builder offers every allowed Type on every
+# page. One fragment per union means a new section Type is registered once.
+#
+# The two bodies are identical but cannot share a definition — a GraphQL fragment
+# is typed on its parent, and `Page.sections` and `BlogPost.sections` are
+# distinct union types.
+
+fragment PageSectionBlocks on PageSectionsRef {
+  __typename
+  ... on PageHero {
+    ...PageHeroSection
+  }
+  ... on Wizard {
+    ...WizardSection
+  }
+  ... on ContactDetails {
+    ...ContactDetailsSection
+  }
+  ... on HomeHeaderSection {
+    ...HomeHeroSection
+  }
+  ... on WhoWeAreSection {
+    ...WhoWeAreSection
+  }
+  ... on AccreditationList {
+    ...AccreditationList
+  }
+  ... on WhatWeDoSection {
+    ...WhatWeDoSection
+  }
+  ... on WhyChooseUsSection {
+    ...WhyChooseUsSection
+  }
+  ... on HowItWorksSection {
+    ...HowItWorksSection
+  }
+  ... on RecentWorkSection {
+    ...RecentWorkSection
+  }
+  ... on ClientReviewSection {
+    ...ClientReviewSection
+  }
+  ... on PlanningRenovationSection {
+    ...PlanningRenovationSection
+  }
+  ... on ClientsCarousel {
+    ...ClientsCarousel
+  }
+  ... on ServiceOfferSection {
+    ...ServiceOfferSection
+  }
+  ... on CaseStudiesSection {
+    ...CaseStudiesSection
+  }
+  ... on GoogleReviews {
+    ...GoogleReviews
+  }
+  ... on SplitSection {
+    ...SplitSection
+  }
+  ... on ProseSection {
+    ...ProseSection
+  }
+  ... on Faq {
+    ...FaqSection
+  }
+  ... on ImageSection {
+    ...ImageSection
+  }
+  ... on GallerySection {
+    ...GallerySection
+  }
+  ... on QuoteSection {
+    ...QuoteSection
+  }
+  ... on SeparatorSection {
+    ...SeparatorSection
+  }
+}
+
+fragment BlogPostSectionBlocks on BlogPostSectionsRef {
+  __typename
+  ... on PageHero {
+    ...PageHeroSection
+  }
+  ... on Wizard {
+    ...WizardSection
+  }
+  ... on ContactDetails {
+    ...ContactDetailsSection
+  }
+  ... on HomeHeaderSection {
+    ...HomeHeroSection
+  }
+  ... on WhoWeAreSection {
+    ...WhoWeAreSection
+  }
+  ... on AccreditationList {
+    ...AccreditationList
+  }
+  ... on WhatWeDoSection {
+    ...WhatWeDoSection
+  }
+  ... on WhyChooseUsSection {
+    ...WhyChooseUsSection
+  }
+  ... on HowItWorksSection {
+    ...HowItWorksSection
+  }
+  ... on RecentWorkSection {
+    ...RecentWorkSection
+  }
+  ... on ClientReviewSection {
+    ...ClientReviewSection
+  }
+  ... on PlanningRenovationSection {
+    ...PlanningRenovationSection
+  }
+  ... on ClientsCarousel {
+    ...ClientsCarousel
+  }
+  ... on ServiceOfferSection {
+    ...ServiceOfferSection
+  }
+  ... on CaseStudiesSection {
+    ...CaseStudiesSection
+  }
+  ... on GoogleReviews {
+    ...GoogleReviews
+  }
+  ... on SplitSection {
+    ...SplitSection
+  }
+  ... on ProseSection {
+    ...ProseSection
+  }
+  ... on Faq {
+    ...FaqSection
+  }
+  ... on ImageSection {
+    ...ImageSection
+  }
+  ... on GallerySection {
+    ...GallerySection
+  }
+  ... on QuoteSection {
+    ...QuoteSection
+  }
+  ... on SeparatorSection {
+    ...SeparatorSection
+  }
+}

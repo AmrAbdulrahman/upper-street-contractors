@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 import { resolveMediaUrl } from "@/helpers/media-url";
 
 /**
@@ -21,6 +22,12 @@ export type CmsImageProps = {
   fallbackAlt?: string;
   /** Fixed sizing + rounding for this call site (imageContainer's CMS radius/size is gone). */
   className?: string;
+  /**
+   * Sizing that comes from a CMS value rather than a fixed class (e.g. the
+   * `logoSize` height on the logo-strip sections) — Tailwind cannot compile a
+   * runtime number, so those call sites pass it here instead.
+   */
+  style?: CSSProperties;
   /** Shown in place of the image when the asset is empty. */
   placeholderLabel?: string;
   sizes?: string;
@@ -37,6 +44,7 @@ export function CmsImage({
   data,
   fallbackAlt,
   className,
+  style,
   placeholderLabel = "Image placeholder",
   sizes = "(max-width: 1024px) 100vw, 536px",
 }: CmsImageProps) {
@@ -47,7 +55,10 @@ export function CmsImage({
     return (
       <div
         className={`flex items-center justify-center text-sm text-white/15 ${className ?? ""}`}
-        style={{ background: "linear-gradient(145deg, #0a1c2e, #031021)" }}
+        style={{
+          background: "linear-gradient(145deg, #0a1c2e, #031021)",
+          ...style,
+        }}
       >
         {placeholderLabel}
       </div>
@@ -61,6 +72,7 @@ export function CmsImage({
       width={data?.width ?? 800}
       height={data?.height ?? 680}
       className={className}
+      style={style}
       sizes={sizes}
     />
   );

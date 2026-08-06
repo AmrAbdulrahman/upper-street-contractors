@@ -1,5 +1,6 @@
 fragment PageHeroSection on PageHero {
   id
+  type
   breadcrumbLabel
   overline
   title

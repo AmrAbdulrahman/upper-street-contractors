@@ -1,0 +1,12 @@
+fragment ImageSection on ImageSection {
+  id
+  type
+  caption
+  width
+  image {
+    url
+    alt
+    width
+    height
+  }
+}

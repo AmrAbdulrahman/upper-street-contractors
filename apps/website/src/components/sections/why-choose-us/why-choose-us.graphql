@@ -1,5 +1,6 @@
 fragment WhyChooseUsSection on WhyChooseUsSection {
   id
+  type
   overline
   listOfPoints {
     ...BulletList

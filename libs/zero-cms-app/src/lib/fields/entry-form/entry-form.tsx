@@ -65,6 +65,13 @@ export interface EntryFormProps {
   autosave?: (values: FormValues) => void | Promise<void>;
   /** Reports whenever the form's dirty state (unsaved edits) flips. */
   onDirtyChange?: (dirty: boolean) => void;
+  /**
+   * Reports whenever an autosave write starts or finishes. Everything inside
+   * this form goes inert on its own (see the `fieldset` below); this exists for
+   * the controls *outside* it — the editor's Close button, and the widget
+   * drawer's backdrop/Esc — which must not be able to unmount a form mid-write.
+   */
+  onSavingChange?: (saving: boolean) => void;
 }
 
 export function EntryForm({
@@ -77,6 +84,7 @@ export function EntryForm({
   focusField,
   autosave,
   onDirtyChange,
+  onSavingChange,
 }: EntryFormProps) {
   const { control, handleSubmit, reset, getValues } = useForm<FormValues>({
     defaultValues: defaultValues as DefaultValues<FormValues>,
@@ -120,13 +128,23 @@ export function EntryForm({
     onDirtyChange?.(dirty);
   }, [dirty, onDirtyChange]);
 
+  // Deliberately NOT reported from an effect (the way `dirty` is): an effect
+  // lands a render late, and for those couple of frames the host's dismiss
+  // affordances would still be live — the exact race this flag exists to close.
+  // Called inline from runAutoSave instead, so React batches the host's state
+  // update into the same commit as `setIsAutoSaving`.
+  const reportSaving = (saving: boolean) => {
+    setIsAutoSaving(saving);
+    onSavingChange?.(saving);
+  };
+
   const runAutoSave = () => {
     if (!autosave || !autoSaveOn || savingRef.current) return;
     const values = getValues();
     const signature = JSON.stringify(cleanValues(values));
     if (signature === baselineRef.current) return;
     savingRef.current = true;
-    setIsAutoSaving(true);
+    reportSaving(true);
     Promise.resolve(autosave(values))
       .then(() => {
         baselineRef.current = signature;
@@ -141,7 +159,7 @@ export function EntryForm({
       })
       .finally(() => {
         savingRef.current = false;
-        setIsAutoSaving(false);
+        reportSaving(false);
       });
   };
 
@@ -188,52 +206,73 @@ export function EntryForm({
   const autosaveActive = Boolean(autosave) && autoSaveOn;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {type.fields.map((f) => (
-        <FieldHighlight key={f.__name} highlighted={f.__name === focusField}>
-          <FieldControl
-            field={f}
-            control={control}
-            publishedValue={publishedValues ? publishedValues[f.__name] : undefined}
-            hasPublished={publishedValues !== undefined}
-          />
-        </FieldHighlight>
-      ))}
-      <div className="space-y-2 border-t border-neutral-100 pt-3">
-        {/* One flat, wrap-safe row of uniform buttons so state-conditional actions
-            (Discard/Unpublish) can appear without reshuffling the layout. The manual
-            "Save draft" is redundant while autosave is armed, so it's hidden then. */}
-        <div className="flex flex-wrap items-center gap-2">
-          {!autosaveActive && (
-            <Button type="submit" variant="primary">
-              {submitLabel}
-            </Button>
-          )}
-          {footer}
-        </div>
-        {autosave && (
-          <div className="flex min-h-5 items-center justify-between gap-2">
-            <label className="inline-flex cursor-pointer items-center gap-2">
-              <input
-                type="checkbox"
-                checked={autoSaveOn}
-                onChange={(e) => setAutoSaveOn(e.target.checked)}
-                className="h-4 w-4"
-              />
-              <span className="text-sm text-neutral-500">Auto-save changes</span>
-            </label>
-            {autoSaveOn && (isAutoSaving || secondsLeft !== null || savedFlash) ? (
-              <span className="text-xs text-neutral-400" aria-live="polite">
-                {isAutoSaving
-                  ? 'Auto-saving…'
-                  : secondsLeft !== null
-                    ? `Auto-saving in ${secondsLeft.toFixed(1)}s`
-                    : 'Saved ✓'}
-              </span>
-            ) : null}
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/*
+        Everything editable lives inside one disabled-while-saving fieldset.
+        Native `disabled` cascades to every nested input, select, textarea and
+        button — including the `footer` actions (Publish / Unpublish / Discard /
+        Delete render here, not in the editor's own chrome) and every drag
+        handle, reference picker and asset uploader. That is ~40 controls made
+        inert by one attribute, and unlike a CSS `pointer-events: none` it also
+        blocks keyboard activation and is announced to assistive tech.
+
+        `space-y-4` moves off the <form> onto this element because Tailwind's
+        `space-y-*` selects DOM children — leaving it on the form would only
+        ever see the fieldset. `min-w-0` defeats a fieldset's default
+        `min-inline-size: min-content`, which otherwise stops long field values
+        from shrinking inside the drawer.
+      */}
+      <fieldset
+        disabled={isAutoSaving}
+        aria-busy={isAutoSaving}
+        className="min-w-0 space-y-4"
+      >
+        {type.fields.map((f) => (
+          <FieldHighlight key={f.__name} highlighted={f.__name === focusField}>
+            <FieldControl
+              field={f}
+              control={control}
+              publishedValue={publishedValues ? publishedValues[f.__name] : undefined}
+              hasPublished={publishedValues !== undefined}
+            />
+          </FieldHighlight>
+        ))}
+        <div className="space-y-2 border-t border-neutral-100 pt-3">
+          {/* One flat, wrap-safe row of uniform buttons so state-conditional actions
+              (Discard/Unpublish) can appear without reshuffling the layout. The manual
+              "Save draft" is redundant while autosave is armed, so it's hidden then. */}
+          <div className="flex flex-wrap items-center gap-2">
+            {!autosaveActive && (
+              <Button type="submit" variant="primary">
+                {submitLabel}
+              </Button>
+            )}
+            {footer}
           </div>
-        )}
-      </div>
+          {autosave && (
+            <div className="flex min-h-5 items-center justify-between gap-2">
+              <label className="inline-flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={autoSaveOn}
+                  onChange={(e) => setAutoSaveOn(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                <span className="text-sm text-neutral-500">Auto-save changes</span>
+              </label>
+              {autoSaveOn && (isAutoSaving || secondsLeft !== null || savedFlash) ? (
+                <span className="text-xs text-neutral-400" aria-live="polite">
+                  {isAutoSaving
+                    ? 'Auto-saving…'
+                    : secondsLeft !== null
+                      ? `Auto-saving in ${secondsLeft.toFixed(1)}s`
+                      : 'Saved ✓'}
+                </span>
+              ) : null}
+            </div>
+          )}
+        </div>
+      </fieldset>
     </form>
   );
 }

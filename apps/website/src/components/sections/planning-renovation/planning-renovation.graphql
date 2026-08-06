@@ -1,5 +1,6 @@
 fragment PlanningRenovationSection on PlanningRenovationSection {
   id
+  type
   overline
   title
   description

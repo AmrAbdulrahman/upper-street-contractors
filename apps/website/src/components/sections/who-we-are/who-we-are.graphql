@@ -1,5 +1,6 @@
 fragment WhoWeAreSection on WhoWeAreSection {
   id
+  type
   overline
   title
   body

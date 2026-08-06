@@ -1,5 +1,6 @@
 fragment WizardSection on Wizard {
   id
+  type
   submitLabel
   whatsappNumber
   doneTitle
@@ -63,4 +64,8 @@ fragment FormField on FormField {
   required
   dependsOnFieldKey
   dependsOnValue
+  maxDates
+  earliestOffsetDays
+  horizonMonths
+  allowWeekends
 }

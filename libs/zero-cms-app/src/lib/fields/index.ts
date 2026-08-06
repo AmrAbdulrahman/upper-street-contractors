@@ -9,3 +9,4 @@ export { EntryForm, type EntryFormProps } from './entry-form';
 export { fieldRegistry, FieldControl } from './registry';
 export type { FormValues, RendererProps } from './registry';
 export { entryLabel, titleField } from './entry-label';
+export { useEntryOptions } from './entry-options';

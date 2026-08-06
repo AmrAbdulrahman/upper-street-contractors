@@ -90,6 +90,7 @@ function AddReferenceControl({
   max,
   onLink,
   onCreate,
+  onPick,
 }: {
   available: RefOption[];
   createTypes: { type: string; label: string }[];
@@ -98,6 +99,8 @@ function AddReferenceControl({
   max?: number;
   onLink: (id: string) => void;
   onCreate: (type: string) => void;
+  /** Host Type picker; when present it replaces this whole panel. */
+  onPick?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -105,6 +108,15 @@ function AddReferenceControl({
   const filtered = q ? available.filter((o) => o.label.toLowerCase().includes(q)) : available;
 
   if (atMax) return <p className="text-sm text-neutral-500">Maximum of {max} reached.</p>;
+
+  // The picker already does search + create + reuse, with glyphs and
+  // descriptions — everything below is its no-host fallback.
+  if (onPick)
+    return (
+      <Button variant="primary" onClick={onPick}>
+        + Add…
+      </Button>
+    );
 
   return (
     <div className="space-y-2">
@@ -140,7 +152,7 @@ function AddReferenceControl({
             </>
           )}
           {canCreate &&
-            createTypes.map((c) => (
+            createTypes.slice(0, 4).map((c) => (
               <Button
                 key={c.type}
                 onClick={() => onCreate(c.type)}
@@ -149,6 +161,11 @@ function AddReferenceControl({
                 ＋ Add new {c.label}
               </Button>
             ))}
+          {canCreate && createTypes.length > 4 && (
+            <p className="px-1 text-xs text-neutral-500">
+              +{createTypes.length - 4} more types — open this entry in the CMS to add them.
+            </p>
+          )}
           {available.length === 0 && !canCreate && (
             <p className="px-1 py-1 text-sm text-neutral-400">No entries to add.</p>
           )}
@@ -198,6 +215,26 @@ export const ReferencesRenderer: ComponentType<RendererProps> = ({ field, contro
             }
           : undefined;
 
+        /**
+         * Single "+ Add…": ask the host's Type picker what to add, then either
+         * link the chosen existing entry or run the create-on-save path. Needs
+         * `createReference` too — a picker that can only offer reuse would be a
+         * worse control than the buttons it replaces.
+         */
+        const pickOne =
+          actions?.pickReference && createNew && allowed.length
+            ? async () => {
+                const picked = await actions.pickReference!({
+                  allowedTypes: allowed,
+                  fieldLabel: field.label ?? field.__name,
+                });
+                if (!picked) return;
+                if (picked.kind === 'create') return void createNew(picked.type);
+                if (!selected.includes(picked.id) && selected.length < (max ?? Infinity))
+                  f.onChange([...selected, picked.id]);
+              }
+            : undefined;
+
         if (visual)
           return (
             <MultiReferencePicker
@@ -206,6 +243,7 @@ export const ReferencesRenderer: ComponentType<RendererProps> = ({ field, contro
               options={options}
               onOpen={openOne}
               onCreate={createNew}
+              onPick={pickOne}
               createTypes={createTypes}
               atMax={atMax}
               canRemove={canRemove}
@@ -249,6 +287,7 @@ export const ReferencesRenderer: ComponentType<RendererProps> = ({ field, contro
               max={max}
               onLink={(id) => f.onChange([...selected, id])}
               onCreate={(t) => void createNew?.(t)}
+              onPick={pickOne}
             />
           </div>
         );

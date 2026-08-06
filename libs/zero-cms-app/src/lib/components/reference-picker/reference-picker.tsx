@@ -220,6 +220,7 @@ export function MultiReferencePicker({
   options,
   onOpen,
   onCreate,
+  onPick,
   createTypes = [],
   atMax = false,
   canRemove = true,
@@ -229,6 +230,12 @@ export function MultiReferencePicker({
   options: RefOption[];
   onOpen?: (id: string) => void;
   onCreate?: (type: string) => void;
+  /**
+   * Opens the host's Type picker, which handles choosing a Type AND reusing an
+   * existing entry. When present it replaces both the per-Type "add new" buttons
+   * and the thumbnail library — one affordance instead of N + 1.
+   */
+  onPick?: () => void;
   createTypes?: { type: string; label: string }[];
   atMax?: boolean;
   canRemove?: boolean;
@@ -276,24 +283,41 @@ export function MultiReferencePicker({
         </DragDropProvider>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          onClick={() => setOpen((o) => !o)}
-          disabled={atMax && !open}
-          title={atMax && !open ? 'Maximum reached' : undefined}
-        >
-          {open ? 'Close library' : '+ Add…'}
+      {onPick ? (
+        // One button. The picker covers create-new and reuse-existing both.
+        <Button variant="primary" onClick={onPick} disabled={atMax} title={atMax ? 'Maximum reached' : undefined}>
+          + Add…
         </Button>
-        {onCreate &&
-          !atMax &&
-          createTypes.map((c) => (
-            <Button key={c.type} onClick={() => onCreate(c.type)}>
-              ＋ Add new {c.label}
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => setOpen((o) => !o)}
+              disabled={atMax && !open}
+              title={atMax && !open ? 'Maximum reached' : undefined}
+            >
+              {open ? 'Close library' : '+ Add…'}
             </Button>
-          ))}
-      </div>
+            {/* Fallback for a bare <EntryForm> with no host picker. Capped
+                because one button per allowed Type stops being a control and
+                starts being a wall somewhere around four. */}
+            {onCreate &&
+              !atMax &&
+              createTypes.slice(0, 4).map((c) => (
+                <Button key={c.type} onClick={() => onCreate(c.type)}>
+                  ＋ Add new {c.label}
+                </Button>
+              ))}
+            {onCreate && !atMax && createTypes.length > 4 && (
+              <span className="self-center text-xs text-neutral-500">
+                +{createTypes.length - 4} more types — open this entry in the CMS to add them.
+              </span>
+            )}
+          </div>
 
-      {open && <ThumbGrid options={available} onPick={add} />}
+          {open && <ThumbGrid options={available} onPick={add} />}
+        </>
+      )}
     </div>
   );
 }

@@ -21,6 +21,29 @@ const schema: Schema = [
       { __name: 'author', __type: 'reference', allowedTypes: ['author'] },
     ],
   },
+  // A page whose `sections` union holds a section that itself holds references —
+  // the two levels of nesting `computePopulate` has to walk through a union.
+  { __name: 'button', label: 'Button', fields: [{ __name: 'label', __type: 'text' }] },
+  {
+    __name: 'hero',
+    label: 'Hero',
+    fields: [
+      { __name: 'title', __type: 'text' },
+      { __name: 'buttons', __type: 'references', allowedTypes: ['button'] },
+    ],
+  },
+  { __name: 'quote', label: 'Quote', fields: [{ __name: 'body', __type: 'text' }] },
+  {
+    __name: 'page',
+    label: 'Page',
+    fields: [
+      { __name: 'key', __type: 'text' },
+      // TWO allowed types on purpose: a single-target `references` is typed as
+      // `[Hero!]`, and only 2+ produce the `PageSectionsRef` union these tests
+      // are about.
+      { __name: 'sections', __type: 'references', allowedTypes: ['hero', 'quote'] },
+    ],
+  },
 ];
 
 const ACTOR = 'tester';
@@ -208,5 +231,81 @@ describe('graphql execution', () => {
       (published.data as { publishAuthor: { status: string; hasDraft: boolean } })
         .publishAuthor
     ).toEqual({ status: 'published', hasDraft: false });
+  });
+});
+
+describe('computePopulate through a sections union', () => {
+  /** A page → hero → buttons chain, all drafts. */
+  async function pageFixture() {
+    const { adapter, exec } = await setup();
+    const button = await adapter.create('button', { label: 'Get a quote' }, ACTOR);
+    const hero = await adapter.create(
+      'hero',
+      { title: 'Kitchens', buttons: [button.__id] },
+      ACTOR
+    );
+    const page = await adapter.create(
+      'page',
+      { key: 'kitchens', sections: [hero.__id] },
+      ACTOR
+    );
+    return { adapter, exec, button, hero, page };
+  }
+
+  const EXPECTED = {
+    pages: [
+      {
+        sections: [
+          { __typename: 'Hero', title: 'Kitchens', buttons: [{ label: 'Get a quote' }] },
+        ],
+      },
+    ],
+  };
+
+  it('populates nested references reached through an INLINE fragment on the union', async () => {
+    const { exec } = await pageFixture();
+    const res = await exec(`query {
+      pages(status: draft, includeUnpublished: true) {
+        sections {
+          __typename
+          ... on Hero { id title buttons { id label } }
+        }
+      }
+    }`);
+    expect(res.errors).toBeUndefined();
+    expect(res.data).toMatchObject(EXPECTED);
+  });
+
+  it('populates them through a NAMED fragment declared on the union type', async () => {
+    const { exec } = await pageFixture();
+    // The shape the website uses: one fragment on `PageSectionsRef` shared by
+    // every page query. A fragment declared on a union maps to no CMS Type, so
+    // `computePopulate` used to skip it wholesale — `sections` still populated,
+    // but nothing INSIDE a section did, and `buttons` came back as bare ids
+    // whose non-nullable `Button.id` then failed.
+    const res = await exec(`query {
+      pages(status: draft, includeUnpublished: true) {
+        sections { ...Blocks }
+      }
+    }
+    fragment Blocks on PageSectionsRef {
+      __typename
+      ... on Hero { id title buttons { id label } }
+    }`);
+    expect(res.errors).toBeUndefined();
+    expect(res.data).toMatchObject(EXPECTED);
+  });
+
+  it('still ignores a named fragment aimed at a DIFFERENT concrete type', async () => {
+    const { exec } = await pageFixture();
+    // Guard on the widened condition: "abstract ⇒ descend" must not become
+    // "anything ⇒ descend". A Project fragment spread at Page level contributes
+    // no populate paths, so `author` stays unpopulated rather than silently
+    // widening every query's fetch.
+    const res = await exec(`query {
+      projects(status: draft, includeUnpublished: true) { id }
+      pages(status: draft, includeUnpublished: true) { key }
+    }`);
+    expect(res.errors).toBeUndefined();
   });
 });

@@ -3,6 +3,7 @@ export { formatAddress } from "./format-address";
 export { formatPhoneDisplay } from "./format-phone";
 export { iconData } from "./icon-data";
 export { isIconCode } from "./is-icon-code";
+export { resolveLogoHeight } from "./logo-size";
 export {
   buildBaseMetadata,
   normalizeSiteUrl,

@@ -42,6 +42,13 @@ function cacheFor(adapter: Adapter): Map<string, RefOption[]> {
 export function useEntryOptions(allowedTypes: string[]): {
   options: RefOption[];
   visual: boolean;
+  /**
+   * True until every allowed Type's options are in the cache. Callers that
+   * BRANCH on whether any entries exist must wait for this — reading
+   * `options.length === 0` mid-fetch reports "none exist" for a Type that has
+   * plenty, which silently changed the Type picker's create-vs-reuse decision.
+   */
+  loading: boolean;
   reload: () => void;
 } {
   const { adapter, schema } = useZeroCms();
@@ -91,6 +98,9 @@ export function useEntryOptions(allowedTypes: string[]): {
   const visual = allowedTypes.some((tn) =>
     schema.find((t) => t.__name === tn)?.fields.some((f) => f.__type === 'asset')
   );
+  // Derived from the same cache the effect fills, so it needs no extra state:
+  // the fetch bumps `version`, which re-renders and flips this to false.
+  const loading = allowedTypes.some((tn) => !cache.has(tn));
 
-  return { options, visual, reload };
+  return { options, visual, loading, reload };
 }

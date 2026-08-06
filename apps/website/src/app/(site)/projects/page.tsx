@@ -1,7 +1,7 @@
 import { cache } from "react";
 import type { Metadata } from "next";
 import { ProjectsView } from "@/components/sections/projects";
-import { PageSection, type PageSectionData } from "@/components/sections/page-section";
+import { PageSections } from "@/components/sections/page-sections";
 import { pageMetaToMetadata } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { GetPageDocument, GetProjectsDocument } from "@/generated/graphql";
@@ -37,7 +37,6 @@ export default async function ProjectsPage() {
     query(GetProjectsDocument),
   ]);
 
-  const sections = pageData.pages[0]?.sections ?? [];
   const projects =
     projectsData?.projects?.filter(
       (item): item is NonNullable<typeof item> => Boolean(item),
@@ -45,9 +44,7 @@ export default async function ProjectsPage() {
 
   return (
     <>
-      {sections.map((section, i) => (
-        <PageSection key={i} section={section as PageSectionData} />
-      ))}
+      <PageSections page={pageData.pages[0]} />
       <ProjectsView projects={projects} />
     </>
   );

@@ -9,7 +9,8 @@
 import { useState, type ReactElement } from 'react';
 import { useZeroCmsWidgetOptional } from '../context';
 import { useZeroCmsEntry } from './entry-context';
-import { mergeClassNames, wrapWithInspect } from './inspect-clone';
+import { useInspect } from './use-inspect';
+import { PencilIcon, mergeClassNames, wrapWithInspect } from './inspect-clone';
 
 export interface ZeroCmsEntryFieldProps {
   field: string;
@@ -27,8 +28,11 @@ export function ZeroCmsEntryField({
   const widget = useZeroCmsWidgetOptional();
   const ctx = useZeroCmsEntry();
   const [hovered, setHovered] = useState(false);
+  // Not `widget.inspect` — see `useInspect`. This wrapper can swap an <h1> for a
+  // <div> host, so hydrating a frame too early is a structural mismatch.
+  const inspect = useInspect();
 
-  if (!widget?.inspect || !ctx?.entryId || !field) return children;
+  if (!inspect || !widget || !ctx?.entryId || !field) return children;
   const { openEntry } = widget;
 
   const inspectClassName = mergeClassNames(
@@ -51,11 +55,17 @@ export function ZeroCmsEntryField({
     inspectClassName,
     hovered,
     setHovered,
-    onEdit: () =>
-      void openEntry(ctx.entryId, {
-        type: ctx.typeName ?? undefined,
-        focusField: field,
-      }),
-    editAriaLabel: `Edit ${field}`,
+    actions: [
+      {
+        key: 'edit',
+        label: `Edit ${field}`,
+        icon: <PencilIcon />,
+        onClick: () =>
+          void openEntry(ctx.entryId, {
+            type: ctx.typeName ?? undefined,
+            focusField: field,
+          }),
+      },
+    ],
   });
 }

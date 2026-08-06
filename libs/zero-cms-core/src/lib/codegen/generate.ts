@@ -19,6 +19,8 @@ function baseFieldType(field: Field): string {
     case 'text':
     case 'longtext':
     case 'richtext':
+    case 'slug':
+    case 'user':
     case 'asset':
     case 'date':
       return 'string';

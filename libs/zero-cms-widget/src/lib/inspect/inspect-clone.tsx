@@ -1,10 +1,15 @@
 'use client';
 
 /**
- * Inspect-mode hover host: wraps a single element, shows a floating "edit" pencil
- * on hover (portaled to body, kept alive while the pointer moves onto it), and
- * calls `onEdit` when clicked. Ported from the website's Strapi inspect layer,
- * decoupled and neutral-themed for the widget library.
+ * Inspect-mode hover host: wraps a single element and shows a floating cluster of
+ * action buttons on hover (portaled to body, kept alive while the pointer moves
+ * onto it). Ported from the website's Strapi inspect layer, decoupled and
+ * neutral-themed for the widget library.
+ *
+ * The cluster used to be a single hardcoded pencil. It takes an `actions` list
+ * now because a section inside the Section builder needs a drag handle and a
+ * remove button on the SAME anchor — a second floating overlay would fight the
+ * first for the same corner, and both would fight the hover-keepalive logic.
  */
 
 import {
@@ -31,12 +36,28 @@ export function mergeClassNames(
 export const editButtonClassName = [
   'flex h-8 w-8 cursor-pointer items-center justify-center rounded-md',
   'border border-white/20 bg-neutral-900/90 text-white shadow-md backdrop-blur-sm',
-  'transition-colors hover:bg-neutral-900 z-[90]',
+  'transition-colors hover:bg-neutral-900',
 ].join(' ');
 
 const EDIT_ATTR = 'data-zero-cms-inspect-edit';
 
-function PencilIcon() {
+/** One button in the floating cluster. */
+export interface InspectAction {
+  /** React key + a stable hook for tests. */
+  key: string;
+  /** `aria-label` and tooltip — the button is icon-only. */
+  label: string;
+  icon: ReactNode;
+  onClick?: () => void;
+  /** A drag handle's ref (e.g. dnd-kit's `handleRef`). */
+  ref?: Ref<HTMLButtonElement>;
+  /** Grab cursor + `touch-none`, for a drag handle rather than a click target. */
+  grab?: boolean;
+  /** Tints the button red — for destructive actions. */
+  danger?: boolean;
+}
+
+export function PencilIcon() {
   return (
     <svg
       className="h-4 w-4"
@@ -51,6 +72,35 @@ function PencilIcon() {
         strokeLinejoin="round"
         d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
       />
+    </svg>
+  );
+}
+
+export function TrashIcon() {
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+      />
+    </svg>
+  );
+}
+
+export function GrabIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      {[8, 12, 16].map((y) =>
+        [9, 15].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.5" />)
+      )}
     </svg>
   );
 }
@@ -102,15 +152,13 @@ function useClearHoverOnPointerExit(
   }, [hovered, hostNode, setHovered]);
 }
 
-function EditButton({
+function ActionCluster({
   anchor,
-  onEdit,
-  editAriaLabel,
+  actions,
   onDismiss,
 }: {
   anchor: HTMLElement;
-  onEdit: () => void;
-  editAriaLabel: string;
+  actions: InspectAction[];
   onDismiss: () => void;
 }) {
   const [style, setStyle] = useState<CSSProperties>({ visibility: 'hidden' });
@@ -121,8 +169,11 @@ function EditButton({
       setStyle({
         position: 'fixed',
         top: rect.top + 8,
-        left: rect.right - 40,
-        // Below the sticky app header (z-100) + bar (z-1000) so the pencil is
+        // Right-anchored rather than `left: rect.right - width`, so the cluster
+        // doesn't need to know its own width as buttons are added/removed.
+        // clientWidth (not innerWidth) so it never tucks under the scrollbar.
+        right: Math.max(8, document.documentElement.clientWidth - rect.right + 8),
+        // Below the sticky app header (z-100) + bar (z-1000) so the cluster is
         // clipped by the chrome instead of floating over it when content scrolls
         // under; still above ordinary page content.
         zIndex: 90,
@@ -139,10 +190,8 @@ function EditButton({
   }, [anchor]);
 
   return createPortal(
-    <button
-      type="button"
-      aria-label={editAriaLabel}
-      className={editButtonClassName}
+    <div
+      className="flex items-center gap-1"
       style={style}
       {...{ [EDIT_ATTR]: '' }}
       onPointerLeave={(event) => {
@@ -150,13 +199,31 @@ function EditButton({
         if (related instanceof Node && anchor.contains(related)) return;
         onDismiss();
       }}
-      onClick={(event) => {
-        event.stopPropagation();
-        onEdit();
-      }}
     >
-      <PencilIcon />
-    </button>,
+      {actions.map((a) => (
+        <button
+          key={a.key}
+          ref={a.ref}
+          type="button"
+          aria-label={a.label}
+          title={a.label}
+          className={mergeClassNames(
+            editButtonClassName,
+            a.grab && 'cursor-grab touch-none active:cursor-grabbing',
+            a.danger && 'hover:bg-red-600'
+          )}
+          onClick={
+            a.onClick &&
+            ((event) => {
+              event.stopPropagation();
+              a.onClick?.();
+            })
+          }
+        >
+          {a.icon}
+        </button>
+      ))}
+    </div>,
     document.body
   );
 }
@@ -165,8 +232,11 @@ export interface InspectHostShared {
   inspectClassName: string;
   hovered: boolean;
   setHovered: (hovered: boolean) => void;
-  onEdit: () => void;
-  editAriaLabel: string;
+  /**
+   * The floating buttons to show on hover, left-to-right. Callers build the
+   * whole list so a section can order them drag / edit / remove.
+   */
+  actions: InspectAction[];
 }
 
 /** Clones a single host element, attaching hover handlers + the floating button. */
@@ -175,8 +245,7 @@ function InspectClone({
   inspectClassName,
   hovered,
   setHovered,
-  onEdit,
-  editAriaLabel,
+  actions,
 }: InspectHostShared & { child: InspectableChild }) {
   const [hostNode, setHostNode] = useState<HTMLElement | null>(null);
   const { onPointerEnter, onPointerLeave } = child.props;
@@ -217,10 +286,9 @@ function InspectClone({
         className: mergeClassNames(child.props.className, inspectClassName),
       })}
       {hovered && hostNode ? (
-        <EditButton
+        <ActionCluster
           anchor={hostNode}
-          onEdit={onEdit}
-          editAriaLabel={editAriaLabel}
+          actions={actions}
           onDismiss={() => setHovered(false)}
         />
       ) : null}
@@ -235,8 +303,7 @@ export function InspectHost({
   inspectClassName,
   hovered,
   setHovered,
-  onEdit,
-  editAriaLabel,
+  actions,
   as: Tag = 'div',
 }: InspectHostShared & {
   children: ReactNode;
@@ -259,10 +326,9 @@ export function InspectHost({
         {children}
       </Tag>
       {hovered && hostNode ? (
-        <EditButton
+        <ActionCluster
           anchor={hostNode}
-          onEdit={onEdit}
-          editAriaLabel={editAriaLabel}
+          actions={actions}
           onDismiss={() => setHovered(false)}
         />
       ) : null}

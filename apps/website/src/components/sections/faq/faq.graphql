@@ -5,6 +5,7 @@ fragment FaqItem on FaqItem {
 }
 
 fragment FaqSection on Faq {
+  type
   id
   overline
   title

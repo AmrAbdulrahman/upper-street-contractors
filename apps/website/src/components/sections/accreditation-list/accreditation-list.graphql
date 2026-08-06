@@ -1,5 +1,7 @@
 fragment AccreditationList on AccreditationList {
   id
+  type
+  logoSize
   list {
     ...Accreditation
   }

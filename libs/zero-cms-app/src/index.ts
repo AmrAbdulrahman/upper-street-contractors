@@ -24,20 +24,31 @@ export {
   ReferenceActionsProvider,
   useReferenceActions,
   type ReferenceActions,
+  type PickReferenceOptions,
+  type TypePickResult,
 } from './lib/reference-actions';
 
 // Sub-views (compose your own shell) + field extensibility
-export { EntriesList, EntryEditor } from './lib/entries';
+export { EntriesList, EntryEditor, describeReferenceHits } from './lib/entries';
 export { TypeBuilder } from './lib/type-builder';
 export { MediaLibrary } from './lib/components/media';
+export {
+  TYPE_GLYPHS,
+  TYPE_GLYPH_KEYS,
+  GENERIC_GLYPH,
+  typeGlyph,
+  TypeGlyphSelect,
+} from './lib/components/type-glyphs';
 export {
   EntryForm,
   fieldRegistry,
   entryLabel,
   titleField,
+  useEntryOptions,
   type FormValues,
   type EntryFormProps,
 } from './lib/fields';
+export { type RefOption } from './lib/components/reference-picker';
 export { SECTIONS, type Section, type View } from './lib/nav';
 export {
   DraftRegistryProvider,

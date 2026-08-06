@@ -1,0 +1,17 @@
+fragment GallerySection on GallerySection {
+  id
+  type
+  title
+  columns
+  images {
+    id
+    type
+    caption
+    image {
+      url
+      alt
+      width
+      height
+    }
+  }
+}

@@ -26,6 +26,7 @@ import {
 } from '@usc/zero-cms-app';
 import { Drawer } from './Drawer';
 import { WidgetProvider, useWidgetInternal } from './context';
+import { TypePickerPanel } from './inspect/TypePickerPanel';
 
 export interface ZeroCmsWidgetProps {
   adapter?: Adapter;
@@ -127,6 +128,7 @@ function AuthedWidget({
       blocks={blocks}
       notify={notify}
       currentUserId={user?.__id}
+      listAuthors={client.listAuthors}
     >
       <WidgetProvider
         inspect={inspect}
@@ -152,7 +154,7 @@ function DrawerBody({
   token?: string | null;
   onAuthed?: (token: string) => void;
 }) {
-  const { stack, pop, close, pushEntry, pushCreate } = useWidgetInternal();
+  const { stack, pop, close, pushEntry, pushCreate, pushTypePicker } = useWidgetInternal();
   const { schema } = useZeroCms();
   const needsLogin = Boolean(client) && !token;
 
@@ -171,13 +173,32 @@ function DrawerBody({
     });
   }, []);
 
+  // Same shape as `dirtyKeys`, but for an autosave actually in flight. Unlike
+  // dirty (which asks for confirmation) this hard-freezes the panel's exits —
+  // the editor's own controls are already inert via its disabled fieldset, and
+  // this covers the two ways out that live outside it.
+  const [savingKeys, setSavingKeys] = useState<ReadonlySet<string>>(new Set());
+  const setSaving = useCallback((key: string, saving: boolean) => {
+    setSavingKeys((prev) => {
+      if (prev.has(key) === saving) return prev;
+      const next = new Set(prev);
+      if (saving) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }, []);
+
   const refActions = useMemo(
     () => ({
       openReference: (id: string, type?: string) =>
         void pushEntry(id, type ? { type } : undefined),
       createReference: pushCreate,
+      // Lets a relation field inside a drawer open the same Type picker an
+      // insert slot uses, instead of listing one "add new <Type>" button per
+      // allowed Type.
+      pickReference: pushTypePicker,
     }),
-    [pushEntry, pushCreate]
+    [pushEntry, pushCreate, pushTypePicker]
   );
 
   // Login gate: a single base drawer shown whenever the stack is open but unauthed.
@@ -197,8 +218,10 @@ function DrawerBody({
         // Closing a create panel settles its resolver as cancelled (no orphan);
         // an edit panel has no resolver, so this just pops.
         const settleClose = () => {
+          if (savingKeys.has(t.key)) return;
           if (dirtyKeys.has(t.key) && !window.confirm('Discard unsaved changes?')) return;
           t.onResult?.(null);
+          t.onPick?.(null);
           pop();
         };
         return (
@@ -207,9 +230,27 @@ function DrawerBody({
             open
             depth={i}
             isTop={isTop}
+            busy={savingKeys.has(t.key)}
             onClose={settleClose}
-            label={t.mode === 'create' ? 'Add entry' : 'Edit entry'}
+            label={
+              t.mode === 'pick-type'
+                ? 'Add section'
+                : t.mode === 'create'
+                  ? 'Add entry'
+                  : 'Edit entry'
+            }
           >
+            {/* The picker pops itself the moment it resolves — `openCreate`
+                then pushes the create panel, so the two never stack. */}
+            {t.mode === 'pick-type' && t.pick && (
+              <TypePickerPanel
+                pick={t.pick}
+                onPick={(result) => {
+                  t.onPick?.(result);
+                  pop();
+                }}
+              />
+            )}
             {t.loading && (
               <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
             )}
@@ -228,6 +269,7 @@ function DrawerBody({
                 onClose={settleClose}
                 onChanged={() => onSaved?.()}
                 onDirtyChange={(dirty) => setDirty(t.key, dirty)}
+                onSavingChange={(saving) => setSaving(t.key, saving)}
                 onCreated={
                   t.mode === 'create'
                     ? (id) => {

@@ -4,6 +4,10 @@
  * <ZeroCmsEntry> — wrap a rendered CMS entry. In inspect mode, hovering shows an
  * edit pencil that opens the entry in the widget drawer. Must be used inside
  * <ZeroCmsWidget>.
+ *
+ * When the entry is also a slot in a <ZeroCmsSectionList>, the same hover cluster
+ * grows a drag handle and a remove button (see `section-slot-context`) — one
+ * overlay per entry, never two competing for the same corner.
  */
 
 import { useState, type ReactNode } from 'react';
@@ -13,7 +17,15 @@ import {
   useZeroCmsEntry,
   type ZeroCmsEntryRef,
 } from './entry-context';
-import { mergeClassNames, wrapWithInspect } from './inspect-clone';
+import {
+  PencilIcon,
+  TrashIcon,
+  mergeClassNames,
+  wrapWithInspect,
+  type InspectAction,
+} from './inspect-clone';
+import { useSectionSlot } from './section-slot-context';
+import { useInspect } from './use-inspect';
 
 export interface ZeroCmsEntryProps {
   entry: ZeroCmsEntryRef;
@@ -43,10 +55,14 @@ function EntryInspect({
 }) {
   const widget = useZeroCmsWidgetOptional();
   const ctx = useZeroCmsEntry();
+  const slot = useSectionSlot();
   const [hovered, setHovered] = useState(false);
+  // Not `widget.inspect` — see `useInspect`. The outline classes this adds to the
+  // cloned host are a hydration mismatch if they land a frame too early.
+  const inspect = useInspect();
 
   const entryId = ctx?.entryId ?? '';
-  if (!widget?.inspect || !entryId) return <>{children}</>;
+  if (!inspect || !widget || !entryId) return <>{children}</>;
   const { openEntry } = widget;
 
   const inspectClassName = mergeClassNames(
@@ -54,14 +70,28 @@ function EntryInspect({
     hovered ? 'outline-blue-500' : 'outline-transparent'
   );
 
-  return wrapWithInspect({
-    children,
-    className,
-    as,
-    inspectClassName,
-    hovered,
-    setHovered,
-    onEdit: () => void openEntry(entryId, { type: ctx?.typeName ?? undefined }),
-    editAriaLabel: 'Edit entry',
-  });
+  // Edit, then remove when this entry is a Section builder slot. The drag handle
+  // is NOT here — see section-slot-context for why it belongs to the slot.
+  const where = slot ? ` (${slot.noun} ${slot.index + 1} of ${slot.count})` : '';
+  const actions: InspectAction[] = [
+    {
+      key: 'edit',
+      label: `Edit entry${where}`,
+      icon: <PencilIcon />,
+      onClick: () => void openEntry(entryId, { type: ctx?.typeName ?? undefined }),
+    },
+    ...(slot
+      ? [
+          {
+            key: 'remove',
+            label: `Remove ${slot.noun} ${slot.index + 1} of ${slot.count}`,
+            icon: <TrashIcon />,
+            onClick: slot.onRemove,
+            danger: true,
+          } satisfies InspectAction,
+        ]
+      : []),
+  ];
+
+  return wrapWithInspect({ children, className, as, inspectClassName, hovered, setHovered, actions });
 }

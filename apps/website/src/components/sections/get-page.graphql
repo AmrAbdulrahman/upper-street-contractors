@@ -6,67 +6,14 @@ query GetPage($key: String!, $status: CmsReadStatus = published, $includeUnpubli
     includeUnpublished: $includeUnpublished
   ) {
     id
+    type
     title
     description
     meta {
       ...PageMetadata
     }
     sections {
-      __typename
-      ... on PageHero {
-        ...PageHeroSection
-      }
-      ... on Wizard {
-        ...WizardSection
-      }
-      ... on ContactDetails {
-        ...ContactDetailsSection
-      }
-      ... on HomeHeaderSection {
-        ...HomeHeroSection
-      }
-      ... on WhoWeAreSection {
-        ...WhoWeAreSection
-      }
-      ... on AccreditationList {
-        ...AccreditationList
-      }
-      ... on WhatWeDoSection {
-        ...WhatWeDoSection
-      }
-      ... on WhyChooseUsSection {
-        ...WhyChooseUsSection
-      }
-      ... on HowItWorksSection {
-        ...HowItWorksSection
-      }
-      ... on RecentWorkSection {
-        ...RecentWorkSection
-      }
-      ... on ClientReviewSection {
-        ...ClientReviewSection
-      }
-      ... on PlanningRenovationSection {
-        ...PlanningRenovationSection
-      }
-      ... on ServiceOfferSection {
-        ...ServiceOfferSection
-      }
-      ... on CaseStudiesSection {
-        ...CaseStudiesSection
-      }
-      ... on SplitSection {
-        ...SplitSection
-      }
-      ... on ProseSection {
-        ...ProseSection
-      }
-      ... on GoogleReviews {
-        ...GoogleReviews
-      }
-      ... on Faq {
-        ...FaqSection
-      }
+      ...PageSectionBlocks
     }
   }
 }

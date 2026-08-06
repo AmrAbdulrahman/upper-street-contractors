@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { pageMetaToMetadata } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
-import { PageSection, type PageSectionData } from "@/components/sections/page-section";
+import { PageSections } from "@/components/sections/page-sections";
 
 import { cache } from "react";
 import { GetHomePageDocument } from "@/generated/graphql";
@@ -35,13 +35,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const data = await getHomePage();
-  const sections = data.pages[0]?.sections ?? [];
 
-  return (
-    <>
-      {sections.map((section, i) => (
-        <PageSection key={i} section={section as PageSectionData} />
-      ))}
-    </>
-  );
+  return <PageSections page={data.pages[0]} />;
 }

@@ -160,7 +160,24 @@ export class Engine {
           continue;
         }
         if (e.__status === 'published' && e.values) {
-          const issues = validateValues(nextIndex.get(e.__type), e.values, false);
+          // Validate what a READER would see, i.e. the values projected through
+          // the *next* schema — not the raw stored bag.
+          //
+          // ADR 0011 is explicit that "a stored key the Type no longer defines
+          // gets dropped" at read time, so a leftover key is never surfaced and
+          // cannot invalidate anything. Validating the raw bag instead reported
+          // every such key as 'Unknown field', which made removing a field from
+          // any Type with published entries **impossible** — and permanently so,
+          // because `require()` hands `publish` the projected bags, so every
+          // publish re-materialises every declared field (as `null` when unset)
+          // straight back into storage. There was no order of operations that
+          // could clear the key first.
+          //
+          // The checks that matter are untouched: a stored string under a field
+          // that just became `number`, or an option no longer in a `lookup`, is
+          // still projected and still fails here.
+          const type = nextIndex.get(e.__type);
+          const issues = validateValues(type, applySchemaDefaults(type, e.values), false);
           if (issues.length) offenders.push({ id: e.__id, type: e.__type, issues });
         }
       }
@@ -533,8 +550,21 @@ export class Engine {
 }
 
 /** The content that determines whether a Type "changed", excluding its stamps. */
-function withoutStamps(t: Type): Pick<Type, '__name' | 'label' | 'fields'> {
-  return { __name: t.__name, label: t.label, fields: t.fields };
+/**
+ * Every Type key except the stamps. An ALLOWLIST, not an omit — so any new
+ * Type-level meta must be added here or `saveSchema` silently drops it (and
+ * never bumps `__updatedAt` for it either, since the diff below can't see it).
+ */
+function withoutStamps(
+  t: Type
+): Pick<Type, '__name' | 'label' | 'description' | 'thumbnail' | 'fields'> {
+  return {
+    __name: t.__name,
+    label: t.label,
+    description: t.description,
+    thumbnail: t.thumbnail,
+    fields: t.fields,
+  };
 }
 
 /**

@@ -1,5 +1,6 @@
 fragment ProseSection on ProseSection {
   id
+  type
   overline
   body
 }

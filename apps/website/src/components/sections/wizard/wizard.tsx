@@ -1,58 +1,46 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { DayPicker } from "@daypicker/react";
 import "@daypicker/react/style.css";
 import { ZeroCmsEntry } from "@usc/zero-cms-widget";
 import { CmsImage } from "@/components/ui/cms-image";
 import { ContactDetailsPanel } from "../contact-details";
 import type { WizardSectionFragment } from "@/generated/graphql";
+import { AvailabilityField } from "./availability-field";
+import {
+  DAYPICKER_THEME,
+  TIME_WINDOWS,
+  formatAvailability,
+  formatDateLong,
+  fromISODate,
+  isAvailabilityComplete,
+  toISODate,
+  type AvailabilityEntry,
+} from "./helpers";
 import {
   ENQUIRY_FILE_ACCEPT as FILE_ACCEPT,
-  ENQUIRY_FILE_TYPE_ERROR,
-  isAllowedEnquiryFile,
+  ENQUIRY_MAX_FILES,
+  ENQUIRY_MAX_TOTAL_BYTES,
+  enquiryFileCapsText,
+  formatBytes,
+  planEnquiryDelivery,
+  validateEnquiryFiles,
+  type HostedAttachment,
 } from "@/helpers/enquiry-files";
 
 type WizardQuestion = NonNullable<WizardSectionFragment["questions"]>[number];
 type WizardSectionProps = { data: WizardSectionFragment };
 
-const MAX_FILES = 5;
-const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10 MB
+/**
+ * Identity for an Attachment across picks. The native input hands us a fresh
+ * File object every time, so this triple is what lets a second pick append
+ * without re-adding something already in the list.
+ */
+const fileKey = (f: File) => `${f.name}:${f.size}:${f.lastModified}`;
 
-// Fixed booking slots for the `timeWindow` field (multi-select). En-dash by design.
-const TIME_WINDOWS = ["9am–1pm", "1pm–4pm", "4pm–8pm"] as const;
-
-// Store a picked date as local YYYY-MM-DD (no UTC shift from toISOString()).
-const toISODate = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-
-// Parse a stored YYYY-MM-DD back to a local Date for the controlled picker.
-const fromISODate = (s: string): Date | undefined => {
-  const [y, m, d] = s.split("-").map(Number);
-  return y && m && d ? new Date(y, m - 1, d) : undefined;
-};
-
-// Human-readable date for the confirmation line + the emailed enquiry.
-const formatDateLong = (s: string): string => {
-  const d = fromISODate(s);
-  return d
-    ? d.toLocaleDateString("en-GB", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-    : s;
-};
-
-// Gold-tinted theme for the DayPicker calendar (CSS vars inherit into .rdp-root).
-const DAYPICKER_THEME = {
-  "--rdp-accent-color": "var(--color-gold)",
-  "--rdp-accent-background-color": "color-mix(in srgb, var(--color-gold) 14%, white)",
-  "--rdp-today-color": "var(--color-gold-deep)",
-} as CSSProperties;
+/** Files above this go up in parallel parts, with per-part retry — worth it for video. */
+const MULTIPART_THRESHOLD_BYTES = 5 * 1024 * 1024;
 
 // Postcode lookup (postcodes.io): matched by CMS fieldKey convention.
 const POSTCODE_RE = /^post.?code$/i;
@@ -81,6 +69,9 @@ type CollectedAnswers = {
   senderName: string;
 };
 
+/** 0-100 upload progress per hosted attachment, keyed by `fileKey`. */
+type UploadProgress = Record<string, number>;
+
 export function WizardSection({ data }: WizardSectionProps) {
   const questions = (data.questions ?? []).filter(Boolean) as WizardQuestion[];
   const [step, setStep] = useState(0);
@@ -92,6 +83,14 @@ export function WizardSection({ data }: WizardSectionProps) {
   const [optionText, setOptionText] = useState<Record<string, string>>({});
   const [formAnswers, setFormAnswers] = useState<Record<string, string>>({});
   const [fileAnswers, setFileAnswers] = useState<Record<string, File[]>>({});
+  // Availability answers can't live in `formAnswers` (strings only), same as files.
+  const [availabilityAnswers, setAvailabilityAnswers] = useState<
+    Record<string, AvailabilityEntry[]>
+  >({});
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
+  // Honeypot. Both /api/enquiry and the upload-token route have always checked
+  // `company_website`, but nothing ever rendered it — so the check was dead.
+  const [honeypot, setHoneypot] = useState("");
   const [pcStatus, setPcStatus] = useState<Record<string, PostcodeStatus>>({});
   const [pcSuggestions, setPcSuggestions] = useState<Record<string, string[]>>({});
   const [pcOpen, setPcOpen] = useState<Record<string, boolean>>({});
@@ -247,27 +246,65 @@ export function WizardSection({ data }: WizardSectionProps) {
     void lookupPostcode(questionId, pc);
   };
 
+  /**
+   * Every Attachment in the enquiry, in the order the questions ask for them.
+   * The caps and the inline/hosted split are properties of the whole enquiry,
+   * not of one field, so both are computed over this — and it has to be the
+   * same traversal `collectAnswers` uses, or the destination shown against a
+   * row would not be the one the submit actually picks.
+   */
+  const orderedAttachments = (): File[] => {
+    const out: File[] = [];
+    for (const q of questions) {
+      if (q.__typename !== "FormQuestion") continue;
+      for (const f of q.fields ?? []) {
+        if (!f?.fieldKey || f.inputType !== "file") continue;
+        if (!isFieldVisible(q.id, f)) continue;
+        out.push(...(fileAnswers[`${q.id}:${f.fieldKey}`] ?? []));
+      }
+    }
+    return out;
+  };
+
+  /**
+   * Adds a pick to the field's existing Attachments rather than replacing them,
+   * so a visitor can upload a PDF, then come back and add a video and a photo.
+   * Native `<input type=file>` replaces its own FileList on every pick, so the
+   * accumulated set has to live in React state.
+   *
+   * Caps are checked against the MERGED set — per-pick checks would let three
+   * picks of 100 MB each through.
+   */
   const handleFiles = (key: string, list: FileList | null) => {
-    const files = list ? Array.from(list) : [];
-    if (files.length > MAX_FILES) {
-      setError(`Please attach at most ${MAX_FILES} files.`);
+    const picked = list ? Array.from(list) : [];
+    if (!picked.length) return;
+
+    const existing = fileAnswers[key] ?? [];
+    const seen = new Set(existing.map(fileKey));
+    const added = picked.filter((f) => f.size > 0 && !seen.has(fileKey(f)));
+    if (!added.length) {
+      setError("Those files are already attached.");
       return;
     }
-    // The `accept` attr is only a picker hint — enforce the type contract here.
-    const rejected = files.filter((f) => !isAllowedEnquiryFile(f));
-    if (rejected.length) {
-      setError(
-        `${ENQUIRY_FILE_TYPE_ERROR} Remove: ${rejected.map((f) => f.name).join(", ")}`,
-      );
+
+    const problem = validateEnquiryFiles([...orderedAttachments(), ...added]);
+    if (problem) {
+      // Keep what was already accepted — the previous version bailed out here
+      // and left the visible list disagreeing with the input's own selection.
+      setError(problem);
       return;
     }
-    const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-    if (totalBytes > MAX_TOTAL_BYTES) {
-      setError("Attachments must total under 10 MB.");
-      return;
-    }
+
     setError(null);
-    setFileAnswers((prev) => ({ ...prev, [key]: files }));
+    setFileAnswers((prev) => ({ ...prev, [key]: [...existing, ...added] }));
+  };
+
+  const removeFile = (key: string, file: File) => {
+    setError(null);
+    setFileAnswers((prev) => ({
+      ...prev,
+      [key]: (prev[key] ?? []).filter((f) => fileKey(f) !== fileKey(file)),
+    }));
   };
 
   const canProceed = (() => {
@@ -280,6 +317,8 @@ export function WizardSection({ data }: WizardSectionProps) {
       if (!f.required) return true;
       const key = `${current.id}:${f.fieldKey}`;
       if (f.inputType === "file") return (fileAnswers[key]?.length ?? 0) > 0;
+      if (f.inputType === "availability")
+        return isAvailabilityComplete(availabilityAnswers[key] ?? []);
       if (f.inputType === "boolean") return formAnswers[key] === "true";
       return (formAnswers[key] ?? "").trim().length > 0;
     });
@@ -327,6 +366,11 @@ export function WizardSection({ data }: WizardSectionProps) {
             }
             continue;
           }
+          if (f.inputType === "availability") {
+            const value = formatAvailability(availabilityAnswers[key] ?? []);
+            if (value) fields.push({ label: f.label || f.fieldKey, value });
+            continue;
+          }
           if (f.inputType === "boolean") {
             fields.push({ label: f.label || f.fieldKey, value: formAnswers[key] === "true" ? "Yes" : "No" });
             continue;
@@ -349,9 +393,40 @@ export function WizardSection({ data }: WizardSectionProps) {
     setError(null);
     try {
       const { fields, files, senderEmail, senderName } = collectAnswers();
+
+      // Split the Attachments: fill the email's inline budget first, then send
+      // whatever is left straight to Blob from here (ADR 0014). Uploading from
+      // the browser is what makes a 40 MB video possible at all — /api/enquiry
+      // could never receive it, Vercel caps a Function request body at ~4.5 MB.
+      const { inline, hosted } = planEnquiryDelivery(files);
+      const hostedLinks: HostedAttachment[] = [];
+      if (hosted.length) {
+        const { upload } = await import("@vercel/blob/client");
+        for (const file of hosted) {
+          const result = await upload(`enquiry/${file.name}`, file, {
+            access: "public",
+            handleUploadUrl: "/api/enquiry/upload-token",
+            clientPayload: JSON.stringify({ honeypot }),
+            contentType: file.type || "application/octet-stream",
+            multipart: file.size > MULTIPART_THRESHOLD_BYTES,
+            onUploadProgress: ({ percentage }) =>
+              setUploadProgress((p) => ({ ...p, [fileKey(file)]: percentage })),
+          });
+          hostedLinks.push({
+            name: file.name,
+            size: file.size,
+            url: result.url,
+          });
+        }
+      }
+
       const body = new FormData();
-      body.append("payload", JSON.stringify({ fields, senderEmail, senderName }));
-      files.forEach((file) => body.append("attachments", file, file.name));
+      body.append(
+        "payload",
+        JSON.stringify({ fields, senderEmail, senderName, hostedLinks }),
+      );
+      body.append("company_website", honeypot);
+      inline.forEach((file) => body.append("attachments", file, file.name));
 
       const res = await fetch("/api/enquiry", { method: "POST", body });
       if (!res.ok) {
@@ -566,6 +641,15 @@ export function WizardSection({ data }: WizardSectionProps) {
 
                         if (field!.inputType === "file") {
                           const files = fileAnswers[key] ?? [];
+                          // Counts and the inline/hosted split span the whole
+                          // enquiry, not this field. Recomputed on every change
+                          // because removing a file can promote a later one back
+                          // into the inline budget.
+                          const allFiles = orderedAttachments();
+                          const totalBytes = allFiles.reduce((s, f) => s + f.size, 0);
+                          const { inline } = planEnquiryDelivery(allFiles);
+                          const inlineKeys = new Set(inline.map(fileKey));
+                          const capsId = `${id}-caps`;
                           return (
                             <div key={field!.id} className="flex flex-col gap-1.5">
                               <label htmlFor={id}>{labelText}</label>
@@ -574,21 +658,91 @@ export function WizardSection({ data }: WizardSectionProps) {
                                 type="file"
                                 multiple
                                 accept={FILE_ACCEPT}
-                                onChange={(e) => handleFiles(key, e.target.files)}
+                                aria-describedby={capsId}
+                                onChange={(e) => {
+                                  handleFiles(key, e.target.files);
+                                  // Clear the native selection so picking the same
+                                  // file again still fires `change`, and so the
+                                  // control never contradicts our own list.
+                                  e.target.value = "";
+                                }}
                                 className="w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-border-light file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-dark outline-none focus:border-gold"
                               />
+
                               {files.length ? (
-                                <ul className="mt-1 flex flex-col gap-0.5 text-xs text-muted">
-                                  {files.map((f) => (
-                                    <li key={f.name}>📎 {f.name}</li>
-                                  ))}
+                                <ul className="mt-1 flex flex-col gap-1.5">
+                                  {files.map((f) => {
+                                    const k = fileKey(f);
+                                    const isInline = inlineKeys.has(k);
+                                    const pct = uploadProgress[k];
+                                    return (
+                                      <li
+                                        key={k}
+                                        className="flex items-center gap-2 rounded-lg border border-border-light bg-white px-3 py-2"
+                                      >
+                                        <span aria-hidden="true">📎</span>
+                                        <span className="min-w-0 flex-1">
+                                          <span className="block truncate text-sm text-dark">
+                                            {f.name}
+                                          </span>
+                                          <span className="block text-xs text-muted">
+                                            {formatBytes(f.size)}
+                                            {" · "}
+                                            {isInline
+                                              ? "attached to the email"
+                                              : "sent as a download link"}
+                                            {typeof pct === "number" && pct < 100
+                                              ? ` · uploading ${Math.round(pct)}%`
+                                              : ""}
+                                          </span>
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => removeFile(key, f)}
+                                          disabled={submitting}
+                                          aria-label={`Remove ${f.name}`}
+                                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-border-light hover:text-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:opacity-50"
+                                        >
+                                          <span aria-hidden="true">✕</span>
+                                        </button>
+                                      </li>
+                                    );
+                                  })}
                                 </ul>
-                              ) : (
-                                <span className="text-xs text-muted">
-                                  Up to {MAX_FILES} files, 10 MB total (images, PDF, Word).
-                                </span>
-                              )}
+                              ) : null}
+
+                              {/* Caps stay visible once files are picked — they used
+                                  to be replaced by the file list, which is exactly
+                                  when a visitor needs to know what is left. */}
+                              <span id={capsId} className="text-xs text-muted">
+                                {enquiryFileCapsText()}
+                                {allFiles.length ? (
+                                  <>
+                                    {" "}
+                                    <span className="text-dark">
+                                      {allFiles.length} of {ENQUIRY_MAX_FILES} files ·{" "}
+                                      {formatBytes(totalBytes)} of{" "}
+                                      {formatBytes(ENQUIRY_MAX_TOTAL_BYTES)} used.
+                                    </span>
+                                  </>
+                                ) : null}
+                              </span>
                             </div>
+                          );
+                        }
+
+                        if (field!.inputType === "availability") {
+                          return (
+                            <AvailabilityField
+                              key={field!.id}
+                              id={id}
+                              labelText={labelText}
+                              field={field!}
+                              value={availabilityAnswers[key] ?? []}
+                              onChange={(next) =>
+                                setAvailabilityAnswers((prev) => ({ ...prev, [key]: next }))
+                              }
+                            />
                           );
                         }
 
@@ -797,6 +951,20 @@ export function WizardSection({ data }: WizardSectionProps) {
                       })}
                   </div>
                 )}
+
+                {/* Honeypot — off-screen rather than display:none so bots that
+                    skip hidden inputs still fill it. Never announced, never
+                    tabbable, never labelled for a human. */}
+                <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+                  <input
+                    type="text"
+                    name="company_website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                  />
+                </div>
 
                 {error ? (
                   <p role="alert" className="mt-5 text-sm font-medium text-red-600">

@@ -15,6 +15,12 @@ export interface DrawerProps {
   depth?: number;
   /** Topmost panel? Only the top shows the scrim, grabs focus, and handles Esc. */
   isTop?: boolean;
+  /**
+   * Freeze every way out of this panel — the backdrop click and Esc. Set while
+   * the editor inside is writing, because dismissing then unmounts the form the
+   * in-flight response is meant to settle into.
+   */
+  busy?: boolean;
 }
 
 export function Drawer({
@@ -24,17 +30,18 @@ export function Drawer({
   children,
   depth = 0,
   isTop = true,
+  busy = false,
 }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open || !isTop) return;
+    if (!open || !isTop || busy) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, isTop, onClose]);
+  }, [open, isTop, busy, onClose]);
 
   // Focus on open + when isTop flips true (a child popped), so the parent
   // re-grabs focus. Deliberately NOT keyed on `onClose`: hosts pass inline
@@ -64,6 +71,7 @@ export function Drawer({
         <button
           aria-label="Close"
           tabIndex={-1}
+          disabled={busy}
           onClick={onClose}
           className="absolute inset-0 h-full w-full cursor-default bg-black/40"
         />

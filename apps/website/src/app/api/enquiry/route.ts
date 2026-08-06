@@ -8,15 +8,16 @@ import {
   type EnquiryField,
 } from "@/lib/email/templates";
 import {
-  ENQUIRY_FILE_TYPE_ERROR,
-  isAllowedEnquiryFile,
+  ENQUIRY_INLINE_BUDGET_BYTES,
+  formatBytes,
+  sanitizeHostedAttachments,
+  validateEnquiryFiles,
+  type HostedAttachment,
 } from "@/helpers/enquiry-files";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_FILES = 5;
-const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10 MB
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
@@ -42,6 +43,12 @@ type Payload = {
   fields?: EnquiryField[];
   senderEmail?: string;
   senderName?: string;
+  /**
+   * Attachments the browser uploaded straight to Vercel Blob because they did
+   * not fit the inline budget (ADR 0014). Untrusted — every URL is re-checked
+   * against our own Blob host before it reaches an email body.
+   */
+  hostedLinks?: unknown;
 };
 
 export async function POST(request: Request) {
@@ -77,26 +84,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Your enquiry looks empty." }, { status: 400 });
   }
 
+  // Any file type is accepted (see helpers/enquiry-files.ts) — the caps are the
+  // contract, and a direct POST is bounded by the same ones the wizard applies.
   const uploaded = form
     .getAll("attachments")
     .filter((v): v is File => v instanceof File && v.size > 0);
+  const hostedLinks: HostedAttachment[] = sanitizeHostedAttachments(
+    payload.hostedLinks,
+  );
 
-  if (uploaded.length > MAX_FILES) {
+  // Same caps the wizard applies, re-run over the whole set — a direct POST
+  // skips the client entirely. Hosted sizes are self-reported, so the real
+  // per-file bound for those is `maximumSizeInBytes` on the Blob upload token.
+  const capProblem = validateEnquiryFiles([
+    ...uploaded.map((f) => ({ name: f.name, size: f.size })),
+    ...hostedLinks,
+  ]);
+  if (capProblem) {
+    return NextResponse.json({ error: capProblem }, { status: 400 });
+  }
+  // Only the inline set rides this request, so it is the only thing bounded
+  // here — anything larger should already have gone to Blob.
+  if (uploaded.reduce((sum, f) => sum + f.size, 0) > ENQUIRY_INLINE_BUDGET_BYTES) {
     return NextResponse.json(
-      { error: `Please attach at most ${MAX_FILES} files.` },
+      {
+        error: `Emailed attachments must total under ${formatBytes(ENQUIRY_INLINE_BUDGET_BYTES)}. Larger files are uploaded separately.`,
+      },
       { status: 400 },
     );
-  }
-  if (uploaded.reduce((sum, f) => sum + f.size, 0) > MAX_TOTAL_BYTES) {
-    return NextResponse.json(
-      { error: "Attachments must total under 10 MB." },
-      { status: 400 },
-    );
-  }
-  // The wizard filters types client-side, but a direct POST bypasses it —
-  // enforce the same images/PDF/Word contract before anything is emailed.
-  if (uploaded.some((f) => !isAllowedEnquiryFile(f))) {
-    return NextResponse.json({ error: ENQUIRY_FILE_TYPE_ERROR }, { status: 400 });
   }
 
   const to = process.env.ENQUIRY_TO;
@@ -139,6 +154,7 @@ export async function POST(request: Request) {
     senderName,
     senderEmail,
     attachmentNames,
+    hostedLinks,
     logoCid: LOGO_ATTACHMENT?.cid,
   });
   try {
@@ -164,6 +180,7 @@ export async function POST(request: Request) {
       fields,
       senderName,
       attachmentNames,
+      hostedLinks,
       logoCid: LOGO_ATTACHMENT?.cid,
     });
     try {

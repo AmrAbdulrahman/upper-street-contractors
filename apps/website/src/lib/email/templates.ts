@@ -3,6 +3,8 @@
  * layout for broad email-client support; colours mirror the site tokens.
  */
 
+import { formatBytes, type HostedAttachment } from "@/helpers/enquiry-files";
+
 const SITE = "Upper Street Contractors";
 const BRAND = {
   dark: "#031021",
@@ -36,11 +38,39 @@ function rowsHtml(fields: EnquiryField[]): string {
     .join("");
 }
 
+/**
+ * Download links for the hosted attachments — the ones too large to ride the
+ * email as real MIME attachments (ADR 0014). `isBlobUrl` has already vetted
+ * every href server-side; `escapeHtml` here guards the attribute itself.
+ */
+function hostedLinksHtml(links: HostedAttachment[]): string {
+  if (!links.length) return "";
+
+  const items = links
+    .map(
+      (l) => `
+      <li style="margin:0 0 6px;">
+        <a href="${escapeHtml(l.url)}" style="color:${BRAND.gold};font-weight:600;text-decoration:underline;">${escapeHtml(l.name)}</a>
+        <span style="color:${BRAND.subtle};"> — ${escapeHtml(formatBytes(l.size))}</span>
+      </li>`,
+    )
+    .join("");
+
+  return `
+    <tr>
+      <td style="padding:0 30px 22px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${BRAND.muted};margin-bottom:8px;">Large files</div>
+        <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.6;color:${BRAND.dark};">${items}</ul>
+      </td>
+    </tr>`;
+}
+
 function layout(opts: {
   heading: string;
   intro: string;
   fields: EnquiryField[];
   note?: string;
+  hostedLinks?: HostedAttachment[];
   /** When set, the header shows the logo image (cid attachment) instead of text. */
   logoCid?: string;
 }): string {
@@ -71,6 +101,7 @@ function layout(opts: {
                 </table>
               </td>
             </tr>
+            ${hostedLinksHtml(opts.hostedLinks ?? [])}
             ${opts.note ? `<tr><td style="padding:0 30px 24px;font-size:13px;color:${BRAND.subtle};">${escapeHtml(opts.note)}</td></tr>` : ""}
             <tr>
               <td style="background:${BRAND.surface};padding:16px 30px;font-size:12px;color:${BRAND.subtle};text-align:center;">© ${SITE}</td>
@@ -88,6 +119,7 @@ export function renderEnquiryEmail(opts: {
   senderName: string;
   senderEmail: string;
   attachmentNames: string[];
+  hostedLinks?: HostedAttachment[];
   logoCid?: string;
 }): { subject: string; html: string } {
   const who = opts.senderName || opts.senderEmail || "a website visitor";
@@ -101,6 +133,7 @@ export function renderEnquiryEmail(opts: {
       intro: `You've received a new enquiry from ${who}. The details are below.`,
       fields: opts.fields,
       note,
+      hostedLinks: opts.hostedLinks,
       logoCid: opts.logoCid,
     }),
   };
@@ -110,6 +143,7 @@ export function renderConfirmationEmail(opts: {
   fields: EnquiryField[];
   senderName: string;
   attachmentNames: string[];
+  hostedLinks?: HostedAttachment[];
   logoCid?: string;
 }): { subject: string; html: string } {
   const note = opts.attachmentNames.length
@@ -122,6 +156,7 @@ export function renderConfirmationEmail(opts: {
       intro: `Hi${opts.senderName ? ` ${opts.senderName}` : ""}, thanks for getting in touch. Here's a copy of what you sent — we'll be in touch shortly.`,
       fields: opts.fields,
       note,
+      hostedLinks: opts.hostedLinks,
       logoCid: opts.logoCid,
     }),
   };

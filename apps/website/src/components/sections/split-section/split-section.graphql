@@ -1,5 +1,6 @@
 fragment SplitSection on SplitSection {
   id
+  type
   overline
   body
   imagePosition

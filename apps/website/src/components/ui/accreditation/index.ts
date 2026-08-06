@@ -1,1 +1,5 @@
-export { Accreditation, type AccreditationProps } from "./accreditation";
+export {
+  Accreditation,
+  ACCREDITATION_LOGO_HEIGHT,
+  type AccreditationProps,
+} from "./accreditation";

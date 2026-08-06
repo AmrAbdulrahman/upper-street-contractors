@@ -17,7 +17,7 @@ The banner section at the top of an interior page (Refurbishments, Kitchens, Bat
 _Avoid_: page header, banner, ProjectsHeroPlaceholder (the removed UI-only mock)
 
 **Enquiry Wizard**:
-A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / date / time-window / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which emails a branded HTML enquiry to the business and a confirmation copy to the sender (nodemailer over SMTP), then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
+A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / date / Availability / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which emails a branded HTML enquiry to the business and a confirmation copy to the sender (nodemailer over SMTP), then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
 _Avoid_: form, survey, quiz, multi-step form
 
 **Conditional field**:
@@ -25,12 +25,28 @@ A Form Question field (or an Image Question free-text box) that is only shown wh
 _Avoid_: dependent field, show/hide rule, branching
 
 **Attachment**:
-A file a visitor adds on the wizard's final step (`file` field type). Client-validated (≤5 files, ≤10 MB total; images/PDF/Word) and sent to the business as email attachments by `/api/enquiry`.
+A file a visitor adds on the wizard's final step (`file` field type). Any file type; validated on both sides against three caps (≤10 files, ≤50 MB each, ≤200 MB total). Picks accumulate rather than replace, so a visitor can add more on a later click. Each one reaches the business as either an Inline attachment or a Hosted attachment.
 _Avoid_: upload, file field (implementation phrasing)
 
-**Time window** (Form Question field):
-A `time-window` field offering three fixed slots — 9am–1pm, 1pm–4pm, 4pm–8pm — as multi-select chips; the visitor ticks any slots that suit them for a visit. Paired on the Contact wizard with an Emergency boolean-toggle and a start-date field.
-_Avoid_: time picker, slot, availability, timeslot
+**Inline attachment**:
+An Attachment small enough to ride the enquiry email as a real attachment. Filled greedily in the visitor's own order up to a fixed budget, because the request that carries them to `/api/enquiry` is itself size-capped.
+_Avoid_: small file, embedded file
+
+**Hosted attachment**:
+An Attachment that did not fit the Inline attachment budget. The browser uploads it directly to blob storage and the enquiry email carries a download link instead of the bytes — the only way a phone video reaches the business at all.
+_Avoid_: link, blob, big file
+
+**Availability** (Form Question field):
+An `availability` field: a multi-date calendar, and beneath it one "Preferred time of day (date)" row per Preferred date, each offering the same three Time windows as multi-select chips. So a visitor free Monday morning and Thursday evening can say exactly that. Paired on the Contact wizard with an Emergency boolean-toggle, replacing the start-date + standalone Time window pair. An editor tunes the calendar from the Edit drawer: max dates, earliest date, horizon in months, allow weekends — each `0` meaning no limit. Required means ≥1 Preferred date **and** ≥1 Time window across them; an empty calendar is not an answer.
+_Avoid_: availability calendar, date range, booking, time picker, timeslot
+
+**Preferred date**:
+One day a visitor ticked in an Availability field. Holds zero or more Time windows; none ticked is a real answer meaning "Any time" that day, which the field says on the row. Rows always read chronologically, whatever order the days were clicked.
+_Avoid_: start date, visit date, slot, appointment
+
+**Time window**:
+One of three fixed slots — 9am–1pm, 1pm–4pm, 4pm–8pm — tickable on a Preferred date. (The retired standalone `timeWindow` field, which offered the same slots attached to no particular day, still exists for an editor to place; the stored enum value is camelCase because a hyphen would collapse the lookup to a plain String.)
+_Avoid_: time picker, slot, availability (the field that contains them), timeslot
 
 **Contact Details panel**:
 The `contact-details` section listing ways to reach the company as items (each a `contact-detail-item`: emoji, label, text), plus a note and a WhatsApp button.
@@ -105,12 +121,20 @@ The home page section that surfaces homeowner testimonials with star ratings and
 _Avoid_: Testimonials section, reviews block, social proof
 
 **Clients Carousel**:
-A page section (`clients-carousel` CMS type) showing an editor-chosen list of client logos (`client-logo` children: image + optional name + link) in an infinitely rotating, pause-on-hover strip on desktop (≥1024px); collapses to a static 3-column grid (5px gaps all around) below 1024px, and to a static wrapped row under `prefers-reduced-motion`.
+A page section (`clients-carousel` CMS type) showing an editor-chosen list of client logos (`client-logo` children: image + optional name + link) in an infinitely rotating, pause-on-hover strip on desktop (≥1024px); collapses to a static 3-column grid (5px gaps all around) on tablets, to **one logo per row** below 640px, and to a static wrapped row under `prefers-reduced-motion`. Logos are full colour at every width with no hover state at all — a mark a visitor has to hover to see properly is one most visitors never see, and a touch screen has no hover to give. Carries a Logo height.
 _Avoid_: logo slider, partners marquee, brand ticker
 
+**Accreditations section**:
+The trust-badge strip (`accreditation-list` CMS type) sitting under the hero — the Trustpilot widget on the same row as an editor-chosen list of accreditation badges (`accreditation` children: image + title). One row on desktop, wrapping when it no longer fits. Carries a Logo height, which sizes the badges only.
+_Avoid_: certifications, credentials, badges row, trust bar
+
+**Logo height**:
+The section-level pixel number (`logoSize`) an editor sets to size every logo on a strip — the Accreditations section and the Clients Carousel each have their own. It is a height; each logo's width follows its own aspect ratio, which is what keeps a row of mixed-shape logos looking even. It does **not** apply to the Trustpilot widget, which is a vendor embed at a font size we cannot set.
+_Avoid_: logo size, image width, scale, zoom
+
 **Site Banner**:
-The SVG brand mark (crest + "Upper Street Contractors" wordmark) that replaced the text wordmark, rendered by `SiteBanner`. Ships in two tones — navy for light backgrounds (header) and white for dark (footer) — plus a crest-only variant. In the header it sits in its own row above the service-links row and shrinks on scroll.
-_Avoid_: logo (the old text wordmark), SiteLogo (the retired component)
+The SVG brand mark rendered by `SiteBanner` — **two** images side by side, the crest and the "Upper Street Contractors" wordmark, sized independently. Ships in two tones — navy for light backgrounds (header) and white for dark (footer) — plus a crest-only variant. In the header it sits in its own row above the service-links row, where scrolling shrinks **the crest only**: the crest is decoration and can afford to get smaller, the words are the company's name and hold one size.
+_Avoid_: logo (the old text wordmark), banner (the single combined artwork it was until the split), SiteLogo (the retired component)
 
 **Service page**:
 A per-service landing page reached from the header's service-links row — Refurbishments, Kitchens, Bathrooms, Plumbing, Heating, Electric, Carpentry, Roofing, Handyman (Refurbishments and Kitchens were promoted from the footer into the main nav). Each is a CMS `page` (`<service>-service` key) whose `sections` follow one shared shape: a Page Hero, a Service Offer section, a Case Studies section, and a per-page CTA band (a `planning-renovation-section` carrying WhatsApp + Request-a-Quote). Distinct from the Projects / About / Contact pages.
@@ -147,6 +171,54 @@ _Avoid_: Q&A, question, accordion item (UI phrasing)
 **Legal pages**:
 The Privacy Policy (`/privacy-policy`) and Terms & Conditions (`/terms-and-conditions`) pages — each a CMS `page` (key matching the path) whose `sections` are a Page Hero + a Prose Section, linked from the footer's bottom legal bar beside the Cookie preferences link. Privacy copy is grounded in the site's real data flows (Enquiry Wizard emails, Consent cookies, Trustpilot / Google embeds).
 _Avoid_: policy page, legal, T&Cs (informal), terms page
+
+**Blog Post**:
+One article on the Blog index, stored as a `blog-post` entry: a title, Slug, Excerpt, hero image, Author, publish date, a Blog category, and a `sections` list built with the Section builder from the same block Types a page uses. Its header (title / category / date / Author / hero) renders from the post's **own** fields, not from a section — so the index card and the page can never disagree, and the header cannot be dragged away or deleted. It carries no metadata field: its title and Excerpt **are** its metadata.
+_Avoid_: article, news item, page (the CMS `page` Type it deliberately is not)
+
+**Slug**:
+The lowercase hyphenated words that make a Blog Post's URL (`/blog/<slug>`), validated against that shape on every write rather than merely suggested. **Derived, then detached**: while blank it mirrors the slugified title, and the first time an editor types in it (or the post already has one) it stops following the title for good — so a headline can be reworded without moving a URL that has already been shared. zero-cms enforces no uniqueness, so a duplicate silently shadows the earlier post — the route takes the first match.
+_Avoid_: permalink, path, id (the uuid `/projects/:id` still uses)
+
+**Author** (Blog Post field):
+Who wrote a post — the display **name** of the CMS user picked from a dropdown of the current accounts, stored as text. Not a link to that account and not its own content type: accounts live outside the entry store, so a live link would mean exposing them publicly just to print a byline. The trade is that renaming a CMS user leaves older posts crediting the old name (ADR 0016).
+_Avoid_: author entry (the retired `author` Type a Blog Post no longer points at — `project.author` still declares it), byline, CMS user (the account, not the credit)
+
+**Excerpt**:
+A Blog Post's short standfirst — the copy on its index card (clamped to three lines there so a row of cards stays even), under its title on the post itself, and its meta description. Plain text, so it stays legible in a card, a `<meta>` tag and a search result alike. The **only** source of a post's description: there is nothing to pick instead.
+_Avoid_: summary (the Project field), description, intro, teaser
+
+**Blog index**:
+The `/blog` page: a Page Hero from its `blogs` `page` entry, then every published Blog Post as a card, newest first, with a text search, a Blog category chip row and a numbered pager. Every post ships in the HTML and all three controls filter client-side, so a search covers the whole archive rather than one page; discovery does not depend on the pager, since every `/blog/<slug>` is in the sitemap. (`/blogs/*` still resolves, as a permanent redirect.)
+_Avoid_: Blogs index (the earlier plural name, and the plural URL), blog page, archive, feed, Projects index (the analogous page for Projects)
+
+**Blog category**:
+The single topic a Blog Post is filed under (Kitchens, Bathrooms, Guides, News, …), shown as a gold badge on its card and — beneath the title — on its header, and driving the Blog index chip row. One per post; there is no tag concept, deliberately — a second overlapping taxonomy is the thing editors get wrong.
+_Avoid_: tag, topic, Category tag (the Project concept, a different option set)
+
+**Blog card**:
+One Blog Post on the Blog index: hero image with its Blog category badge, publish date, title and Excerpt. Mirrors the Project card's proportions and hover so the two grids read as one site.
+_Avoid_: post tile, article card, Project card
+
+**Image section**:
+A page section (`image-section`) holding one photo and an optional caption, at a chosen Width (narrow / wide / full) — `narrow` matching a Prose Section's reading column so an image between two text blocks lines up with them.
+_Avoid_: photo, banner, Project images (the Project-detail grid), Gallery section
+
+**Gallery section**:
+A page section (`gallery-section`) showing a grid of Figures at 2–4 Columns, with an optional title. The multi-photo counterpart to the Image section.
+_Avoid_: carousel, slider, Project images (the Project-detail grid), gallery (an _Avoid_ term elsewhere)
+
+**Figure**:
+One captioned photo inside a Gallery section (a `figure`: image + caption). Distinct from a Project image, which is the same shape but belongs to a Project's detail page.
+_Avoid_: photo, image, Project image
+
+**Quote section**:
+A page section (`quote-section`) pairing one emphasised line of copy with an optional attribution, marked up as a real `<blockquote>`/`<cite>`. Distinct from a Client Comment (tied to one Project) and a Review card (site-wide, carries a star score).
+_Avoid_: pull quote (fine in prose, but this is the Type), testimonial, Client Comment
+
+**Separator**:
+A page section (`separator-section`) putting a break between blocks, as a rule, dots, or plain space. The `space` variant renders no `<hr>` — a horizontal rule announces a *thematic* break to a screen reader, and breathing room is not one.
+_Avoid_: divider, spacer, hr
 
 **Review card**:
 A single testimonial tile showing a star score, quoted review text, and the reviewer's profile.
@@ -205,8 +277,12 @@ The set of Types a Relation field may point at.
 _Avoid_: whitelist, ref types
 
 **Reference list**:
-The Inspect-mode wrapper that renders a One-to-Many relation as an add-able row/grid of cards, injecting a "+ Add" affordance and enforcing `max` (component: `ZeroCmsList`). Removal is not offered here — a child is removed from the parent's Edit drawer.
-_Avoid_: repeater, collection list
+The Inspect-mode wrapper that renders a One-to-Many relation as an add-able row/grid of cards, injecting a "+ Add" affordance that **appends**, and enforcing `max` (component: `ZeroCmsList`). Removal is not offered here — a child is removed from the parent's Edit drawer. Now used only for card-grid children (a Gallery section's photos, accreditation badges); a page's `sections` uses the **Section builder** instead, which does offer removal, insertion at a chosen position and reordering.
+_Avoid_: repeater, collection list, Section builder (the richer editor for `sections`)
+
+**Section builder**:
+The Inspect-mode editor for a page's or Blog Post's `sections` — the one place the **set** of sections on a page can change rather than just their contents. An Insert slot sits before the first section, between every pair and after the last; each section's hover cluster gains a trash button beside its pencil; a drag handle reorders, with every section collapsing to a compact card while dragging so a screen-tall hero is still movable — and the page **does not move under the pointer** while that happens. Live on every CMS-driven page (`<PageSections>`); before it existed, sections could be edited but never added, removed or reordered anywhere on the site. Defined in the zero-cms context — see `libs/zero-cms-core/CONTEXT.md`.
+_Avoid_: page builder, block editor, Reference list (the simpler card-grid wrapper)
 
 **Stacked drawer**:
 Edit drawers layered on top of one another. Opening a linked child Entry (to edit) or creating a new one from within a drawer pushes a new panel; closing it returns to the panel beneath, with its state intact. New Entries are linked into the parent only when their create form is saved.

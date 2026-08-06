@@ -1,6 +1,6 @@
 /** Value validation against a Type's fields. */
 
-import type { Type } from '../model/schema';
+import { SLUG_PATTERN, type Type } from '../model/schema';
 import type { EntryValues } from '../model/entry';
 import { ZeroCmsError } from '../model/errors';
 
@@ -40,8 +40,23 @@ export function validateValues(
       case 'text':
       case 'longtext':
       case 'richtext':
+      // A `user` value is the display name captured when it was set (ADR 0016),
+      // so it is deliberately NOT checked against the current user list: the
+      // person may have been renamed, or have left, since the entry was written.
+      case 'user':
         if (typeof v !== 'string')
           issues.push({ field: f.__name, message: 'Expected string' });
+        break;
+      case 'slug':
+        // Enforced on drafts too, not just on publish: an invalid slug is not an
+        // incomplete value the way a missing `required` one is — it is a broken URL.
+        if (typeof v !== 'string')
+          issues.push({ field: f.__name, message: 'Expected string' });
+        else if (!SLUG_PATTERN.test(v))
+          issues.push({
+            field: f.__name,
+            message: 'Expected lowercase words joined by hyphens (e.g. my-post-title)',
+          });
         break;
       case 'boolean':
         if (typeof v !== 'boolean')

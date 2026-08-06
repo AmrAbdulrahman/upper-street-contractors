@@ -11,8 +11,10 @@ fragment ClientLogo on ClientLogo {
 }
 
 fragment ClientsCarousel on ClientsCarousel {
+  type
   id
   title
+  logoSize
   logos {
     ...ClientLogo
   }

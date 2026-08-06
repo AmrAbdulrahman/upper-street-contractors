@@ -67,7 +67,7 @@ re-verify before budgeting ([Vercel](https://vercel.com/pricing),
 | ------- | ------------ | ---- |
 | **Vercel** (Pro) | Hosts the website — production + staging, ISR, serverless RPC. Paid plan required for commercial use. | $20/user/mo (1 seat), includes $20/mo usage credit |
 | **Upstash Redis** (via Vercel Marketplace) | The CMS database — schema, all content entries, CMS user accounts ([ADR 0008](./docs/adr/0008-zero-cms-redis-blob-store.md)). | $0 on free tier (256 MB, 500K commands/mo); then pay-as-you-go $0.20 / 100K commands |
-| **Vercel Blob** | All CMS media bytes (photos, files), CDN-served. | Usage-billed ($0.023/GB stored + per-op); covered by Pro's included credit at current volume |
+| **Vercel Blob** | All CMS media bytes (photos, files), CDN-served — plus Hosted attachments from the public enquiry form, which are never pruned ([ADR 0014](./docs/adr/0014-enquiry-attachments-inline-plus-hosted.md)). | Usage-billed ($0.023/GB stored + per-op); covered by Pro's included credit at current volume |
 | **Domain** | `upperstreet.contractors` registration. | ≈ $28/yr renewal (≈ $2.40/mo) |
 | **Email** | Enquiry-form delivery (nodemailer SMTP). Free Gmail app-password today; production wants `info@upperstreet.contractors`. | $0 now → Google Workspace Business Starter **£5/user/mo** (annual, + VAT) when `info@` goes live |
 | **GizmoSauce** | The Google Reviews widget embedded on the site. | $8.25/mo (Starter, 5 widgets — we use 1); ≈ $5.78/mo billed yearly (30% off) |

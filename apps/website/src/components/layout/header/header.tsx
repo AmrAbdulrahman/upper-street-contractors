@@ -57,10 +57,15 @@ export function Header({ config }: HeaderProps) {
       <div className="mx-auto w-full max-w-container px-6 lg:px-10">
         {/* Mobile — single compact row */}
         <div className="flex items-center justify-between gap-4 py-3 lg:hidden">
+          {/* Only the crest shrinks on scroll; the wordmark holds its size, so
+              the company name stays legible however far the header collapses.
+              Fixed at the COLLAPSED crest height — the tightest the row ever
+              gets, so the words never need to shrink to fit it. */}
           <SiteBanner
             tone="dark"
             siteName={config?.siteName}
             className={`transition-[height] duration-300 ${scrolled ? "h-8" : "h-11"}`}
+            wordmarkClassName="h-8"
           />
           <HeaderMobileNav links={MAIN_NAV_LINKS} whatsappUrl={whatsappUrl} />
         </div>
@@ -76,6 +81,7 @@ export function Header({ config }: HeaderProps) {
               tone="dark"
               siteName={config?.siteName}
               className={`transition-[height] duration-300 ${scrolled ? "h-10" : "h-20"}`}
+              wordmarkClassName="h-10"
             />
           </div>
 
