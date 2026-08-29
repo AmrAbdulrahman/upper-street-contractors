@@ -1,0 +1,23 @@
+fragment ServiceCard on ServiceCard {
+  id
+  type
+  title
+  summary
+  href
+  image {
+    url
+    alt
+    width
+    height
+  }
+}
+
+fragment ServiceGridSection on ServiceGridSection {
+  id
+  type
+  overline
+  title
+  cards {
+    ...ServiceCard
+  }
+}

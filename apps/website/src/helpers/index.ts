@@ -13,6 +13,7 @@ export {
   BUTTON_ACTIONS,
   BUTTON_COLORS,
   BUTTON_VARIANTS,
+  CONTACT_FORM_PATH,
   ICON_POSITIONS,
   isExternalHref,
   normalizeButtonAction,
@@ -25,6 +26,7 @@ export {
   type IconPosition,
 } from "./normalize-button";
 export { pathnameToPageKey } from "./page-key";
+export { resolveSiteLogos, type SiteLogos } from "./resolve-site-logos";
 export { resolveWhatsAppUrl } from "./resolve-whatsapp-url";
 export {
   detectSurfaceTone,

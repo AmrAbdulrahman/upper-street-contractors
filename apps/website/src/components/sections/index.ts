@@ -1,7 +1,7 @@
 export { AccreditationList } from "./accreditation-list";
 export { ClientReviewsSection } from "./client-reviews";
 export { ClientsCarousel } from "./clients-carousel";
-export { ContactDetailsSection } from "./contact-details";
+export { ContactDetailsSection } from "./contact-details/contact-details-section";
 export { FaqSection } from "./faq";
 export { GoogleReviewsSection } from "./google-reviews";
 export { HeroHeroSection } from "./home-hero";
@@ -9,6 +9,7 @@ export { HowItWorksSection } from "./how-it-works";
 export { PageHeroSection } from "./page-hero";
 export { ProseSection } from "./prose-section";
 export { RecentWorkSection } from "./recent-work";
+export { ServiceCard, ServiceGridSection } from "./service-grid";
 export { SplitSection } from "./split-section";
 export { PageSection, type PageSectionData } from "./page-section";
 export { WhatWeDoSection } from "./what-we-do";

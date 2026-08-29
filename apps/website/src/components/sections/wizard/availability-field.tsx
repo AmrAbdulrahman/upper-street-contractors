@@ -5,6 +5,7 @@ import { DayPicker, type Matcher } from "@daypicker/react";
 import {
   ANY_TIME_LABEL,
   AVAILABILITY_DEFAULTS,
+  CLOSED_WEEKDAYS,
   DAYPICKER_THEME,
   TIME_WINDOWS,
   formatDateLong,
@@ -13,6 +14,9 @@ import {
   toISODate,
   type AvailabilityEntry,
 } from "./helpers";
+
+/** `Date.getDay()` for Saturday — the one weekend day `allowWeekends` decides. */
+const SATURDAY = 6;
 
 type AvailabilityFieldProps = {
   /** The shared label fragment the wizard builds for every field. */
@@ -31,7 +35,14 @@ type AvailabilityFieldProps = {
     earliestOffsetDays?: number | null;
     horizonMonths?: number | null;
     allowWeekends?: boolean | null;
+    emergencyHorizonDays?: number | null;
   };
+  /**
+   * Whether the wizard's emergency switch is on. When it is, the calendar is
+   * clamped to `emergencyHorizonDays` — somebody reporting a leak should not be
+   * offered a date six months out, and the offer itself sets the expectation.
+   */
+  emergency?: boolean;
   value: AvailabilityEntry[];
   onChange: (next: AvailabilityEntry[]) => void;
 };
@@ -45,6 +56,7 @@ export function AvailabilityField({
   labelText,
   id,
   field,
+  emergency = false,
   value,
   onChange,
 }: AvailabilityFieldProps) {
@@ -67,13 +79,31 @@ export function AvailabilityField({
     horizonEnd.setMonth(horizonEnd.getMonth() + horizonMonths);
   }
 
+  // An emergency shortens the window rather than replacing it: whichever of the
+  // two ceilings falls sooner wins, so turning the switch on can only ever
+  // narrow what is offered, never quietly open dates the normal horizon refused.
+  const emergencyDays = field.emergencyHorizonDays ?? 0;
+  if (emergency && emergencyDays > 0) {
+    const emergencyEnd = new Date(earliest);
+    emergencyEnd.setDate(emergencyEnd.getDate() + emergencyDays);
+    horizonEnd = horizonEnd && horizonEnd < emergencyEnd ? horizonEnd : emergencyEnd;
+  }
+
   const picked = new Set(value.map((e) => e.date));
   const capReached = maxDates > 0 && value.length >= maxDates;
+
+  // Days we are never open come off the calendar whatever the field says —
+  // offering one is an invitation to a visit that cannot happen. `allowWeekends`
+  // then only decides Saturday, the one weekend day the business does work.
+  const closedWeekdays = [
+    ...CLOSED_WEEKDAYS,
+    ...(allowWeekends ? [] : [SATURDAY]),
+  ];
 
   const disabled: Matcher[] = [
     { before: earliest },
     ...(horizonEnd ? [{ after: horizonEnd }] : []),
-    ...(allowWeekends ? [] : [{ dayOfWeek: [0, 6] }]),
+    { dayOfWeek: closedWeekdays },
     // At the cap only the already-picked days stay clickable. We enforce the cap
     // ourselves rather than with DayPicker's `max`, which does not refuse the
     // extra day — it hands back a fresh single-day selection, silently binning
@@ -121,7 +151,16 @@ export function AvailabilityField({
 
   return (
     <fieldset className="flex flex-col gap-1.5" aria-describedby={hintId}>
-      <legend className="mb-1.5">{labelText}</legend>
+      {/* The field's own label names the whole group for assistive tech, but it
+          is not shown here: visually it belongs over the TIMES, which do not
+          exist until a day is picked. Putting "Preferred time of day" above an
+          empty calendar labelled the wrong control and asked for a time before
+          offering a day to attach it to. */}
+      <legend className="sr-only">{labelText}</legend>
+
+      {/* Two controls stacked under one legend read as one thing without a name
+          on each half — so each gets its own visible heading. */}
+      <span className="text-sm font-medium text-dark">Pick a day</span>
 
       {/* The calendar is a fixed-width grid — let it scroll rather than push the
           page sideways on a narrow phone. */}
@@ -139,6 +178,16 @@ export function AvailabilityField({
         </div>
       </div>
 
+      {/* The times heading appears with the times, under the calendar — it has
+          nothing to label until a day is chosen. `aria-hidden` because the
+          fieldset's legend already carries this name; showing it twice would
+          have a screen reader read the field's label a second time. */}
+      {value.length > 0 ? (
+        <span aria-hidden className="mt-2 text-sm font-medium text-dark">
+          {labelText}
+        </span>
+      ) : null}
+
       {/* One row per Preferred date. Announced, because rows appear and vanish
           as days are ticked in the calendar above. */}
       <div aria-live="polite" className="flex flex-col gap-2">
@@ -150,10 +199,9 @@ export function AvailabilityField({
               className="rounded-lg border border-border-light bg-white p-3"
             >
               <div className="flex items-start justify-between gap-2">
-                <span className="text-sm font-medium text-dark">
-                  Preferred time of day{" "}
-                  <span className="font-normal text-muted">({when})</span>
-                </span>
+                {/* Just the date now — the group heading above says what the
+                    chips are for, so repeating it on every row was noise. */}
+                <span className="text-sm font-medium text-dark">{when}</span>
                 <button
                   type="button"
                   onClick={() => removeDate(entry.date)}
@@ -187,7 +235,7 @@ export function AvailabilityField({
 
               {entry.windows.length ? null : (
                 <span className="mt-2 block text-xs text-muted">
-                  {`${ANY_TIME_LABEL} — we’ll work around you on this day.`}
+                  {`${ANY_TIME_LABEL} — we’ll come whenever suits us on this day.`}
                 </span>
               )}
             </div>
@@ -196,8 +244,14 @@ export function AvailabilityField({
       </div>
 
       <span id={hintId} className="text-xs text-muted">
-        Pick any days that suit you, then tick the times that work on each. Leave
-        a day&rsquo;s times blank and we&rsquo;ll read it as {ANY_TIME_LABEL.toLowerCase()}.
+        {/* These are the days and times we will actually attend, not a wish
+            list — so the copy has to commit, and the calendar has to only ever
+            offer days the business really works (closed days come off in
+            `disabled`, and an emergency shortens the window). Saying "we'll
+            confirm later" here would be the safer sentence and the wrong one:
+            it invites people to pick a day they cannot do. */}
+        Choose the days and times you want us there. Leave a day&rsquo;s times
+        blank and we&rsquo;ll take it as {ANY_TIME_LABEL.toLowerCase()} that day.
         {maxDates > 0 ? (
           <>
             {" "}

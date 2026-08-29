@@ -38,6 +38,10 @@ function outputType(type: Type, field: Field): string {
     case 'slug':
     case 'user':
     case 'date':
+    // A hex string. Kept a String rather than given a scalar of its own: it
+    // goes straight into a style, and a custom scalar would only add a
+    // serialise step between the store and the stylesheet.
+    case 'color':
       return 'String';
     case 'asset':
       return 'Media';
@@ -89,6 +93,7 @@ function inputType(field: Field): string {
     case 'references':
       return '[ID!]';
     case 'date':
+    case 'color':
       return 'String';
     default:
       return 'String';
@@ -111,6 +116,7 @@ function whereFilter(field: Field): string | null {
     case 'asset':
     case 'lookup':
     case 'date':
+    case 'color':
       return 'StringFilter';
     default:
       return null; // references, blocks and json are not filterable in v1

@@ -4,16 +4,23 @@ import type { SiteMetaConfigFragment } from "@/generated/graphql";
 
 import Link from "next/link";
 
+import { ZeroCmsEntry, ZeroCmsList } from "@usc/zero-cms-widget";
+
 import {
-  FOOTER_ACCREDITATIONS,
   FOOTER_COMPANY_REGISTRATION,
   FOOTER_OPENING_HOURS,
 } from "@/components/layout/footer/footer-static";
 
 import {
+  Accreditation,
+  ACCREDITATION_LOGO_HEIGHT,
+} from "@/components/ui/accreditation";
+
+import { TrustpilotWidget } from "@/components/ui/trustpilot-widget";
+
+import {
   FOOTER_COMPANY_LINKS,
   FOOTER_LEGAL_LINKS,
-  FOOTER_SERVICE_LINKS,
 } from "@/components/layout/nav-links";
 
 import { SiteBanner } from "@/components/layout/site-banner";
@@ -24,6 +31,8 @@ import {
   formatAddress,
   formatPhoneDisplay,
   iconData,
+  resolveLogoHeight,
+  resolveSiteLogos,
   resolveWhatsAppUrl,
 } from "@/helpers";
 
@@ -42,14 +51,6 @@ function FooterColumnHeading({ children }: { children: ReactNode }) {
     <p className="mb-3.5 font-sans text-[11px] font-bold tracking-[0.1em] text-white/60 uppercase">
       {children}
     </p>
-  );
-}
-
-function FooterBadge({ children }: { children: ReactNode }) {
-  return (
-    <span className="rounded-[6px] border border-white/10 bg-white/[0.07] px-2.5 py-[5px] text-[11px] font-semibold text-white/60">
-      {children}
-    </span>
   );
 }
 
@@ -93,13 +94,24 @@ export function Footer({ config }: FooterProps) {
 
   const hasContactDetails = Boolean(phone || email || whatsappUrl);
 
+  const accreditations = config?.footerAccreditations?.filter(Boolean) ?? [];
+
+  const accreditationHeight = resolveLogoHeight(
+    config?.footerLogoSize,
+    ACCREDITATION_LOGO_HEIGHT,
+  );
+
+  const accreditationGlow = config?.footerGlowColor?.trim() || null;
+
   const copyrightName =
     legalName ?? config?.siteName ?? "Upper Street Contractors";
 
   return (
     <footer className="bg-dark-2 font-sans text-white/55">
       <div className="mx-auto max-w-container px-6 pt-14 pb-7">
-        <div className="mb-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.5fr] lg:gap-12">
+        {/* Three columns, not four: the Services column (the nine trades) is
+            gone. `/services` carries them now and is linked from Company. */}
+        <div className="mb-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1.5fr] lg:gap-12">
           <div>
             {/* The margin sits on the wrapper, not on the artwork: `className`
                 now sizes the crest alone. */}
@@ -107,6 +119,7 @@ export function Footer({ config }: FooterProps) {
               <SiteBanner
                 tone="light"
                 siteName={config?.siteName}
+                logos={resolveSiteLogos(config)}
                 className="h-12"
                 // Matches the crest: the footer never collapses, so the pair can
                 // stay at the proportions the combined lockup had.
@@ -131,17 +144,6 @@ export function Footer({ config }: FooterProps) {
               </p>
             ) : null}
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {FOOTER_ACCREDITATIONS.map((label) => (
-                <FooterBadge key={label}>{label}</FooterBadge>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <FooterColumnHeading>Services</FooterColumnHeading>
-
-            <FooterLinkList links={FOOTER_SERVICE_LINKS} />
           </div>
 
           <div>
@@ -213,6 +215,56 @@ export function Footer({ config }: FooterProps) {
             </div>
           </div>
         </div>
+
+        {/* The trust row: full width, its own band between the columns and the
+            legal bar. It replaced three hardcoded text labels that had drifted
+            from the real accreditations the home page already showed as logos —
+            these are CMS content on the Site settings' Footer tab. */}
+        {accreditations.length > 0 ? (
+          <div className="mb-8 border-t border-white/[0.08] pt-8">
+            <h2 className="sr-only">Our accreditations</h2>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+              {/* `theme="dark"` is load-bearing, not decoration: the vendor's
+                  light theme prints near-black type, which on a navy footer is
+                  invisible while the stars still render — so it reads as a
+                  broken widget rather than an unreadable one.
+
+                  96px rather than the variant's 130: `mini` scales its content
+                  to that box, and at full size it towered over the badges
+                  beside it. `footerLogoSize` still cannot apply here — this is
+                  a vendor iframe, not one of our images — and neither can the
+                  hover, since there is no element of ours to transform.
+                  Consent-gated: an inert placeholder until the visitor opts in. */}
+              <TrustpilotWidget
+                variant="mini"
+                theme="dark"
+                styleHeight="96px"
+              />
+
+              <ZeroCmsList
+                className="flex flex-wrap items-center justify-center gap-3 sm:gap-3.5"
+                field="footerAccreditations"
+                items={accreditations}
+              >
+                {accreditations.map((accreditation) => (
+                  <ZeroCmsEntry key={accreditation.id} entry={accreditation}>
+                    {/* The hover lift lives inside <Accreditation> now, shared
+                        with the home Accreditations section. */}
+                    <Accreditation
+                      data={accreditation}
+                      height={accreditationHeight}
+                      // No white tile on a dark footer, so the glow is what
+                      // separates each mark from the background.
+                      bare
+                      glowColor={accreditationGlow}
+                    />
+                  </ZeroCmsEntry>
+                ))}
+              </ZeroCmsList>
+            </div>
+          </div>
+        ) : null}
 
         <div className="flex flex-wrap items-center justify-between gap-2.5 border-t border-white/[0.08] pt-5 text-xs text-white/55">
           <p>

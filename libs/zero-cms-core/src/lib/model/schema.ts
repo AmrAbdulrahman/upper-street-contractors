@@ -18,8 +18,12 @@ export type FieldType =
   | 'date'
   | 'asset'
   | 'lookup'
+  | 'color'
   | 'reference'
   | 'references';
+
+/** The one shape a `color` value may take — `#rgb`, `#rrggbb` or `#rrggbbaa`. */
+export const COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
 /** The one shape a `slug` value may take — lowercase words joined by hyphens. */
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -59,6 +63,16 @@ export interface FieldMetaBase {
    * into existing entries, if requested. `null` (not this field) when unset.
    */
   default?: unknown;
+  /**
+   * Optional section heading. A Type whose fields carry more than one distinct
+   * `group` is rendered as a tab strip instead of one long form — the same
+   * mechanism whatever the Type, so a 25-field settings singleton and a big
+   * content Type both become navigable without a bespoke screen for either.
+   *
+   * Fields with no group sit in an untitled first tab; the tab order is the
+   * order the groups first appear in `fields`.
+   */
+  group?: string;
 }
 
 export interface TextField extends FieldMetaBase {
@@ -142,6 +156,26 @@ export interface LookupField extends FieldMetaBase {
   options: string[];
 }
 
+/**
+ * A colour, stored as a hex string ({@link COLOR_PATTERN}) and edited with a
+ * native colour picker.
+ *
+ * Its own kind rather than a `text` field holding a hex string: the value has a
+ * shape worth validating on write, and — more to the point — an editor asked to
+ * type `#fcdd09` into a text box is being asked to do a job the platform has a
+ * control for. The stored value stays a plain string, so it drops straight into
+ * a style without a conversion step.
+ *
+ * Hex only, deliberately. `rgba()` / `hsl()` / named colours would each need
+ * their own parse-and-validate path, and the picker cannot produce them.
+ */
+export interface ColorField extends FieldMetaBase {
+  __name: string;
+  __type: 'color';
+  /** Swatches offered beside the picker, e.g. a brand palette. */
+  presets?: string[];
+}
+
 /** Holds one entry id of an allowed target Type. */
 export interface ReferenceField extends FieldMetaBase {
   __name: string;
@@ -172,6 +206,7 @@ export type Field =
   | DateField
   | AssetField
   | LookupField
+  | ColorField
   | ReferenceField
   | ReferencesField;
 

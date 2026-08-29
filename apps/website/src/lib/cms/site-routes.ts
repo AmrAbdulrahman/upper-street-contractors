@@ -33,14 +33,27 @@ import { query } from "@/lib/cms/query";
  * `/blog/*` (see `next.config.mjs`) — but a redirect is not a crawlable page and
  * listing it would ask crawlers to index a URL that only points elsewhere.
  */
+/**
+ * Deliberately absent: `/rates`. The route still resolves but carries no real
+ * content yet and is marked `robots: { index: false }` on the page itself.
+ * Submitting a noindexed page in the sitemap asks a crawler to fetch a URL we
+ * have just told it not to keep. Add it back with the content.
+ *
+ * `/repairs-and-smaller-works` used to be listed here for the same reason. The
+ * route is gone — its only inbound link was the What We Do banner — and it now
+ * 308s to `/services`.
+ *
+ * `/services` matters more than a normal marketing page: it is the only place
+ * that links all nine Service pages now that the footer's Services column is
+ * gone and the header keeps them behind a dropdown.
+ */
 const STATIC_ROUTES = [
   "/",
   "/about",
   "/contact",
-  "/rates",
-  "/repairs-and-smaller-works",
   "/privacy-policy",
   "/terms-and-conditions",
+  "/services",
   "/projects",
   "/blog",
   "/refurbishments",

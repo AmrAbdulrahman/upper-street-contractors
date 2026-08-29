@@ -4,7 +4,7 @@ import {
   ZeroCmsList,
   ZeroCmsRelationEntry,
 } from "@usc/zero-cms-widget";
-import { Button } from "@/components/ui/button";
+import { CmsButton } from "@/components/ui/button/cms-button";
 import { ProjectCard } from "@/components/ui/project-card";
 import { RecentWorkSectionFragment } from "@/generated/graphql";
 
@@ -59,7 +59,7 @@ export function RecentWorkSection({ data }: RecentWorkSectionProps) {
           {viewAllProjects ? (
             <div className="mt-9 flex justify-center">
               <ZeroCmsRelationEntry entry={viewAllProjects} field="viewAllProjects">
-                <Button data={viewAllProjects} />
+                <CmsButton data={viewAllProjects} />
               </ZeroCmsRelationEntry>
             </div>
           ) : null}

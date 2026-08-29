@@ -2,6 +2,7 @@ export const ICON_KEYS = [
   "arrow-right",
   "chat",
   "check",
+  "chevron-down",
   "envelope",
   "phone",
   "pin",

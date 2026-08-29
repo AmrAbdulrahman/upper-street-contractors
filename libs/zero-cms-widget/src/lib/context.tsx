@@ -26,6 +26,7 @@ import {
   type ReactNode,
 } from 'react';
 import { ZeroCmsError } from '@usc/zero-cms-core';
+import { duplicateEntry, type DuplicateEntryOptions } from './duplicate-entry';
 import {
   useZeroCms,
   errorMessage,
@@ -113,6 +114,12 @@ interface DrawerTarget {
   onPick?: (result: TypePickResult | null) => void;
 }
 
+/**
+ * Options for {@link WidgetContextValue.duplicate}. Re-exported under a shorter
+ * name because callers meet it through the widget context, not the module.
+ */
+export type DuplicateOptions = DuplicateEntryOptions;
+
 interface WidgetContextValue {
   /** Inspect mode: when true, <ZeroCmsEntry>/<ZeroCmsEntryField> show edit affordances. */
   inspect: boolean;
@@ -134,6 +141,15 @@ interface WidgetContextValue {
    * this the only way to make one is the Content admin.
    */
   createEntry: (type: string) => Promise<string | null>;
+  /**
+   * Deep-copy an entry and everything it owns, then open the copy's drawer.
+   * Resolves with the new id, or null if the copy failed.
+   *
+   * Deep, not shallow: content held in a `references` list (a Blog Post's
+   * `sections`) would otherwise be shared with the original, so editing the
+   * copy would rewrite the thing it was copied from. See `duplicateEntry`.
+   */
+  duplicate: (id: string, opts?: DuplicateOptions) => Promise<string | null>;
   /** Link an entry that already exists into a parent relation field. */
   link: (opts: LinkOptions) => Promise<void>;
   /** Remove a child from a parent relation field (unlink only; entry survives). */
@@ -442,6 +458,38 @@ export function WidgetProvider({
     [adapter, schema, notify, pushCreate, pushTypePicker, link]
   );
 
+  const duplicate = useCallback(
+    async (id: string, opts?: DuplicateOptions): Promise<string | null> => {
+      try {
+        const result = await duplicateEntry(id, { adapter, schema, actor: currentUserId }, opts);
+
+        if (result.cycles.length > 0) {
+          // Not fatal — the copy is coherent — but the editor should know a
+          // reference loop meant part of it is shared with the original.
+          notify(
+            'error',
+            `Copied, but ${result.cycles.length} looping reference(s) are shared with the original.`
+          );
+        } else {
+          notify('success', `Duplicated — ${result.created} item(s) copied as a draft.`);
+        }
+
+        onChanged?.();
+        await openEntry(result.id, { type: result.type });
+        return result.id;
+      } catch (error) {
+        notify(
+          'error',
+          error instanceof ZeroCmsError || error instanceof Error
+            ? error.message
+            : 'Could not duplicate this entry'
+        );
+        return null;
+      }
+    },
+    [adapter, schema, currentUserId, notify, onChanged, openEntry]
+  );
+
   const close = useCallback(() => {
     // Settle any pending create/pick resolvers with null so awaiting callers
     // don't hang (openCreate awaits both in sequence).
@@ -465,6 +513,7 @@ export function WidgetProvider({
       openEntry,
       openCreate,
       createEntry: pushCreate,
+      duplicate,
       link,
       unlink,
       reorder,
@@ -479,6 +528,7 @@ export function WidgetProvider({
       openEntry,
       openCreate,
       pushCreate,
+      duplicate,
       link,
       unlink,
       reorder,

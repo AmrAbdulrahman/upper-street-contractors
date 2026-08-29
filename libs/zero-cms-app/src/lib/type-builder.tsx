@@ -42,6 +42,7 @@ const KIND_OPTIONS = [
   'date',
   'asset',
   'lookup',
+  'color',
   'relation',
 ] as const;
 
@@ -57,6 +58,8 @@ function withKind(field: Field, kind: FieldType): Field {
       return { ...base, __type: 'lookup', options: [] };
     case 'asset':
       return { ...base, __type: 'asset', accept: 'any' };
+    case 'color':
+      return { ...base, __type: 'color', presets: [] };
     case 'reference':
       return { ...base, __type: 'reference', allowedTypes: [] };
     case 'references':
@@ -344,6 +347,22 @@ function FieldRow({
             onChange({
               ...field,
               options: e.target.value
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean),
+            })
+          }
+        />
+      )}
+
+      {field.__type === 'color' && (
+        <Input
+          placeholder="Preset swatches, comma-separated (e.g. #c8a253, #0a1c2e) — optional"
+          value={(field.presets ?? []).join(', ')}
+          onChange={(e) =>
+            onChange({
+              ...field,
+              presets: e.target.value
                 .split(',')
                 .map((s) => s.trim())
                 .filter(Boolean),

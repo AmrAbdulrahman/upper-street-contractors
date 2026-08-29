@@ -1,6 +1,6 @@
 import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
-import { Button } from "@/components/ui/button";
+import { CmsButton } from "@/components/ui/button/cms-button";
 import { BannerFragment } from "@/generated/graphql";
 
 export const BANNER_VARIANTS = [
@@ -153,7 +153,7 @@ export function Banner({ data, className = "" }: BannerProps) {
 
         {hasButton && button ? (
           <ZeroCmsEntry entry={button}>
-            <Button data={button} className="w-full shrink-0 md:w-auto" />
+            <CmsButton data={button} className="w-full shrink-0 md:w-auto" />
           </ZeroCmsEntry>
         ) : null}
       </div>

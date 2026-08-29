@@ -4,7 +4,7 @@ import {
   ZeroCmsList,
 } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
-import { Button } from "@/components/ui/button";
+import { CmsButton } from "@/components/ui/button/cms-button";
 import { PlanningRenovationSectionFragment } from "@/generated/graphql";
 
 type PlanningRenovationSectionProps = {
@@ -53,7 +53,7 @@ export function PlanningRenovationSection({
             {buttonItems.map((button) =>
               button ? (
                 <ZeroCmsEntry key={button.id} entry={button}>
-                  <Button data={button} />
+                  <CmsButton data={button} />
                 </ZeroCmsEntry>
               ) : null,
             )}

@@ -19,7 +19,7 @@ export function ProjectCta({ data }: { data?: CtaFragment | null }) {
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/contact"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-white/35 bg-transparent px-7 text-sm font-semibold text-white transition hover:border-white/60 hover:bg-white/5"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-gold px-7 text-sm font-semibold text-white transition-colors hover:bg-gold-deep"
             >
               Request a Quote
             </Link>

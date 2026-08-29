@@ -24,7 +24,7 @@ import {
   wrapWithInspect,
   type InspectAction,
 } from './inspect-clone';
-import { useSectionSlot } from './section-slot-context';
+import { SectionSlotBoundary, useSectionSlot } from './section-slot-context';
 import { useInspect } from './use-inspect';
 
 export interface ZeroCmsEntryProps {
@@ -62,7 +62,10 @@ function EntryInspect({
   const inspect = useInspect();
 
   const entryId = ctx?.entryId ?? '';
-  if (!inspect || !widget || !entryId) return <>{children}</>;
+  // Same boundary on the inactive path: `useInspect` is per-component and
+  // hydration-gated, so a nested entry can be live while this one is not yet.
+  if (!inspect || !widget || !entryId)
+    return <SectionSlotBoundary>{children}</SectionSlotBoundary>;
   const { openEntry } = widget;
 
   const inspectClassName = mergeClassNames(
@@ -93,5 +96,18 @@ function EntryInspect({
       : []),
   ];
 
-  return wrapWithInspect({ children, className, as, inspectClassName, hovered, setHovered, actions });
+  // The slot is claimed by THIS entry; everything below it is a nested entry
+  // (a card, a field) whose own trash must never unlink this section.
+  //
+  // The boundary goes around the RESULT, not around `children`. `wrapWithInspect`
+  // clones a lone host element rather than wrapping it, which is what keeps a
+  // grid cell a grid cell — hand it a component element instead and it falls
+  // back to an extra <div>, silently breaking every layout on the site. A
+  // context provider emits no DOM, so out here it costs nothing. The cluster's
+  // remove action is unaffected: `actions` already closed over `slot` above.
+  return (
+    <SectionSlotBoundary>
+      {wrapWithInspect({ children, className, as, inspectClassName, hovered, setHovered, actions })}
+    </SectionSlotBoundary>
+  );
 }

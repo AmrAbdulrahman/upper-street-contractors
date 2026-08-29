@@ -48,6 +48,20 @@ export function SectionSlotProvider({
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
+/**
+ * Stops a slot leaking past the entry it belongs to.
+ *
+ * Context reaches every descendant, so a <ZeroCmsEntry> nested INSIDE a section
+ * — a card in a grid, a field in a form — used to read its host section's slot
+ * and offer "Remove section 2 of 2" on its own hover cluster. Pressing it
+ * unlinked the whole section, from a control that looked like it belonged to
+ * the card. <ZeroCmsEntry> consumes the slot and then renders its children
+ * behind this, so exactly one entry per slot can ever claim it.
+ */
+export function SectionSlotBoundary({ children }: { children: ReactNode }) {
+  return <Ctx.Provider value={null}>{children}</Ctx.Provider>;
+}
+
 /** Null-safe: null whenever this entry is not a slot in a Section builder. */
 export function useSectionSlot(): SectionSlotValue | null {
   return useContext(Ctx);

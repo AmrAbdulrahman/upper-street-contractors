@@ -17,6 +17,31 @@ import type { BlogPostCardFragment } from "@/generated/graphql";
 const ALL_POSTS_LABEL = "All posts";
 const PER_PAGE = 9;
 
+/**
+ * What "duplicate this post" means, in this content model.
+ *
+ * A post's `sections` ARE its content, so they are copied — a shared section
+ * would let an edit to the copy rewrite the original. These Types are not part
+ * of the post and are shared instead:
+ *
+ * - `project` / `blog-post` / `page` — each has its own URL. A Recent Work
+ *   section pins Projects; copying them would mint orphan case studies that
+ *   appear nowhere and duplicate the real ones in `/projects`.
+ * - `button` — every CTA band on the site points at the same two Button
+ *   entries, so that changing the wording once changes it everywhere. A copy
+ *   would quietly opt this post out of that.
+ * - `icon` — a shared glyph registry, not content.
+ *
+ * `slug` is cleared rather than copied: zero-cms enforces no uniqueness, so a
+ * duplicated slug silently shadows the original (the route takes the first
+ * match). Blank, it re-derives from the new title.
+ */
+const DUPLICATE_BLOG_POST = {
+  shareTypes: ["project", "blog-post", "page", "button", "icon"],
+  clearFields: ["slug"],
+  renameField: "title",
+} as const;
+
 type BlogIndexViewProps = {
   posts: BlogPostCardFragment[];
 };
@@ -162,9 +187,35 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
 
         {visible.length > 0 ? (
           <div className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map((post) => (
-              <BlogCard key={post.id} data={post} />
-            ))}
+            {visible.map((post) =>
+              // In flow beneath the card, not overlaid on it: the card already
+              // grows a hover pencil cluster in its own top corner, and a second
+              // floating control there fights it for the same pixels.
+              inspect && widget ? (
+                <div key={post.id} className="flex flex-col gap-2">
+                  <BlogCard data={post} />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void widget.duplicate(post.id, DUPLICATE_BLOG_POST)
+                    }
+                    className="zero-cms inline-flex items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-400 bg-white px-3 py-2 text-[13px] font-semibold text-neutral-700 transition-colors hover:border-neutral-900 hover:text-neutral-900"
+                  >
+                    <span aria-hidden>⧉</span>
+                    Duplicate
+                    {/* The title rides in the accessible name so a screen
+                        reader listing controls doesn't hear "Duplicate" nine
+                        times with nothing to tell them apart. */}
+                    <span className="sr-only">
+                      {post.title ? ` “${post.title}”` : ""}
+                    </span>
+                  </button>
+                </div>
+              ) : (
+                <BlogCard key={post.id} data={post} />
+              ),
+            )}
           </div>
         ) : null}
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ZeroCmsEntry, ZeroCmsEntryField, ZeroCmsList } from "@usc/zero-cms-widget";
-import { Button } from "@/components/ui/button";
+import { CmsButton } from "@/components/ui/button/cms-button";
 import type { PageHeroSectionFragment } from "@/generated/graphql";
 
 type PageHeroSectionProps = { data: PageHeroSectionFragment };
@@ -65,7 +65,7 @@ export function PageHeroSection({ data }: PageHeroSectionProps) {
             {buttonItems.map((button) =>
               button ? (
                 <ZeroCmsEntry key={button.id} entry={button}>
-                  <Button data={button} />
+                  <CmsButton data={button} />
                 </ZeroCmsEntry>
               ) : null,
             )}

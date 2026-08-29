@@ -19,12 +19,43 @@ fragment WizardSection on Wizard {
   }
 }
 
+# A Branch rule's `appliesTo` points at image-options, which are themselves
+# image-options — selecting the whole fragment would recurse forever. Only the
+# id is needed: the wizard matches it against what the visitor has selected.
+# The Step introduction, held as its own entry so it can be edited on its own
+# and reused across steps.
+fragment RichTextBlock on RichTextBlock {
+  id
+  body
+}
+
+fragment StepCopy on StepCopy {
+  id
+  title
+  intro {
+    ...RichTextBlock
+  }
+  whenEmergency
+  appliesTo {
+    id
+  }
+}
+
 fragment ImageQuestion on ImageQuestion {
   id
   stepLabel
   title
   hint
+  intro {
+    ...RichTextBlock
+  }
   multiSelect
+  gatedBy {
+    id
+  }
+  variants {
+    ...StepCopy
+  }
   options {
     ...ImageOption
   }
@@ -37,6 +68,10 @@ fragment ImageOption on ImageOption {
   description
   revealTextInput
   textInputPlaceholder
+  whenEmergency
+  appliesTo {
+    id
+  }
   image {
     url
     alt
@@ -50,6 +85,12 @@ fragment FormQuestion on FormQuestion {
   stepLabel
   title
   hint
+  intro {
+    ...RichTextBlock
+  }
+  variants {
+    ...StepCopy
+  }
   fields {
     ...FormField
   }
@@ -68,4 +109,10 @@ fragment FormField on FormField {
   earliestOffsetDays
   horizonMonths
   allowWeekends
+  whenEmergency
+  isEmergencyFlag
+  emergencyHorizonDays
+  appliesTo {
+    id
+  }
 }

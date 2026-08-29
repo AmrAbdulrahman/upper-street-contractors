@@ -22,6 +22,12 @@ const nextConfig = {
    * The `/admin/*` pair matters too: that prefix is a Draft-Mode mirror of the
    * public routes (`proxy.ts` rewrites `/admin/blog/x` -> `/blog/x`), so an
    * editor's bookmarked `/admin/blogs/...` would otherwise 404.
+   *
+   * `/repairs-and-smaller-works` is a different case: the route is gone, not
+   * renamed. It was a noindexed placeholder reached only from the home page's
+   * What We Do banner, which has been removed. `/services` is the nearest real
+   * answer to what that URL promised — the handyman and multi-trade work it
+   * described is on the Services index and its Handyman page.
    */
   async redirects() {
     return [
@@ -29,6 +35,7 @@ const nextConfig = {
       { source: '/blogs/:slug', destination: '/blog/:slug', permanent: true },
       { source: '/admin/blogs', destination: '/admin/blog', permanent: true },
       { source: '/admin/blogs/:slug', destination: '/admin/blog/:slug', permanent: true },
+      { source: '/repairs-and-smaller-works', destination: '/services', permanent: true },
     ];
   },
   images: {

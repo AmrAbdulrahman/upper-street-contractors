@@ -1,6 +1,22 @@
 fragment SiteMetaConfig on SiteMetaConfig {
   id
   siteName
+  tagline
+  logoCrestDark {
+    url
+  }
+  logoCrestLight {
+    url
+  }
+  logoWordmarkDark {
+    url
+  }
+  logoWordmarkLight {
+    url
+  }
+  favicon {
+    url
+  }
   siteUrl
   pageTitleTemplate
   defaultMetaTitle
@@ -24,6 +40,14 @@ fragment SiteMetaConfig on SiteMetaConfig {
     socialNetworkName
     url
   }
+  # Spread, not a hand-written selection: the footer row renders the same
+  # <Accreditation> component the home strip does, so it must select exactly
+  # what that component's fragment declares.
+  footerAccreditations {
+    ...Accreditation
+  }
+  footerLogoSize
+  footerGlowColor
 }
 
 query GetSiteMetaConfig($status: CmsReadStatus = published, $includeUnpublished: Boolean) {

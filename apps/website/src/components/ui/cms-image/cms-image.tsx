@@ -31,6 +31,12 @@ export type CmsImageProps = {
   /** Shown in place of the image when the asset is empty. */
   placeholderLabel?: string;
   sizes?: string;
+  /**
+   * Load eagerly and preload. Set it on images that are above the fold — Next
+   * lazy-loads by default, which makes an above-the-fold photo the Largest
+   * Contentful Paint *and* delays it.
+   */
+  priority?: boolean;
 };
 
 /**
@@ -47,6 +53,7 @@ export function CmsImage({
   style,
   placeholderLabel = "Image placeholder",
   sizes = "(max-width: 1024px) 100vw, 536px",
+  priority = false,
 }: CmsImageProps) {
   const url = resolveMediaUrl(data?.url);
   const alt = data?.alt?.trim() || fallbackAlt || "";
@@ -74,6 +81,7 @@ export function CmsImage({
       className={className}
       style={style}
       sizes={sizes}
+      priority={priority}
     />
   );
 }

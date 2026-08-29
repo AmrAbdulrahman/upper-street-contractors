@@ -1,6 +1,7 @@
 fragment Accreditation on Accreditation {
   id
   accreditationTitle
+  glowColor
   image {
     url
     alt

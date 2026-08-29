@@ -55,6 +55,9 @@ fragment PageSectionBlocks on PageSectionsRef {
   ... on ServiceOfferSection {
     ...ServiceOfferSection
   }
+  ... on ServiceGridSection {
+    ...ServiceGridSection
+  }
   ... on CaseStudiesSection {
     ...CaseStudiesSection
   }
@@ -127,6 +130,9 @@ fragment BlogPostSectionBlocks on BlogPostSectionsRef {
   }
   ... on ServiceOfferSection {
     ...ServiceOfferSection
+  }
+  ... on ServiceGridSection {
+    ...ServiceGridSection
   }
   ... on CaseStudiesSection {
     ...CaseStudiesSection

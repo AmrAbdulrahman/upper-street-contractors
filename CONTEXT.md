@@ -20,6 +20,14 @@ _Avoid_: page header, banner, ProjectsHeroPlaceholder (the removed UI-only mock)
 A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / date / Availability / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which emails a branded HTML enquiry to the business and a confirmation copy to the sender (nodemailer over SMTP), then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
 _Avoid_: form, survey, quiz, multi-step form
 
+**Step introduction**:
+The rich-text passage beneath a wizard step's inputs, explaining the choice being asked for. A **reference** to a Rich Text Block (`intro`), not inline blocks — so it is an entry with its own pencil, editable on its own and reusable across steps. It sits **below** the inputs: above them it pushed the thing being asked about off a phone's first screen, and the copy is context for a choice already on screen. A Question's own `intro` is used unless a variant's Branch rule matches, exactly as its title is.
+_Avoid_: body (the retired inline field, and the Rich Text Block's own field name), hint (the one-line grey note under the heading), step copy (the variant mechanism)
+
+**Rich Text Block**:
+A passage of rich text held as its own entry (`rich-text-block`: a single blocks `body`). Introduced so a Step introduction could stop being a field buried in a step's drawer. Not a page section — it has no overline, no width and no place in `page.sections`; a Prose Section is the full-width page-level counterpart.
+_Avoid_: Prose Section (the page section), rich text (the field kind / RichTextViewer), text block
+
 **Conditional field**:
 A Form Question field (or an Image Question free-text box) that is only shown when another answer matches. A `form-field` carries `dependsOnFieldKey` + `dependsOnValue` (e.g. Company Name appears only when the "I am a company" toggle is on); an `image-option` with `revealTextInput` shows a describe-more textarea when that option is selected. Hidden fields never block Next.
 _Avoid_: dependent field, show/hide rule, branching
@@ -121,24 +129,48 @@ The home page section that surfaces homeowner testimonials with star ratings and
 _Avoid_: Testimonials section, reviews block, social proof
 
 **Clients Carousel**:
-A page section (`clients-carousel` CMS type) showing an editor-chosen list of client logos (`client-logo` children: image + optional name + link) in an infinitely rotating, pause-on-hover strip on desktop (≥1024px); collapses to a static 3-column grid (5px gaps all around) on tablets, to **one logo per row** below 640px, and to a static wrapped row under `prefers-reduced-motion`. Logos are full colour at every width with no hover state at all — a mark a visitor has to hover to see properly is one most visitors never see, and a touch screen has no hover to give. Carries a Logo height.
+A page section (`clients-carousel` CMS type) showing an editor-chosen list of client logos (`client-logo` children: image + optional name + link) in an infinitely rotating, pause-on-hover strip on desktop (≥1024px); collapses to a static 3-column grid (5px gaps all around) on tablets, to **one logo per row** below 640px, and to a static wrapped row under `prefers-reduced-motion`. Logos are full colour at every width with no hover state at all — a mark a visitor has to hover to see properly is one most visitors never see, and a touch screen has no hover to give. Carries a Logo height. (That rule is about **this strip**: it rejects hover as a way of *revealing* a logo, not motion as such. The Footer accreditation row lifts on hover and hides nothing.)
 _Avoid_: logo slider, partners marquee, brand ticker
 
 **Accreditations section**:
-The trust-badge strip (`accreditation-list` CMS type) sitting under the hero — the Trustpilot widget on the same row as an editor-chosen list of accreditation badges (`accreditation` children: image + title). One row on desktop, wrapping when it no longer fits. Carries a Logo height, which sizes the badges only.
-_Avoid_: certifications, credentials, badges row, trust bar
+The trust-badge strip (`accreditation-list` CMS type) sitting under the hero — the Trustpilot widget on the same row as an editor-chosen list of accreditation badges (`accreditation` children: image + title). One row on desktop, wrapping when it no longer fits. Carries a Logo height, which sizes the badges only. A page section, placed per page; distinct from the Footer accreditation row, which is site-wide Settings content holding its **own** badge entries.
+_Avoid_: certifications, credentials, badges row, trust bar, Footer accreditation row
+
+**Footer accreditation row**:
+The full-width trust band at the foot of every page: the Trustpilot widget, then accreditation badges, between the footer's columns and its legal bar. Its badges are `accreditation` entries held by Global Settings (`footerAccreditations`) with their own Logo height — **copies** of the Accreditations section's, not the same entries, so a footer edit cannot restyle the home page. No white tiles here: on a navy footer a white card is a rectangle punched into the page rather than a badge sitting on it, so each mark carries a Badge glow instead. Badges are full colour at rest and lift on hover; the Trustpilot widget gets neither the glow nor the hover (a vendor iframe has no element of ours to transform) and is rendered in its **dark** theme, without which its near-black type is invisible on navy while its stars still show. Replaced three hardcoded text labels that had already drifted from the real accreditations.
+_Avoid_: Accreditations section (the home-page one), footer badges, trust bar, FOOTER_ACCREDITATIONS (the retired static list)
+
+**Badge glow**:
+The neon halo around a badge in the Footer accreditation row. Set **per badge** (`accreditation.glowColor`, a `color` field), because each badge is a different organisation's mark with its own palette — one site-wide gold behind Gas Safe's yellow and NICEIC's red fought both. Global Settings' `footerGlowColor` is the fallback for a badge that has none, so a newly added badge still glows. Drawn with `drop-shadow`, which follows the image's alpha channel and so traces the logo's own silhouette rather than boxing it — the reason it is not a `box-shadow`.
+_Avoid_: shadow, halo, neon, outline, Logo height (the sizing setting)
 
 **Logo height**:
-The section-level pixel number (`logoSize`) an editor sets to size every logo on a strip — the Accreditations section and the Clients Carousel each have their own. It is a height; each logo's width follows its own aspect ratio, which is what keeps a row of mixed-shape logos looking even. It does **not** apply to the Trustpilot widget, which is a vendor embed at a font size we cannot set.
+The pixel number an editor sets to size every logo on a strip — the Accreditations section (`logoSize`), the Clients Carousel (`logoSize`) and the Footer accreditation row (`footerLogoSize`, on Global Settings) each have their own. It is a height; each logo's width follows its own aspect ratio, which is what keeps a row of mixed-shape logos looking even. It does **not** apply to the Trustpilot widget, which is a vendor embed at a font size we cannot set.
 _Avoid_: logo size, image width, scale, zoom
 
 **Site Banner**:
-The SVG brand mark rendered by `SiteBanner` — **two** images side by side, the crest and the "Upper Street Contractors" wordmark, sized independently. Ships in two tones — navy for light backgrounds (header) and white for dark (footer) — plus a crest-only variant. In the header it sits in its own row above the service-links row, where scrolling shrinks **the crest only**: the crest is decoration and can afford to get smaller, the words are the company's name and hold one size.
-_Avoid_: logo (the old text wordmark), banner (the single combined artwork it was until the split), SiteLogo (the retired component)
+The SVG brand mark rendered by `SiteBanner` — **two** images side by side, the crest and the "Upper Street Contractors" wordmark, each sized by its own prop. Ships in two tones — navy for light backgrounds (header) and white for dark (footer) — plus a crest-only variant. In the header it sits on **one line beside the nav**, both images at the same height: their artwork shares a 287-unit box (234×287 and 491×287), so equal heights reproduce the proportions of the single combined lockup they were split out of. The header does not shrink on scroll — it did while the crest sat above a row of nine service links, sized apart so the crest could shrink while the words stayed readable; with the Services menu and a fixed-height row, neither is needed.
+_Avoid_: logo (the old text wordmark), banner (the single combined artwork it was until the split), SiteLogo (the retired component), service-links row (the retired second header row)
 
 **Service page**:
-A per-service landing page reached from the header's service-links row — Refurbishments, Kitchens, Bathrooms, Plumbing, Heating, Electric, Carpentry, Roofing, Handyman (Refurbishments and Kitchens were promoted from the footer into the main nav). Each is a CMS `page` (`<service>-service` key) whose `sections` follow one shared shape: a Page Hero, a Service Offer section, a Case Studies section, and a per-page CTA band (a `planning-renovation-section` carrying WhatsApp + Request-a-Quote). Distinct from the Projects / About / Contact pages.
-_Avoid_: category page, landing page (generic)
+A per-service landing page — Refurbishments, Kitchens, Bathrooms, Plumbing, Heating, Electric, Carpentry, Roofing, Handyman. Reached from the Services menu and the Services index (they were the header row itself until the menu took over). Each is a CMS `page` (`<service>-service` key) whose `sections` follow one shared shape: a Page Hero, a Service Offer section, a Case Studies section, and a per-page CTA band (a `planning-renovation-section` carrying WhatsApp + Request-a-Quote). Distinct from the Projects / About / Contact pages, and from the Services index that lists them.
+_Avoid_: category page, landing page (generic), service-links row (the retired header row)
+
+**Services index**:
+The `/services` page listing all nine Service pages as cards. A CMS `page` (key `services`) like any Service page — a Page Hero, a Service grid section and a CTA band — not a bespoke route with a hardcoded grid. It is the hub the Services menu's own label and the footer's Services link both point at, and since the footer stopped listing the nine trades it is the one page that links every Service page. No category filter: nine distinct items have nothing to narrow.
+_Avoid_: services page (ambiguous with a Service page), our services, category index, Projects index (the analogous page for Projects)
+
+**Service grid section**:
+A page section (`service-grid-section`) pairing a gold overline and a title with a grid of Service cards. Mirrors the Projects index's grid proportions and hover so the two read as one site. Powers the Services index, and can be placed on any page.
+_Avoid_: services list, What We Do (the home-page section, which is Work Cards + a banner), card grid
+
+**Service card**:
+One service in a Service grid (a `service-card`: image, title, summary, link). Its photo is a real Project hero for that Category, so a Kitchens card shows a kitchen. Distinct from a Work Card, which is a home-page What We Do tile carrying an emoji and a price line rather than a photo.
+_Avoid_: Work Card, service tile, Project card
+
+**Services menu**:
+The header's `Services` item: a real link to the Services index **plus** a chevron button that opens a dropdown of the nine Service pages. Two controls, not one — making the whole item the toggle would put the Services index out of reach, and opening on hover alone would hide the menu from every touch visitor, since a tap navigates rather than hovers. Opens on hover for a mouse and on the chevron for everyone else (click, Enter, Space); Escape closes it and returns focus to the chevron, and tabbing out of the panel closes it behind you. It deliberately does **not** open merely on focus: closing returns focus to the chevron, which sits inside the group, so a focus-to-open rule reopened the panel a frame after Escape and made Escape look broken. In the mobile menu it is a native `<details>` group with an "All services" row beneath it.
+_Avoid_: services dropdown, mega menu, service-links row (what it replaced), flyout
 
 **Service Offer section**:
 The Service-page section stating what we deliver for that service — a `service-offer-section` with an overline, title, intro, a numbered scope list of Deliverables and an optional callout, beside an aside of one or more Cost cards. Present tense (the offer), distinct from a Project's past-tense What We Delivered.
@@ -199,6 +231,10 @@ _Avoid_: tag, topic, Category tag (the Project concept, a different option set)
 **Blog card**:
 One Blog Post on the Blog index: hero image with its Blog category badge, publish date, title and Excerpt. Mirrors the Project card's proportions and hover so the two grids read as one site.
 _Avoid_: post tile, article card, Project card
+
+**Duplicate** (Blog Post):
+The Blog-index action that copies a post to start a new one from — the "use an existing post as a template" route. **Deep**: the copy takes its own sections and their children, because a post's content *is* its `sections` and sharing them would let an edit to the copy rewrite the original. Three things are not copied — media (an `asset` is a media id; both point at the same file), standalone content (a Project has its own URL, a Button is shared site-wide), and lifecycle (a copy is an unpublished draft). Its title gains " (copy)" and its Slug is cleared so it re-derives (ADR 0017).
+_Avoid_: clone, copy, template (the use, not the feature), reuse (the Type picker's sharing step, which is the opposite)
 
 **Image section**:
 A page section (`image-section`) holding one photo and an optional caption, at a chosen Width (narrow / wide / full) — `narrow` matching a Prose Section's reading column so an image between two text blocks lines up with them.

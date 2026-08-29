@@ -4,6 +4,23 @@ import type { CSSProperties } from "react";
 // an `availability` field (multi-select). En-dash by design.
 export const TIME_WINDOWS = ["9am–1pm", "1pm–4pm", "4pm–8pm"] as const;
 
+/**
+ * Weekdays the business never attends, as `Date.getDay()` numbers (0 = Sunday).
+ *
+ * The published hours are Mon–Fri 8am–6pm and Sat 9am–2pm (see
+ * `components/layout/footer/footer-static.ts`), so Sunday is closed outright
+ * while Saturday is a short working day. The calendar previously offered every
+ * day of the week, which asked a visitor to nominate a Sunday nobody would ever
+ * turn up on — the field's `allowWeekends` toggle could only refuse Saturday
+ * and Sunday together, so switching it off lost a real working day to remove a
+ * fake one.
+ *
+ * Hardcoded here, deliberately, only until the opening hours move into Settings
+ * and both this and the footer read them from one place. It is a duplicate of a
+ * fact, not a second definition of it.
+ */
+export const CLOSED_WEEKDAYS = [0] as const;
+
 // Store a picked date as local YYYY-MM-DD (no UTC shift from toISOString()).
 export const toISODate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(

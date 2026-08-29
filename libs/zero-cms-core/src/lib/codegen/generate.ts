@@ -36,6 +36,8 @@ function baseFieldType(field: Field): string {
       return field.options.length
         ? field.options.map(quote).join(' | ')
         : 'string';
+    case 'color':
+      return 'string';
     case 'reference':
       return 'string';
     case 'references':

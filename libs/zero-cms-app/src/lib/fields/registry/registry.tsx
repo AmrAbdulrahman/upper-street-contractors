@@ -22,6 +22,7 @@ import { JsonRenderer } from '../json';
 import { BlocksFieldRenderer } from '../blocks';
 import { BooleanRenderer } from '../boolean';
 import { LookupRenderer } from '../lookup';
+import { ColorRenderer } from '../color';
 import { AssetRenderer } from '../asset';
 import { ReferenceRenderer } from '../reference';
 import { ReferencesRenderer } from '../references';
@@ -41,6 +42,7 @@ export const fieldRegistry: Record<FieldType, ComponentType<RendererProps>> = {
   boolean: BooleanRenderer,
   date: DateRenderer,
   lookup: LookupRenderer,
+  color: ColorRenderer,
   asset: AssetRenderer,
   reference: ReferenceRenderer,
   references: ReferencesRenderer,

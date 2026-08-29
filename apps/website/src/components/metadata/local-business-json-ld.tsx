@@ -7,10 +7,15 @@ type LocalBusinessJsonLdProps = {
 
 export function LocalBusinessJsonLd({ config }: LocalBusinessJsonLdProps) {
   const siteUrl = normalizeSiteUrl(config.siteUrl);
+  // `sameAs` is a structured-data claim that these URLs are the business, so it
+  // must not publish whatever scheme an editor happened to type — the stored
+  // WhatsApp link is `http://` today. Upgrade to https, then keep only what is
+  // actually an https URL; a `mailto:` or a bare handle is not a profile page.
   const sameAs =
     config.socialLinks
-      ?.map((link) => link?.url)
-      .filter((url): url is string => Boolean(url)) ?? [];
+      ?.map((link) => link?.url?.trim().replace(/^http:\/\//i, "https://"))
+      .filter((url): url is string => Boolean(url) && /^https:\/\//i.test(url!)) ??
+    [];
   const mapLocation = config.mapLocation as
     | { lat?: number | null; lon?: number | null }
     | null

@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import { ArrowRightIcon } from "./icons/arrow-right";
 import { ChatIcon } from "./icons/chat";
 import { CheckIcon } from "./icons/check";
+import { ChevronDownIcon } from "./icons/chevron-down";
 import { EnvelopeIcon } from "./icons/envelope";
 import { PhoneIcon } from "./icons/phone";
 import { PinIcon } from "./icons/pin";
@@ -14,6 +15,7 @@ const iconMap: Record<IconCode, ComponentType<IconSvgProps>> = {
   "arrow-right": ArrowRightIcon,
   chat: ChatIcon,
   check: CheckIcon,
+  "chevron-down": ChevronDownIcon,
   envelope: EnvelopeIcon,
   phone: PhoneIcon,
   pin: PinIcon,

@@ -90,21 +90,33 @@ tsconfig.base.json
   and `$includeUnpublished: Boolean` — `apps/website/src/lib/cms/query.ts` injects both
   automatically whenever `isPreview()` is true.
 - **Shared fragments**: compose from `apps/website/src/components/ui/**/*.graphql` (e.g. `...Button`, `...Icon`).
-- **Codegen**: after any `.graphql` change, run `npm run codegen`. Generated types land in
-  `apps/website/src/generated/graphql.ts`; schema SDL in `apps/website/src/generated/schema.graphql`.
+- **Codegen**: after any `.graphql` change, run `nx codegen website` (it depends on
+  `cms-schema`, so both run). Generated types land in `apps/website/src/generated/graphql.ts`;
+  schema SDL in `apps/website/src/generated/schema.graphql`. Add `--skip-nx-cache` after a
+  schema change — Nx caches `cms-schema` and a cached run regenerates the OLD SDL.
 
 ## Adding a new content Type
 
-1. **Type** — author it via the Types tab at `/admin/cms` (writes straight to Redis).
+1. **Type** — author it via the Types tab at `/admin/cms`, or (preferred, and what every
+   existing change did) a new `scripts/seed-*.mjs` following the additive harness in
+   `scripts/seed-services-index.mjs`. Both write straight to Redis. Remember
+   `allowedTypes` on **`page.sections` and `blog-post.sections`** — two separate snapshots.
 2. **Fragment** — create `apps/website/src/components/sections/<name>/<name>.graphql`.
+   Codegen globs `apps/website/src/**/*.graphql`, so fragments resolve without imports.
 3. **Component** — create `apps/website/src/components/sections/<name>/<name>.tsx` — accept
    fragment type from `@/generated/graphql`.
-4. **Barrel** — export from `apps/website/src/components/sections/<name>/index.ts`.
-5. **Wire PageSection** — add the fragment type to `PageSectionData` union and the `switch` in
-   `apps/website/src/components/sections/page-section.tsx`.
-6. **Page query** — add the relation field + fragment spread in the owning page query.
-7. **Flatten refs** — add the new relation to `apps/website/src/helpers/flatten-section-refs.ts`.
-8. **Codegen** — run `npm run codegen` (reads the new Type straight from Redis).
+4. **Barrel** — export from `apps/website/src/components/sections/<name>/index.ts`, and from
+   `apps/website/src/components/sections/index.ts`.
+5. **Union fragments** — add `... on <GqlType> { ...<Fragment> }` to **both**
+   `PageSectionBlocks` and `BlogPostSectionBlocks` in
+   `apps/website/src/components/sections/page-sections.graphql`. They are byte-identical but
+   cannot share a definition, and missing one is the easiest thing to forget.
+6. **Wire PageSection** — add the fragment type to the `PageSectionData` union and the
+   `switch` in `apps/website/src/components/sections/page-section.tsx`.
+7. **Codegen** — `nx cms-schema website --skip-nx-cache && nx codegen website --skip-nx-cache`.
+8. **Restart `next dev`.** The schema is cached once per process in three places (the Engine,
+   the `globalThis` read adapter, and the executable GraphQL schema in `lib/cms/query.ts`), so
+   a seed script in another process is invisible until restart.
 
 Wrap editable fields with the zero-cms-widget Inspect overlay when edit pencils are needed.
 Use `RichText` from `@/components/ui/rich-text-viewer` for `blocks` fields.
@@ -123,7 +135,8 @@ Use `RichText` from `@/components/ui/rich-text-viewer` for `blocks` fields.
 | `npm run dev` | The only dev entrypoint — one app, one process (`nx dev website`) |
 | `npm run build` | Builds `website` (also regenerates the zero-cms GraphQL SDL as a dependent Nx target); `app/sitemap.ts` reads live Redis at request time, no separate build step |
 | `npm run lint` | ESLint |
-| `npm run codegen` | After `.graphql` changes — reads live Redis for the schema, no local fixture |
+| `nx codegen website` | After `.graphql` changes — reads live Redis for the schema, no local fixture. Add `--skip-nx-cache` after a schema change. (There is no `npm run codegen`.) |
+| `nx cms-schema website` | Regenerate `generated/schema.graphql` alone — a `codegen` dependency, rarely run by hand |
 
 ## Next.js agent rules
 

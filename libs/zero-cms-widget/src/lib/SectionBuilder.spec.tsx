@@ -356,6 +356,45 @@ describe('<ZeroCmsSectionList> — the Section builder', () => {
     expect(off.container.querySelector('[data-zero-cms-section-list]')).toBeNull();
   });
 
+  it('does not leak the slot into an entry nested inside a section', async () => {
+    const fx = await fixture();
+    render(
+      <ZeroCmsWidget adapter={fx.adapter} inspect>
+        <ZeroCmsEntryProvider entry={{ __id: fx.pageId, __type: 'page' }}>
+          <ZeroCmsSectionList
+            field="sections"
+            items={fx.sections.map((s) => ({ id: s.id, type: s.type }))}
+          >
+            {fx.sections.map((s) => (
+              <ZeroCmsEntry key={s.id} entry={{ id: s.id, type: s.type }}>
+                <section>
+                  {s.title}
+                  {/* A card or field inside the section — its own entry. */}
+                  <ZeroCmsEntry entry={{ id: `${s.id}-child`, type: 'cta' }}>
+                    <span>child of {s.title}</span>
+                  </ZeroCmsEntry>
+                </section>
+              </ZeroCmsEntry>
+            ))}
+          </ZeroCmsSectionList>
+        </ZeroCmsEntryProvider>
+      </ZeroCmsWidget>
+    );
+
+    // Hover the CHILD entry's own host. `pointerenter` does not bubble, so this
+    // mounts that entry's cluster and nothing else's.
+    fireEvent.pointerEnter(await screen.findByText(/child of Section one/));
+
+    // Section-slot context reaches every descendant, so the nested entry used
+    // to read its HOST's slot and grow its own "Remove section 1 of 2" — a
+    // control that looked like it belonged to the card but unlinked the whole
+    // section. A nested entry gets a pencil and nothing else.
+    await waitFor(() =>
+      expect(screen.getAllByRole('button', { name: /^Edit entry/ })).toHaveLength(1)
+    );
+    expect(screen.queryByRole('button', { name: /^Remove section/ })).toBeNull();
+  });
+
   it('disables every insert slot at the field max', async () => {
     const capped: Schema = schema.map((t) =>
       t.__name === 'page'

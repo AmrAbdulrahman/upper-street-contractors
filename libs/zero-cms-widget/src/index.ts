@@ -20,7 +20,14 @@ export {
   type LinkOptions,
   type ReorderOptions,
   type TypePickerContext,
+  type DuplicateOptions,
 } from './lib/context';
+export {
+  duplicateEntry,
+  type DuplicateAdapter,
+  type DuplicateEntryOptions,
+  type DuplicateEntryResult,
+} from './lib/duplicate-entry';
 export { Drawer, type DrawerProps } from './lib/Drawer';
 export { ZeroCmsBar, type ZeroCmsBarProps } from './lib/ZeroCmsBar';
 

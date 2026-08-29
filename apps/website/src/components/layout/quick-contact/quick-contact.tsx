@@ -24,6 +24,22 @@ export function QuickContact({
 }: QuickContactProps) {
   return (
     <div className="fixed right-0 top-[calc(var(--admin-banner-offset,0px)+10rem)] z-[60] flex flex-col items-end gap-3">
+      {/* Request a Quote sits above WhatsApp: the quote is the outcome the site
+          is for, and the top tab is the one a thumb reaches first. */}
+      <Link
+        href={quoteHref}
+        aria-label="Request a Quote"
+        title="Request a Quote"
+        className={`${pillBase} bg-gold text-white`}
+      >
+        <span className={labelWrap}>
+          <span className={labelText}>Request a Quote</span>
+        </span>
+        <span className={iconWrap}>
+          <Icon data={iconData("chat")} className="h-6 w-6 shrink-0" />
+        </span>
+      </Link>
+
       {whatsappUrl ? (
         <a
           href={whatsappUrl}
@@ -41,20 +57,6 @@ export function QuickContact({
           </span>
         </a>
       ) : null}
-
-      <Link
-        href={quoteHref}
-        aria-label="Request a Quote"
-        title="Request a Quote"
-        className={`${pillBase} bg-gold text-white`}
-      >
-        <span className={labelWrap}>
-          <span className={labelText}>Request a Quote</span>
-        </span>
-        <span className={iconWrap}>
-          <Icon data={iconData("chat")} className="h-6 w-6 shrink-0" />
-        </span>
-      </Link>
     </div>
   );
 }

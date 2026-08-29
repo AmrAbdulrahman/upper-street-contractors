@@ -9,6 +9,54 @@ import { cmsNotify } from "@/lib/cms/notify";
 
 const ADMIN_PREFIX = "/admin";
 const CMS_PREFIX = "/admin/cms";
+const INSPECT_PARAM = "inspect";
+/**
+ * Survives a navigation the click interceptor never sees — a form post, an
+ * external round-trip, a typed URL, `exit-preview` and back. Session-scoped, so
+ * it cannot leak edit mode into a new tab opened days later.
+ */
+const INSPECT_STORAGE_KEY = "zero-cms-inspect";
+
+/** Site-relative href with `?inspect=true` added (or left alone when off). */
+function withInspect(href: string, on: boolean): string {
+  if (!on) return href;
+  const url = new URL(href, window.location.origin);
+  url.searchParams.set(INSPECT_PARAM, "true");
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+function readStoredInspect(): boolean {
+  try {
+    return window.sessionStorage.getItem(INSPECT_STORAGE_KEY) === "true";
+  } catch {
+    // Private mode / blocked storage. Edit mode still works, it just stops
+    // surviving a full page load — never a reason to break the page.
+    return false;
+  }
+}
+
+function writeStoredInspect(on: boolean): void {
+  try {
+    window.sessionStorage.setItem(INSPECT_STORAGE_KEY, String(on));
+  } catch {
+    /* see readStoredInspect */
+  }
+}
+
+/**
+ * Whether the stored preference has already been applied for THIS document.
+ *
+ * Module scope, not a `useRef`. `InspectControls` reads `useSearchParams`, so it
+ * lives under a Suspense boundary, and a query-only navigation can re-suspend
+ * that boundary and remount the component — which resets a ref. That made
+ * "turn off edit mode" impossible: the toggle dropped `?inspect=true`, the
+ * remount re-armed the guard, and the restore put the parameter straight back.
+ *
+ * A module variable is scoped to the document instead, which is the actual unit
+ * this should run once per: it survives every client-side navigation and resets
+ * only on a real page load, which is exactly when restoring is wanted.
+ */
+let inspectRestored = false;
 
 /**
  * Renders the zero-cms widget + admin bar (preview deploy only).
@@ -50,6 +98,11 @@ export function CmsInspectShellClient({
   // of URL), but losing the /admin context and its re-gating on the way.
   // Only active while actually under /admin/* and outside the dashboard
   // (/admin/cms, a distinct real app, not a mirrored page).
+  //
+  // It also has to carry `?inspect=true` across, which it did not: edit mode
+  // lives entirely in the query string, and this handler rebuilt the URL from
+  // the anchor's href alone. So every link an editor clicked while editing
+  // dropped them back into read-only — the one navigation they make most.
   useEffect(() => {
     const underAdmin =
       pathname === ADMIN_PREFIX || pathname.startsWith(`${ADMIN_PREFIX}/`);
@@ -73,12 +126,12 @@ export function CmsInspectShellClient({
       if (!href || !href.startsWith("/") || href.startsWith("//")) return; // external/absolute/mailto/tel
       if (href.startsWith(ADMIN_PREFIX)) return; // already admin-aware (e.g. "Skip to content")
       e.preventDefault();
-      router.push(ADMIN_PREFIX + href);
+      router.push(withInspect(ADMIN_PREFIX + href, inspect));
     };
 
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [pathname, router]);
+  }, [pathname, router, inspect]);
 
   return (
     <>
@@ -116,16 +169,40 @@ function InspectControls({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const paramInspect = searchParams.get("inspect") === "true";
+  const paramInspect = searchParams.get(INSPECT_PARAM) === "true";
 
   useEffect(() => {
     onInspectChange(paramInspect);
   }, [paramInspect, onInspectChange]);
 
+  // The URL stays the source of truth; sessionStorage is only a memory of the
+  // last choice, so a navigation the click interceptor cannot intercept — a
+  // full page load, a typed URL, a browser back out of an external link — comes
+  // back in edit mode instead of silently dropping to read-only.
+  //
+  // Runs once. A `replace`, not a `push`: restoring a state the editor never
+  // left should not cost them a history entry, and it must not be undoable by
+  // pressing Back straight back into the URL that triggered it.
+  useEffect(() => {
+    if (inspectRestored) return;
+    inspectRestored = true;
+
+    const underCms = pathname === CMS_PREFIX || pathname.startsWith(`${CMS_PREFIX}/`);
+    if (underCms || paramInspect || !readStoredInspect()) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(INSPECT_PARAM, "true");
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [pathname, paramInspect, searchParams, router]);
+
+  useEffect(() => {
+    writeStoredInspect(paramInspect);
+  }, [paramInspect]);
+
   const toggleInspect = () => {
     const params = new URLSearchParams(searchParams.toString());
-    if (paramInspect) params.delete("inspect");
-    else params.set("inspect", "true");
+    if (paramInspect) params.delete(INSPECT_PARAM);
+    else params.set(INSPECT_PARAM, "true");
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname);
   };
@@ -143,6 +220,10 @@ function InspectControls({
       onToggleInspect={toggleInspect}
       onChange={onContentChange}
       closeHref={closeHref}
+      // Site-wide settings — name, logos, metadata, contact details, social
+      // links — belong to no page, so no pencil on the site can reach them.
+      settingsType="site-meta-config"
+      settingsLabel="Site settings"
     />
   );
 }

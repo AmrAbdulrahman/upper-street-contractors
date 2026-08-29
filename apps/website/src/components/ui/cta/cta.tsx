@@ -1,5 +1,5 @@
 import { Banner } from "@/components/ui/banner";
-import { Button } from "@/components/ui/button";
+import { CmsButton } from "@/components/ui/button/cms-button";
 import type { CtaFragment } from "@/generated/graphql";
 import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 
@@ -54,7 +54,7 @@ export function Cta({ data, variant = "section" }: CtaProps) {
             <div className="mt-4 flex flex-col gap-2.5">
               {items.map((b) => (
                 <ZeroCmsEntry key={b.id} entry={b}>
-                  <Button data={b} className="w-full" />
+                  <CmsButton data={b} className="w-full" />
                 </ZeroCmsEntry>
               ))}
             </div>
@@ -87,7 +87,7 @@ export function Cta({ data, variant = "section" }: CtaProps) {
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             {items.map((b) => (
               <ZeroCmsEntry key={b.id} entry={b}>
-                <Button data={b} className="w-full sm:w-auto" />
+                <CmsButton data={b} className="w-full sm:w-auto" />
               </ZeroCmsEntry>
             ))}
           </div>

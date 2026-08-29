@@ -1,5 +1,21 @@
+/**
+ * Where a `contact_form` Button action goes. One constant rather than a literal
+ * per call site, because the enquiry route is about to start carrying a source
+ * service in its query string and every producer of that link has to agree.
+ */
+export const CONTACT_FORM_PATH = "/contact";
+
 export const BUTTON_VARIANTS = ["contained", "outlined", "text"] as const;
-export const BUTTON_COLORS = ["green", "dark_blue", "white", "black"] as const;
+// `gold` is the brand colour and the one the primary CTA wears. It sits last
+// because the earlier four are stored values in live CMS entries and the order
+// is what the type-builder shows an editor.
+export const BUTTON_COLORS = [
+  "green",
+  "dark_blue",
+  "white",
+  "black",
+  "gold",
+] as const;
 export const BUTTON_ACTIONS = ["whatsapp", "contact_form"] as const;
 export const ICON_POSITIONS = ["start", "end"] as const;
 
@@ -33,6 +49,7 @@ export function normalizeButtonColor(color?: string | null): ButtonColor {
   if (key === "dark-blue" || key === "dark" || key === "dark_blue") return "dark_blue";
   if (key === "white") return "white";
   if (key === "black") return "black";
+  if (key === "gold" || key === "brand" || key === "primary") return "gold";
 
   return "green";
 }

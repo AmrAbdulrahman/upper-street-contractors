@@ -16,6 +16,7 @@ import {
   type QuoteSectionFragment,
   type RecentWorkSectionFragment,
   type SeparatorSectionFragment,
+  type ServiceGridSectionFragment,
   type ServiceOfferSectionFragment,
   type SplitSectionFragment,
   type WhatWeDoSectionFragment,
@@ -27,7 +28,7 @@ import { AccreditationList } from "./accreditation-list";
 import { CaseStudiesSection } from "./case-studies";
 import { ClientReviewsSection } from "./client-reviews";
 import { ClientsCarousel } from "./clients-carousel";
-import { ContactDetailsSection } from "./contact-details";
+import { ContactDetailsSection } from "./contact-details/contact-details-section";
 import { FaqSection } from "./faq";
 import { GallerySection } from "./gallery-section";
 import { GoogleReviewsSection } from "./google-reviews";
@@ -40,6 +41,7 @@ import { ProseSection } from "./prose-section";
 import { QuoteSection } from "./quote-section";
 import { RecentWorkSection } from "./recent-work";
 import { SeparatorSection } from "./separator-section";
+import { ServiceGridSection } from "./service-grid";
 import { ServiceOfferSection } from "./service-offer";
 import { SplitSection } from "./split-section";
 import { WhatWeDoSection } from "./what-we-do";
@@ -65,6 +67,7 @@ export type PageSectionData = (
   | QuoteSectionFragment
   | RecentWorkSectionFragment
   | SeparatorSectionFragment
+  | ServiceGridSectionFragment
   | ServiceOfferSectionFragment
   | SplitSectionFragment
   | WhatWeDoSectionFragment
@@ -125,6 +128,11 @@ export function PageSection({ section }: { section: PageSectionData }) {
     case "ServiceOfferSection":
       return (
         <ServiceOfferSection data={section as ServiceOfferSectionFragment} />
+      );
+
+    case "ServiceGridSection":
+      return (
+        <ServiceGridSection data={section as ServiceGridSectionFragment} />
       );
 
     case "CaseStudiesSection":

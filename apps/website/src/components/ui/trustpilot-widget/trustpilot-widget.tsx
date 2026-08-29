@@ -78,6 +78,18 @@ const VARIANT_CONFIG: Record<TrustpilotVariant, VariantConfig> = {
 type TrustpilotWidgetProps = {
   className?: string;
   variant?: TrustpilotVariant;
+  /**
+   * Vendor colour scheme. `dark` is for **dark backgrounds** — it switches the
+   * widget's own text to white. On a navy footer the default `light` renders
+   * near-black type on navy, which is simply invisible; the stars still show,
+   * so it reads as a broken widget rather than an unreadable one.
+   */
+  theme?: "light" | "dark";
+  /**
+   * Overrides the variant's `data-style-height`. `mini` scales its content to
+   * this box, so it is a size control for that template rather than padding.
+   */
+  styleHeight?: string;
 };
 
 declare global {
@@ -96,6 +108,8 @@ function loadTrustpilotWidget(element: HTMLDivElement | null) {
 export function TrustpilotWidget({
   className,
   variant = "mini",
+  theme = "light",
+  styleHeight: styleHeightOverride,
 }: TrustpilotWidgetProps) {
   const allowed = useHasConsent("functional");
   const widgetRef = useRef<HTMLDivElement>(null);
@@ -117,16 +131,20 @@ export function TrustpilotWidget({
     return () => observer.disconnect();
   }, [variant, allowed]);
 
+  // An explicit override wins over both the variant default and the
+  // micro-combo wrap measurement — a caller asking for a size has measured its
+  // own row.
   const styleHeight =
-    variant === "micro-combo" && boxWidth !== null
+    styleHeightOverride ??
+    (variant === "micro-combo" && boxWidth !== null
       ? `${boxWidth >= MICRO_COMBO_ONE_LINE_WIDTH ? MICRO_COMBO_ONE_LINE_HEIGHT : MICRO_COMBO_TWO_LINE_HEIGHT}px`
-      : config.styleHeight;
+      : config.styleHeight);
 
   useEffect(() => {
     // Consent gate: only touch the vendor API once functional cookies are allowed.
     if (!allowed) return;
     loadTrustpilotWidget(widgetRef.current);
-  }, [variant, styleHeight, allowed]);
+  }, [variant, styleHeight, theme, allowed]);
 
   // No consent → render an inert badge-sized prompt, never the vendor <Script>.
   if (!allowed) {
@@ -154,7 +172,7 @@ export function TrustpilotWidget({
           // Keyed on both so crossing the wrap threshold remounts the host div —
           // the vendor injects an iframe on load and never re-reads
           // `data-style-height` afterwards.
-          key={`${variant}:${styleHeight}`}
+          key={`${variant}:${styleHeight}:${theme}`}
           ref={widgetRef}
           className="trustpilot-widget"
           data-locale="en-GB"
@@ -162,7 +180,7 @@ export function TrustpilotWidget({
           data-businessunit-id={BUSINESS_UNIT_ID}
           data-style-height={styleHeight}
           data-style-width={config.styleWidth}
-          data-theme="light"
+          data-theme={theme}
           data-token={TOKEN}
         >
           <a

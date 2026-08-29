@@ -25,8 +25,8 @@ Read `docs/agents/project-stack.md`. Use caveman mode. Match existing patterns i
 
 4. **Barrel** — `index.ts` re-exporting public API
 
-5. **Codegen** (if `.graphql` added) — `npm run codegen`
+5. **Codegen** (if `.graphql` added) — `nx codegen website` (there is no `npm run codegen`)
 
-6. **Verify** — `npm run lint`
+6. **Verify** — `npm run lint` and `npx tsc --noEmit -p apps/website/tsconfig.json`
 
 Do not edit `apps/website/src/generated/` by hand. Report files created.

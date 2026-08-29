@@ -205,6 +205,44 @@ export function EntryForm({
 
   const autosaveActive = Boolean(autosave) && autoSaveOn;
 
+  /**
+   * Field groups, in the order they first appear. One group (or none) means no
+   * tabs and the form renders exactly as it always did — so this is inert for
+   * every Type that hasn't opted in.
+   */
+  const groups = useMemo(() => {
+    const seen: { name: string }[] = [];
+    for (const f of type.fields) {
+      const name = f.group ?? '';
+      if (!seen.some((g) => g.name === name)) seen.push({ name });
+    }
+    return seen;
+  }, [type.fields]);
+
+  const [activeGroup, setActiveGroup] = useState<string>(groups[0]?.name ?? '');
+
+  // A Type swap (or a schema edit that renames a group) must not leave the form
+  // showing a tab that no longer exists — that renders as an empty panel with
+  // no way back except reloading.
+  useEffect(() => {
+    if (!groups.some((g) => g.name === activeGroup)) {
+      setActiveGroup(groups[0]?.name ?? '');
+    }
+  }, [groups, activeGroup]);
+
+  // Focusing a field from outside (the pencil on a specific Field in inspect
+  // mode) has to be able to reach a field on a tab that isn't open.
+  useEffect(() => {
+    if (!focusField) return;
+    const target = type.fields.find((f) => f.__name === focusField);
+    if (target) setActiveGroup(target.group ?? '');
+  }, [focusField, type.fields]);
+
+  const visibleFields =
+    groups.length > 1
+      ? type.fields.filter((f) => (f.group ?? '') === activeGroup)
+      : type.fields;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       {/*
@@ -227,7 +265,32 @@ export function EntryForm({
         aria-busy={isAutoSaving}
         className="min-w-0 space-y-4"
       >
-        {type.fields.map((f) => (
+        {groups.length > 1 ? (
+          <div
+            role="tablist"
+            aria-label="Field groups"
+            className="-mx-1 flex flex-wrap gap-1 border-b border-neutral-200 px-1 pb-2"
+          >
+            {groups.map((g) => (
+              <button
+                key={g.name}
+                type="button"
+                role="tab"
+                aria-selected={g.name === activeGroup}
+                onClick={() => setActiveGroup(g.name)}
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  g.name === activeGroup
+                    ? 'bg-neutral-900 text-white'
+                    : 'text-neutral-600 hover:bg-neutral-100'
+                }`}
+              >
+                {g.name || 'General'}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {visibleFields.map((f) => (
           <FieldHighlight key={f.__name} highlighted={f.__name === focusField}>
             <FieldControl
               field={f}

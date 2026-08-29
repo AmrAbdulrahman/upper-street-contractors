@@ -1,6 +1,6 @@
 /** Value validation against a Type's fields. */
 
-import { SLUG_PATTERN, type Type } from '../model/schema';
+import { COLOR_PATTERN, SLUG_PATTERN, type Type } from '../model/schema';
 import type { EntryValues } from '../model/entry';
 import { ZeroCmsError } from '../model/errors';
 
@@ -96,6 +96,15 @@ export function validateValues(
       case 'lookup':
         if (typeof v !== 'string' || !f.options.includes(v))
           issues.push({ field: f.__name, message: 'Not an allowed option' });
+        break;
+      case 'color':
+        // Validated on every write, not only on publish: a malformed colour is
+        // a broken style, not an incomplete value — same argument as `slug`.
+        if (typeof v !== 'string' || !COLOR_PATTERN.test(v))
+          issues.push({
+            field: f.__name,
+            message: 'Expected a hex colour (#rgb, #rrggbb or #rrggbbaa)',
+          });
         break;
       case 'reference':
         if (typeof v !== 'string')

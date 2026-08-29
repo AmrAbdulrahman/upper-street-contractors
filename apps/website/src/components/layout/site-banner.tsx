@@ -32,6 +32,17 @@ type SiteBannerProps = {
    * same height on a single-line wordmark would.
    */
   wordmarkClassName?: string;
+  /**
+   * CMS-supplied artwork, from Site settings. Each is optional and each falls
+   * back independently to the committed SVG — an editor who uploads a crest but
+   * no wordmark gets their crest beside the built-in words, not a broken pair.
+   */
+  logos?: {
+    crestDark?: string | null;
+    crestLight?: string | null;
+    wordmarkDark?: string | null;
+    wordmarkLight?: string | null;
+  } | null;
 };
 
 // Intrinsic dimensions match each SVG's viewBox aspect ratio.
@@ -58,10 +69,15 @@ export function SiteBanner({
   href = "/",
   className,
   wordmarkClassName = "h-6",
+  logos,
 }: SiteBannerProps) {
   const alt = siteName || "Upper Street Contractors";
-  const crestSrc = tone === "light" ? "/logo-light.svg" : "/logo-dark.svg";
-  const wordmarkSrc = tone === "light" ? "/wordmark-light.svg" : "/wordmark-dark.svg";
+  const crestSrc =
+    (tone === "light" ? logos?.crestLight : logos?.crestDark) ||
+    (tone === "light" ? "/logo-light.svg" : "/logo-dark.svg");
+  const wordmarkSrc =
+    (tone === "light" ? logos?.wordmarkLight : logos?.wordmarkDark) ||
+    (tone === "light" ? "/wordmark-light.svg" : "/wordmark-dark.svg");
 
   const crest = (
     <Image

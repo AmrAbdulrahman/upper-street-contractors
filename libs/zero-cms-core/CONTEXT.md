@@ -50,7 +50,7 @@ _Avoid_: column, property, attribute
 
 **`__type`** (field kind):
 One of: `text`, `longtext`, `richtext`, `slug`, `user`, `blocks`, `number`, `json`,
-`boolean`, `date`, `asset`, `lookup`, `reference`, `references`.
+`boolean`, `date`, `asset`, `lookup`, `color`, `reference`, `references`.
 - **richtext** — an HTML/markdown string. **blocks** — structured rich text
   ({@link BlocksContent}, Strapi-blocks-compatible) rendered by `@usc/zero-cms-blocks`.
 - **slug** — a URL segment: lowercase words joined by hyphens, validated on every
@@ -68,6 +68,14 @@ One of: `text`, `longtext`, `richtext`, `slug`, `user`, `blocks`, `number`, `jso
 - **asset** — points at a file in `media/`. Meta `accept`: `image | video | any`. In
   GraphQL it resolves to a **Media** object (`id, url, alt, width, height, mime, kind`).
 - **lookup** — text constrained to a predefined set. Meta `options: string[]`.
+- **color** — a hex colour (`#rgb`, `#rrggbb` or `#rrggbbaa`), validated on every
+  write like a `slug`, because a malformed colour is a broken style rather than
+  an incomplete value. Edited with the native picker plus a hex box — the picker
+  alone cannot express "unset" (it reports `#000000` when empty, which would
+  write black into every optional colour an editor merely opened). Hex only:
+  `rgba()`/`hsl()`/named colours each need their own parse path and the picker
+  cannot produce them. Meta `presets: string[]` offers swatches. A `String` in
+  GraphQL, so it drops straight into a style with no conversion step.
 - **reference** — holds one Entry id of an allowed target Type. Meta `allowedTypes`.
 - **references** — holds an array of Entry ids; targets may mix allowed Types. Meta `allowedTypes`.
 

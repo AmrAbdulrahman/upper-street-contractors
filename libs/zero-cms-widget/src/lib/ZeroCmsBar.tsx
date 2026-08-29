@@ -31,6 +31,21 @@ export interface ZeroCmsBarProps {
    * this component's own routing knowledge. Omit to hide the Close button.
    */
   closeHref?: string;
+  /**
+   * Type name of a site-wide settings singleton (e.g. `site-meta-config`).
+   * When set, the bar grows a Settings button on the left that opens that
+   * entry's drawer in place — the site's name, logos, metadata, contact details
+   * and menus are the one kind of content that belongs to no page, so there is
+   * no pencil anywhere on the site that can reach them and the only route was
+   * to leave for /admin/cms and hunt for the Type.
+   *
+   * The entry is looked up by Type, not by id: a singleton's id is generated
+   * and would have to be threaded through the host as configuration. If none
+   * exists yet the button creates one.
+   */
+  settingsType?: string;
+  /** Label for that button. Defaults to "Settings". */
+  settingsLabel?: string;
   className?: string;
 }
 
@@ -44,10 +59,13 @@ export function ZeroCmsBar({
   onToggleInspect,
   onChange,
   closeHref,
+  settingsType,
+  settingsLabel = 'Settings',
   className,
 }: ZeroCmsBarProps) {
   const { adapter, notify, currentUserId } = useZeroCms();
-  const { logout, currentUserEmail } = useZeroCmsWidget();
+  const { logout, currentUserEmail, openEntry, createEntry } = useZeroCmsWidget();
+  const [openingSettings, setOpeningSettings] = useState(false);
   // Which entries currently have drafts is a shared store: the drawer marks them
   // optimistically on every (auto)save, and this bar re-syncs authoritatively.
   const { drafts, setDrafts, clearDraft } = useDraftRegistry();
@@ -149,6 +167,30 @@ export function ZeroCmsBar({
     );
   }
 
+  /**
+   * Open the settings singleton. Queries by Type rather than holding an id, and
+   * creates the entry when the site has never had one — a settings button that
+   * errors because nobody has made the record yet is worse than one that makes it.
+   */
+  const openSettings = async () => {
+    if (!settingsType || openingSettings) return;
+    setOpeningSettings(true);
+    try {
+      const { data } = await adapter.query(settingsType, {
+        status: 'draft',
+        includeUnpublished: true,
+        page: { limit: 1 },
+      });
+      const existing = data[0]?.__id;
+      if (existing) await openEntry(existing, { type: settingsType });
+      else await createEntry(settingsType);
+    } catch (e) {
+      notify('error', errorMessage(e));
+    } finally {
+      setOpeningSettings(false);
+    }
+  };
+
   const btn =
     'inline-flex h-7 items-center gap-1.5 rounded-md border px-3 text-xs font-semibold transition-colors';
 
@@ -158,9 +200,29 @@ export function ZeroCmsBar({
       aria-label="zero-cms editor bar"
       className={`zero-cms sticky inset-x-0 top-0 z-[1000] flex h-9 items-center gap-2 border-b border-white/20 bg-neutral-900 px-3 text-white ${className ?? ''}`}
     >
-      <span className="mr-auto text-xs font-semibold tracking-wide uppercase text-white/60">
+      <span className="text-xs font-semibold tracking-wide uppercase text-white/60">
         zero-cms
       </span>
+
+      {/* Settings sits on the LEFT, next to the wordmark, and carries the
+          `mr-auto` that used to be on it — everything else on this bar acts on
+          the page you are looking at, while this one acts on the whole site.
+          Keeping it away from Publish/Close also keeps it away from the two
+          buttons an editor presses in a hurry. */}
+      {settingsType ? (
+        <button
+          type="button"
+          onClick={openSettings}
+          disabled={openingSettings}
+          aria-label="Open site settings"
+          className={`${btn} mr-auto border-white/60 text-white hover:bg-white/15 disabled:opacity-50`}
+        >
+          <span aria-hidden>⚙</span>
+          {openingSettings ? 'Opening…' : settingsLabel}
+        </button>
+      ) : (
+        <span className="mr-auto" />
+      )}
 
       <button
         type="button"

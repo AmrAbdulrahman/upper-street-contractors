@@ -7,13 +7,31 @@ import {
 import { Button } from "@/components/ui/button";
 import type { ContactDetailsSectionFragment } from "@/generated/graphql";
 
-type ContactDetailsProps = { data: ContactDetailsSectionFragment };
+/**
+ * This module is imported by the Enquiry Wizard, a Client Component, so it must
+ * stay free of anything server-only. The standalone `<ContactDetailsSection>`
+ * wrapper — which needs `getSiteMetaConfig` — therefore lives in its own file,
+ * `contact-details-section.tsx`, and the barrel keeps the two apart.
+ */
+export type ContactDetailsProps = {
+  data: ContactDetailsSectionFragment;
+  /**
+   * The site's WhatsApp destination, for a `whatsappButton` that carries the
+   * action rather than an explicit href.
+   *
+   * Passed in rather than looked up, because this panel is also rendered by the
+   * Enquiry Wizard — a Client Component — and `<CmsButton>`'s own lookup would
+   * drag the CMS query layer into the browser bundle from there. Every server
+   * caller gets it from `<ContactDetailsSection>` below.
+   */
+  whatsappUrl?: string | null;
+};
 
 /**
  * The dark "Get in touch directly" card. Rendered on its own by
  * <ContactDetailsSection> and as the right column of the Contact wizard.
  */
-export function ContactDetailsPanel({ data }: ContactDetailsProps) {
+export function ContactDetailsPanel({ data, whatsappUrl }: ContactDetailsProps) {
   const { title, items, note, whatsappButton } = data;
   const detailItems = items?.filter(Boolean) ?? [];
 
@@ -67,7 +85,11 @@ export function ContactDetailsPanel({ data }: ContactDetailsProps) {
             {whatsappButton ? (
               <div className="mt-4">
                 <ZeroCmsRelationEntry entry={whatsappButton} field="whatsappButton">
-                  <Button data={whatsappButton} className="w-full justify-center" />
+                  <Button
+                    data={whatsappButton}
+                    whatsappUrl={whatsappUrl}
+                    className="w-full justify-center"
+                  />
                 </ZeroCmsRelationEntry>
               </div>
             ) : null}
@@ -78,15 +100,3 @@ export function ContactDetailsPanel({ data }: ContactDetailsProps) {
   );
 }
 
-/** Standalone section wrapper (when Contact Details is used on its own). */
-export function ContactDetailsSection({ data }: ContactDetailsProps) {
-  return (
-    <section className="bg-surface">
-      <div className="mx-auto max-w-container px-6 py-[72px]">
-        <div className="max-w-md">
-          <ContactDetailsPanel data={data} />
-        </div>
-      </div>
-    </section>
-  );
-}

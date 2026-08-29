@@ -7,6 +7,7 @@ import {
   isNavLinkActive,
   type NavLink,
 } from "@/components/layout/nav-links";
+import { HeaderServicesMenu } from "@/components/layout/header/header-services-menu";
 
 type HeaderDesktopNavProps = {
   links: NavLink[];
@@ -21,15 +22,22 @@ export function HeaderDesktopNav({ links }: HeaderDesktopNavProps) {
       className="min-w-0"
     >
       {/*
-        gap-2 / xl:gap-4, not the old gap-4 / xl:gap-6 — both of those overflowed
-        once Blogs made this a ten-item row: at 1024 the items spilled past the
-        viewport on BOTH sides (justify-center, so it clips symmetrically) and at
-        xl they broke out of the max-w-container gutters. The row is
-        `whitespace-nowrap shrink-0` and deliberately never wraps, so the gap is
-        the only slack there is.
+        gap-2 / xl:gap-4 dates from the ten-item row, where gap-4 / xl:gap-6
+        overflowed: at 1024 the items spilled past the viewport on BOTH sides
+        and at xl they broke out of the max-w-container gutters. Six items
+        sharing a line with the brand lockup have room to spare, but the row is
+        still `whitespace-nowrap shrink-0` and still never wraps, so the slack
+        stays banked rather than spent.
+
+        `justify-end`, not the old `justify-center`: the nav no longer owns a
+        row of its own — it sits to the right of the lockup.
       */}
-      <ul className="flex items-center justify-center gap-2 xl:gap-4">
+      <ul className="flex items-center justify-end gap-2 xl:gap-4">
         {links.map((link) => {
+          if (link.children?.length) {
+            return <HeaderServicesMenu key={link.href} link={link} />;
+          }
+
           const isActive = isNavLinkActive(pathname, link.href);
 
           return (
