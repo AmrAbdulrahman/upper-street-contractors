@@ -17,3 +17,79 @@ query GetPage($key: String!, $status: CmsReadStatus = published, $includeUnpubli
     }
   }
 }
+
+# The same page, addressed the way a visitor addresses it. `key` is an internal
+# handle a route file hardcodes; `slug` is the URL. Service pages are resolved
+# by slug so one dynamic route can serve all of them, and a new one needs no
+# deploy. Pages with their own route file leave `slug` blank and are unaffected.
+query GetPageBySlug(
+  $slug: String!
+  $status: CmsReadStatus = published
+  $includeUnpublished: Boolean
+) {
+  pages(
+    filters: { slug: { eq: $slug } }
+    pagination: { limit: 1 }
+    status: $status
+    includeUnpublished: $includeUnpublished
+  ) {
+    id
+    type
+    key
+    slug
+    title
+    description
+    meta {
+      ...PageMetadata
+    }
+    sections {
+      ...PageSectionBlocks
+    }
+  }
+}
+
+# Every page that has a slug — i.e. every Service page. Drives
+# `generateStaticParams`, the Services menu and the sitemap, so the three can
+# never disagree about what services exist.
+query GetServicePageSlugs($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
+  pages(
+    pagination: { limit: 200 }
+    status: $status
+    includeUnpublished: $includeUnpublished
+  ) {
+    id
+    key
+    slug
+    title
+  }
+}
+
+# The Services index's card grid, addressed on its own.
+#
+# A Service page's own actions bar needs it: a Service is TWO entries (the page
+# that owns the URL, and the `service-card` on /services that links to it), so
+# duplicating the page alone would leave a copy nothing links to. Selected
+# without the section bodies — this asks "which entry is the grid", not "what
+# does the grid say" — and read only in Draft Mode, so a public request never
+# pays for it.
+query GetServiceGrid(
+  $key: String! = "services"
+  $status: CmsReadStatus = published
+  $includeUnpublished: Boolean
+) {
+  pages(
+    filters: { key: { eq: $key } }
+    pagination: { limit: 1 }
+    status: $status
+    includeUnpublished: $includeUnpublished
+  ) {
+    id
+    sections {
+      __typename
+      ... on ServiceGridSection {
+        id
+        type
+      }
+    }
+  }
+}

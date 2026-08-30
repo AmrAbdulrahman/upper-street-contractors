@@ -7,13 +7,37 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { ZeroCmsError, type Field, type FieldType, type Schema, type Type } from '@usc/zero-cms-core';
+import {
+  ZeroCmsError,
+  humanize,
+  isTitleFieldCandidate,
+  titleFieldOf,
+  type Field,
+  type FieldType,
+  type Schema,
+  type Type,
+} from '@usc/zero-cms-core';
 import ReactSelect from 'react-select';
 import { useZeroCms } from './context';
 import { Badge, Button, EmptyState, Field as FieldShell, Input, Select, cls, cx } from './components/ui';
 import { TypeGlyphSelect } from './components/type-glyphs';
 import { SortControl, type SortDir, type SortField } from './list-controls';
 import { errorMessage, fuzzyMatch } from './util';
+
+/** How each kind's value becomes an Entry title, for the Title field hint. */
+const TITLE_RULE: Partial<Record<FieldType, string>> = {
+  richtext: 'the first 3 words of the rich text',
+  blocks: 'the first 3 words of the rich text',
+  asset: "the image's alt text, or its filename",
+  boolean: '“Yes” or “No”',
+  json: 'the JSON, shortened',
+};
+
+function titleRuleHint(field: Field | undefined): string {
+  if (!field) return 'No field can title this type yet — add a text field.';
+  const rule = TITLE_RULE[field.__type] ?? 'the value, shortened';
+  return `Entries are titled by ${rule}.`;
+}
 
 function compareTypesBy(sortBy: SortField, dir: SortDir) {
   const sign = dir === 'asc' ? 1 : -1;
@@ -129,8 +153,25 @@ export function TypeBuilder() {
     setSelectedName(name);
   };
 
-  const mutateField = (fi: number, next: Field) =>
-    mutateType({ fields: type!.fields.map((f, i) => (i === fi ? next : f)) });
+  /**
+   * Follow the Title field through a field edit. A rename repoints it and a
+   * switch to a relation clears it — otherwise an explicit choice silently
+   * reverts to the implicit "first text field" rule, which reads as the setting
+   * having been ignored.
+   */
+  const retargetTitleField = (before: Field, after: Field): Partial<Type> => {
+    if (type?.titleField !== before.__name) return {};
+    if (!isTitleFieldCandidate(after)) return { titleField: undefined };
+    return { titleField: after.__name };
+  };
+
+  const mutateField = (fi: number, next: Field) => {
+    const before = type!.fields[fi];
+    mutateType({
+      fields: type!.fields.map((f, i) => (i === fi ? next : f)),
+      ...retargetTitleField(before, next),
+    });
+  };
 
   const addType = () => {
     const name = `type_${draft.length + 1}`;
@@ -211,10 +252,12 @@ export function TypeBuilder() {
               </Button>
             </div>
 
-            {/* Type-level presentation meta. All three are read wherever a TYPE
-                is chosen rather than an entry — chiefly the Section builder's
-                Type picker, which shows the glyph, the label and the
-                description for each block an editor can add. */}
+            {/* Type-level presentation meta. Label / glyph / description are
+                read wherever a TYPE is chosen rather than an entry — chiefly
+                the Section builder's Type picker, which shows the glyph, the
+                label and the description for each block an editor can add.
+                Title field is the odd one out: it is read wherever an ENTRY of
+                this Type is named. */}
             <div className={cx(cls.card, 'space-y-3 p-3')}>
               <div className="grid gap-3 sm:grid-cols-2">
                 <FieldShell label="Label" hint="Shown instead of the type name. Defaults to it.">
@@ -239,6 +282,24 @@ export function TypeBuilder() {
                   onChange={(e) => mutateType({ description: e.target.value || undefined })}
                 />
               </FieldShell>
+              <FieldShell
+                label="Title field"
+                hint={titleRuleHint(titleFieldOf(type))}
+              >
+                <Select
+                  value={type.titleField ?? ''}
+                  onChange={(e) => mutateType({ titleField: e.target.value || undefined })}
+                >
+                  <option value="">Auto — first text field</option>
+                  {/* Relations excluded: they hold entry ids, so titling an
+                      entry by one would name it after a different entry. */}
+                  {type.fields.filter(isTitleFieldCandidate).map((f) => (
+                    <option key={f.__name} value={f.__name}>
+                      {`${f.label ?? humanize(f.__name)} (${f.__type})`}
+                    </option>
+                  ))}
+                </Select>
+              </FieldShell>
             </div>
 
             <div className={cx(cls.card, 'divide-y divide-neutral-100')}>
@@ -249,7 +310,12 @@ export function TypeBuilder() {
                   typeNames={draft.map((t) => t.__name)}
                   onChange={(next) => mutateField(fi, next)}
                   onRemove={() =>
-                    mutateType({ fields: type.fields.filter((_, i) => i !== fi) })
+                    mutateType({
+                      fields: type.fields.filter((_, i) => i !== fi),
+                      ...(type.titleField === f.__name
+                        ? { titleField: undefined }
+                        : {}),
+                    })
                   }
                 />
               ))}

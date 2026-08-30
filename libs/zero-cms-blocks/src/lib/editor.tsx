@@ -9,6 +9,8 @@
  * Read rendering keeps full fidelity via <ZeroCmsBlocks>.
  */
 
+import { blockNodeText } from '@usc/zero-cms-core';
+
 import type { BlocksContent, BlocksNode } from './types';
 
 type Kind = 'paragraph' | 'h1' | 'h2' | 'h3' | 'quote' | 'ul' | 'ol';
@@ -23,11 +25,6 @@ const KINDS: { v: Kind; l: string }[] = [
   { v: 'ol', l: 'Numbered list' },
 ];
 
-function flattenText(node: BlocksNode): string {
-  if (typeof node.text === 'string') return node.text;
-  return (node.children ?? []).map(flattenText).join('');
-}
-
 function kindOf(node: BlocksNode): Kind {
   if (node.type === 'heading') {
     const l = Number(node.level) || 1;
@@ -36,12 +33,6 @@ function kindOf(node: BlocksNode): Kind {
   if (node.type === 'quote') return 'quote';
   if (node.type === 'list') return node.format === 'ordered' ? 'ol' : 'ul';
   return 'paragraph';
-}
-
-function getText(node: BlocksNode): string {
-  if (node.type === 'list')
-    return (node.children ?? []).map(flattenText).join('\n');
-  return flattenText(node);
 }
 
 function makeBlock(kind: Kind, text: string): BlocksNode {
@@ -102,7 +93,7 @@ export function BlocksEditor({ value, onChange }: BlocksEditorProps) {
               <select
                 className={inputCls + ' max-w-44'}
                 value={kind}
-                onChange={(e) => setBlock(i, makeBlock(e.target.value as Kind, getText(b)))}
+                onChange={(e) => setBlock(i, makeBlock(e.target.value as Kind, blockNodeText(b)))}
               >
                 {KINDS.map((k) => (
                   <option key={k.v} value={k.v}>
@@ -128,7 +119,7 @@ export function BlocksEditor({ value, onChange }: BlocksEditorProps) {
             </div>
             <textarea
               className={inputCls + ' min-h-16'}
-              value={getText(b)}
+              value={blockNodeText(b)}
               placeholder={isList ? 'One item per line' : ''}
               onChange={(e) => setBlock(i, makeBlock(kind, e.target.value))}
             />

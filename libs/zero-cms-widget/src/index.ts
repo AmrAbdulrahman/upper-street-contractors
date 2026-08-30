@@ -21,6 +21,10 @@ export {
   type ReorderOptions,
   type TypePickerContext,
   type DuplicateOptions,
+  type TemplatePickerContext,
+  type TemplatePickResult,
+  type CreateFromTemplateOptions,
+  type SaveAsTemplateOptions,
 } from './lib/context';
 export {
   duplicateEntry,
@@ -28,7 +32,13 @@ export {
   type DuplicateEntryOptions,
   type DuplicateEntryResult,
 } from './lib/duplicate-entry';
+export {
+  instantiateFrom,
+  type InstantiateFromOptions,
+  type InstantiateFromResult,
+} from './lib/instantiate-template';
 export { Drawer, type DrawerProps } from './lib/Drawer';
+export { BusyOverlay, type BusyOverlayProps } from './lib/BusyOverlay';
 export { ZeroCmsBar, type ZeroCmsBarProps } from './lib/ZeroCmsBar';
 
 // Inspect-mode wrappers
@@ -67,6 +77,36 @@ export {
   wrapWithInspect,
   mergeClassNames,
 } from './lib/inspect/inspect-clone';
+/**
+ * Offers a duplicate button on the hover cluster of the <ZeroCmsEntry> beneath.
+ * The host supplies the options because ADR 0017 keeps `shareTypes` a parameter,
+ * not something this library guesses.
+ */
+export {
+  DuplicateActionProvider,
+  useDuplicateAction,
+  type DuplicateActionValue,
+} from './lib/inspect/duplicate-action-context';
+/**
+ * Offers a "save as template" button on the same cluster. The host supplies the
+ * kind and the field map for the same reason: which lists a Template holds is a
+ * fact about the host's content model, not this library's.
+ */
+export {
+  TemplateActionProvider,
+  useTemplateAction,
+  type TemplateActionValue,
+} from './lib/inspect/template-action-context';
+/**
+ * Offers a delete button on the same cluster, for an entry that is its own
+ * content rather than a slot in some page — a Project card. The host names the
+ * noun; the confirm and the reference-integrity reporting live in the library.
+ */
+export {
+  DeleteActionProvider,
+  useDeleteAction,
+  type DeleteActionValue,
+} from './lib/inspect/delete-action-context';
 export {
   useSurfaceTone,
   surfaceToneOf,

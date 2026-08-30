@@ -40,7 +40,8 @@ _Avoid_: dist, build dir
 
 **Type**:
 One schema entry describing a content shape. Has a unique `__name` (drives generated
-type + store names) and a set of Fields.
+type + store names) and a set of Fields, plus settings that are not Fields: a `label`,
+a Type description, a Thumbnail glyph and a Title field.
 _Avoid_: content-type (Strapi term), model, table
 
 **Field**:
@@ -82,7 +83,8 @@ One of: `text`, `longtext`, `richtext`, `slug`, `user`, `blocks`, `number`, `jso
 **Entry** (data instance):
 One content instance, stored in `data.json`. Carries its `__type` (the owning Type's
 `__name`), an auto-generated uuid `__id`, the live `values` keyed by Field `__name`,
-a `__status` (lifecycle), and a `__draft` (pending edits overlay, or `null`).
+a `__status` (lifecycle), a `__draft` (pending edits overlay, or `null`), and a
+`__title` (the Title override, or `null`).
 _Avoid_: document, record, row, node
 
 **`__status`** (lifecycle):
@@ -149,6 +151,75 @@ The zero-cms-widget slide-over that edits one Entry in place (by `__id`) without
 the host app, reusing the same field renderers and draft/publish actions as the app.
 _Avoid_: modal, popover, Edit drawer (the Website/Strapi-context term)
 
+**Drawer breadcrumb**:
+The trail at the top of a Widget drawer naming every panel stacked beneath it, one
+per line, each ancestor a jump straight back to that panel. Panels are the same
+width and fully overlap, so without it a stack four deep looks exactly like one and
+the only way out is Escape, once per level. A crumb names its panel twice — the
+Type, and the Entry's own title once its editor has loaded it and reported it back —
+because the Type alone cannot tell two sibling Questions apart. That title is the
+Entry title, so a crumb reads the same name the Content admin's list does. Jumping asks once
+for the whole jump if anything being closed is unsaved, and refuses outright while
+anything being closed is mid-save; the panels it abandons have their pending
+create/pick promises settled, or the caller awaiting them would hang forever.
+_Avoid_: back button, navigation, breadcrumb on its own (the Website context's
+`page-hero` one is a public-page trail, a different concept in a different context)
+
+**Field label**:
+What an editor reads where a Field is named — its `label` when the Schema sets one,
+otherwise its `__name` humanized (`doneTitle` → "Done Title", `middle_name` →
+"Middle Name", `sidebarCta` → "Sidebar CTA"). A fallback, never an override: most
+Fields carry no `label`, and a raw identifier in a form is legible only to whoever
+typed the schema. Used everywhere a key would otherwise surface — the form, the edit
+pencil's tooltip, the Type picker's heading, the reference-integrity refusal. It
+cannot rescue a key with no word boundary in it (`lastname` stays "Lastname"); that
+one needs a real `label`.
+_Avoid_: field name (the `__name`), Entry title (what names an Entry, not a Field),
+humanize (the function, not the concept)
+
+**Entry title**:
+What the CMS calls one Entry — the Content admin's list, every reference and Type
+picker, the Section builder's drag cards and remove dialog, the Drawer breadcrumb,
+and the reference-integrity refusal that names what is blocking a delete. One
+derivation for all of them, so no two places can call the same Entry two things.
+Its Title override wins if it has one; otherwise its Type's Title field is
+*derived* into a title, and with nothing to derive it reads `Untitled <Type label>`
+— "Untitled" rather than the bare Type label because a column of five identical
+Type labels is the confusion this replaced, and only "Untitled" tells an editor the
+entry needs copy. Never a persisted string: rename the field it comes from and every
+place naming that Entry follows.
+_Avoid_: entry label / `entryLabel` (the function, kept as the app's name for it),
+Field label (which names a Field), Type description, name
+
+**Title field** (`Type.titleField`):
+The Field an Entry title is derived from, chosen per **Type** in the Types admin —
+one decision for every Entry of that Type, rather than a setting every new Entry
+starts out missing and two siblings can disagree on. Any kind **but a relation**: a
+relation holds Entry ids, so titling an Entry by one would name it after a different
+Entry. Each kind has its own derivation — text as it stands (clamped); a `richtext`
+or `blocks` field as the **first three words** of its plain text, which is enough to
+tell two passages apart without putting a paragraph in a breadcrumb; an `asset` as
+the image's alt text, falling back to its filename (a Media item has no title of its
+own); a `boolean` as Yes/No. Absent, or naming a Field since removed or turned into
+a relation, falls back to the Type's first `text`/`longtext` — the rule that was
+hardcoded before this existed, so an unset Title field behaves exactly as the CMS
+always did. Editing Types is Admin-only, so choosing one is too.
+_Avoid_: display field, label field, primary field, `slug.from` (which derives a URL
+segment, not a title), Field label
+
+**Title override** (`Entry.__title`):
+A literal Entry title typed on one Entry, beating whatever its Title field derives —
+the escape hatch for the entry the rule gets wrong. Set in the **Content admin
+only**, deliberately not in the Widget drawer: a title is Type-wide configuration
+plus a per-entry exception, and both belong where an editor is managing content
+rather than looking at a page. Stored beside `__status` rather than inside `values`,
+so it is **not draft-gated** — saving it is immediately what the entry is called.
+Nothing public reads it, so a publish step would hold the change back from an
+audience that does not exist, and a declared Field would put it in every Type's
+field list, the Generated client and the GraphQL layer. Blank clears it and the
+title goes back to being derived.
+_Avoid_: Title field (the Type-level pointer), name, custom label, alias
+
 ## Section builder
 
 **Section builder**:
@@ -193,9 +264,15 @@ _Avoid_: add button (the always-appends `<AddZeroCmsEntry>` chip), divider, drop
 
 **Type picker**:
 The panel an Insert slot opens: a grid of the Field's Allowed types, each showing its
-Thumbnail glyph, label and Type description. Picking one either opens a create form or,
-when Entries of that Type already exist, offers reuse first. It pops itself as soon as
-it resolves. Replaced the old behaviour of silently creating `allowedTypes[0]`.
+Thumbnail glyph, label and Type description, over a search box that narrows the grid
+by substring across all three — so "photo" finds Image and Gallery, and a page's two
+dozen section Types are reachable by typing rather than by scanning. Substring rather
+than the subsequence match the admin's Type list uses, which on that many cells
+returns most of them for a three-letter query. The reuse step keeps its own separate
+box: one shared between them carries a query into a list it means nothing in.
+Picking a Type either opens a create form or, when Entries of that Type already
+exist, offers reuse first. It pops itself as soon as it resolves. Replaced the old
+behaviour of silently creating `allowedTypes[0]`.
 
 Reached from **two** places, via `ReferenceActions.pickReference`: an Insert slot, and
 the "+ Add…" on a Relation field inside an Edit drawer — which used to render one
@@ -213,6 +290,12 @@ A Type's wireframe preview in the Type picker, stored as a KEY into the consumer
 glyph registry (`TYPE_GLYPHS`) rather than a media id — a Type only becomes pickable
 once a host ships a component for it, so the glyph ships alongside and can never
 dangle. Unknown or absent keys fall back to a generic frame.
+
+**Every Type that can appear beside a sibling carries a mark drawn for it**, not a
+mark for its category: six section Types sharing one card-list glyph is the picker
+telling an editor to read the labels instead, which is the job the glyph was added to
+do. The rule is scoped to what a picker actually offers — a Type that is only ever
+the single Allowed type of some Field has nothing to be told apart from.
 _Avoid_: icon, thumbnail image, preview image
 
 **Type description** (`Type.description`):

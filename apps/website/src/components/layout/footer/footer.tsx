@@ -102,9 +102,19 @@ export function Footer({ config }: FooterProps) {
   );
 
   const accreditationGlow = config?.footerGlowColor?.trim() || null;
+  const accreditationGlowRadius = config?.footerGlowRadius ?? null;
+  const accreditationGlowIntensity = config?.footerGlowIntensity ?? null;
 
-  const copyrightName =
-    legalName ?? config?.siteName ?? "Upper Street Contractors";
+  // Trailing period stripped because the line that prints this adds its own.
+  // The CMS legalName is written the way a company writes it — "Upper Street
+  // Handyman Ltd." — so appending unconditionally rendered "Ltd.." on every
+  // page. Fixed here rather than in the CMS value so it stays right whichever
+  // way the next editor types the name.
+  const copyrightName = (
+    legalName ??
+    config?.siteName ??
+    "Upper Street Contractors"
+  ).replace(/[.\s]+$/, "");
 
   return (
     <footer className="bg-dark-2 font-sans text-white/55">
@@ -113,17 +123,17 @@ export function Footer({ config }: FooterProps) {
             gone. `/services` carries them now and is linked from Company. */}
         <div className="mb-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1.5fr] lg:gap-12">
           <div>
-            {/* The margin sits on the wrapper, not on the artwork: `className`
-                now sizes the crest alone. */}
+            {/* The margin sits on the wrapper, not on the artwork, which
+                carries only its height. Larger than the desktop header's h-16
+                so the mark signs off heavier than it opens — the footer
+                gives it a whole column and no nav competing for the row, so it
+                is deliberately larger here than the desktop header's h-16. */}
             <div className="mb-3">
               <SiteBanner
                 tone="light"
                 siteName={config?.siteName}
                 logos={resolveSiteLogos(config)}
-                className="h-12"
-                // Matches the crest: the footer never collapses, so the pair can
-                // stay at the proportions the combined lockup had.
-                wordmarkClassName="h-12"
+                className="h-26"
               />
             </div>
 
@@ -258,6 +268,8 @@ export function Footer({ config }: FooterProps) {
                       // separates each mark from the background.
                       bare
                       glowColor={accreditationGlow}
+                      glowRadius={accreditationGlowRadius}
+                      glowIntensity={accreditationGlowIntensity}
                     />
                   </ZeroCmsEntry>
                 ))}

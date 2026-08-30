@@ -7,9 +7,9 @@
 # it is not, now that the Section builder offers every allowed Type on every
 # page. One fragment per union means a new section Type is registered once.
 #
-# The two bodies are identical but cannot share a definition — a GraphQL fragment
-# is typed on its parent, and `Page.sections` and `BlogPost.sections` are
-# distinct union types.
+# The bodies below repeat each other but cannot share a definition — a GraphQL
+# fragment is typed on its parent, and `Page.sections`, `BlogPost.sections` and
+# `Project.sections` are three distinct union types.
 
 fragment PageSectionBlocks on PageSectionsRef {
   __typename
@@ -160,5 +160,90 @@ fragment BlogPostSectionBlocks on BlogPostSectionsRef {
   }
   ... on SeparatorSection {
     ...SeparatorSection
+  }
+}
+
+# A Project is a list of sections too, so it has a union of its own — with two
+# members no page can hold: What We Delivered and the Project Timeline, which
+# say "this job", not "this service".
+fragment ProjectSectionBlocks on ProjectSectionsRef {
+  __typename
+  ... on PageHero {
+    ...PageHeroSection
+  }
+  ... on Wizard {
+    ...WizardSection
+  }
+  ... on ContactDetails {
+    ...ContactDetailsSection
+  }
+  ... on HomeHeaderSection {
+    ...HomeHeroSection
+  }
+  ... on WhoWeAreSection {
+    ...WhoWeAreSection
+  }
+  ... on AccreditationList {
+    ...AccreditationList
+  }
+  ... on WhatWeDoSection {
+    ...WhatWeDoSection
+  }
+  ... on WhyChooseUsSection {
+    ...WhyChooseUsSection
+  }
+  ... on HowItWorksSection {
+    ...HowItWorksSection
+  }
+  ... on RecentWorkSection {
+    ...RecentWorkSection
+  }
+  ... on ClientReviewSection {
+    ...ClientReviewSection
+  }
+  ... on PlanningRenovationSection {
+    ...PlanningRenovationSection
+  }
+  ... on ClientsCarousel {
+    ...ClientsCarousel
+  }
+  ... on ServiceOfferSection {
+    ...ServiceOfferSection
+  }
+  ... on ServiceGridSection {
+    ...ServiceGridSection
+  }
+  ... on CaseStudiesSection {
+    ...CaseStudiesSection
+  }
+  ... on GoogleReviews {
+    ...GoogleReviews
+  }
+  ... on SplitSection {
+    ...SplitSection
+  }
+  ... on ProseSection {
+    ...ProseSection
+  }
+  ... on Faq {
+    ...FaqSection
+  }
+  ... on ImageSection {
+    ...ImageSection
+  }
+  ... on GallerySection {
+    ...GallerySection
+  }
+  ... on QuoteSection {
+    ...QuoteSection
+  }
+  ... on SeparatorSection {
+    ...SeparatorSection
+  }
+  ... on ProjectScopeSection {
+    ...ProjectScopeSection
+  }
+  ... on ProjectTimelineSection {
+    ...ProjectTimelineSection
   }
 }

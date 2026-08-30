@@ -1,4 +1,4 @@
-import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import type { ProjectDetailFragment } from "@/generated/graphql";
 import { getDuration } from "@/helpers/project-meta";
 import { resolveMediaUrl } from "@/helpers/media-url";
@@ -12,53 +12,26 @@ const glassChip =
 const goldChip =
   "inline-flex items-center rounded-full border border-gold/35 bg-gold/20 px-3 py-1 text-xs font-semibold text-gold-mid";
 
-type GalleryImage = NonNullable<
-  NonNullable<ProjectDetailFragment["projectImages"]>[number]
->;
-
 function completedYear(endDate?: string | null): number | null {
   if (!endDate) return null;
   const t = Date.parse(endDate);
   return Number.isNaN(t) ? null : new Date(t).getUTCFullYear();
 }
 
-function GalleryFigure({
-  img,
-  className,
-  sizes,
-  priority,
-}: {
-  img: GalleryImage;
-  className?: string;
-  sizes: string;
-  priority?: boolean;
-}) {
-  const url = resolveMediaUrl(img.image?.url);
-  return (
-    <figure
-      className={`relative overflow-hidden border border-white/10 bg-white/5 ${className ?? ""}`}
-    >
-      {url ? (
-        <Image
-          src={url}
-          alt={img.image?.alt ?? img.caption ?? "Project photo"}
-          fill
-          className="object-cover"
-          sizes={sizes}
-          priority={priority}
-        />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0a1c2e] to-[#031021]" />
-      )}
-      {img.caption ? (
-        <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent px-3 py-2 text-xs font-medium text-white/90">
-          {img.caption}
-        </figcaption>
-      ) : null}
-    </figure>
-  );
-}
-
+/**
+ * The banner at the top of a Project: breadcrumb, title, fact chips, intro and
+ * the hero photo.
+ *
+ * Rendered from the Project's OWN fields rather than from a section, the same
+ * way `BlogPostHeader` is: the index card and this header must agree, and a
+ * title living in two places guarantees they eventually won't. It also can't be
+ * reordered away — a Project always has a header.
+ *
+ * The photo is the Project's `hero`, singular. It used to be a three-up collage
+ * built from the first three `projectImages`, which no longer exist on the
+ * Project — a Project's photos are a Gallery section now (ADR 0022), where an
+ * editor can place, caption and reorder them like any other content.
+ */
 export function ProjectHero({ project }: { project: ProjectDetailFragment }) {
   const { title, location, projectValue, subCategory } = project;
   const intro = (project.description ?? project.summary ?? "")
@@ -67,11 +40,7 @@ export function ProjectHero({ project }: { project: ProjectDetailFragment }) {
     .filter(Boolean);
   const duration = getDuration(project.beginDate, project.endDate);
   const year = completedYear(project.endDate);
-  const images = (project.projectImages ?? []).filter(
-    (i): i is GalleryImage => Boolean(i),
-  );
-  const [main, ...rest] = images;
-  const sides = rest.slice(0, 2);
+  const heroUrl = resolveMediaUrl(project.hero?.url);
 
   return (
     <section className="bg-dark text-white">
@@ -154,32 +123,19 @@ export function ProjectHero({ project }: { project: ProjectDetailFragment }) {
           </ZeroCmsEntryField>
         ) : null}
 
-        {main ? (
-          <div className="mt-10 grid gap-3 overflow-hidden rounded-t-lg md:h-[460px] md:grid-cols-3">
-            <div className={sides.length ? "md:col-span-2" : "md:col-span-3"}>
-              <ZeroCmsEntry entry={main}>
-                <GalleryFigure
-                  img={main}
-                  className="h-64 md:h-full"
-                  sizes="(max-width: 768px) 100vw, 66vw"
-                  priority
-                />
-              </ZeroCmsEntry>
+        {heroUrl ? (
+          <ZeroCmsEntryField field="hero">
+            <div className="relative mt-10 h-64 overflow-hidden rounded-t-lg border border-white/10 bg-white/5 md:h-[460px]">
+              <Image
+                src={heroUrl}
+                alt={project.hero?.alt ?? title ?? "Project photo"}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1200px) 100vw, 1200px"
+                priority
+              />
             </div>
-            {sides.length ? (
-              <div className="grid gap-3 md:grid-rows-2">
-                {sides.map((img) => (
-                  <ZeroCmsEntry key={img.id} entry={img}>
-                    <GalleryFigure
-                      img={img}
-                      className="h-40 md:h-full"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  </ZeroCmsEntry>
-                ))}
-              </div>
-            ) : null}
-          </div>
+          </ZeroCmsEntryField>
         ) : null}
       </div>
     </section>

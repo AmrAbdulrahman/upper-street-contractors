@@ -44,6 +44,8 @@ export {
   fieldRegistry,
   entryLabel,
   titleField,
+  useEntryLabeller,
+  useIsUntitled,
   useEntryOptions,
   type FormValues,
   type EntryFormProps,

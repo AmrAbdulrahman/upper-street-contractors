@@ -32,6 +32,8 @@ export function createEngineAdapter(engine: Engine): EngineAdapter {
     publish: (t, id, actor, expected) => engine.publish(t, id, actor, expected),
     unpublish: (t, id, actor, expected) => engine.unpublish(t, id, actor, expected),
     discardDraft: (t, id, actor, expected) => engine.discardDraft(t, id, actor, expected),
+    setEntryTitle: (t, id, title, actor, expected) =>
+      engine.setEntryTitle(t, id, title, actor, expected),
     get: async (t, id, opts) => engine.get(t, id, opts),
     query: async (t, input) => engine.query(t, input),
     listDrafts: async () => engine.listDrafts(),

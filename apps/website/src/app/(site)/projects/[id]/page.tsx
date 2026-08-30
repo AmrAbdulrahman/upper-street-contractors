@@ -1,21 +1,22 @@
 import {
+  ProjectActions,
   ProjectCta,
   ProjectGlance,
   ProjectHero,
-  ProjectScope,
-  ProjectTimeline,
   SimilarProjects,
 } from "@/components/sections/project-detail";
+import { PageSection, type PageSectionData } from "@/components/sections/page-section";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import {
   GetProjectDocument,
   GetProjectIdsDocument,
   GetProjectsDocument,
+  type ProjectDetailFragment,
 } from "@/generated/graphql";
 import { getSimilarProjects } from "@/helpers/similar-projects";
 import { resolveMediaUrl } from "@/helpers/media-url";
 import { query } from "@/lib/cms/query";
-import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
+import { ZeroCmsEntryProvider, ZeroCmsSectionList } from "@usc/zero-cms-widget";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -69,6 +70,23 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * How many Deliverables this Project lists, for the "Scope items" stat.
+ *
+ * Read off the Project's own What We Delivered section rather than a field:
+ * `deliverables` moved into that section (ADR 0022), and the glance band is
+ * derived chrome that has no other way to see it. Nothing if the editor has not
+ * placed one — the stat simply drops out.
+ */
+function scopeCountOf(sections: ProjectDetailFragment["sections"]): number {
+  let count = 0;
+  for (const section of sections ?? []) {
+    if (section?.__typename === "ProjectScopeSection")
+      count += (section.deliverables ?? []).length;
+  }
+  return count;
+}
+
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { id } = await params;
 
@@ -88,60 +106,33 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       (p): p is NonNullable<typeof p> => Boolean(p),
     ) ?? [];
   const similar = getSimilarProjects(project, allProjects, 3);
-
-  const comments = (project.clientComments ?? []).filter(
-    (c): c is NonNullable<typeof c> => Boolean(c),
-  );
-  const pullQuote = comments[0] ?? null;
-  const miniQuote = comments[1] ?? null;
+  const sections = project.sections ?? [];
 
   return (
     <>
-      <ZeroCmsEntry entry={project}>
+      {/* Provider, not <ZeroCmsEntry>: the Section builder needs the Project's
+          id and type in context, but an outline + pencil around the whole page
+          would swallow every section's own affordance. The same shape a Blog
+          Post page has had since a post became a list of sections. */}
+      <ZeroCmsEntryProvider entry={project}>
+        <div className="mx-auto max-w-container px-6 pt-6 empty:hidden">
+          <ProjectActions title={project.title} />
+        </div>
+
         <ProjectHero project={project} />
 
-        <section className="bg-surface">
-          <div className="mx-auto max-w-container px-6 py-[72px] pb-20">
-            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14">
-              <div>
-                <ProjectScope
-                  summary={project.deliveredSummary}
-                  deliverables={project.deliverables}
-                />
+        <ProjectGlance
+          project={project}
+          scopeCount={scopeCountOf(sections)}
+          sidebarCta={project.sidebarCta}
+        />
 
-                {pullQuote?.comment ? (
-                  <ZeroCmsEntry entry={pullQuote}>
-                    <figure className="mt-10 rounded-2xl border border-border border-l-4 border-l-gold bg-white p-6 shadow-sm">
-                      <ZeroCmsEntryField field="comment">
-                        <blockquote className="text-base leading-relaxed text-dark/85 italic">
-                          {`“${pullQuote.comment}”`}
-                        </blockquote>
-                      </ZeroCmsEntryField>
-                      {pullQuote.name ? (
-                        <ZeroCmsEntryField field="name">
-                          <figcaption className="mt-3 text-sm font-semibold text-dark">
-                            {`— ${pullQuote.name}`}
-                          </figcaption>
-                        </ZeroCmsEntryField>
-                      ) : null}
-                    </figure>
-                  </ZeroCmsEntry>
-                ) : null}
-
-                <ProjectTimeline steps={project.projectTimeline} />
-              </div>
-
-              <aside>
-                <ProjectGlance
-                  project={project}
-                  quote={miniQuote}
-                  sidebarCta={project.sidebarCta}
-                />
-              </aside>
-            </div>
-          </div>
-        </section>
-      </ZeroCmsEntry>
+        <ZeroCmsSectionList field="sections" items={sections}>
+          {sections.map((section, i) => (
+            <PageSection key={i} section={section as PageSectionData} />
+          ))}
+        </ZeroCmsSectionList>
+      </ZeroCmsEntryProvider>
 
       <SimilarProjects projects={similar} />
       <ProjectCta data={project.cta} />

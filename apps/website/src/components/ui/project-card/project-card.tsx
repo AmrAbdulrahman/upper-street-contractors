@@ -9,6 +9,8 @@ import { ProjectBanner } from "./project-banner";
 
 type ProjectCardProps = {
   data: ProjectCardFragment;
+  /** Just created by this editor — see `useCardFlash`. */
+  flash?: boolean;
 };
 
 const cardClasses =
@@ -17,14 +19,17 @@ const cardClasses =
 const titleClasses =
   "mb-1.5 font-sans text-[15px] font-semibold leading-snug text-dark";
 
-export function ProjectCard({ data }: ProjectCardProps) {
+export function ProjectCard({ data, flash = false }: ProjectCardProps) {
   const { id, title, summary, category, hero } = data;
   const chips = getProjectMetaChips(data);
   const href = `/projects/${id}`;
 
   return (
     <ZeroCmsEntry entry={data}>
-      <article className={cardClasses}>
+      {/* The flash class goes on the existing <article>, never a wrapper:
+          <ZeroCmsEntry> clones a lone host element rather than wrapping it, and
+          an extra div here would stop this being a direct grid item. */}
+      <article className={flash ? `${cardClasses} card-flash` : cardClasses}>
         <Link href={href} className="block">
           <ZeroCmsEntryField field="hero">
             <ProjectBanner banner={hero} category={category} />

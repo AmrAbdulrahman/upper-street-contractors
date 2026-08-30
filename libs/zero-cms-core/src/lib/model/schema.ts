@@ -229,6 +229,14 @@ export interface Type {
    * component and can never dangle. Unknown/absent → the generic glyph.
    */
   thumbnail?: string;
+  /**
+   * Field `__name` whose value titles every Entry of this Type wherever an
+   * editor reads one (see `entryTitle`). Any kind but a relation — a relation
+   * holds ids, so naming an Entry by one would name it after another Entry.
+   * Absent, or naming a field that has since been removed or turned into a
+   * relation, falls back to the first `text`/`longtext` field.
+   */
+  titleField?: string;
   fields: Field[];
   /**
    * Stamped by `Engine.saveSchema`, matching Types by `__name` against the

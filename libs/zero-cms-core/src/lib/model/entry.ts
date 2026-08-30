@@ -23,6 +23,16 @@ export interface Entry {
   values: EntryValues | null;
   /** Pending edits, full snapshot. `null` when there are no pending edits. */
   __draft: EntryValues | null;
+  /**
+   * Editor-facing title override — what the CMS calls this entry, overriding
+   * the value derived from its Type's `titleField`. Deliberately outside
+   * `values`: it is not published content (nothing on the public site reads
+   * it), so it is not draft-gated and takes effect the moment it is saved.
+   * Keeping it out of `values` also keeps it out of every Type's field list,
+   * the generated client, the GraphQL SDL and the destructive-edit guard.
+   * `null`/absent → the title is derived.
+   */
+  __title?: string | null;
   /** ISO timestamp, set once at `create` and never changed after. */
   __createdAt: string;
   /**

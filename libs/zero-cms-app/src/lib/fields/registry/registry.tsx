@@ -8,7 +8,7 @@
 
 import { type ComponentType } from 'react';
 import { useWatch } from 'react-hook-form';
-import type { Field, FieldType } from '@usc/zero-cms-core';
+import { humanize, type Field, type FieldType } from '@usc/zero-cms-core';
 import { Badge, Field as FieldShell, cls, cx } from '../../components/ui';
 import { formatFieldValue, valuesEqual } from '../../util';
 import type { FormValues, RendererProps } from './types';
@@ -28,7 +28,7 @@ import { ReferenceRenderer } from '../reference';
 import { ReferencesRenderer } from '../references';
 import { DateRenderer } from '../date';
 
-const labelOf = (f: Field) => f.label ?? f.__name;
+const labelOf = (f: Field) => f.label ?? humanize(f.__name);
 
 export const fieldRegistry: Record<FieldType, ComponentType<RendererProps>> = {
   text: TextRenderer,

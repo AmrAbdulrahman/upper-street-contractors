@@ -96,6 +96,14 @@ export interface Adapter {
     actor: string,
     expectedLastEditedAt: string
   ): Promise<OutputEntry>;
+  /** Set or clear an entry's Title override (editor metadata, not draft-gated). */
+  setEntryTitle(
+    type: string,
+    id: string,
+    title: string | null,
+    actor: string,
+    expectedLastEditedAt: string
+  ): Promise<OutputEntry>;
 
   get(type: string, id: string, opts?: GetOptions): Promise<OutputEntry | null>;
   query(type: string, input?: QueryInput): Promise<QueryResult<OutputEntry>>;

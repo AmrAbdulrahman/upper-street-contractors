@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, type ComponentType } from 'react';
+import { humanize } from '@usc/zero-cms-core';
 import { Controller } from 'react-hook-form';
 import { DragDropProvider } from '@dnd-kit/react';
 import { useSortable } from '@dnd-kit/react/sortable';
@@ -226,7 +227,7 @@ export const ReferencesRenderer: ComponentType<RendererProps> = ({ field, contro
             ? async () => {
                 const picked = await actions.pickReference!({
                   allowedTypes: allowed,
-                  fieldLabel: field.label ?? field.__name,
+                  fieldLabel: field.label ?? humanize(field.__name),
                 });
                 if (!picked) return;
                 if (picked.kind === 'create') return void createNew(picked.type);

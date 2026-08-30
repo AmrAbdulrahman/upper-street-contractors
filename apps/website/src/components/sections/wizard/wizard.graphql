@@ -85,6 +85,14 @@ fragment FormQuestion on FormQuestion {
   stepLabel
   title
   hint
+  # The Availability calendar's settings. On the step rather than the field:
+  # `form-field` is one Type shared by every input, so these five showed in all
+  # ~15 field drawers and only the calendar ever read them.
+  maxDates
+  earliestOffsetDays
+  horizonMonths
+  allowWeekends
+  emergencyHorizonDays
   intro {
     ...RichTextBlock
   }
@@ -105,13 +113,8 @@ fragment FormField on FormField {
   required
   dependsOnFieldKey
   dependsOnValue
-  maxDates
-  earliestOffsetDays
-  horizonMonths
-  allowWeekends
   whenEmergency
   isEmergencyFlag
-  emergencyHorizonDays
   appliesTo {
     id
   }

@@ -14,6 +14,7 @@ export type RpcOp =
   | 'publish'
   | 'unpublish'
   | 'discardDraft'
+  | 'setEntryTitle'
   | 'get'
   | 'query'
   | 'listDrafts'

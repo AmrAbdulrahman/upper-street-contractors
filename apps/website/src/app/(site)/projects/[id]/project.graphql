@@ -1,39 +1,20 @@
 #import "../../components/ui/project-card/project-card.graphql"
 #import "../../components/ui/cta/cta.graphql"
 
+# A Project's content is its `sections`, exactly like a page's. What used to be
+# four owned child lists here (Deliverables, Timeline Steps, Project images,
+# Client Comments) are section entries now — see ADR 0022 — so the only Project
+# fields left are the ones the card and the header BOTH read, which is why they
+# stay on the entry rather than moving into a hero section.
 fragment ProjectDetail on Project {
   ...ProjectCard
   subCategory
   description
-  deliveredSummary
   featured
   clientRating
   occupancy
-  deliverables {
-    id
-    title
-    description
-  }
-  clientComments {
-    id
-    name
-    comment
-  }
-  projectTimeline {
-    id
-    step
-    title
-    description
-  }
-  projectImages {
-    id
-    caption
-    image {
-      url
-      alt
-      width
-      height
-    }
+  sections {
+    ...ProjectSectionBlocks
   }
   similarWork {
     ...ProjectCard

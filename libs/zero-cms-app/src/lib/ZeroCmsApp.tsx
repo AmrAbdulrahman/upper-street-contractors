@@ -305,6 +305,7 @@ export function ZeroCmsAdminContent() {
           entryId={nav.entryId}
           onClose={() => go({ section: 'entries', typeName: activeType.__name, isNew: false })}
           onChanged={bumpReload}
+          allowTitleOverride
         />
       </ReferenceActionsProvider>
     </aside>

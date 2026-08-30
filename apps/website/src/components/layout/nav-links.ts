@@ -63,43 +63,41 @@ export function getMobileNavLinkClassName(isActive: boolean): string {
 }
 
 /**
- * The nine trades. Each is a Service page (`/<trade>`), and together they are
- * both the Services dropdown and the Services index's card grid — one list, so
- * the menu and `/services` cannot disagree about what we do.
- *
- * `Electric` (not Electrical) matches the route and the Category tag.
- */
-export const SERVICE_LINKS: NavLink[] = [
-  { label: "Refurbishments", href: "/refurbishments" },
-  { label: "Kitchens", href: "/kitchens" },
-  { label: "Bathrooms", href: "/bathrooms" },
-  { label: "Plumbing", href: "/plumbing" },
-  { label: "Heating", href: "/heating" },
-  { label: "Electric", href: "/electric" },
-  { label: "Carpentry", href: "/carpentry" },
-  { label: "Roofing", href: "/roofing" },
-  { label: "Handyman", href: "/handyman" },
-];
-
-/**
- * The header row. Six items: the nine trades collapsed into a Services
- * dropdown, which is what made room for Home, Projects, About Us and Contact —
- * none of which the header carried at all while the trades held the whole width.
+ * The header row. Six items: the trades collapsed into a Services dropdown,
+ * which is what made room for Home, Projects, About Us and Contact — none of
+ * which the header carried at all while the trades held the whole width.
  *
  * `Services` is a real link as well as a dropdown parent, so the row's own
  * label reaches the Services index rather than only ever opening a panel.
  *
  * Blog stays in the main row deliberately, for the prominence its search
  * traffic depends on.
+ *
+ * The trades arrive as an argument rather than a constant here. They used to be
+ * a hardcoded `SERVICE_LINKS` array whose own comment said it and the Services
+ * index's card grid were "one list" — but they were two, kept in step by hand,
+ * and a Service created in the CMS could never appear in either. Now the grid
+ * is the list, read by `getServiceLinks()` on the server and passed in; a
+ * header component is a client component and cannot read the CMS itself.
+ *
+ * An empty array is a valid answer (the CMS read failed, or no cards are set up
+ * yet): `Services` then renders as a plain link with no dropdown, which is
+ * exactly what it should be when there is nothing to drop down.
  */
-export const MAIN_NAV_LINKS: NavLink[] = [
-  { label: "Home", href: "/" },
-  { label: "Services", href: "/services", children: SERVICE_LINKS },
-  { label: "Projects", href: "/projects" },
-  { label: "Blog", href: "/blog" },
-  { label: "About Us", href: "/about" },
-  { label: "Contact", href: "/contact" },
-];
+export function buildMainNavLinks(serviceLinks: NavLink[]): NavLink[] {
+  return [
+    { label: "Home", href: "/" },
+    {
+      label: "Services",
+      href: "/services",
+      children: serviceLinks.length ? serviceLinks : undefined,
+    },
+    { label: "Projects", href: "/projects" },
+    { label: "Blog", href: "/blog" },
+    { label: "About Us", href: "/about" },
+    { label: "Contact", href: "/contact" },
+  ];
+}
 
 /**
  * The footer no longer lists the nine trades. It carried a Services column

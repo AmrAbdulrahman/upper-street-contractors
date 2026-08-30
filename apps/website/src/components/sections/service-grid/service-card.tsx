@@ -9,6 +9,8 @@ type ServiceCardProps = {
   data: ServiceCardFragment;
   /** Above the fold — load eagerly rather than letting it become a late LCP. */
   priority?: boolean;
+  /** Just created by this editor — see `useCardFlash`. */
+  flash?: boolean;
 };
 
 // The Project card's chrome, deliberately: the two grids are the same shape at
@@ -17,16 +19,28 @@ type ServiceCardProps = {
 const cardClasses =
   "group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-white transition-all duration-250 ease-out hover:-translate-y-[3px] hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0";
 
-export function ServiceCard({ data, priority = false }: ServiceCardProps) {
-  const { title, summary, href, image } = data;
+export function ServiceCard({
+  data,
+  priority = false,
+  flash = false,
+}: ServiceCardProps) {
+  const { title, summary, page, image } = data;
 
+  // Derived from the linked page's own slug, never typed out. While the card
+  // carried a free-text `href`, the card and the page it meant were two strings
+  // an editor could change independently — and a typo in one silently produced
+  // a card linking to a 404.
+  //
   // A card with nowhere to go is a card that should not be a card. Falling back
   // to the Services index keeps it clickable rather than rendering a dead tile.
-  const target = href?.trim() || "/services";
+  const target = page?.slug ? `/${page.slug}` : "/services";
 
   return (
     <ZeroCmsEntry entry={data}>
-      <article className={cardClasses}>
+      {/* The flash class goes on the existing <article>, never a wrapper:
+          <ZeroCmsEntry> clones a lone host element rather than wrapping it, and
+          an extra div here would stop this being a direct grid item. */}
+      <article className={flash ? `${cardClasses} card-flash` : cardClasses}>
         {/* Clickable, but hidden from assistive tech: the title and "Learn
             more" beneath already link the same page, and the photo is a reused
             Project hero whose own alt names that project — so a screen reader

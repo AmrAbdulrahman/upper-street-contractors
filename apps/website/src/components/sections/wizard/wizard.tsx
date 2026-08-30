@@ -10,6 +10,7 @@ import {
   ZeroCmsList,
   useInspect,
 } from "@usc/zero-cms-widget";
+import { BusyOverlay } from "@/components/ui/busy-overlay";
 import { CmsImage } from "@/components/ui/cms-image";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import type { WizardSectionFragment } from "@/generated/graphql";
@@ -18,6 +19,7 @@ import {
   DAYPICKER_THEME,
   TIME_WINDOWS,
   formatAvailability,
+  optionChipClassName,
   formatDateLong,
   fromISODate,
   isAvailabilityComplete,
@@ -178,6 +180,14 @@ export function WizardSection({ data }: WizardSectionProps) {
     Record<string, AvailabilityEntry[]>
   >({});
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
+  // Which Hosted attachment is in flight, for the blocking overlay. The
+  // per-file map above only surfaces on the file field's own step, which is not
+  // necessarily the step a visitor is looking at when they press send.
+  const [uploadStage, setUploadStage] = useState<{
+    index: number;
+    total: number;
+    pct: number;
+  } | null>(null);
   // Honeypot. Both /api/enquiry and the upload-token route have always checked
   // `company_website`, but nothing ever rendered it — so the check was dead.
   const [honeypot, setHoneypot] = useState("");
@@ -535,6 +545,25 @@ export function WizardSection({ data }: WizardSectionProps) {
         )
       : [];
 
+  /**
+   * The Availability calendar's settings. Read off the STEP, not off the field:
+   * `form-field` is one Type shared by every wizard input, so five settings only
+   * the calendar reads were showing in all ~15 field drawers, and the emergency
+   * window was stored on two fields with one copy inert. Spread explicitly
+   * rather than passing `current` straight through — it is still the question
+   * union here, and an Image Question has no calendar to configure.
+   */
+  const availabilityConfig =
+    current.__typename === "FormQuestion"
+      ? {
+          maxDates: current.maxDates,
+          earliestOffsetDays: current.earliestOffsetDays,
+          horizonMonths: current.horizonMonths,
+          allowWeekends: current.allowWeekends,
+          emergencyHorizonDays: current.emergencyHorizonDays,
+        }
+      : {};
+
   const goToStep = (index: number) => {
     if (index < 0 || index > maxStep) return;
     setDone(false);
@@ -620,15 +649,18 @@ export function WizardSection({ data }: WizardSectionProps) {
       const hostedLinks: HostedAttachment[] = [];
       if (hosted.length) {
         const { upload } = await import("@vercel/blob/client");
-        for (const file of hosted) {
+        for (const [i, file] of hosted.entries()) {
+          setUploadStage({ index: i + 1, total: hosted.length, pct: 0 });
           const result = await upload(`enquiry/${file.name}`, file, {
             access: "public",
             handleUploadUrl: "/api/enquiry/upload-token",
             clientPayload: JSON.stringify({ honeypot }),
             contentType: file.type || "application/octet-stream",
             multipart: file.size > MULTIPART_THRESHOLD_BYTES,
-            onUploadProgress: ({ percentage }) =>
-              setUploadProgress((p) => ({ ...p, [fileKey(file)]: percentage })),
+            onUploadProgress: ({ percentage }) => {
+              setUploadProgress((p) => ({ ...p, [fileKey(file)]: percentage }));
+              setUploadStage((s) => (s ? { ...s, pct: percentage } : s));
+            },
           });
           hostedLinks.push({
             name: file.name,
@@ -636,6 +668,8 @@ export function WizardSection({ data }: WizardSectionProps) {
             url: result.url,
           });
         }
+        // Uploads done; what is left is the POST and two SMTP round trips.
+        setUploadStage(null);
       }
 
       const body = new FormData();
@@ -656,6 +690,7 @@ export function WizardSection({ data }: WizardSectionProps) {
       setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
+      setUploadStage(null);
     }
   };
 
@@ -708,7 +743,9 @@ export function WizardSection({ data }: WizardSectionProps) {
                     <li className="flex w-9 shrink-0 flex-col items-center gap-1.5 text-center md:w-20 md:gap-2">
                       <button
                         type="button"
-                        disabled={!canClick}
+                        // Locked while sending: stepping away mid-upload leaves
+                        // the visitor on a form that is already being submitted.
+                        disabled={!canClick || submitting}
                         aria-current={state === "current" ? "step" : undefined}
                         onClick={() => goToStep(i)}
                         className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors md:h-[34px] md:w-[34px] md:text-sm ${dotClass[state]} ${canClick ? "cursor-pointer" : "cursor-default"}`}
@@ -781,7 +818,10 @@ export function WizardSection({ data }: WizardSectionProps) {
                             type="button"
                             aria-pressed={selected}
                             onClick={() => toggleImage(current.id, option!.id, Boolean(current.multiSelect))}
-                            className={`group relative h-44 overflow-hidden rounded-2xl border-2 text-left transition-colors ${selected ? "border-gold" : "border-transparent hover:border-gold/40"} ${live ? "" : "border-dashed border-gold/60 opacity-45"}`}
+                            // `border-2` on both states, so choosing one never
+                            // reflows the grid. The ring and shadow sit outside
+                            // the box, so they cost no layout either.
+                            className={`group relative h-44 overflow-hidden rounded-2xl border-2 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 ${selected ? "border-gold shadow-[0_10px_30px_rgba(144,109,55,0.35)] ring-4 ring-gold/40" : "border-transparent hover:border-gold/40"} ${live ? "" : "border-dashed border-gold/60 opacity-45"}`}
                           >
                             <CmsImage
                               data={option!.image}
@@ -794,6 +834,19 @@ export function WizardSection({ data }: WizardSectionProps) {
                               aria-hidden
                               className="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/35 to-transparent"
                             />
+                            {/* The label plate turns gold when chosen. A hairline
+                                border on top of arbitrary photography is not
+                                something a visitor scanning nine cards will see;
+                                a change of colour behind the words is. Confined
+                                to the bottom two fifths on purpose — tinting the
+                                whole card washes out the photograph, and the
+                                photograph is the reason these are image cards. */}
+                            {selected ? (
+                              <span
+                                aria-hidden
+                                className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-gold-deep/95 to-transparent"
+                              />
+                            ) : null}
                             <span className="absolute inset-x-0 bottom-0 p-4">
                               {option!.emoji ? (
                                 <span aria-hidden className="mb-1 block text-xl">
@@ -808,7 +861,7 @@ export function WizardSection({ data }: WizardSectionProps) {
                               ) : null}
                             </span>
                             {selected ? (
-                              <span className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-gold text-xs text-white">
+                              <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-gold text-sm font-bold text-white shadow-md ring-2 ring-white/90">
                                 ✓
                               </span>
                             ) : null}
@@ -855,9 +908,11 @@ export function WizardSection({ data }: WizardSectionProps) {
                     items={fieldItems}
                   >
                     {/* Every control is one `form-field` entry, so each gets its
-                        own pencil — label, key, input type, required, the
-                        Branch rule and the Availability settings all live
-                        there. The control itself is built by an inline IIFE
+                        own pencil — label, key, input type, required and the
+                        Branch rule live there. The Availability calendar's
+                        settings deliberately do not: they belong to the step,
+                        and are edited from the step title's own pencil.
+                        The control itself is built by an inline IIFE
                         rather than a named function purely so the existing
                         per-input-type branches keep their `return`s; the
                         wrapper is what had to change, not the 250 lines of
@@ -894,7 +949,7 @@ export function WizardSection({ data }: WizardSectionProps) {
                                 aria-checked={on}
                                 id={id}
                                 onClick={() => setField(key, on ? "" : "true")}
-                                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${on ? "bg-gold" : "bg-border"}`}
+                                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${on ? "bg-gold ring-2 ring-gold/30" : "bg-border"}`}
                               >
                                 <span
                                   className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${on ? "translate-x-5" : "translate-x-0.5"}`}
@@ -1006,6 +1061,7 @@ export function WizardSection({ data }: WizardSectionProps) {
                               id={id}
                               labelText={labelText}
                               field={field!}
+                              config={availabilityConfig}
                               emergency={emergencyOn}
                               value={availabilityAnswers[key] ?? []}
                               onChange={(next) =>
@@ -1071,8 +1127,9 @@ export function WizardSection({ data }: WizardSectionProps) {
                                       key={w}
                                       aria-pressed={on}
                                       onClick={() => toggleWindow(w)}
-                                      className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${on ? "border-gold bg-gold text-white" : "border-border bg-white text-dark hover:border-gold/40"}`}
+                                      className={optionChipClassName(on)}
                                     >
+                                      {on ? <span aria-hidden>✓</span> : null}
                                       {w}
                                     </button>
                                   );
@@ -1265,8 +1322,9 @@ export function WizardSection({ data }: WizardSectionProps) {
                   {step > 0 ? (
                     <button
                       type="button"
+                      disabled={submitting}
                       onClick={() => goToStep(step - 1)}
-                      className="rounded-lg border border-border bg-white px-5 py-2.5 font-medium text-dark transition-colors hover:bg-border-light"
+                      className="rounded-lg border border-border bg-white px-5 py-2.5 font-medium text-dark transition-colors hover:bg-border-light disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       ← Back
                     </button>
@@ -1311,6 +1369,20 @@ export function WizardSection({ data }: WizardSectionProps) {
             ) : null}
           </div>
         </div>
+
+        {/* Inside the <section>, not beside it: <ZeroCmsEntry> clones a lone
+            host child rather than wrapping it, and a second sibling would force
+            an extra <div> around the whole thing. It is `position: fixed`, so
+            where it sits in the DOM makes no difference to where it paints. */}
+        <BusyOverlay
+          show={submitting}
+          label={uploadStage ? "Uploading your files…" : "Sending your enquiry…"}
+          detail={
+            uploadStage
+              ? `File ${uploadStage.index} of ${uploadStage.total} · ${Math.round(uploadStage.pct)}%`
+              : "This only takes a moment."
+          }
+        />
       </section>
     </ZeroCmsEntry>
   );

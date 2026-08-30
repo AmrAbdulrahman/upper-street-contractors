@@ -43,34 +43,91 @@ const paragraphClasses: Record<RichTextVariant, string> = {
   prose: "mb-5 text-[16px] leading-[1.75] text-muted",
 };
 
-const headingClasses: Record<RichTextVariant, string> = {
-  default: "mb-4 text-3xl text-foreground",
-  "hero-title": "block text-4xl leading-[1.15] tracking-tight text-white sm:text-5xl",
-  "hero-footer": "text-sm leading-relaxed text-subtle",
-  "at-a-glance-footer": "text-sm leading-snug text-subtle",
-  "who-we-are-body": "text-[17px] leading-[1.7] text-muted",
-  "work-card-body":
-    "text-[15px] leading-relaxed text-muted transition-colors group-hover:text-subtle",
-  "what-we-do-body": "text-[17px] leading-[1.7] text-muted",
-  "banner-body-dark": "text-sm leading-relaxed text-subtle",
-  "banner-body-light": "text-sm leading-relaxed text-muted",
-  "banner-body-inline": "text-sm leading-relaxed text-inherit",
-  "review-card-body": "italic text-[15px] leading-relaxed text-muted",
-  "planning-renovation-footer": "text-[13px] leading-relaxed text-white/60",
-  prose: "mt-10 mb-4 font-serif text-2xl text-dark",
+/**
+ * Heading sizes by level, per variant.
+ *
+ * A heading block has always carried its level — `blocks-html.ts` stores it and
+ * the renderer hands it over — but every variant except `prose` resolved to one
+ * class and threw the level away, so an h1 and an h2 came out the same size. In
+ * the ten body/card variants the heading class was byte-for-byte the paragraph
+ * class, so a heading was indistinguishable from body copy at any level.
+ *
+ * Long-form variants get a display scale. Body/card variants get a compact one:
+ * a heading inside a Review card or a banner should read as a heading without
+ * blowing the card open, and each keeps its own colour so a heading on navy
+ * stays legible.
+ */
+type HeadingScale = Record<number, string>;
+
+/**
+ * Sizes for a heading inside body copy — a step above the paragraph, not a title.
+ *
+ * Every level clears 17px, the largest paragraph any of these variants uses
+ * (who-we-are-body / what-we-do-body). A heading that lands on exactly the
+ * paragraph size is carrying its whole meaning in font-weight, which is not
+ * enough to read as a heading when it sits directly above one.
+ */
+const COMPACT_SIZES: HeadingScale = {
+  1: "text-[24px]",
+  2: "text-[20px]",
+  3: "text-[18px]",
+  4: "text-[18px]",
+  5: "text-[18px]",
+  6: "text-[18px]",
 };
 
-// Prose headings size by level (legal / long-form pages). The single
-// per-variant class above can't tell an h2 from an h3, so the "prose" variant
-// resolves its heading class from here instead — giving real hierarchy for SEO
-// + a11y without changing any other variant.
-const proseHeadingClasses: Record<number, string> = {
-  1: "mt-10 mb-4 font-serif text-3xl text-dark",
-  2: "mt-10 mb-4 font-serif text-2xl text-dark",
-  3: "mt-8 mb-3 font-serif text-xl text-dark",
-  4: "mt-6 mb-2 text-lg font-semibold text-dark",
-  5: "mt-6 mb-2 text-base font-semibold text-dark",
-  6: "mt-6 mb-2 text-base font-semibold text-dark",
+/**
+ * A body/card heading scale in the variant's own colour.
+ *
+ * `first:mt-0` because these bodies often open on a heading, and a top margin
+ * there pushes the copy away from whatever it sits under.
+ */
+function compactHeadings(tone: string): HeadingScale {
+  const scale: HeadingScale = {};
+  for (const level of [1, 2, 3, 4, 5, 6]) {
+    scale[level] = `mt-5 mb-1.5 font-semibold leading-snug first:mt-0 ${COMPACT_SIZES[level]} ${tone}`;
+  }
+  return scale;
+}
+
+/** The home hero title is one line of display type — level does not size it. */
+const HERO_TITLE_HEADINGS: HeadingScale = {
+  1: "block text-4xl leading-[1.15] tracking-tight text-white sm:text-5xl",
+  2: "block text-4xl leading-[1.15] tracking-tight text-white sm:text-5xl",
+  3: "block text-4xl leading-[1.15] tracking-tight text-white sm:text-5xl",
+  4: "block text-4xl leading-[1.15] tracking-tight text-white sm:text-5xl",
+  5: "block text-4xl leading-[1.15] tracking-tight text-white sm:text-5xl",
+  6: "block text-4xl leading-[1.15] tracking-tight text-white sm:text-5xl",
+};
+
+const headingClasses: Record<RichTextVariant, HeadingScale> = {
+  default: {
+    1: "mt-8 mb-4 font-serif text-3xl text-foreground first:mt-0",
+    2: "mt-8 mb-3 font-serif text-2xl text-foreground first:mt-0",
+    3: "mt-6 mb-3 font-serif text-xl text-foreground first:mt-0",
+    4: "mt-6 mb-2 text-lg font-semibold text-foreground first:mt-0",
+    5: "mt-6 mb-2 text-base font-semibold text-foreground first:mt-0",
+    6: "mt-6 mb-2 text-base font-semibold text-foreground first:mt-0",
+  },
+  "hero-title": HERO_TITLE_HEADINGS,
+  "hero-footer": compactHeadings("text-subtle"),
+  "at-a-glance-footer": compactHeadings("text-subtle"),
+  "who-we-are-body": compactHeadings("text-dark"),
+  "work-card-body": compactHeadings("text-dark"),
+  "what-we-do-body": compactHeadings("text-dark"),
+  "banner-body-dark": compactHeadings("text-white"),
+  "banner-body-light": compactHeadings("text-dark"),
+  "banner-body-inline": compactHeadings("text-inherit"),
+  "review-card-body": compactHeadings("text-dark not-italic"),
+  "planning-renovation-footer": compactHeadings("text-white/80"),
+  prose: {
+    1: "mt-10 mb-4 font-serif text-4xl text-dark first:mt-0",
+    2: "mt-10 mb-4 font-serif text-3xl text-dark first:mt-0",
+    3: "mt-8 mb-3 font-serif text-2xl text-dark first:mt-0",
+    4: "mt-6 mb-2 text-lg font-semibold text-dark first:mt-0",
+    5: "mt-6 mb-2 text-base font-semibold text-dark first:mt-0",
+    6: "mt-6 mb-2 text-base font-semibold text-dark first:mt-0",
+  },
 };
 
 function isBlocksContent(value: unknown): value is unknown[] {
@@ -96,17 +153,17 @@ export function RichTextViewer({
             <p className={paragraphClasses[variant]}>{children}</p>
           ),
           heading: ({ children, level }) => {
+            const headingClass =
+              headingClasses[variant][level] ?? headingClasses[variant][6];
+
+            // The home hero already renders this block inside its own <h1>
+            // (`as="h1"`), so the heading here has to stay a <span> — nesting a
+            // second h1 inside the first is not markup any reader can use.
             if (variant === "hero-title" && level === 1) {
-              return (
-                <span className={headingClasses[variant]}>{children}</span>
-              );
+              return <span className={headingClass}>{children}</span>;
             }
 
             const HeadingTag = `h${level}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-            const headingClass =
-              variant === "prose"
-                ? (proseHeadingClasses[level] ?? proseHeadingClasses[6])
-                : headingClasses[variant];
             return (
               <HeadingTag className={headingClass}>{children}</HeadingTag>
             );

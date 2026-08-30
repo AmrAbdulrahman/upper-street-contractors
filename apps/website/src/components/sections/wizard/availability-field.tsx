@@ -11,6 +11,7 @@ import {
   formatDateLong,
   fromISODate,
   isAvailabilityComplete,
+  optionChipClassName,
   toISODate,
   type AvailabilityEntry,
 } from "./helpers";
@@ -23,14 +24,23 @@ type AvailabilityFieldProps = {
   labelText: ReactNode;
   /** DOM id prefix, so the hint can be wired with aria-describedby. */
   id: string;
-  /**
-   * The CMS `form-field`. The four config attributes are optional because the
-   * WizardSection fragment must select them (wizard.graphql) and the CMS may
-   * still return null — `AVAILABILITY_DEFAULTS` fills the gaps.
-   */
+  /** The CMS `form-field` this calendar renders. */
   field: {
     label?: string | null;
     required?: boolean | null;
+  };
+  /**
+   * The parent Timing step's calendar settings, from its `form-question`. They
+   * are the step's rather than the field's because the step owns both halves of
+   * the feature — the emergency toggle and the calendar that toggle clamps — and
+   * because `form-field` is one Type shared by every wizard input, so five
+   * settings only this widget reads were showing in all ~15 field drawers.
+   *
+   * Each is optional because the CMS may return null even though the
+   * WizardSection fragment selects them (wizard.graphql) —
+   * `AVAILABILITY_DEFAULTS` fills the gaps.
+   */
+  config: {
     maxDates?: number | null;
     earliestOffsetDays?: number | null;
     horizonMonths?: number | null;
@@ -56,16 +66,17 @@ export function AvailabilityField({
   labelText,
   id,
   field,
+  config,
   emergency = false,
   value,
   onChange,
 }: AvailabilityFieldProps) {
   // `??` not `||` — 0 is meaningful for all three numbers.
-  const maxDates = field.maxDates ?? AVAILABILITY_DEFAULTS.maxDates;
+  const maxDates = config.maxDates ?? AVAILABILITY_DEFAULTS.maxDates;
   const earliestOffsetDays =
-    field.earliestOffsetDays ?? AVAILABILITY_DEFAULTS.earliestOffsetDays;
-  const horizonMonths = field.horizonMonths ?? AVAILABILITY_DEFAULTS.horizonMonths;
-  const allowWeekends = field.allowWeekends ?? AVAILABILITY_DEFAULTS.allowWeekends;
+    config.earliestOffsetDays ?? AVAILABILITY_DEFAULTS.earliestOffsetDays;
+  const horizonMonths = config.horizonMonths ?? AVAILABILITY_DEFAULTS.horizonMonths;
+  const allowWeekends = config.allowWeekends ?? AVAILABILITY_DEFAULTS.allowWeekends;
 
   const earliest = new Date();
   earliest.setHours(0, 0, 0, 0);
@@ -82,7 +93,7 @@ export function AvailabilityField({
   // An emergency shortens the window rather than replacing it: whichever of the
   // two ceilings falls sooner wins, so turning the switch on can only ever
   // narrow what is offered, never quietly open dates the normal horizon refused.
-  const emergencyDays = field.emergencyHorizonDays ?? 0;
+  const emergencyDays = config.emergencyHorizonDays ?? 0;
   if (emergency && emergencyDays > 0) {
     const emergencyEnd = new Date(earliest);
     emergencyEnd.setDate(emergencyEnd.getDate() + emergencyDays);
@@ -225,8 +236,9 @@ export function AvailabilityField({
                       key={w}
                       aria-pressed={on}
                       onClick={() => toggleWindow(entry.date, w)}
-                      className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${on ? "border-gold bg-gold text-white" : "border-border bg-white text-dark hover:border-gold/40"}`}
+                      className={optionChipClassName(on)}
                     >
+                      {on ? <span aria-hidden>✓</span> : null}
                       {w}
                     </button>
                   );

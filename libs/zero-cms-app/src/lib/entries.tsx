@@ -3,22 +3,52 @@
 /** Content section: entry listing (search + status filter) and the entry editor. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ZeroCmsError, type OutputEntry, type ReferenceHit, type Type } from '@usc/zero-cms-core';
+import {
+  ZeroCmsError,
+  humanize,
+  type MediaItem,
+  type OutputEntry,
+  type ReferenceHit,
+  type Type,
+} from '@usc/zero-cms-core';
 import { useZeroCms } from './context';
 import { useDraftRegistryOptional } from './draft-registry';
-import { EntryForm, entryLabel, titleField, type FormValues } from './fields';
-import { Badge, Button, EmptyState, Input, Select, Spinner, cls, cx } from './components/ui';
+import {
+  EntryForm,
+  entryLabel,
+  useEntryLabeller,
+  useIsUntitled,
+  type FormValues,
+} from './fields';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  Field as FieldShell,
+  Input,
+  Select,
+  Spinner,
+  cls,
+  cx,
+} from './components/ui';
 import { SortControl, type SortDir, type SortField } from './list-controls';
 import { cleanValues, defaultsFor, errorMessage, fuzzyMatch } from './util';
 
 type StatusFilter = 'all' | 'published' | 'draft' | 'unpublished';
 
-function compareBy(sortBy: SortField, dir: SortDir, type: Type | undefined) {
+type Labeller = (type: Type | undefined, entry: OutputEntry) => string;
+
+function compareBy(
+  sortBy: SortField,
+  dir: SortDir,
+  type: Type | undefined,
+  label: Labeller
+) {
   const sign = dir === 'asc' ? 1 : -1;
   return (a: OutputEntry, b: OutputEntry) => {
     if (sortBy === 'created') return sign * a.__createdAt.localeCompare(b.__createdAt);
     if (sortBy === 'updated') return sign * a.__lastEditedAt.localeCompare(b.__lastEditedAt);
-    return sign * entryLabel(type, a).localeCompare(entryLabel(type, b));
+    return sign * label(type, a).localeCompare(label(type, b));
   };
 }
 
@@ -52,6 +82,8 @@ export function EntriesList({
   refreshToken?: number;
 }) {
   const { adapter } = useZeroCms();
+  const label = useEntryLabeller();
+  const isUntitled = useIsUntitled();
   const [entries, setEntries] = useState<OutputEntry[] | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
@@ -74,9 +106,10 @@ export function EntriesList({
       // StrictMode double-invoke made this visible as the list rendering
       // once, then immediately re-rendering in a different order). Sort here
       // so repeat fetches of the same data always land in the same order.
-      const sorted = [...data].sort((a, b) =>
-        entryLabel(type, a).localeCompare(entryLabel(type, b))
-      );
+      // Deterministic, not title-aware: `filtered` below re-sorts by the real
+      // Entry title anyway, and keying this on the title would make `load`
+      // re-run whenever the media library or schema changed identity.
+      const sorted = [...data].sort((a, b) => a.__id.localeCompare(b.__id));
       setEntries(sorted);
     },
     [adapter, type.__name]
@@ -111,10 +144,8 @@ export function EntriesList({
       if (!q) return true;
       return Object.values(e).some((v) => typeof v === 'string' && fuzzyMatch(q, v));
     });
-    return [...matched].sort(compareBy(sortBy, sortDir, type));
-  }, [entries, search, status, sortBy, sortDir, type]);
-
-  const tf = titleField(type);
+    return [...matched].sort(compareBy(sortBy, sortDir, type, label));
+  }, [entries, search, status, sortBy, sortDir, type, label]);
 
   return (
     <div className="space-y-3">
@@ -163,9 +194,11 @@ export function EntriesList({
               className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-neutral-50"
             >
               <span className="flex-1 truncate text-sm text-neutral-800">
-                {entryLabel(type, e)}
+                {label(type, e)}
               </span>
-              {tf == null && (
+              {/* Only when nothing resolved to a title: the short id is then the
+                  one thing telling two "Untitled …" siblings apart. */}
+              {isUntitled(type, e) && (
                 <span className="text-xs text-neutral-400">{e.__id.slice(0, 8)}</span>
               )}
               <StatusBadges entry={e} />
@@ -185,20 +218,83 @@ export function EntriesList({
 export async function describeReferenceHits(
   hits: ReferenceHit[],
   schema: Type[],
-  adapter: ReturnType<typeof useZeroCms>['adapter']
+  adapter: ReturnType<typeof useZeroCms>['adapter'],
+  media?: MediaItem[]
 ): Promise<string> {
   const parts = await Promise.all(
     hits.map(async (h) => {
       const fromType = schema.find((t) => t.__name === h.fromType);
-      const fieldLabel = fromType?.fields.find((f) => f.__name === h.field)?.label ?? h.field;
+      const fieldLabel =
+        fromType?.fields.find((f) => f.__name === h.field)?.label ?? humanize(h.field);
       const label = await adapter
         .get(h.fromType, h.fromId, { status: 'draft', includeUnpublished: true })
-        .then((e) => (e ? entryLabel(fromType, e) : null))
+        .then((e) => (e ? entryLabel(fromType, e, media) : null))
         .catch(() => null);
       return `"${label ?? h.fromId.slice(0, 8)}" (${fromType?.label ?? h.fromType} → ${fieldLabel})`;
     })
   );
   return `Can't delete — still referenced by ${parts.join(', ')}.`;
+}
+
+/**
+ * The Title override row — Content admin only (see `EntryEditor`'s
+ * `allowTitleOverride`). Sits outside `EntryForm`, so it does not ride the
+ * form's autosave and needs `disabled` threaded by hand like the Close button.
+ *
+ * Saves on blur (and on Enter) rather than on a Save button: it is one short
+ * string, and a control whose value silently differs from what is stored is
+ * worse than a write an editor did not consciously trigger. Not draft-gated —
+ * `setEntryTitle` writes the entry record, so the new title is live at once.
+ */
+function TitleOverrideRow({
+  entry,
+  derived,
+  disabled,
+  onSave,
+}: {
+  entry: OutputEntry;
+  /** What the title would be with no override — shown as the placeholder. */
+  derived: string;
+  disabled: boolean;
+  onSave: (title: string | null) => Promise<void>;
+}) {
+  const stored = entry.__title ?? '';
+  const [value, setValue] = useState(stored);
+
+  // Re-sync when the entry reloads under us (a CONFLICT reload, or switching
+  // entries without a remount) — but never mid-edit, which would eat keystrokes.
+  const lastStored = useRef(stored);
+  if (lastStored.current !== stored) {
+    lastStored.current = stored;
+    if (value !== stored) setValue(stored);
+  }
+
+  const commit = () => {
+    const next = value.trim();
+    if (next === stored) return;
+    void onSave(next || null);
+  };
+
+  return (
+    <FieldShell
+      label="Title override"
+      hint="What the CMS calls this entry. Blank derives it from the type's title field."
+    >
+      <Input
+        value={value}
+        placeholder={derived}
+        disabled={disabled}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            e.currentTarget.blur();
+          }
+        }}
+      />
+    </FieldShell>
+  );
 }
 
 export function EntryEditor({
@@ -211,6 +307,8 @@ export function EntryEditor({
   focusField,
   onDirtyChange,
   onSavingChange,
+  onLabelChange,
+  allowTitleOverride,
 }: {
   type: Type;
   entryId?: string;
@@ -238,8 +336,25 @@ export function EntryEditor({
    * mid-write unmounts the form the response is meant to settle into.
    */
   onSavingChange?: (saving: boolean) => void;
+  /**
+   * Reports the entry's display label as it loads, so a host can NAME this
+   * panel — the widget drawer's breadcrumb uses it. Only this component ever
+   * holds the loaded entry, so the alternative is the host fetching it a second
+   * time purely to print a title. `null` while loading, and for a create form,
+   * which has nothing to be called yet.
+   */
+  onLabelChange?: (label: string | null) => void;
+  /**
+   * Show the Title override row — the Content admin only. The in-place Edit
+   * drawer deliberately does not: a title is Type-wide configuration plus a
+   * per-entry escape hatch, both of which belong where an editor is managing
+   * content rather than looking at a page. Also the only per-surface difference
+   * in this component's form, since `EntryForm` has no notion of one.
+   */
+  allowTitleOverride?: boolean;
 }) {
-  const { adapter, schema, refreshMedia, notify, currentUserId } = useZeroCms();
+  const { adapter, schema, media, refreshMedia, notify, currentUserId } = useZeroCms();
+  const label = useEntryLabeller();
   const draftReg = useDraftRegistryOptional();
   const isNew = !entryId;
   const creating = createMode ?? isNew;
@@ -297,6 +412,14 @@ export function EntryEditor({
     };
   }, [adapter, type.__name, entryId, isNew]);
 
+  // Deliberately depends on `onLabelChange`: hosts pass an inline closure whose
+  // identity changes every render, so this re-runs often. It settles because the
+  // host's setter ignores an unchanged title (see `setTargetTitle`) — the same
+  // contract `onDirtyChange` already relies on.
+  useEffect(() => {
+    onLabelChange?.(entry ? label(type, entry) : null);
+  }, [entry, type, label, onLabelChange]);
+
   // A CONFLICT means someone else changed this entry since it was loaded here —
   // reload it so the form reflects the fresh state, ready for the user to redo
   // their edit against it, rather than leaving them staring at stale data.
@@ -311,7 +434,7 @@ export function EntryEditor({
     } catch (err) {
       const msg =
         err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY'
-          ? await describeReferenceHits(err.details as ReferenceHit[], schema, adapter)
+          ? await describeReferenceHits(err.details as ReferenceHit[], schema, adapter, media)
           : errorMessage(err);
       setError(msg);
       notify('error', msg);
@@ -367,6 +490,30 @@ export function EntryEditor({
     }
   };
 
+  // Title override: its own CAS write, so it bumps `__lastEditedAt` like any
+  // other mutation — merge the response back the way `saveQuiet` does or the
+  // next form save presents a stale token and CONFLICTs.
+  const saveTitle = async (title: string | null) => {
+    if (isNew || !entryId || !entry) return;
+    setError(null);
+    try {
+      const saved = await adapter.setEntryTitle(
+        type.__name,
+        entryId,
+        title,
+        currentUserId,
+        entry.__lastEditedAt
+      );
+      setEntry((prev) => (prev ? { ...prev, ...saved } : prev));
+      onChanged();
+    } catch (err) {
+      const msg = errorMessage(err);
+      setError(msg);
+      notify('error', msg);
+      if (err instanceof ZeroCmsError && err.code === 'CONFLICT') await reloadEntry();
+    }
+  };
+
   const act = (fn: () => Promise<unknown>, close = false, successMsg?: string) =>
     run(async () => {
       await fn();
@@ -399,6 +546,15 @@ export function EntryEditor({
           </Button>
         </div>
       </div>
+
+      {allowTitleOverride && entry && !creating && (
+        <TitleOverrideRow
+          entry={entry}
+          derived={label(type, { ...entry, __title: null })}
+          disabled={locked}
+          onSave={saveTitle}
+        />
+      )}
 
       {error && (
         <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">

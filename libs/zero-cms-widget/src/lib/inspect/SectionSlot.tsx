@@ -29,6 +29,12 @@ export interface SectionSlotProps {
   count: number;
   /** This section's zero-cms Type `__name`, for the card's glyph + label. */
   typeName: string | null;
+  /**
+   * The child entry's own title, once read. Undefined until then — the card
+   * shows the Type label meanwhile, and swaps without changing height, so a
+   * late arrival cannot move the box dnd-kit measured at pointer-down.
+   */
+  title?: string;
   /** True while ANY drag in this list is active. */
   collapsed: boolean;
   onRemove: () => void;
@@ -47,6 +53,7 @@ export function SectionSlot({
   index,
   count,
   typeName,
+  title,
   collapsed,
   onRemove,
   onGrab,
@@ -64,7 +71,12 @@ export function SectionSlot({
   const { ref, handleRef, isDragging } = useSortable({ id, index });
   const zeroCms = useZeroCmsOptional();
   const type = typeName ? zeroCms?.schema.find((t) => t.__name === typeName) : undefined;
-  const label = type?.label ?? typeName ?? 'Section';
+  const typeLabel = type?.label ?? typeName ?? 'Section';
+  // Two lines either way, so the card's height never changes as a title lands:
+  // the entry's name takes the top line and demotes the Type to the second,
+  // which is the line the Type description was on.
+  const label = title ?? typeLabel;
+  const sub = title ? typeLabel : type?.description;
 
   return (
     <div
@@ -106,9 +118,7 @@ export function SectionSlot({
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-neutral-900">{label}</p>
-            {type?.description ? (
-              <p className="truncate text-xs text-neutral-500">{type.description}</p>
-            ) : null}
+            {sub ? <p className="truncate text-xs text-neutral-500">{sub}</p> : null}
           </div>
         </div>
       ) : (

@@ -26,10 +26,11 @@
  *
  * ## The other additions
  *
- *   image-question.body / form-question.body — `blocks`, so a step can carry a
- *     real paragraph under its title instead of the one-line plain `hint`.
- *     `blocks` and not `richtext`: every other rich body on this site is blocks
- *     and mixing the two kinds breaks codegen.
+ *   (image-question.body / form-question.body — `blocks` — were added here
+ *     originally. scripts/seed-step-intro-block.mjs has since replaced them with
+ *     `intro`, a reference to a Rich Text Block, and removed `body` from all
+ *     three carriers. This script must NOT re-add them: it is idempotent and
+ *     re-running it would resurrect a retired field.)
  *   image-question.gatedBy — names the earlier Image Question whose answers
  *     gate this step's cards. Its only job is to let the editor UI warn when a
  *     card on a gated step has no `appliesTo` set; the runtime still falls back
@@ -39,8 +40,12 @@
  *   form-field.isEmergencyFlag — marks WHICH boolean field is the emergency
  *     switch. An explicit marker rather than matching on `fieldKey === 'emergency'`,
  *     so renaming the key in the CMS cannot quietly break every branch rule.
- *   form-field.emergencyHorizonDays — how far ahead the Availability calendar
- *     may reach while the emergency flag is on. 0 = use the normal horizon.
+ *   form-question.emergencyHorizonDays — how far ahead the Availability
+ *     calendar may reach while the emergency flag is on. 0 = use the normal
+ *     horizon. It sits on the step, not the field: the Timing step owns both
+ *     the emergency toggle and the calendar the toggle clamps, and while it
+ *     lived on `form-field` the same 7 was stored on two fields with one copy
+ *     inert. Moved by scripts/seed-timing-config-to-step.mjs.
  *
  * All additive, so `saveSchema`'s destructive-edit guard passes (it validates
  * existing published values and skips absent fields), and ADR 0011 read-time
@@ -105,13 +110,6 @@ const BRANCH_FIELDS = [
   },
 ];
 
-const STEP_BODY = {
-  __name: 'body',
-  __type: 'blocks',
-  label: 'Step introduction',
-  description: 'Rich text shown under the step title.',
-};
-
 const VARIANTS = {
   __name: 'variants',
   __type: 'references',
@@ -119,6 +117,23 @@ const VARIANTS = {
   description:
     'Alternative titles and introductions. The first one whose rules match the visitor wins; otherwise the step keeps its own title and introduction.',
   allowedTypes: ['step-copy'],
+};
+
+/**
+ * How far ahead the Availability calendar may reach in an emergency. On the
+ * Timing step (`form-question`) rather than the calendar field, alongside the
+ * other four calendar settings seeded by scripts/seed-availability-schema.mjs.
+ */
+const EMERGENCY_HORIZON_DAYS = {
+  __name: 'emergencyHorizonDays',
+  __type: 'number',
+  label: 'Availability: emergency booking window (days)',
+  description:
+    'How far ahead the calendar may reach while the emergency switch is on. 0 = no special limit. Can only narrow the normal horizon, never widen it.',
+  integer: true,
+  min: 0,
+  max: 365,
+  default: 0,
 };
 
 /** Which existing Type gets which new fields. */
@@ -134,20 +149,8 @@ const ADDITIONS = {
         'Marks the boolean field whose value the Emergency rules above are read from. Set this on exactly one field.',
       default: false,
     },
-    {
-      __name: 'emergencyHorizonDays',
-      __type: 'number',
-      label: 'Emergency booking window (days)',
-      description:
-        'Availability fields only. How far ahead the calendar may reach while the emergency switch is on. 0 = no special limit.',
-      integer: true,
-      min: 0,
-      max: 365,
-      default: 0,
-    },
   ],
   'image-question': [
-    STEP_BODY,
     VARIANTS,
     {
       __name: 'gatedBy',
@@ -158,7 +161,7 @@ const ADDITIONS = {
       allowedTypes: ['image-question'],
     },
   ],
-  'form-question': [STEP_BODY, VARIANTS],
+  'form-question': [VARIANTS, EMERGENCY_HORIZON_DAYS],
 };
 
 /** The new Type. Its own fields mirror a question's copy, plus the Branch rule. */
@@ -169,7 +172,8 @@ const STEP_COPY_TYPE = {
   thumbnail: 'richText',
   fields: [
     { __name: 'title', __type: 'text', label: 'Title', required: true },
-    { __name: 'body', __type: 'blocks', label: 'Introduction' },
+    // No `body`: scripts/seed-step-intro-block.mjs gives every carrier an
+    // `intro` reference instead, and adds it to this Type too.
     ...BRANCH_FIELDS,
   ],
 };

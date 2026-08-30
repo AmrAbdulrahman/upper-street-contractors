@@ -13,6 +13,7 @@
  */
 
 import { useState } from 'react';
+import { humanize } from '@usc/zero-cms-core';
 import { useZeroCmsWidgetOptional } from '../context';
 import { useZeroCmsEntry } from './entry-context';
 import { useInspect } from './use-inspect';
@@ -59,7 +60,7 @@ export function AddZeroCmsEntry({ field, disabled, disabledReason }: AddZeroCmsE
     <button
       ref={setHost}
       type="button"
-      aria-label={`Add ${field}`}
+      aria-label={`Add ${humanize(field)}`}
       disabled={disabled}
       title={disabled ? disabledReason : undefined}
       onClick={() =>

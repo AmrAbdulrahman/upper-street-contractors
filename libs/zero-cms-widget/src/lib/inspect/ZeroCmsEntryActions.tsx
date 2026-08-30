@@ -1,8 +1,9 @@
 'use client';
 
 /**
- * <ZeroCmsEntryActions> — Publish / Unpublish / Delete for the entry a page is
- * ABOUT, rendered inline in that page's own markup.
+ * <ZeroCmsEntryActions> — Publish / Unpublish / Duplicate / Save as template /
+ * Delete for the entry a page is ABOUT, rendered inline in that page's own
+ * markup.
  *
  * The Edit drawer has carried these three since the beginning, but only for an
  * entry you had opened to edit. A Blog Post is the whole page, so publishing it
@@ -17,6 +18,13 @@
  *
  * Delete confirms in place rather than through `window.confirm` — a native dialog
  * cannot say *what* is about to be deleted, and this one is irreversible.
+ *
+ * Duplicate and Save as template are the same two actions a card's hover cluster
+ * offers on an index (see `duplicate-action-context` / `template-action-context`),
+ * offered here for the page you are standing ON. They are opt-in per host and for
+ * the same reason those contexts are: what a copy shares and which lists a
+ * Template carries are facts about the host's content model (ADR 0017 / 0019),
+ * so the options arrive as props rather than being guessed here.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -27,7 +35,11 @@ import {
   describeReferenceHits,
   errorMessage,
 } from '@usc/zero-cms-app';
-import { useZeroCmsWidgetOptional } from '../context';
+import {
+  useZeroCmsWidgetOptional,
+  type DuplicateOptions,
+  type SaveAsTemplateOptions,
+} from '../context';
 import { useZeroCmsEntry } from './entry-context';
 import { useInspect } from './use-inspect';
 
@@ -39,6 +51,20 @@ export interface ZeroCmsEntryActionsProps {
   onDeleted?: () => void;
   /** What this entry is called in the button labels and confirm copy. */
   noun?: string;
+  /**
+   * Offer "Duplicate". Passed straight to `widget.duplicate` — ADR 0017 keeps
+   * `shareTypes` a parameter, so absent means the host has not said what a copy
+   * of this thing may share and no button appears.
+   */
+  duplicateOptions?: DuplicateOptions;
+  /**
+   * Called with the copy's id once a duplicate lands. The copy opens in a drawer
+   * either way; this is for hosts that also want to go somewhere (a Project's
+   * URL is its id, so the copy has a page to navigate to).
+   */
+  onDuplicated?: (id: string) => void | Promise<void>;
+  /** Offer "Save as template". Passed straight to `widget.saveAsTemplate`. */
+  templateOptions?: SaveAsTemplateOptions;
   /** Extra classes on the wrapper row. */
   className?: string;
 }
@@ -50,6 +76,9 @@ export function ZeroCmsEntryActions({
   onDeleted,
   noun = 'post',
   className,
+  duplicateOptions,
+  onDuplicated,
+  templateOptions,
 }: ZeroCmsEntryActionsProps) {
   const widget = useZeroCmsWidgetOptional();
   const ctx = useZeroCmsEntry();
@@ -109,7 +138,7 @@ export function ZeroCmsEntryActions({
     } catch (err) {
       const message =
         err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY'
-          ? await describeReferenceHits(err.details as ReferenceHit[], schema, adapter)
+          ? await describeReferenceHits(err.details as ReferenceHit[], schema, adapter, zeroCms?.media)
           : errorMessage(err);
       setError(message);
       notify('error', message);
@@ -132,6 +161,23 @@ export function ZeroCmsEntryActions({
       () => adapter.unpublish(typeName, entryId, currentUserId, entry.__lastEditedAt),
       `${noun[0].toUpperCase()}${noun.slice(1)} unpublished — it is no longer on the site`
     );
+
+  /**
+   * Not `run`: `widget.duplicate` / `widget.saveAsTemplate` already report their
+   * own outcome and raise the busy overlay, so wrapping them would notify twice
+   * and re-read an entry neither of them changed. The local flag is only here to
+   * stop a second click landing while the first walk is still copying.
+   */
+  const copyAction = async (fn: () => Promise<string | null>, done?: (id: string) => unknown) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const id = await fn();
+      if (id && done) await done(id);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const remove = () =>
     run(
@@ -198,6 +244,33 @@ export function ZeroCmsEntryActions({
                 className={`${BTN} border-neutral-300 text-neutral-700 hover:border-neutral-900`}
               >
                 Unpublish
+              </button>
+            )}
+            {widget && duplicateOptions && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() =>
+                  void copyAction(
+                    () => widget.duplicate(entryId, duplicateOptions),
+                    (id) => onDuplicated?.(id)
+                  )
+                }
+                className={`${BTN} border-neutral-300 text-neutral-700 hover:border-neutral-900`}
+              >
+                Duplicate
+              </button>
+            )}
+            {widget && templateOptions && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() =>
+                  void copyAction(() => widget.saveAsTemplate(entryId, templateOptions))
+                }
+                className={`${BTN} border-neutral-300 text-neutral-700 hover:border-neutral-900`}
+              >
+                Save as template
               </button>
             )}
             <button

@@ -34,6 +34,7 @@ const RPC_MIN_ROLE: Record<string, Role> = {
   publish: 'editor',
   unpublish: 'editor',
   discardDraft: 'editor',
+  setEntryTitle: 'editor',
   putMedia: 'editor',
   updateMedia: 'editor',
   deleteMedia: 'editor',

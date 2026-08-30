@@ -60,6 +60,8 @@ export function createHttpAdapter(opts: HttpAdapterOptions): Adapter {
       rpc('unpublish', [t, id, actor, expected]),
     discardDraft: (t, id, actor: string, expected: string) =>
       rpc('discardDraft', [t, id, actor, expected]),
+    setEntryTitle: (t, id, title: string | null, actor: string, expected: string) =>
+      rpc('setEntryTitle', [t, id, title, actor, expected]),
     get: (t, id, opts?: GetOptions) =>
       rpc<OutputEntry | null>('get', [t, id, opts ?? {}]),
     query: (t, input?: QueryInput) =>

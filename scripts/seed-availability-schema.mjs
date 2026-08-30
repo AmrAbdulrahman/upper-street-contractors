@@ -5,11 +5,16 @@
  *   1. `form-field.inputType` += `availability`. camelCase, not `availability-*`
  *      or anything hyphenated: one invalid option drops the whole lookup back to
  *      a String scalar (libs/zero-cms-graphql `lookupCanEnum`).
- *   2. Four config attributes on `form-field` so an editor can tune the calendar
- *      from the Edit drawer without a deploy. `form-field` is a single Type, so
- *      these show on every field's drawer — the same cost `dependsOnFieldKey` /
- *      `dependsOnValue` already pay. The `Availability:` label prefix is what
- *      keeps that legible.
+ *   2. Four config attributes on `form-question` — the Timing step, which holds
+ *      both the emergency toggle and the calendar it clamps — so an editor can
+ *      tune the calendar from the Edit drawer without a deploy.
+ *
+ *      They sat on `form-field` until scripts/seed-timing-config-to-step.mjs
+ *      moved them up. `form-field` is one Type shared by every input, so five
+ *      attributes only the calendar ever read were showing in all ~15 field
+ *      drawers, and the emergency window ended up stored twice with one copy
+ *      inert. `form-question` is flat too — three steps carry these and one
+ *      uses them — so the `Availability:` label prefix still earns its keep.
  *
  * Defaults mirror AVAILABILITY_DEFAULTS in
  * apps/website/src/components/sections/wizard/helpers.ts — keep the two in step.
@@ -61,9 +66,10 @@ const ACTOR = 'seed:availability';
 
 /**
  * The Availability calendar's editor controls. 0 means "no limit" on all three
- * numbers — and that has to live in the `label`, because the Content admin
- * renders a field's label but not its `description` (verified in the drawer).
- * The descriptions stay for the day it does.
+ * numbers, said in the `label` because that is the line an editor reads first.
+ * (It once had to live there: the Content admin rendered a field's label but
+ * not its `description`. It renders both now — `registry.tsx` passes the
+ * description through as the field's hint.)
  */
 const CONFIG_FIELDS = [
   {
@@ -99,8 +105,9 @@ const CONFIG_FIELDS = [
   {
     __name: 'allowWeekends',
     __type: 'boolean',
-    label: 'Availability: allow weekends (off hides Sat + Sun)',
-    description: 'Whether Saturday and Sunday are selectable.',
+    label: 'Availability: allow Saturdays (off hides Saturday)',
+    description:
+      'Whether Saturday is selectable. Sunday is never offered either way — the business is closed.',
     default: true,
   },
 ];
@@ -113,6 +120,11 @@ let changed = false;
 const formField = next.find((t) => t.__name === 'form-field');
 if (!formField) throw new Error('seed-availability-schema: no "form-field" Type in schema');
 formField.fields = formField.fields ?? [];
+
+const formQuestion = next.find((t) => t.__name === 'form-question');
+if (!formQuestion)
+  throw new Error('seed-availability-schema: no "form-question" Type in schema');
+formQuestion.fields = formQuestion.fields ?? [];
 
 // --- 1. form-field.inputType: add the `availability` option ------------------
 const inputTypeField = formField.fields.find((f) => f.__name === 'inputType');
@@ -131,13 +143,13 @@ if (!inputTypeField.options.includes('availability')) {
   console.log('schema: inputType option "availability" already present — left alone');
 }
 
-// --- 2. form-field: the four Availability config attributes -----------------
+// --- 2. form-question: the four Availability config attributes --------------
 for (const spec of CONFIG_FIELDS) {
-  const existing = formField.fields.find((f) => f.__name === spec.__name);
+  const existing = formQuestion.fields.find((f) => f.__name === spec.__name);
   if (existing) {
     if (existing.__type !== spec.__type)
       throw new Error(
-        `seed-availability-schema: "form-field.${spec.__name}" is __type "${existing.__type}", expected "${spec.__type}"`
+        `seed-availability-schema: "form-question.${spec.__name}" is __type "${existing.__type}", expected "${spec.__type}"`
       );
     // Reconcile the presentation bits rather than skipping outright, so a label
     // reword lands on a re-run. Data-shape keys (__type, default) are left as
@@ -151,15 +163,15 @@ for (const spec of CONFIG_FIELDS) {
     }
     if (touched) {
       changed = true;
-      console.log(`schema: refreshed label/bounds on "form-field.${spec.__name}"`);
+      console.log(`schema: refreshed label/bounds on "form-question.${spec.__name}"`);
     } else {
-      console.log(`schema: "form-field.${spec.__name}" already up to date — left alone`);
+      console.log(`schema: "form-question.${spec.__name}" already up to date — left alone`);
     }
     continue;
   }
-  formField.fields.push({ ...spec });
+  formQuestion.fields.push({ ...spec });
   changed = true;
-  console.log(`schema: added "form-field.${spec.__name}" (default ${spec.default})`);
+  console.log(`schema: added "form-question.${spec.__name}" (default ${spec.default})`);
 }
 
 // --- save -------------------------------------------------------------------

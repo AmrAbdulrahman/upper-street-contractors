@@ -39,6 +39,7 @@ import { move } from '@dnd-kit/helpers';
 import { useZeroCmsOptional } from '@usc/zero-cms-app';
 import { useZeroCmsWidgetOptional } from '../context';
 import { useZeroCmsEntry, entryRefId, entryRefType, type ZeroCmsEntryRef } from './entry-context';
+import { useEntryTitles } from './use-entry-titles';
 import { useInspect } from './use-inspect';
 import { outlineAnchorStyles } from './outline-geometry';
 import { AddSectionSlot } from './AddSectionSlot';
@@ -131,6 +132,13 @@ export function ZeroCmsSectionList({
   const ids = present.map((p) => p.id);
   const byId = new Map(present.map((p) => [p.id, p]));
   const order = pendingOrder ?? ids;
+
+  // Entry titles for the collapsed cards. Read only once a drag has actually
+  // started (`dragging`), so browsing a page in inspect mode costs nothing.
+  const { titles, ensure: ensureTitle } = useEntryTitles(
+    present.map((p) => ({ id: p.id, type: entryRefType(p.entry) })),
+    dragging
+  );
 
   // Any change to the server list (including the one our own reorder caused)
   // retires the optimistic order.
@@ -248,16 +256,35 @@ export function ZeroCmsSectionList({
       const type = childType
         ? zeroCms?.schema.find((t) => t.__name === childType)
         : undefined;
-      setRemoving({
-        childId,
-        childType,
-        childLabel: type?.label ?? childType ?? 'This block',
-        parentId: parentId!,
-        parentType: ctx?.typeName ?? meta.parentType,
-        parentField: field,
-      });
+      const open = (childLabel: string) =>
+        setRemoving({
+          childId,
+          childType,
+          childLabel,
+          parentId: parentId!,
+          parentType: ctx?.typeName ?? meta.parentType,
+          parentField: field,
+        });
+      // Name the entry, not just its Type — "Remove Prose?" on a page of four
+      // Prose sections says nothing about which one. Read it now if a drag has
+      // not already; the Type label is the fallback if that read fails.
+      const fallback = type?.label ?? childType ?? 'This block';
+      const known = titles.get(childId);
+      if (known) return open(known);
+      void ensureTitle({ id: childId, type: childType }).then((title) =>
+        open(title ?? fallback)
+      );
     },
-    [byId, zeroCms, parentId, ctx?.typeName, meta.parentType, field]
+    [
+      byId,
+      zeroCms,
+      parentId,
+      ctx?.typeName,
+      meta.parentType,
+      field,
+      titles,
+      ensureTitle,
+    ]
   );
 
   // Public + inspect-off: exactly the children, in a fragment. No wrapper.
@@ -365,6 +392,7 @@ export function ZeroCmsSectionList({
                     index={i}
                     count={order.length}
                     typeName={entryRefType(slot.entry)}
+                    title={titles.get(id)}
                     collapsed={dragging}
                     noun={noun}
                     onRemove={() => openRemove(id)}

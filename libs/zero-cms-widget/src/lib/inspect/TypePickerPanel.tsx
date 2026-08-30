@@ -81,7 +81,19 @@ export function TypePickerPanel({
 
   /** null = showing the Type grid; otherwise the Type whose reuse list is open. */
   const [reuseType, setReuseType] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  /**
+   * Two searches, not one. The grid filters Types and the reuse step filters
+   * that Type's existing entries; sharing one box carries a query typed on the
+   * grid into a list it means nothing in, and silently hides most of it.
+   */
+  const [typeSearch, setTypeSearch] = useState('');
+  const [reuseSearch, setReuseSearch] = useState('');
+
+  /** Entering or leaving the reuse step always starts its search empty. */
+  const openReuse = (name: string | null) => {
+    setReuseSearch('');
+    setReuseType(name);
+  };
 
   const types = useMemo(
     () =>
@@ -99,14 +111,32 @@ export function TypePickerPanel({
     ? (schema.find((t) => t.__name === parentType)?.label ?? parentType).toLowerCase()
     : 'page';
 
+  /**
+   * Substring, not the subsequence `fuzzyMatch` the admin's Type list uses: on
+   * two dozen cells a subsequence match returns most of them for a three-letter
+   * query (`cta` also hits Clients Carousel and Case Studies), which is the
+   * opposite of what someone typing a name wants. The description is searched
+   * too, so "testimonial" finds Client Reviews and "photo" finds Image.
+   */
+  const shownTypes = useMemo(() => {
+    const q = typeSearch.trim().toLowerCase();
+    if (!q) return types;
+    return types.filter(
+      (t) =>
+        t.label.toLowerCase().includes(q) ||
+        t.name.toLowerCase().includes(q) ||
+        (t.description ?? '').toLowerCase().includes(q)
+    );
+  }, [types, typeSearch]);
+
   if (reuseType) {
     const t = types.find((x) => x.name === reuseType);
-    const q = search.trim().toLowerCase();
+    const q = reuseSearch.trim().toLowerCase();
     const shown = (t?.existing ?? []).filter((o) => !q || o.label.toLowerCase().includes(q));
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <ui.Button onClick={() => setReuseType(null)} aria-label="Back to section types">
+          <ui.Button onClick={() => openReuse(null)} aria-label="Back to section types">
             ← Back
           </ui.Button>
           <h3 className="text-base font-semibold text-neutral-900">{t?.label}</h3>
@@ -133,8 +163,8 @@ export function TypePickerPanel({
 
         <ui.Input
           placeholder="Search…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={reuseSearch}
+          onChange={(e) => setReuseSearch(e.target.value)}
           aria-label={`Search ${t?.label ?? 'entries'}`}
         />
 
@@ -170,8 +200,15 @@ export function TypePickerPanel({
         <p className="mt-1 text-sm text-neutral-600">Choose what kind of block to add.</p>
       </div>
 
+      <ui.Input
+        placeholder="Search section types…"
+        value={typeSearch}
+        onChange={(e) => setTypeSearch(e.target.value)}
+        aria-label="Search section types"
+      />
+
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {types.map((t) => (
+        {shownTypes.map((t) => (
           <li key={t.name}>
             <button
               type="button"
@@ -182,7 +219,7 @@ export function TypePickerPanel({
               // let it resolve there.
               onClick={() =>
                 t.existing.length || loading
-                  ? setReuseType(t.name)
+                  ? openReuse(t.name)
                   : onPick({ kind: 'create', type: t.name })
               }
               className="flex h-full w-full flex-col gap-2 rounded-lg border border-neutral-200 p-2 text-left transition-colors hover:border-neutral-900 hover:bg-neutral-50"
@@ -199,6 +236,11 @@ export function TypePickerPanel({
             </button>
           </li>
         ))}
+        {shownTypes.length === 0 && (
+          <li className="col-span-full px-3 py-6 text-center text-sm text-neutral-400">
+            No section types match “{typeSearch.trim()}”.
+          </li>
+        )}
       </ul>
 
       <ui.Button onClick={() => onPick(null)}>Cancel</ui.Button>

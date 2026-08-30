@@ -1,6 +1,10 @@
 import "server-only";
 
-import { GetBlogSlugsDocument, GetProjectIdsDocument } from "@/generated/graphql";
+import {
+  GetBlogSlugsDocument,
+  GetProjectIdsDocument,
+  GetServicePageSlugsDocument,
+} from "@/generated/graphql";
 import { query } from "@/lib/cms/query";
 
 /**
@@ -20,10 +24,16 @@ import { query } from "@/lib/cms/query";
  *   introspect (readdir-based enumeration only works at build time, which is
  *   exactly the mistake the old `scripts/generate-sitemap.mjs` made without
  *   the walk even reaching these routes — see ADR 0012).
- * - **Project pages** (`/projects/:id`) and **Blog posts** (`/blog/:slug`) —
- *   genuinely CMS-driven (a publish can add one with no code change), so this
- *   list queries live via the same `GetProjectIds` / `GetBlogSlugs` used by
- *   those routes' own `generateStaticParams`.
+ * - **Project pages** (`/projects/:id`), **Blog posts** (`/blog/:slug`) and
+ *   **Service pages** (`/:slug`) — genuinely CMS-driven (a publish can add one
+ *   with no code change), so this list queries live via the same
+ *   `GetProjectIds` / `GetBlogSlugs` / `GetServicePageSlugs` used by those
+ *   routes' own `generateStaticParams`.
+ *
+ * Service pages moved from the first group to the second when the nine
+ * hardcoded route folders became one `[serviceSlug]` route. Their paths are no
+ * longer a fact about the repository, so a literal list here would go stale the
+ * first time an editor adds one.
  *
  * Blog posts matter here more than most: the Blog index paginates client-side,
  * so a post on page 3 is not linked from the first screen of HTML. The sitemap
@@ -44,8 +54,11 @@ import { query } from "@/lib/cms/query";
  * 308s to `/services`.
  *
  * `/services` matters more than a normal marketing page: it is the only place
- * that links all nine Service pages now that the footer's Services column is
- * gone and the header keeps them behind a dropdown.
+ * that links every Service page now that the footer's Services column is gone
+ * and the header keeps them behind a dropdown.
+ *
+ * The nine trades used to be listed below. They are queried now — see
+ * `servicePaths` — because they no longer have route folders to mirror.
  */
 const STATIC_ROUTES = [
   "/",
@@ -56,15 +69,6 @@ const STATIC_ROUTES = [
   "/services",
   "/projects",
   "/blog",
-  "/refurbishments",
-  "/kitchens",
-  "/bathrooms",
-  "/plumbing",
-  "/heating",
-  "/electric",
-  "/carpentry",
-  "/roofing",
-  "/handyman",
 ] as const;
 
 export async function getAllSitePaths(): Promise<string[]> {
@@ -75,9 +79,13 @@ export async function getAllSitePaths(): Promise<string[]> {
   // what a real anonymous visitor can see, never a signed-in editor's own
   // draft/preview session, even when this happens to run inside one (the
   // warm pass executes within the authenticated RPC call's request scope).
-  const [projectData, blogData] = await Promise.all([
+  const [projectData, blogData, servicePageData] = await Promise.all([
     query(GetProjectIdsDocument, { status: "published", includeUnpublished: false }),
     query(GetBlogSlugsDocument, { status: "published", includeUnpublished: false }),
+    query(GetServicePageSlugsDocument, {
+      status: "published",
+      includeUnpublished: false,
+    }),
   ]);
   const projectPaths = (projectData?.projects ?? [])
     .filter((p): p is { id: string } => Boolean(p?.id))
@@ -90,5 +98,16 @@ export async function getAllSitePaths(): Promise<string[]> {
       .filter((slug): slug is string => Boolean(slug)),
   );
   const blogPaths = [...blogSlugs].map((slug) => `/blog/${slug}`);
-  return [...STATIC_ROUTES, ...projectPaths, ...blogPaths];
+  // Every page carrying a Slug — i.e. every Service page. Deliberately the page
+  // list rather than the Services index's cards: a Service page that nobody has
+  // put a card on still resolves at its URL, and a crawlable page left out of
+  // the sitemap is the thing this file exists to prevent. De-duplicated for the
+  // same reason as blog slugs — zero-cms enforces no uniqueness.
+  const serviceSlugs = new Set(
+    (servicePageData?.pages ?? [])
+      .map((page) => page?.slug?.trim())
+      .filter((slug): slug is string => Boolean(slug)),
+  );
+  const servicePaths = [...serviceSlugs].map((slug) => `/${slug}`);
+  return [...STATIC_ROUTES, ...servicePaths, ...projectPaths, ...blogPaths];
 }

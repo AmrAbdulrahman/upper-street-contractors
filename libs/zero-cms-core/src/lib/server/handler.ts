@@ -113,6 +113,14 @@ async function dispatch(
         actorOf(args[2]),
         args[3] as string
       );
+    case 'setEntryTitle':
+      return adapter.setEntryTitle(
+        args[0] as string,
+        args[1] as string,
+        args[2] as string | null,
+        actorOf(args[3]),
+        args[4] as string
+      );
     case 'get':
       return adapter.get(args[0] as string, args[1] as string, args[2] as never);
     case 'query':

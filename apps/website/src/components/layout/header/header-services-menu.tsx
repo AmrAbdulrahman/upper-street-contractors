@@ -16,6 +16,9 @@ type HeaderServicesMenuProps = {
   link: NavLink;
 };
 
+/** Grace period before a pointer that has left the group closes the panel. */
+const HOVER_CLOSE_DELAY_MS = 180;
+
 /**
  * A nav item that is a link *and* a dropdown parent.
  *
@@ -36,11 +39,38 @@ export function HeaderServicesMenu({ link }: HeaderServicesMenuProps) {
   const menuId = useId();
   const containerRef = useRef<HTMLLIElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const children = link.children ?? [];
   const isActive = isNavGroupActive(pathname, link);
 
-  const close = useCallback(() => setOpen(false), []);
+  const cancelClose = useCallback(() => {
+    if (closeTimer.current !== null) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }, []);
+
+  const close = useCallback(() => {
+    cancelClose();
+    setOpen(false);
+  }, [cancelClose]);
+
+  // Closing on pointerleave is deferred, not immediate. The panel is 26rem wide
+  // and centred on a ~37px trigger, so the only way to reach a link in it is a
+  // diagonal that leaves the trigger's own column first — and a synchronous
+  // close unmounted the panel mid-gesture, which made every link in it
+  // unreachable by mouse. A short grace period lets the pointer arrive.
+  const closeAfterGrace = useCallback(() => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null;
+      setOpen(false);
+    }, HOVER_CLOSE_DELAY_MS);
+  }, [cancelClose]);
+
+  // A pending close must not outlive the component.
+  useEffect(() => cancelClose, [cancelClose]);
 
   // Navigating from inside the panel should not leave it hanging open over the
   // page it just moved to. Adjusted during render rather than in an effect:
@@ -98,12 +128,13 @@ export function HeaderServicesMenu({ link }: HeaderServicesMenuProps) {
       // panel underneath the navigation the same tap is already performing.
       onPointerEnter={(event) => {
         if (event.pointerType === "mouse") {
+          cancelClose();
           setOpen(true);
         }
       }}
       onPointerLeave={(event) => {
         if (event.pointerType === "mouse") {
-          setOpen(false);
+          closeAfterGrace();
         }
       }}
       // Deliberately NO onFocus-to-open. It was here, and it fought Escape:
@@ -148,11 +179,15 @@ export function HeaderServicesMenu({ link }: HeaderServicesMenuProps) {
       </span>
 
       {open ? (
+        // The offset is padding on this wrapper, never a margin. As a margin it
+        // left a 6px band belonging to neither the trigger nor the panel — the
+        // panel is out of flow, so it does not grow the <li>'s hit box — and a
+        // pointer crossing it fired pointerleave on the group.
         <div
           id={menuId}
-          className="absolute top-full left-1/2 z-50 mt-1.5 w-[26rem] -translate-x-1/2 rounded-xl border border-border bg-white p-2 shadow-lg"
+          className="absolute top-full left-1/2 z-50 w-[26rem] -translate-x-1/2 pt-1.5"
         >
-          <ul className="grid grid-cols-2 gap-x-1">
+          <ul className="grid grid-cols-2 gap-x-1 rounded-xl border border-border bg-white p-2 shadow-lg">
             {children.map((child) => {
               const isChildActive = isNavLinkActive(pathname, child.href);
 

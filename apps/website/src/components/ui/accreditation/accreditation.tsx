@@ -1,6 +1,6 @@
 import { ZeroCmsEntryField } from "@usc/zero-cms-widget";
 import { CmsImage } from "@/components/ui/cms-image";
-import { resolveLogoHeight } from "@/helpers";
+import { resolveBadgeGlow, resolveLogoHeight } from "@/helpers";
 import { AccreditationFragment } from "@/generated/graphql";
 
 /** Height used when the parent section has no CMS `logoSize` (was `h-14`). */
@@ -37,16 +37,20 @@ export type AccreditationProps = {
    */
   bare?: boolean;
   /**
-   * Fallback glow colour, used only when the badge has no `glowColor` of its
-   * own. Each badge is a different organisation's mark with its own palette, so
-   * the colour belongs to the entry; this is what a newly added badge gets
-   * until someone picks one.
+   * Fallback glow settings, used per-value when the badge has none of its own.
+   * Each badge is a different organisation's mark with its own palette and its
+   * own weight, so all three belong to the entry; these are what a newly added
+   * badge gets until someone tunes it.
    *
    * `drop-shadow` follows the image's **alpha channel**, so the glow traces the
    * logo's actual silhouette rather than boxing it — which is the whole point
    * on a transparent badge, and why this is not a `box-shadow`.
    */
   glowColor?: string | null;
+  /** Fallback bloom radius in px. `0` on the badge means no glow at all. */
+  glowRadius?: number | null;
+  /** Fallback glow opacity, 0-100. */
+  glowIntensity?: number | null;
 };
 
 export function Accreditation({
@@ -54,19 +58,22 @@ export function Accreditation({
   height,
   bare = false,
   glowColor,
+  glowRadius,
+  glowIntensity,
 }: AccreditationProps) {
   const { accreditationTitle, image } = data;
   const logoHeight = resolveLogoHeight(height, ACCREDITATION_LOGO_HEIGHT);
   const maxWidth = Math.round(logoHeight * LOGO_MAX_ASPECT);
 
-  // The badge's own colour wins; the caller's is the fallback.
-  const resolvedGlow = data.glowColor?.trim() || glowColor?.trim() || null;
-
-  // Two stacked shadows: a tight one for the edge and a wider, softer one for
-  // the bloom. One alone reads as either a hard outline or a smudge.
-  const glow = resolvedGlow
-    ? `drop-shadow(0 0 2px ${resolvedGlow}) drop-shadow(0 0 10px ${resolvedGlow})`
-    : undefined;
+  // The badge's own settings win, value by value; the caller's are fallbacks.
+  const glow = resolveBadgeGlow({
+    own: {
+      color: data.glowColor,
+      radius: data.glowRadius,
+      intensity: data.glowIntensity,
+    },
+    fallback: { color: glowColor, radius: glowRadius, intensity: glowIntensity },
+  });
 
   return (
     <div

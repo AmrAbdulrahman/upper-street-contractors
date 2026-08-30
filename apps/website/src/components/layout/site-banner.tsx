@@ -9,103 +9,58 @@ type SiteBannerProps = {
    * - `"light"` → white artwork, for DARK backgrounds (footer).
    */
   tone?: "dark" | "light";
-  /** Render the crest-only mark instead of the full crest + wordmark lockup. */
-  compact?: boolean;
   href?: string | null;
-  /**
-   * Sizing utilities applied to the CREST (set a height; width stays auto), and
-   * to the whole mark in `compact` mode.
-   */
+  /** Sizing utilities for the mark — set a height; the width stays auto. */
   className?: string;
   /**
-   * Sizing utilities for the WORDMARK. Kept separate from {@link className} so a
-   * caller can shrink the crest on scroll while the words stay put — pass a fixed
-   * height here and let `className` be the one that changes.
-   *
-   * Defaults to a height rather than nothing: the artwork's intrinsic box is
-   * 491×287, so an omitted height would render the words at 287px tall.
-   *
-   * Note this sizes the artwork's **box**, which keeps the banner's full 287-unit
-   * height so the words sit at the same scale they did inside the combined
-   * lockup. The lettering itself is a stacked block filling ~80% of that box
-   * vertically, so a given height here renders noticeably smaller glyphs than the
-   * same height on a single-line wordmark would.
-   */
-  wordmarkClassName?: string;
-  /**
-   * CMS-supplied artwork, from Site settings. Each is optional and each falls
-   * back independently to the committed SVG — an editor who uploads a crest but
-   * no wordmark gets their crest beside the built-in words, not a broken pair.
+   * CMS-supplied artwork, from Site settings. Each tone is optional and falls
+   * back independently to the committed SVG, so an editor who uploads only a
+   * light-background logo still gets the built-in one in the footer.
    */
   logos?: {
-    crestDark?: string | null;
-    crestLight?: string | null;
-    wordmarkDark?: string | null;
-    wordmarkLight?: string | null;
+    dark?: string | null;
+    light?: string | null;
   } | null;
 };
 
-// Intrinsic dimensions match each SVG's viewBox aspect ratio.
-const CREST = { width: 234, height: 287 };
-const WORDMARK = { width: 491, height: 287 };
+// Intrinsic dimensions match the SVG's viewBox aspect ratio (~2.55:1).
+const BANNER = { width: 732, height: 287 };
 
 /**
  * The brand lockup — the crest and the "Upper Street Contractors" wordmark.
  *
- * Two images, not one. It used to be a single `banner-*.svg`, which meant any
- * height change scaled both halves together: shrinking the header on scroll took
- * the words down with the crest until they were unreadable. Split, the crest can
- * shrink while the wordmark holds one size, which is how the mark is meant to
- * behave — the crest is decoration, the words are the name.
+ * One image, not two. It was split into a crest and a cropped wordmark so the
+ * header could shrink the crest on scroll while the words held one size. The
+ * header no longer shrinks — it is a single fixed-height row since the Services
+ * menu replaced the row of nine service links — so the split was paying for a
+ * behaviour nothing uses, at the cost of two requests, two sizing props and a
+ * gap between the halves that had to be tuned to imitate the original artwork.
  *
- * `wordmark-*.svg` is the banner artwork with its viewBox cropped past the crest
- * rather than a re-export: the SVG viewport does the hiding, so no path was
- * touched and no glyph can go missing in the process.
+ * `banner-*.svg` is that original artwork; `logo-*.svg` and `wordmark-*.svg` are
+ * the same file with the viewBox cropped, which is why the proportions here are
+ * unchanged from the pair they replace.
  */
 export function SiteBanner({
   siteName,
   tone = "dark",
-  compact = false,
   href = "/",
   className,
-  wordmarkClassName = "h-6",
   logos,
 }: SiteBannerProps) {
   const alt = siteName || "Upper Street Contractors";
-  const crestSrc =
-    (tone === "light" ? logos?.crestLight : logos?.crestDark) ||
-    (tone === "light" ? "/logo-light.svg" : "/logo-dark.svg");
-  const wordmarkSrc =
-    (tone === "light" ? logos?.wordmarkLight : logos?.wordmarkDark) ||
-    (tone === "light" ? "/wordmark-light.svg" : "/wordmark-dark.svg");
+  const src =
+    (tone === "light" ? logos?.light : logos?.dark) ||
+    (tone === "light" ? "/banner-light.svg" : "/banner-dark.svg");
 
-  const crest = (
+  const image = (
     <Image
-      src={crestSrc}
-      // The wordmark carries the accessible name for the pair; a crest that
-      // repeats it would have a screen reader read the company twice.
-      alt={compact ? alt : ""}
-      width={CREST.width}
-      height={CREST.height}
+      src={src}
+      alt={alt}
+      width={BANNER.width}
+      height={BANNER.height}
       priority
       className={`w-auto ${className ?? ""}`}
     />
-  );
-
-  const image = compact ? (
-    crest
-  ) : (
-    <span className="inline-flex items-center gap-2">
-      {crest}
-      <Image
-        src={wordmarkSrc}
-        alt={alt}
-        width={WORDMARK.width}
-        height={WORDMARK.height}
-        priority
-        className={`w-auto ${wordmarkClassName ?? ""}`}
-      />
-    </span>
   );
 
   if (!href) {

@@ -1,5 +1,6 @@
 fragment ProjectCard on Project {
   id
+  type
   title
   summary
   category

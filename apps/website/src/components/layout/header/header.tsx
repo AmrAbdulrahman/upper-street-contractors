@@ -1,14 +1,21 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SiteMetaConfigFragment } from "@/generated/graphql";
 import { HeaderDesktopNav } from "@/components/layout/header/header-desktop-nav";
 import { HeaderMobileNav } from "@/components/layout/header/header-mobile-nav";
-import { MAIN_NAV_LINKS } from "@/components/layout/nav-links";
+import { buildMainNavLinks, type NavLink } from "@/components/layout/nav-links";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { resolveSiteLogos, resolveWhatsAppUrl } from "@/helpers";
 
 type HeaderProps = {
   config: SiteMetaConfigFragment | null;
+  /**
+   * The Services dropdown, read from the CMS by the server component that
+   * mounts this. Passed in rather than fetched: the header is a client
+   * component (`usePathname` for active state), so it cannot read the CMS.
+   */
+  serviceLinks: NavLink[];
 };
 
 /**
@@ -32,9 +39,12 @@ type HeaderProps = {
  * sized them apart, because the crest had to shrink and the words had to stay
  * readable; with no shrinking, that reason is gone.)
  */
-export function Header({ config }: HeaderProps) {
+export function Header({ config, serviceLinks }: HeaderProps) {
   const whatsappUrl = resolveWhatsAppUrl(config);
   const logos = resolveSiteLogos(config);
+  // Memoised so the mobile and desktop navs get one stable array per render
+  // rather than two fresh ones, which would defeat any memo below them.
+  const navLinks = useMemo(() => buildMainNavLinks(serviceLinks), [serviceLinks]);
 
   return (
     <header className="sticky top-[var(--admin-banner-offset,0px)] z-100 w-full border-b border-border bg-white">
@@ -46,10 +56,9 @@ export function Header({ config }: HeaderProps) {
             siteName={config?.siteName}
             logos={logos}
             className="h-11"
-            wordmarkClassName="h-11"
           />
 
-          <HeaderMobileNav links={MAIN_NAV_LINKS} whatsappUrl={whatsappUrl} />
+          <HeaderMobileNav links={navLinks} whatsappUrl={whatsappUrl} />
         </div>
 
         {/* Desktop — lockup and nav on one line */}
@@ -59,10 +68,9 @@ export function Header({ config }: HeaderProps) {
             siteName={config?.siteName}
             logos={logos}
             className="h-16"
-            wordmarkClassName="h-16"
           />
 
-          <HeaderDesktopNav links={MAIN_NAV_LINKS} />
+          <HeaderDesktopNav links={navLinks} />
         </div>
       </div>
     </header>

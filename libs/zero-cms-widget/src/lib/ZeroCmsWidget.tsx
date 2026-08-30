@@ -25,8 +25,10 @@ import {
   type NotifyFn,
 } from '@usc/zero-cms-app';
 import { Drawer } from './Drawer';
+import { DrawerBreadcrumb } from './DrawerBreadcrumb';
 import { WidgetProvider, useWidgetInternal } from './context';
 import { TypePickerPanel } from './inspect/TypePickerPanel';
+import { TemplatePickerPanel } from './inspect/TemplatePickerPanel';
 
 export interface ZeroCmsWidgetProps {
   adapter?: Adapter;
@@ -154,7 +156,8 @@ function DrawerBody({
   token?: string | null;
   onAuthed?: (token: string) => void;
 }) {
-  const { stack, pop, close, pushEntry, pushCreate, pushTypePicker } = useWidgetInternal();
+  const { stack, pop, popTo, close, pushEntry, pushCreate, pushTypePicker, setTargetTitle } =
+    useWidgetInternal();
   const { schema } = useZeroCms();
   const needsLogin = Boolean(client) && !token;
 
@@ -187,6 +190,41 @@ function DrawerBody({
       return next;
     });
   }, []);
+
+  // The breadcrumb only needs a panel's identity, mode and name, so it takes a
+  // flattened view rather than `DrawerTarget` itself (which is not exported, and
+  // carries resolvers a presentational component has no business holding).
+  const trail = useMemo(
+    () =>
+      stack.map((t) => ({
+        key: t.key,
+        type: t.type,
+        mode: t.mode,
+        title: t.title,
+        loading: t.loading,
+        fieldLabel: t.pick?.fieldLabel,
+      })),
+    [stack]
+  );
+
+  // Jumping back closes every panel above the one clicked, so it answers to the
+  // same two guards `settleClose` does — but once for the whole jump rather than
+  // once per panel, because one click asked for one thing.
+  const jumpTo = (index: number) => {
+    const above = stack.slice(index + 1);
+    if (above.some((t) => savingKeys.has(t.key))) return;
+    const dirty = above.filter((t) => dirtyKeys.has(t.key)).length;
+    if (
+      dirty &&
+      !window.confirm(
+        dirty === 1
+          ? 'Discard unsaved changes?'
+          : `Discard unsaved changes in ${dirty} panels?`
+      )
+    )
+      return;
+    popTo(index);
+  };
 
   const refActions = useMemo(
     () => ({
@@ -222,6 +260,7 @@ function DrawerBody({
           if (dirtyKeys.has(t.key) && !window.confirm('Discard unsaved changes?')) return;
           t.onResult?.(null);
           t.onPick?.(null);
+          t.onPickTemplate?.(null);
           pop();
         };
         return (
@@ -235,11 +274,22 @@ function DrawerBody({
             label={
               t.mode === 'pick-type'
                 ? 'Add section'
-                : t.mode === 'create'
-                  ? 'Add entry'
-                  : 'Edit entry'
+                : t.mode === 'pick-template'
+                  ? 'Choose a template'
+                  : t.mode === 'create'
+                    ? 'Add entry'
+                    : 'Edit entry'
             }
           >
+            {/* Rendered in every panel, not just the top one: lower panels are
+                `inert` and fully covered, so the cost is nil and each panel stays
+                able to describe itself. */}
+            <DrawerBreadcrumb
+              schema={schema}
+              stack={trail}
+              activeIndex={i}
+              onJump={jumpTo}
+            />
             {/* The picker pops itself the moment it resolves — `openCreate`
                 then pushes the create panel, so the two never stack. */}
             {t.mode === 'pick-type' && t.pick && (
@@ -247,6 +297,17 @@ function DrawerBody({
                 pick={t.pick}
                 onPick={(result) => {
                   t.onPick?.(result);
+                  pop();
+                }}
+              />
+            )}
+            {/* Same contract as the Type picker: pop on resolve, so Cancel on
+                the entry's own drawer means "abandon" and not "back a step". */}
+            {t.mode === 'pick-template' && t.templatePick && (
+              <TemplatePickerPanel
+                pick={t.templatePick}
+                onPick={(result) => {
+                  t.onPickTemplate?.(result);
                   pop();
                 }}
               />
@@ -270,6 +331,7 @@ function DrawerBody({
                 onChanged={() => onSaved?.()}
                 onDirtyChange={(dirty) => setDirty(t.key, dirty)}
                 onSavingChange={(saving) => setSaving(t.key, saving)}
+                onLabelChange={(label) => setTargetTitle(t.key, label)}
                 onCreated={
                   t.mode === 'create'
                     ? (id) => {

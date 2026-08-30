@@ -3,7 +3,10 @@ fragment ServiceCard on ServiceCard {
   type
   title
   summary
-  href
+  page {
+    id
+    slug
+  }
   image {
     url
     alt

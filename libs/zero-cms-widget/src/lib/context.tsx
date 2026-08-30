@@ -25,8 +25,10 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { ZeroCmsError } from '@usc/zero-cms-core';
+import { ZeroCmsError, humanize } from '@usc/zero-cms-core';
 import { duplicateEntry, type DuplicateEntryOptions } from './duplicate-entry';
+import { instantiateFrom } from './instantiate-template';
+import { BusyOverlay } from './BusyOverlay';
 import {
   useZeroCms,
   errorMessage,
@@ -101,7 +103,13 @@ interface DrawerTarget {
   id: string | null;
   /** Type `__name`; null for a pick-type panel, or while `locate` is resolving it. */
   type: string | null;
-  mode: 'edit' | 'create' | 'pick-type';
+  mode: 'edit' | 'create' | 'pick-type' | 'pick-template';
+  /**
+   * The edited entry's own display label, reported up by the editor once it has
+   * loaded (see `EntryEditor.onLabelChange`). Purely for the breadcrumb — the
+   * frame is identified by `key`, never by this.
+   */
+  title?: string | null;
   focusField?: string;
   /** Resolving the type via `locate`. */
   loading?: boolean;
@@ -112,6 +120,10 @@ interface DrawerTarget {
   pick?: TypePickerContext;
   /** pick-type panels only: settled with the choice, or null on cancel. */
   onPick?: (result: TypePickResult | null) => void;
+  /** pick-template panels only: which templates to offer. */
+  templatePick?: TemplatePickerContext;
+  /** pick-template panels only: settled with the choice, or null on cancel. */
+  onPickTemplate?: (result: TemplatePickResult | null) => void;
 }
 
 /**
@@ -119,6 +131,75 @@ interface DrawerTarget {
  * name because callers meet it through the widget context, not the module.
  */
 export type DuplicateOptions = DuplicateEntryOptions;
+
+/**
+ * How the host's content model expresses "a template".
+ *
+ * `templateType` / `kindField` / `nameField` default to `template` / `kind` /
+ * `name`, which is what the website uses. They are options rather than
+ * constants for the same reason `shareTypes` is a parameter (ADR 0017): this
+ * library has no business knowing the host's Type names.
+ */
+interface TemplateModel {
+  /** The Type holding templates. Default `'template'`. */
+  templateType?: string;
+  /** The template field naming its kind. Default `'kind'`. */
+  kindField?: string;
+  /** The template field holding its display name. Default `'name'`. */
+  nameField?: string;
+}
+
+/** What a template picker panel is offering. */
+export interface TemplatePickerContext extends Required<TemplateModel> {
+  /** Only templates whose `kindField` equals this are offered. */
+  kind: string;
+  /** The Type that will be created — used for the panel's heading. */
+  targetType: string;
+  /** Overrides the heading noun when the Type's own label reads badly. */
+  targetLabel?: string;
+  /** Source-to-target list mapping, so a row can report how much it carries. */
+  fieldMap: Record<string, string>;
+}
+
+/**
+ * Blank is a real choice, not a cancel: it still creates the entry. Cancel
+ * (null) abandons the action entirely.
+ */
+export type TemplatePickResult = { choice: 'blank' } | { choice: 'template'; id: string };
+
+export interface CreateFromTemplateOptions extends TemplateModel {
+  /** Which templates to offer. */
+  kind: string;
+  /** The Type to create. */
+  targetType: string;
+  /** Overrides the picker's heading noun. */
+  targetLabel?: string;
+  /**
+   * Template field to target field. A template's `sections` maps to a Blog
+   * Post's `sections`; a project template's four owned child lists map to
+   * their namesakes on a Project.
+   */
+  fieldMap: Record<string, string>;
+  /** Values written onto the new entry regardless of the template. */
+  seedValues?: Record<string, unknown>;
+  /** Types shared rather than copied — see ADR 0017. */
+  shareTypes?: readonly string[];
+  /** Hard stop on runaway graphs. */
+  maxEntries?: number;
+}
+
+export interface SaveAsTemplateOptions extends TemplateModel {
+  /** The kind stamped on the new template. */
+  kind: string;
+  /** Source field to template field. */
+  fieldMap: Record<string, string>;
+  /** Types shared rather than copied — see ADR 0017. */
+  shareTypes?: readonly string[];
+  /** Pre-fills the new template's name; the editor renames it in the drawer. */
+  suggestedName?: string;
+  /** Hard stop on runaway graphs. */
+  maxEntries?: number;
+}
 
 interface WidgetContextValue {
   /** Inspect mode: when true, <ZeroCmsEntry>/<ZeroCmsEntryField> show edit affordances. */
@@ -142,6 +223,22 @@ interface WidgetContextValue {
    */
   createEntry: (type: string) => Promise<string | null>;
   /**
+   * Create an entry from values the caller already knows, with no form and no
+   * drawer. Resolves with the new id, or null if the create failed.
+   *
+   * For the second half of a create that is really two entries. On the Services
+   * index, "New service" makes a `page` (from a template, in its own drawer)
+   * AND a `service-card` pointing at it — the card has nothing to ask the
+   * editor at that moment, and a second drawer stacked behind the first would
+   * be a form they cannot fill in until the first one is saved.
+   *
+   * Nothing is linked: pair it with {@link WidgetContextValue.link}.
+   */
+  createDraft: (
+    type: string,
+    values: Record<string, unknown>
+  ) => Promise<string | null>;
+  /**
    * Deep-copy an entry and everything it owns, then open the copy's drawer.
    * Resolves with the new id, or null if the copy failed.
    *
@@ -150,6 +247,27 @@ interface WidgetContextValue {
    * copy would rewrite the thing it was copied from. See `duplicateEntry`.
    */
   duplicate: (id: string, opts?: DuplicateOptions) => Promise<string | null>;
+  /**
+   * Offer a template of `kind`, then create a new `targetType` entry from the
+   * one chosen and open its drawer. Resolves with the new id, null on cancel.
+   *
+   * Not `duplicate` with extra steps: a template's root is a `template` and the
+   * thing created is a Blog Post / page / Project, so nothing copies the root —
+   * only the lists `fieldMap` names, plus `seedValues`. Picking "Start blank"
+   * still creates the entry, with no children.
+   */
+  createFromTemplate: (opts: CreateFromTemplateOptions) => Promise<string | null>;
+  /**
+   * Deep-copy an entry's owned lists into a NEW template, then open the
+   * template's drawer so the editor can name it. Resolves with the template's
+   * id, or null on failure.
+   *
+   * The only way templates are authored. A template holds `sections`, and the
+   * Section builder — the one tool that composes a section list visually —
+   * exists on a rendered page, which a template does not have. Snapshotting
+   * real content sidesteps that entirely.
+   */
+  saveAsTemplate: (id: string, opts: SaveAsTemplateOptions) => Promise<string | null>;
   /** Link an entry that already exists into a parent relation field. */
   link: (opts: LinkOptions) => Promise<void>;
   /** Remove a child from a parent relation field (unlink only; entry survives). */
@@ -185,6 +303,19 @@ interface WidgetInternal extends WidgetContextValue {
   stack: DrawerTarget[];
   /** Pop the top panel. */
   pop: () => void;
+  /**
+   * Close every panel ABOVE `index`, leaving that one on top — what the
+   * breadcrumb does. Settles the abandoned panels' pending resolvers with
+   * `null` exactly as {@link WidgetContextValue.close} does, because
+   * `openCreate` awaits a picker and a create form in sequence and would
+   * otherwise hang forever on a panel that no longer exists.
+   *
+   * Unguarded on purpose: the dirty/saving state lives with the drawer host,
+   * which asks before calling this.
+   */
+  popTo: (index: number) => void;
+  /** Record the title a panel is showing, for the breadcrumb. */
+  setTargetTitle: (key: string, title: string | null) => void;
   /** Push an edit panel (alias of {@link WidgetContextValue.openEntry}). */
   pushEntry: (id: string, opts?: OpenOptions) => Promise<void>;
   /**
@@ -197,6 +328,13 @@ interface WidgetInternal extends WidgetContextValue {
    * cancel. Nothing is created or linked until the caller acts on the result.
    */
   pushTypePicker: (ctx: TypePickerContext) => Promise<TypePickResult | null>;
+  /**
+   * Push a template-picker panel and resolve with the editor's choice, or null
+   * on cancel. Nothing is created until the caller acts on the result.
+   */
+  pushTemplatePicker: (
+    ctx: TemplatePickerContext
+  ) => Promise<TemplatePickResult | null>;
 }
 const InternalContext = createContext<WidgetInternal | null>(null);
 
@@ -240,6 +378,30 @@ export function WidgetProvider({
   }, []);
 
   const pop = useCallback(() => setStack((s) => s.slice(0, -1)), []);
+
+  const popTo = useCallback((index: number) => {
+    setStack((s) => {
+      if (index < 0 || index >= s.length - 1) return s;
+      for (const t of s.slice(index + 1)) {
+        t.onResult?.(null);
+        t.onPick?.(null);
+        t.onPickTemplate?.(null);
+      }
+      return s.slice(0, index + 1);
+    });
+  }, []);
+
+  // Short-circuits an unchanged title. The editor reports its label from an
+  // effect that re-runs on every render (its callback prop is an inline closure
+  // with a fresh identity each time), so returning a new array unconditionally
+  // would be a render loop rather than a state update.
+  const setTargetTitle = useCallback((key: string, title: string | null) => {
+    setStack((s) =>
+      s.some((t) => t.key === key && t.title !== title)
+        ? s.map((t) => (t.key === key ? { ...t, title } : t))
+        : s
+    );
+  }, []);
 
   const openEntry = useCallback(
     async (id: string, opts?: OpenOptions) => {
@@ -300,6 +462,28 @@ export function WidgetProvider({
         };
         if (!pick.allowedTypes.length) return settle(null);
         pushTarget({ id: null, type: null, mode: 'pick-type', pick, onPick: settle });
+      }),
+    [pushTarget]
+  );
+
+  const pushTemplatePicker = useCallback(
+    (templatePick: TemplatePickerContext) =>
+      new Promise<TemplatePickResult | null>((resolve) => {
+        let settled = false;
+        // Idempotent: a pick and a cancel can't both resolve.
+        const settle = (v: TemplatePickResult | null) => {
+          if (!settled) {
+            settled = true;
+            resolve(v);
+          }
+        };
+        pushTarget({
+          id: null,
+          type: null,
+          mode: 'pick-template',
+          templatePick,
+          onPickTemplate: settle,
+        });
       }),
     [pushTarget]
   );
@@ -445,7 +629,7 @@ export function WidgetProvider({
             parentType: pType,
             parentField,
             allowedTypes: allowed,
-            fieldLabel: fieldDef?.label ?? parentField,
+            fieldLabel: fieldDef?.label ?? humanize(parentField),
           });
       if (!picked) return;
 
@@ -458,8 +642,17 @@ export function WidgetProvider({
     [adapter, schema, notify, pushCreate, pushTypePicker, link]
   );
 
+  // A duplicate is N sequential creates (ADR 0017) — a post with ten sections
+  // and their children is ~20 round trips, seconds of silence during which the
+  // control that started it is still live and a second click makes a second
+  // copy. The overlay both reports it and swallows those clicks. Instantiating
+  // a template and saving one are the same walk, so they share it; the label
+  // says which is running rather than a generic "Working…".
+  const [busy, setBusy] = useState<string | null>(null);
+
   const duplicate = useCallback(
     async (id: string, opts?: DuplicateOptions): Promise<string | null> => {
+      setBusy('Duplicating…');
       try {
         const result = await duplicateEntry(id, { adapter, schema, actor: currentUserId }, opts);
 
@@ -485,6 +678,160 @@ export function WidgetProvider({
             : 'Could not duplicate this entry'
         );
         return null;
+      } finally {
+        setBusy(null);
+      }
+    },
+    [adapter, schema, currentUserId, notify, onChanged, openEntry]
+  );
+
+  const createDraft = useCallback(
+    async (type: string, values: Record<string, unknown>): Promise<string | null> => {
+      try {
+        const entry = await adapter.create(type, values, currentUserId);
+        onChanged?.();
+        return entry.__id;
+      } catch (error) {
+        notify(
+          'error',
+          error instanceof ZeroCmsError || error instanceof Error
+            ? error.message
+            : `Could not create a ${type}`
+        );
+        return null;
+      }
+    },
+    [adapter, currentUserId, notify, onChanged]
+  );
+
+  const createFromTemplate = useCallback(
+    async (opts: CreateFromTemplateOptions): Promise<string | null> => {
+      const {
+        kind,
+        targetType,
+        targetLabel,
+        fieldMap,
+        seedValues,
+        shareTypes,
+        maxEntries,
+        templateType = 'template',
+        kindField = 'kind',
+        nameField = 'name',
+      } = opts;
+
+      const picked = await pushTemplatePicker({
+        templateType,
+        kindField,
+        nameField,
+        kind,
+        targetType,
+        targetLabel,
+        fieldMap,
+      });
+
+      // Cancel abandons the whole action; "Start blank" is a real choice below.
+      // The panel has already popped itself either way (see ZeroCmsWidget), so
+      // the entry's drawer replaces it rather than stacking on it.
+      if (!picked) return null;
+
+      setBusy(picked.choice === 'blank' ? 'Creating…' : 'Building from template…');
+      try {
+        let newId: string;
+
+        if (picked.choice === 'blank') {
+          const entry = await adapter.create(targetType, seedValues ?? {}, currentUserId);
+          newId = entry.__id;
+          notify('success', 'Created as a draft.');
+        } else {
+          const result = await instantiateFrom(
+            picked.id,
+            { adapter, schema, actor: currentUserId },
+            { targetType, fieldMap, seedValues, shareTypes, maxEntries }
+          );
+
+          if (result.cycles.length > 0) {
+            notify(
+              'error',
+              `Created, but ${result.cycles.length} looping reference(s) are shared with the template.`
+            );
+          } else {
+            notify('success', `Created from template — ${result.created} item(s) as a draft.`);
+          }
+          newId = result.id;
+        }
+
+        onChanged?.();
+        await openEntry(newId, { type: targetType });
+        return newId;
+      } catch (error) {
+        notify(
+          'error',
+          error instanceof ZeroCmsError || error instanceof Error
+            ? error.message
+            : 'Could not create from this template'
+        );
+        return null;
+      } finally {
+        setBusy(null);
+      }
+    },
+    [adapter, schema, currentUserId, notify, onChanged, openEntry, pushTemplatePicker]
+  );
+
+  const saveAsTemplate = useCallback(
+    async (id: string, opts: SaveAsTemplateOptions): Promise<string | null> => {
+      const {
+        kind,
+        fieldMap,
+        shareTypes,
+        suggestedName,
+        maxEntries,
+        templateType = 'template',
+        kindField = 'kind',
+        nameField = 'name',
+      } = opts;
+
+      setBusy('Saving as template…');
+      try {
+        const result = await instantiateFrom(
+          id,
+          { adapter, schema, actor: currentUserId },
+          {
+            targetType: templateType,
+            fieldMap,
+            shareTypes,
+            maxEntries,
+            seedValues: {
+              [nameField]: suggestedName?.trim() || 'Untitled template',
+              [kindField]: kind,
+            },
+          }
+        );
+
+        if (result.cycles.length > 0) {
+          notify(
+            'error',
+            `Saved, but ${result.cycles.length} looping reference(s) are shared with the original.`
+          );
+        } else {
+          notify('success', `Saved as a template — ${result.created} item(s) copied.`);
+        }
+
+        onChanged?.();
+        // Straight into the template's drawer: the name is a guess, and this is
+        // where the editor corrects it.
+        await openEntry(result.id, { type: templateType, focusField: nameField });
+        return result.id;
+      } catch (error) {
+        notify(
+          'error',
+          error instanceof ZeroCmsError || error instanceof Error
+            ? error.message
+            : 'Could not save this as a template'
+        );
+        return null;
+      } finally {
+        setBusy(null);
       }
     },
     [adapter, schema, currentUserId, notify, onChanged, openEntry]
@@ -497,6 +844,7 @@ export function WidgetProvider({
       for (const t of s) {
         t.onResult?.(null);
         t.onPick?.(null);
+        t.onPickTemplate?.(null);
       }
       return [];
     });
@@ -513,7 +861,10 @@ export function WidgetProvider({
       openEntry,
       openCreate,
       createEntry: pushCreate,
+      createDraft,
       duplicate,
+      createFromTemplate,
+      saveAsTemplate,
       link,
       unlink,
       reorder,
@@ -528,7 +879,10 @@ export function WidgetProvider({
       openEntry,
       openCreate,
       pushCreate,
+      createDraft,
       duplicate,
+      createFromTemplate,
+      saveAsTemplate,
       link,
       unlink,
       reorder,
@@ -539,14 +893,35 @@ export function WidgetProvider({
     ]
   );
   const internalValue = useMemo<WidgetInternal>(
-    () => ({ ...publicValue, stack, pop, pushEntry: openEntry, pushCreate, pushTypePicker }),
-    [publicValue, stack, pop, openEntry, pushCreate, pushTypePicker]
+    () => ({
+      ...publicValue,
+      stack,
+      pop,
+      popTo,
+      setTargetTitle,
+      pushEntry: openEntry,
+      pushCreate,
+      pushTypePicker,
+      pushTemplatePicker,
+    }),
+    [
+      publicValue,
+      stack,
+      pop,
+      popTo,
+      setTargetTitle,
+      openEntry,
+      pushCreate,
+      pushTypePicker,
+      pushTemplatePicker,
+    ]
   );
 
   return (
     <WidgetContext.Provider value={publicValue}>
       <InternalContext.Provider value={internalValue}>
         {children}
+        <BusyOverlay show={busy !== null} label={busy ?? ''} />
       </InternalContext.Provider>
     </WidgetContext.Provider>
   );

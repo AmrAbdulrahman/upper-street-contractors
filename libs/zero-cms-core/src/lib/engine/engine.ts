@@ -360,6 +360,34 @@ export class Engine {
     });
   }
 
+  /**
+   * Set (or clear, with `null`/blank) the entry's Title override — what the CMS
+   * calls it, overriding the title derived from its Type's `titleField`.
+   *
+   * Writes the record directly rather than the draft overlay: a title is editor
+   * metadata, not published content, so gating it behind `publish` would hold a
+   * change back from an audience that does not exist. Still a normal CAS write
+   * (ADR 0009) — it bumps `__lastEditedAt` like any other mutation, so a caller
+   * holding a stale token gets a CONFLICT.
+   */
+  async setEntryTitle(
+    typeName: string,
+    id: string,
+    title: string | null,
+    actor: string,
+    expectedLastEditedAt: string
+  ): Promise<OutputEntry> {
+    return this.mutex.run(async () => {
+      const entry = await this.require(typeName, id);
+      const next = this.stampMutation(
+        { ...entry, __title: title?.trim() ? title.trim() : null },
+        actor
+      );
+      const written = await this.casWrite(id, expectedLastEditedAt, next);
+      return resolveOutput(written, 'draft', undefined, this.ctx());
+    });
+  }
+
   // ---- reads --------------------------------------------------------------
 
   async get(typeName: string, id: string, opts: GetOptions = {}): Promise<OutputEntry | null> {
@@ -557,12 +585,16 @@ export class Engine {
  */
 function withoutStamps(
   t: Type
-): Pick<Type, '__name' | 'label' | 'description' | 'thumbnail' | 'fields'> {
+): Pick<
+  Type,
+  '__name' | 'label' | 'description' | 'thumbnail' | 'titleField' | 'fields'
+> {
   return {
     __name: t.__name,
     label: t.label,
     description: t.description,
     thumbnail: t.thumbnail,
+    titleField: t.titleField,
     fields: t.fields,
   };
 }

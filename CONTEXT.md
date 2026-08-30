@@ -5,8 +5,8 @@ Language for renovation marketing content: services, projects, and trust signals
 ## Language
 
 **Project**:
-A completed renovation case study shown as a card and on its own detail page. Stored as a `project` entry carrying a hero image, Category, Sub-category, Meta-chip facets, a description, What We Delivered, a Project Timeline, Client Comments, Project images and Similar Work. (The earlier card-only `project-card` type has been retired.)
-_Avoid_: Job, portfolio item, case file
+A completed renovation case study shown as a card and on its own detail page. Stored as a `project` entry carrying **identity** — hero image, Category, Sub-category, Meta-chip facets, a summary and description, Similar Work — plus a `sections` list holding its content, exactly the way a page and a Blog Post are composed (ADR 0022). What We Delivered, the Project Timeline, its photos and its client quotes were four owned child lists on the entry until then; they are sections now, so they can be reordered, dropped, and carried by a Template. (The earlier card-only `project-card` type has been retired.)
+_Avoid_: Job, portfolio item, case file, page (a Project is composed like one but is not a `page`)
 
 **Recent Work section**:
 The home page section that lists curated Projects with a link to the full projects index.
@@ -45,7 +45,7 @@ An Attachment that did not fit the Inline attachment budget. The browser uploads
 _Avoid_: link, blob, big file
 
 **Availability** (Form Question field):
-An `availability` field: a multi-date calendar, and beneath it one "Preferred time of day (date)" row per Preferred date, each offering the same three Time windows as multi-select chips. So a visitor free Monday morning and Thursday evening can say exactly that. Paired on the Contact wizard with an Emergency boolean-toggle, replacing the start-date + standalone Time window pair. An editor tunes the calendar from the Edit drawer: max dates, earliest date, horizon in months, allow weekends — each `0` meaning no limit. Required means ≥1 Preferred date **and** ≥1 Time window across them; an empty calendar is not an answer.
+An `availability` field: a multi-date calendar, and beneath it one "Preferred time of day (date)" row per Preferred date, each offering the same three Time windows as multi-select chips. So a visitor free Monday morning and Thursday evening can say exactly that. Paired on the Contact wizard with an Emergency boolean-toggle, replacing the start-date + standalone Time window pair. An editor tunes the calendar from the **Timing step**'s drawer rather than the field's: max dates, earliest date, horizon in months, allow Saturdays, and the emergency window — each `0` meaning no limit. Required means ≥1 Preferred date **and** ≥1 Time window across them; an empty calendar is not an answer.
 _Avoid_: availability calendar, date range, booking, time picker, timeslot
 
 **Preferred date**:
@@ -55,6 +55,10 @@ _Avoid_: start date, visit date, slot, appointment
 **Time window**:
 One of three fixed slots — 9am–1pm, 1pm–4pm, 4pm–8pm — tickable on a Preferred date. (The retired standalone `timeWindow` field, which offered the same slots attached to no particular day, still exists for an editor to place; the stored enum value is camelCase because a hyphen would collapse the lookup to a plain String.)
 _Avoid_: time picker, slot, availability (the field that contains them), timeslot
+
+**Timing step**:
+The Enquiry Wizard step holding the Emergency toggle and the Availability calendar, and the entry that carries the calendar's settings — max dates, earliest date, horizon in months, allow Saturdays, and the emergency window in days. They belong to the step because the two fields beneath it are two halves of one question and the settings answer to neither alone: while they sat on the field, `form-field` being a single Type shared by every input put five calendar controls in all ~15 field drawers, and the emergency window ended up written to both the toggle and the calendar with only the calendar's copy ever read. Its title is variant-driven, so anything looking for it must go by the Availability field it contains, never by its label.
+_Avoid_: timing question, booking step, appointment step, slot picker, Availability (the field it configures)
 
 **Contact Details panel**:
 The `contact-details` section listing ways to reach the company as items (each a `contact-detail-item`: emoji, label, text), plus a note and a WhatsApp button.
@@ -97,28 +101,28 @@ The build value of a Project (e.g. "£120k"), shown as a Meta chip.
 _Avoid_: price, cost, budget
 
 **What We Delivered**:
-The Project-detail section pairing a short intro (`deliveredSummary`) with a list of Deliverables — a completed Project's past-tense scope. Distinct from a Service page's present-tense Service Offer section.
-_Avoid_: scope of works, services
+The section pairing a short intro with a numbered list of Deliverables — a completed Project's past-tense scope (a `project-scope-section`, offered only on a Project). Distinct from a Service page's present-tense Service Offer section, which it deliberately resembles.
+_Avoid_: scope of works, services, Service Offer section (the present-tense one), `deliveredSummary` (the retired Project field its intro came from)
 
 **Deliverable**:
 One item in What We Delivered — a title and a short description of a distinct piece of work.
 _Avoid_: task, feature, line item
 
-**Client Comment**:
-A homeowner quote attached to a single Project (a name and a comment), shown on that Project's detail page. Distinct from a Review card, which is site-wide social proof carrying a star score.
-_Avoid_: testimonial, review (the site-wide concept)
+**Client Comment** (retired):
+A homeowner quote attached to a single Project, held as its own `client-comment` entry. A Project's quotes are Quote sections now — the same two things (a line of copy and who said it) as a block an editor can place, reorder and see. The Type still exists and its entries are still stored; nothing reads them.
+_Avoid_: testimonial, review (the site-wide concept), Quote section (what replaced it)
 
 **Project Timeline**:
-The ordered list of Timeline Steps on a Project's detail page describing how the job progressed.
-_Avoid_: schedule, roadmap, programme
+The section listing ordered Timeline Steps describing how a job progressed (a `project-timeline-section`, offered only on a Project).
+_Avoid_: schedule, roadmap, programme, How It Works section (the home page's, about the company)
 
 **Timeline Step**:
 One stage in a Project Timeline — an optional step marker, a title, and a description.
 _Avoid_: milestone, phase
 
-**Project images**:
-The photos on a Project's detail page (each an image with an optional caption), rendered as a grid headed "Photos".
-_Avoid_: gallery (an _Avoid_ term for Recent Work / Projects index), carousel, slider
+**Project images** (retired):
+The photos on a Project's detail page, held as `project-image` entries. A Project's photos are a Gallery section of Figures now: a Figure and a Project image were the same two fields (image + caption), and the only thing separating them was which page they hung off. The hero collage they also fed is one `hero` photo instead. The Type still exists and its entries are still stored; nothing reads them.
+_Avoid_: gallery (an _Avoid_ term for Recent Work / Projects index), carousel, slider, Figure (what replaced it)
 
 **Similar Work**:
 The related-Projects strip on a Project's detail page. Editor-pinned Projects (the `similarWork` relation) come first, then the closest others are filled in automatically, ranked by Category → Location → Duration. The same card grid is reused by a Service page's Case Studies section.
@@ -141,20 +145,28 @@ The full-width trust band at the foot of every page: the Trustpilot widget, then
 _Avoid_: Accreditations section (the home-page one), footer badges, trust bar, FOOTER_ACCREDITATIONS (the retired static list)
 
 **Badge glow**:
-The neon halo around a badge in the Footer accreditation row. Set **per badge** (`accreditation.glowColor`, a `color` field), because each badge is a different organisation's mark with its own palette — one site-wide gold behind Gas Safe's yellow and NICEIC's red fought both. Global Settings' `footerGlowColor` is the fallback for a badge that has none, so a newly added badge still glows. Drawn with `drop-shadow`, which follows the image's alpha channel and so traces the logo's own silhouette rather than boxing it — the reason it is not a `box-shadow`.
+The neon halo around a badge in the Footer accreditation row. Three settings, each set **per badge** with a Global Settings fallback: a colour (`accreditation.glowColor`), a Glow size and a Glow strength. Per badge because each is a different organisation's mark with its own palette and its own weight — one site-wide gold behind Gas Safe's yellow and NICEIC's red fought both, and a solid block needs less bloom than a thin outline. Global Settings' `footerGlowColor` / `footerGlowRadius` / `footerGlowIntensity` are the fallbacks, value by value, so a newly added badge still glows. Drawn with `drop-shadow`, which follows the image's alpha channel and so traces the logo's own silhouette rather than boxing it — the reason it is not a `box-shadow`.
 _Avoid_: shadow, halo, neon, outline, Logo height (the sizing setting)
+
+**Glow size**:
+How far a Badge glow spreads, in pixels. `0` is a real off switch — no filter is drawn at all, rather than a hard-edged copy of the logo behind itself. The tight inner shadow scales with it, so the pair stays in proportion at any size.
+_Avoid_: radius, blur, glow (the halo itself), Glow strength
+
+**Glow strength**:
+How much of a Badge glow's colour survives, 0–100. Separate from Glow size because they answer different questions: size is how far the light travels, strength is how much of it there is — and shrinking a glow to soften it also detaches it from the logo, which is the opposite of what the glow is for on a navy footer. Applied by mixing the colour toward transparent, so the badge keeps its own hue.
+_Avoid_: opacity, alpha, intensity (the field name), Glow size
 
 **Logo height**:
 The pixel number an editor sets to size every logo on a strip — the Accreditations section (`logoSize`), the Clients Carousel (`logoSize`) and the Footer accreditation row (`footerLogoSize`, on Global Settings) each have their own. It is a height; each logo's width follows its own aspect ratio, which is what keeps a row of mixed-shape logos looking even. It does **not** apply to the Trustpilot widget, which is a vendor embed at a font size we cannot set.
 _Avoid_: logo size, image width, scale, zoom
 
 **Site Banner**:
-The SVG brand mark rendered by `SiteBanner` — **two** images side by side, the crest and the "Upper Street Contractors" wordmark, each sized by its own prop. Ships in two tones — navy for light backgrounds (header) and white for dark (footer) — plus a crest-only variant. In the header it sits on **one line beside the nav**, both images at the same height: their artwork shares a 287-unit box (234×287 and 491×287), so equal heights reproduce the proportions of the single combined lockup they were split out of. The header does not shrink on scroll — it did while the crest sat above a row of nine service links, sized apart so the crest could shrink while the words stayed readable; with the Services menu and a fixed-height row, neither is needed.
-_Avoid_: logo (the old text wordmark), banner (the single combined artwork it was until the split), SiteLogo (the retired component), service-links row (the retired second header row)
+The SVG brand mark rendered by `SiteBanner` — **one** image, the crest and the "Upper Street Contractors" wordmark as a single 732×287 lockup (`banner-*.svg`), sized by a height. Ships in two tones: navy for light backgrounds (header, `tone="dark"`) and white for dark (footer, `tone="light"`), each overridable in Global Settings by one asset field. It was split into a crest and a cropped wordmark so the header could shrink the crest on scroll while the words held their size; the header has not shrunk since the Services menu replaced the row of nine service links, so the split was paying for a behaviour nothing used — two requests, two sizing props and a gap between the halves tuned to imitate the artwork they came from. The crest-only files remain, but only as the favicon and email assets, not as a variant of this.
+_Avoid_: logo (the old text wordmark), crest / wordmark (the retired halves and their four settings slots), SiteLogo (the retired component), service-links row (the retired second header row)
 
 **Service page**:
-A per-service landing page — Refurbishments, Kitchens, Bathrooms, Plumbing, Heating, Electric, Carpentry, Roofing, Handyman. Reached from the Services menu and the Services index (they were the header row itself until the menu took over). Each is a CMS `page` (`<service>-service` key) whose `sections` follow one shared shape: a Page Hero, a Service Offer section, a Case Studies section, and a per-page CTA band (a `planning-renovation-section` carrying WhatsApp + Request-a-Quote). Distinct from the Projects / About / Contact pages, and from the Services index that lists them.
-_Avoid_: category page, landing page (generic), service-links row (the retired header row)
+A per-service landing page — Refurbishments, Kitchens, Bathrooms, Plumbing, Heating, Electric, Carpentry, Roofing, Handyman, and any an editor adds. Reached from the Services menu and the Services index (they were the header row itself until the menu took over). Each is a CMS `page` whose `sections` follow one shared shape: a Page Hero, a Service Offer section, a Case Studies section, and a per-page CTA band (a `planning-renovation-section` carrying WhatsApp + Request-a-Quote). Served by **one dynamic route** resolving a page by its Slug; it was nine near-identical route files whose only difference was two constants, which made a Service the one kind of content nobody could create without a deploy (ADR 0020). The `<service>-service` `key` survives as an internal handle, but the URL comes from the Slug. Distinct from the Projects / About / Contact pages, which keep their own route files, and from the Services index that lists them.
+_Avoid_: category page, landing page (generic), key (the internal handle, not the URL), service-links row (the retired header row)
 
 **Services index**:
 The `/services` page listing all nine Service pages as cards. A CMS `page` (key `services`) like any Service page — a Page Hero, a Service grid section and a CTA band — not a bespoke route with a hardcoded grid. It is the hub the Services menu's own label and the footer's Services link both point at, and since the footer stopped listing the nine trades it is the one page that links every Service page. No category filter: nine distinct items have nothing to narrow.
@@ -165,11 +177,11 @@ A page section (`service-grid-section`) pairing a gold overline and a title with
 _Avoid_: services list, What We Do (the home-page section, which is Work Cards + a banner), card grid
 
 **Service card**:
-One service in a Service grid (a `service-card`: image, title, summary, link). Its photo is a real Project hero for that Category, so a Kitchens card shows a kitchen. Distinct from a Work Card, which is a home-page What We Do tile carrying an emoji and a price line rather than a photo.
-_Avoid_: Work Card, service tile, Project card
+One service in a Service grid (a `service-card`: image, title, summary, and a **relation to its Service page**). Its photo is a real Project hero for that Category, so a Kitchens card shows a kitchen. Its link is derived from the linked page's Slug, never typed: while it carried a free-text path, the card and the page it meant were two strings an editor could change independently, and a typo in one silently produced a card linking to a 404. Distinct from a Work Card, which is a home-page What We Do tile carrying an emoji and a price line rather than a photo.
+_Avoid_: Work Card, service tile, Project card, href (the retired free-text path field)
 
 **Services menu**:
-The header's `Services` item: a real link to the Services index **plus** a chevron button that opens a dropdown of the nine Service pages. Two controls, not one — making the whole item the toggle would put the Services index out of reach, and opening on hover alone would hide the menu from every touch visitor, since a tap navigates rather than hovers. Opens on hover for a mouse and on the chevron for everyone else (click, Enter, Space); Escape closes it and returns focus to the chevron, and tabbing out of the panel closes it behind you. It deliberately does **not** open merely on focus: closing returns focus to the chevron, which sits inside the group, so a focus-to-open rule reopened the panel a frame after Escape and made Escape look broken. In the mobile menu it is a native `<details>` group with an "All services" row beneath it.
+The header's `Services` item: a real link to the Services index **plus** a chevron button that opens a dropdown of the nine Service pages. Two controls, not one — making the whole item the toggle would put the Services index out of reach, and opening on hover alone would hide the menu from every touch visitor, since a tap navigates rather than hovers. Its items are read from the Services index's own card grid rather than a hardcoded list, so the menu and `/services` cannot disagree about what we do and a newly created Service appears in both; with no cards it is a plain link and no dropdown at all. Opens on hover for a mouse and on the chevron for everyone else (click, Enter, Space); Escape closes it and returns focus to the chevron, and tabbing out of the panel closes it behind you. A pointer leaving the group closes it after a short grace period, not immediately, and the panel's offset from the label is its own padding rather than a margin: the panel is out of flow, so a margin left a band of pixels belonging to neither control, and crossing it closed the menu before the pointer could arrive — which made every link in it unreachable by mouse. It deliberately does **not** open merely on focus: closing returns focus to the chevron, which sits inside the group, so a focus-to-open rule reopened the panel a frame after Escape and made Escape look broken. In the mobile menu it is a native `<details>` group with an "All services" row beneath it.
 _Avoid_: services dropdown, mega menu, service-links row (what it replaced), flyout
 
 **Service Offer section**:
@@ -189,7 +201,7 @@ A page section (`split-section` CMS type) pairing a gold overline — spanning t
 _Avoid_: hero, banner, feature row, Who We Are section (a distinct home-page section)
 
 **Prose Section**:
-A full-width page section (`prose-section` CMS type) pairing a gold overline with a rich-text `body` (blocks) in a narrow reading column — no image. Rendered by `ProseSection` via `<RichTextViewer variant="prose">`, the one variant that sizes headings by level (h2/h3), giving real hierarchy for long-form copy. Powers the Legal pages and any other prose page.
+A full-width page section (`prose-section` CMS type) pairing a gold overline with a rich-text `body` (blocks) in a narrow reading column — no image. Rendered by `ProseSection` via `<RichTextViewer variant="prose">`, whose heading scale is the largest of them — every variant sizes headings by level now, but this is the one meant for long-form copy. Powers the Legal pages and any other prose page.
 _Avoid_: Split Section (pairs the body with an image), Who We Are section (home-page; has title/image/buttons), rich text (the field kind / RichTextViewer component)
 
 **FAQ section**:
@@ -209,8 +221,8 @@ One article on the Blog index, stored as a `blog-post` entry: a title, Slug, Exc
 _Avoid_: article, news item, page (the CMS `page` Type it deliberately is not)
 
 **Slug**:
-The lowercase hyphenated words that make a Blog Post's URL (`/blog/<slug>`), validated against that shape on every write rather than merely suggested. **Derived, then detached**: while blank it mirrors the slugified title, and the first time an editor types in it (or the post already has one) it stops following the title for good — so a headline can be reworded without moving a URL that has already been shared. zero-cms enforces no uniqueness, so a duplicate silently shadows the earlier post — the route takes the first match.
-_Avoid_: permalink, path, id (the uuid `/projects/:id` still uses)
+The lowercase hyphenated words that make a URL, validated against that shape on every write rather than merely suggested. On a Blog Post it makes `/blog/<slug>` and is **derived, then detached**: while blank it mirrors the slugified title, and the first time an editor types in it (or the post already has one) it stops following the title for good — so a headline can be reworded without moving a URL that has already been shared. On a `page` it makes `/<slug>` and is **not** derived from anything: only Service pages carry one, and mirroring the title would mint a URL for every page in the CMS. zero-cms enforces no uniqueness in either case, so a duplicate silently shadows the earlier entry — the route takes the first match.
+_Avoid_: permalink, path, key (a page's internal handle, not its URL), id (the uuid `/projects/:id` still uses)
 
 **Author** (Blog Post field):
 Who wrote a post — the display **name** of the CMS user picked from a dropdown of the current accounts, stored as text. Not a link to that account and not its own content type: accounts live outside the entry store, so a live link would mean exposing them publicly just to print a byline. The trade is that renaming a CMS user leaves older posts crediting the old name (ADR 0016).
@@ -232,25 +244,45 @@ _Avoid_: tag, topic, Category tag (the Project concept, a different option set)
 One Blog Post on the Blog index: hero image with its Blog category badge, publish date, title and Excerpt. Mirrors the Project card's proportions and hover so the two grids read as one site.
 _Avoid_: post tile, article card, Project card
 
-**Duplicate** (Blog Post):
-The Blog-index action that copies a post to start a new one from — the "use an existing post as a template" route. **Deep**: the copy takes its own sections and their children, because a post's content *is* its `sections` and sharing them would let an edit to the copy rewrite the original. Three things are not copied — media (an `asset` is a media id; both point at the same file), standalone content (a Project has its own URL, a Button is shared site-wide), and lifecycle (a copy is an unpublished draft). Its title gains " (copy)" and its Slug is cleared so it re-derives (ADR 0017).
-_Avoid_: clone, copy, template (the use, not the feature), reuse (the Type picker's sharing step, which is the opposite)
+**Duplicate**:
+The action that copies one specific Blog Post, Project or Service page to start a new one from. Reached from that thing's card on its index (the hover cluster, beside the pencil) or from the Entry actions row on the thing's own page. **Deep**: the copy takes its own sections and their children, because a post's content *is* its `sections` and sharing them would let an edit to the copy rewrite the original. Three things are not copied — media (an `asset` is a media id; both point at the same file), standalone content (a Project has its own URL, a Button is shared site-wide), and lifecycle (a copy is an unpublished draft). Its title gains " (copy)" and its Slug is cleared so it re-derives (ADR 0017). Distinct from a Template: this copies *one post you can point at*, keeping its title and every field; a Template is a named, reusable shape that carries no identity at all.
+_Avoid_: clone, copy, Template (a real feature now, and a different one), reuse (the Type picker's sharing step, which is the opposite)
+
+**Template**:
+A named, reusable starting shape for a new Blog Post, Service page or Project (a `template` entry: a name, a Template kind, and `sections`). Choosing one on a card index deep-copies its children onto a brand new entry, so the new thing is independent of the template from the first keystroke — the opposite of the Type picker's reuse step, which shares one entry between two places on purpose. It carries no identity of its own to hand on: no title, no Slug, no hero. Authored only by **Save as template** on real content, because the Section builder — the one tool that composes a section list visually — exists on a rendered page, and a Template has none (ADR 0019).
+_Avoid_: page template (a Project is not a page, and a Blog Post deliberately is not either), boilerplate, preset, Duplicate (the one-off copy of a single post)
+
+**Template kind**:
+Which Type a Template creates — `blog`, `service` or `project` — and therefore what the picker on each index offers. All three lay down the same thing, a `sections` list: the project kind used to be the exception, carrying four owned child lists because a Project had no sections, and it lost them when a Project became a list of sections like everything else (ADR 0022).
+_Avoid_: category (**Category tag** and **Blog category** are both taken), type, target, slot (there is one list now, not four)
+
+**Save as template**:
+The action — on a card's hover cluster beside the pencil and Duplicate, or in the Entry actions row on the thing's own page — that snapshots real content into a new Template and opens it so the editor can name it. On the Services index it snapshots the **page the card links to**, not the card, since a Service card has no sections of its own.
+_Avoid_: save as preset, make template, Duplicate
+
+**Entry actions row**:
+The Publish / Unpublish / Duplicate / Save as template / Delete row at the top of a Blog Post, a Project or a Service page while edit mode is on, acting on the entry that page IS. These three are queried by Type rather than held in a parent's relation field, so they inherit none of the Section builder's affordances: without the row, publishing or deleting the thing you are looking at means leaving for the Content admin. Delete confirms in place and names what it is about to delete. On a Service page, Duplicate also mints the `service-card` that reaches the copy — a Service is two entries, and a page with no card is unreachable.
+_Avoid_: toolbar, action bar, zero-cms bar (the floating editing bar, a different thing)
+
+**Card flash**:
+The brief gold ring on a card an editor has just created, shown once the Edit drawer closes rather than the moment the entry exists — fired while the drawer is still open, it would play out entirely behind the panel. Answers "where did it go?": newest-first puts a new post at the top, but a new Service card lands wherever the grid's order says, and on a filtered view it may be off screen. Under `prefers-reduced-motion` the ring is held instead of pulsing.
+_Avoid_: highlight, pulse, toast (the corner notification, a different thing)
 
 **Image section**:
 A page section (`image-section`) holding one photo and an optional caption, at a chosen Width (narrow / wide / full) — `narrow` matching a Prose Section's reading column so an image between two text blocks lines up with them.
-_Avoid_: photo, banner, Project images (the Project-detail grid), Gallery section
+_Avoid_: photo, banner, Gallery section (the multi-photo one)
 
 **Gallery section**:
 A page section (`gallery-section`) showing a grid of Figures at 2–4 Columns, with an optional title. The multi-photo counterpart to the Image section.
-_Avoid_: carousel, slider, Project images (the Project-detail grid), gallery (an _Avoid_ term elsewhere)
+_Avoid_: carousel, slider, Project images (the retired Type it replaced on a Project), gallery (an _Avoid_ term elsewhere)
 
 **Figure**:
-One captioned photo inside a Gallery section (a `figure`: image + caption). Distinct from a Project image, which is the same shape but belongs to a Project's detail page.
-_Avoid_: photo, image, Project image
+One captioned photo inside a Gallery section (a `figure`: image + caption). Every photo on the site that carries a caption is one, a Project's included — the Project image it used to compete with is retired.
+_Avoid_: photo, image, Project image (the retired Type)
 
 **Quote section**:
-A page section (`quote-section`) pairing one emphasised line of copy with an optional attribution, marked up as a real `<blockquote>`/`<cite>`. Distinct from a Client Comment (tied to one Project) and a Review card (site-wide, carries a star score).
-_Avoid_: pull quote (fine in prose, but this is the Type), testimonial, Client Comment
+A page section (`quote-section`) pairing one emphasised line of copy with an optional attribution, marked up as a real `<blockquote>`/`<cite>`. What a homeowner said about one Project is one of these too, since the retired Client Comment said nothing more. Distinct from a Review card (site-wide, carries a star score, links to its source).
+_Avoid_: pull quote (fine in prose, but this is the Type), testimonial, Client Comment (the retired Type)
 
 **Separator**:
 A page section (`separator-section`) putting a break between blocks, as a rule, dots, or plain space. The `space` variant renders no `<hr>` — a horizontal rule announces a *thematic* break to a screen reader, and breathing room is not one.
@@ -267,7 +299,7 @@ _Avoid_: Author, user profile, client info (implementation name only)
 ## Inspect mode
 
 **Inspect mode**:
-The in-page editing overlay, available while previewing under `/admin/*` and toggled by the zero-cms bar's edit-mode button (`?inspect=true`). Wrapped Entries and Fields show an edit pencil that opens the Edit drawer.
+The in-page editing overlay, available while previewing under `/admin/*` and toggled by the zero-cms bar's edit-mode button. Wrapped Entries and Fields show an edit pencil that opens the Edit drawer. The flag is **client state**, and `?inspect=true` mirrors it — the parameter is what makes an edit-mode URL shareable and reloadable, not what drives the overlay; no server component reads it. Remembered per browser, so an editor who closes the tab comes back editing, and shared across tabs, which is why one tab toggling it flips the others.
 _Avoid_: Edit mode, preview mode, admin mode, `NEXT_PUBLIC_STRAPI_INSPECTION_MODE` (retired Strapi-era flag)
 
 **Preview mode** (`ENABLE_PREVIEW`):
@@ -321,7 +353,7 @@ The Inspect-mode editor for a page's or Blog Post's `sections` — the one place
 _Avoid_: page builder, block editor, Reference list (the simpler card-grid wrapper)
 
 **Stacked drawer**:
-Edit drawers layered on top of one another. Opening a linked child Entry (to edit) or creating a new one from within a drawer pushes a new panel; closing it returns to the panel beneath, with its state intact. New Entries are linked into the parent only when their create form is saved.
+Edit drawers layered on top of one another. Opening a linked child Entry (to edit) or creating a new one from within a drawer pushes a new panel; closing it returns to the panel beneath, with its state intact. New Entries are linked into the parent only when their create form is saved. A **Drawer breadcrumb** at the top of each panel names the whole stack and jumps back to any panel in it, rather than one Escape per level — defined in the zero-cms context, see `libs/zero-cms-core/CONTEXT.md`.
 _Avoid_: nested modal, sub-drawer
 
 **Link-on-save**:

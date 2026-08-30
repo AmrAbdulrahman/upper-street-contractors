@@ -10,9 +10,13 @@
  *      instead of a 1fr column squeezing it. The entry is reused, not copied —
  *      the phone number stays in one place.
  *   2. **The emergency switch is marked** (`isEmergencyFlag`) so Branch rules
- *      read it by identity rather than by guessing at its `fieldKey`, and given
- *      a 7-day booking window: someone reporting a leak should not be offered a
- *      date in six months.
+ *      read it by identity rather than by guessing at its `fieldKey`, and the
+ *      **Timing step** is given a 7-day emergency booking window: someone
+ *      reporting a leak should not be offered a date in six months. The window
+ *      belongs to the step, not to either field beneath it — while it lived on
+ *      `form-field` this script wrote the same 7 onto both the toggle and the
+ *      calendar, and only the calendar's copy was ever read
+ *      (scripts/seed-timing-config-to-step.mjs).
  *   3. **The emergency switch is gated to the hourly route.** A planned
  *      renovation is not an emergency, so the toggle only appears for the
  *      "Handyman / Hourly Job" job type. This is the one Branch rule seeded
@@ -163,27 +167,38 @@ if (!emergencyField) {
   const wantsAppliesTo = [hourly.__id];
   const already =
     emergencyField.isEmergencyFlag === true &&
-    emergencyField.emergencyHorizonDays === 7 &&
     JSON.stringify(emergencyField.appliesTo ?? []) === JSON.stringify(wantsAppliesTo);
 
   if (already) {
     console.log('  · emergency field already configured');
   } else {
     await save('form-field', emergencyField.__id,
-      { isEmergencyFlag: true, emergencyHorizonDays: 7, appliesTo: wantsAppliesTo },
+      { isEmergencyFlag: true, appliesTo: wantsAppliesTo },
       emergencyField.__lastEditedAt,
-      `form-field "${emergencyField.label}" — flagged, 7-day window, shown for "${hourly.label}" only`);
+      `form-field "${emergencyField.label}" — flagged, shown for "${hourly.label}" only`);
   }
 }
 
-// Availability field: the calendar the emergency window clamps.
+// The emergency window is the Timing step's, so it is set once on the step that
+// holds the calendar — found by the availability field it contains rather than
+// by its `stepLabel`, which is variant-driven and an editor may reword.
 const availabilityField = fields.find((f) => f.inputType === 'availability');
-if (availabilityField && availabilityField.emergencyHorizonDays !== 7) {
-  await save('form-field', availabilityField.__id, { emergencyHorizonDays: 7 },
-    availabilityField.__lastEditedAt,
-    `form-field "${availabilityField.label}" — emergency window 7 days`);
-} else if (availabilityField) {
-  console.log('  · availability field already has a 7-day emergency window');
+const availabilityStep = availabilityField
+  ? formQuestions.find((q) => (q.fields ?? []).includes(availabilityField.__id))
+  : undefined;
+
+if (!availabilityField) {
+  console.warn('  ! no availability field found — emergency window skipped');
+} else if (!availabilityStep) {
+  console.warn(
+    `  ! no Form Question holds availability field ${availabilityField.__id} — emergency window skipped`
+  );
+} else if (availabilityStep.emergencyHorizonDays === 7) {
+  console.log('  · Timing step already has a 7-day emergency window');
+} else {
+  await save('form-question', availabilityStep.__id, { emergencyHorizonDays: 7 },
+    availabilityStep.__lastEditedAt,
+    `form-question "${availabilityStep.stepLabel}" — emergency window 7 days`);
 }
 
 // --- 4. mark the gated steps -------------------------------------------------

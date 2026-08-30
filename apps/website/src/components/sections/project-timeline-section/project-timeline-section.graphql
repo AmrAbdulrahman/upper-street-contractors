@@ -1,0 +1,13 @@
+fragment ProjectTimelineSection on ProjectTimelineSection {
+  id
+  type
+  overline
+  title
+  steps {
+    id
+    type
+    step
+    title
+    description
+  }
+}

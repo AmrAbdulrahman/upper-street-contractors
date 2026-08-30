@@ -2,7 +2,7 @@
 
 import { type ComponentType } from 'react';
 import { Controller } from 'react-hook-form';
-import { COLOR_PATTERN } from '@usc/zero-cms-core';
+import { COLOR_PATTERN, humanize } from '@usc/zero-cms-core';
 import type { RendererProps } from '../registry/types';
 import { Button, Input, cx } from '../../components/ui';
 
@@ -42,7 +42,7 @@ export const ColorRenderer: ComponentType<RendererProps> = ({ field, control }) 
             <div className="flex items-center gap-2">
               <input
                 type="color"
-                aria-label={`${field.label ?? field.__name} colour picker`}
+                aria-label={`${field.label ?? humanize(field.__name)} colour picker`}
                 value={swatch}
                 onChange={(e) => f.onChange(e.target.value)}
                 className="h-9 w-12 shrink-0 cursor-pointer rounded-md border border-neutral-300 bg-white p-1"
@@ -53,7 +53,7 @@ export const ColorRenderer: ComponentType<RendererProps> = ({ field, control }) 
                 onChange={(e) => f.onChange(e.target.value)}
                 placeholder="#000000"
                 spellCheck={false}
-                aria-label={`${field.label ?? field.__name} hex value`}
+                aria-label={`${field.label ?? humanize(field.__name)} hex value`}
                 className={cx('font-mono', !valid && value !== '' && 'border-red-400')}
               />
 

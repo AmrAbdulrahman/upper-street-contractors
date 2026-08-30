@@ -1,0 +1,13 @@
+fragment ProjectScopeSection on ProjectScopeSection {
+  id
+  type
+  overline
+  title
+  summary
+  deliverables {
+    id
+    type
+    title
+    description
+  }
+}

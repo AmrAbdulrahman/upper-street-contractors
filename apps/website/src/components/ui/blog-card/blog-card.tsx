@@ -7,6 +7,8 @@ import type { BlogPostCardFragment } from "@/generated/graphql";
 
 type BlogCardProps = {
   data: BlogPostCardFragment;
+  /** Just created by this editor — see `useCardFlash`. */
+  flash?: boolean;
 };
 
 /**
@@ -14,7 +16,7 @@ type BlogCardProps = {
  * so the two grids read as the same site, but carries a date rather than meta
  * chips — a post's useful facet is when it was written.
  */
-export function BlogCard({ data }: BlogCardProps) {
+export function BlogCard({ data, flash = false }: BlogCardProps) {
   const { slug, title, excerpt, category, publishedAt, hero } = data;
   // A post with no slug has no URL to link to; still rendered so an editor can
   // see and fix it in inspect mode rather than having it silently vanish.
@@ -45,7 +47,14 @@ export function BlogCard({ data }: BlogCardProps) {
 
   return (
     <ZeroCmsEntry entry={data}>
-      <article className="group overflow-hidden rounded-lg border border-border bg-white transition-all duration-250 ease-out hover:-translate-y-[3px] hover:shadow-lg">
+      {/* The flash class goes on the existing <article>, never a wrapper:
+          <ZeroCmsEntry> clones a lone host element rather than wrapping it, and
+          an extra div here would stop this being a direct grid item. */}
+      <article
+        className={`group overflow-hidden rounded-lg border border-border bg-white transition-all duration-250 ease-out hover:-translate-y-[3px] hover:shadow-lg${
+          flash ? " card-flash" : ""
+        }`}
+      >
         <div className="relative">
           {href ? (
             <Link href={href} className="block" tabIndex={-1} aria-hidden>

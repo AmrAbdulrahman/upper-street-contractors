@@ -5,6 +5,12 @@ export { iconData } from "./icon-data";
 export { isIconCode } from "./is-icon-code";
 export { resolveLogoHeight } from "./logo-size";
 export {
+  resolveBadgeGlow,
+  DEFAULT_GLOW_RADIUS,
+  DEFAULT_GLOW_INTENSITY,
+  type BadgeGlowInput,
+} from "./badge-glow";
+export {
   buildBaseMetadata,
   normalizeSiteUrl,
   pageMetaToMetadata,

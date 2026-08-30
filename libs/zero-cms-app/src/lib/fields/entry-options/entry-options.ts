@@ -1,10 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { Adapter } from '@usc/zero-cms-core';
+import type { Adapter, OutputEntry } from '@usc/zero-cms-core';
 import { useZeroCms } from '../../context';
 import type { RefOption } from '../../components/reference-picker';
-import { entryLabel } from '../entry-label';
+import { useEntryLabeller } from '../entry-label';
 
 /**
  * Per-adapter cache of a Type's entry options, shared by every `reference`/
@@ -18,10 +18,17 @@ import { entryLabel } from '../entry-label';
  * exactly what read as "the whole page reloads" switching between entries.
  * Keyed by adapter identity, not a module singleton, so distinct
  * ZeroCmsProvider instances (tests, multiple mounts) don't cross-contaminate.
+ *
+ * Holds the raw entries, not finished `RefOption`s: an option's label is derived
+ * from the Type's Title field and — when that field is an `asset` — the media
+ * library, either of which can arrive after this fetch resolves. Deriving at
+ * render keeps a title live instead of freezing whatever was resolvable at
+ * fetch time (an image-titled Type cached before `media` loaded read
+ * "Untitled …" until something invalidated it).
  */
-const typeOptionsCache = new WeakMap<Adapter, Map<string, RefOption[]>>();
+const typeOptionsCache = new WeakMap<Adapter, Map<string, OutputEntry[]>>();
 
-function cacheFor(adapter: Adapter): Map<string, RefOption[]> {
+function cacheFor(adapter: Adapter): Map<string, OutputEntry[]> {
   let m = typeOptionsCache.get(adapter);
   if (!m) {
     m = new Map();
@@ -52,6 +59,7 @@ export function useEntryOptions(allowedTypes: string[]): {
   reload: () => void;
 } {
   const { adapter, schema } = useZeroCms();
+  const label = useEntryLabeller();
   const cache = cacheFor(adapter);
   // Bumped after a fetch resolves (to re-render off the now-populated cache) and
   // by `reload()` (also re-arms the effect below to actually re-fetch).
@@ -69,21 +77,11 @@ export function useEntryOptions(allowedTypes: string[]): {
     if (missing.length === 0) return;
     void Promise.all(
       missing.map(async (tn) => {
-        const type = schema.find((t) => t.__name === tn);
-        const assetField = type?.fields.find((f) => f.__type === 'asset')?.__name ?? null;
         const { data } = await adapter.query(tn, {
           status: 'draft',
           includeUnpublished: true,
         });
-        cache.set(
-          tn,
-          data.map((e) => ({
-            id: e.__id,
-            label: entryLabel(type, e),
-            type: tn,
-            mediaId: assetField ? ((e[assetField] as string) || null) : null,
-          }))
-        );
+        cache.set(tn, data);
       })
     ).then(() => {
       if (live) setVersion((v) => v + 1);
@@ -92,9 +90,20 @@ export function useEntryOptions(allowedTypes: string[]): {
       live = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, adapter, schema, version]);
+  }, [key, adapter, version]);
 
-  const options = allowedTypes.flatMap((tn) => cache.get(tn) ?? []);
+  const options = allowedTypes.flatMap((tn) => {
+    const type = schema.find((t) => t.__name === tn);
+    const assetField = type?.fields.find((f) => f.__type === 'asset')?.__name ?? null;
+    return (cache.get(tn) ?? []).map(
+      (e): RefOption => ({
+        id: e.__id,
+        label: label(type, e),
+        type: tn,
+        mediaId: assetField ? ((e[assetField] as string) || null) : null,
+      })
+    );
+  });
   const visual = allowedTypes.some((tn) =>
     schema.find((t) => t.__name === tn)?.fields.some((f) => f.__type === 'asset')
   );

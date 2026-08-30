@@ -5,6 +5,28 @@ import type { CSSProperties } from "react";
 export const TIME_WINDOWS = ["9am–1pm", "1pm–4pm", "4pm–8pm"] as const;
 
 /**
+ * The pill used for every multi-select choice in the wizard — a Time window on
+ * a Preferred date, and the retired standalone `timeWindow` field.
+ *
+ * Shared because those two call sites carried the same class string character
+ * for character, so a visual change to one that missed the other would leave
+ * two identical-looking controls disagreeing about what "chosen" looks like.
+ *
+ * Selected is deliberately loud — solid gold, a halo ring, heavier type and a
+ * tick. It used to be a 1px border swap, which on a page already full of gold
+ * accents was barely a signal at all.
+ */
+export function optionChipClassName(on: boolean): string {
+  return [
+    "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-all",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
+    on
+      ? "border-gold bg-gold font-semibold text-white shadow-sm ring-2 ring-gold/30"
+      : "border-border bg-white font-medium text-dark hover:border-gold/50 hover:bg-gold-light/40",
+  ].join(" ");
+}
+
+/**
  * Weekdays the business never attends, as `Date.getDay()` numbers (0 = Sunday).
  *
  * The published hours are Mon–Fri 8am–6pm and Sat 9am–2pm (see
@@ -61,9 +83,14 @@ export const DAYPICKER_THEME = {
 export type AvailabilityEntry = { date: string; windows: string[] };
 
 /**
- * Fallbacks for the Availability field's four CMS config attributes. Mirrors the
- * `default`s set by scripts/seed-availability-schema.mjs — applied here too so
- * the widget never depends on read-time default projection (ADR 0011).
+ * Fallbacks for the Availability calendar's four CMS config attributes, which
+ * live on the Timing step (`form-question`) rather than on the calendar field —
+ * see scripts/seed-timing-config-to-step.mjs. Mirrors the `default`s set by
+ * scripts/seed-availability-schema.mjs — applied here too so the widget never
+ * depends on read-time default projection (ADR 0011).
+ *
+ * `emergencyHorizonDays` is deliberately absent: 0 is its own off switch, so
+ * `availability-field.tsx` falls back to it inline.
  */
 export const AVAILABILITY_DEFAULTS = {
   /** 0 = unlimited. */

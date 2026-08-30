@@ -365,3 +365,172 @@ describe('schema Type timestamps', () => {
     expect(project.__updatedAt).not.toBe(before.__updatedAt);
   });
 });
+
+describe('entry title override', () => {
+  it('setEntryTitle writes __title and surfaces it on reads', async () => {
+    const e = await freshEngine();
+    const p = await e.create('project', { title: 'Loft job' }, ACTOR);
+    expect(p.__title).toBeNull();
+
+    const named = await e.setEntryTitle(
+      'project',
+      p.__id,
+      'Islington loft',
+      ACTOR,
+      p.__lastEditedAt as string
+    );
+    expect(named.__title).toBe('Islington loft');
+    expect((await e.get('project', p.__id, { status: 'draft' }))?.__title).toBe(
+      'Islington loft'
+    );
+  });
+
+  it('trims, and treats blank as clearing the override', async () => {
+    const e = await freshEngine();
+    const p = await e.create('project', { title: 'A' }, ACTOR);
+    const a = await e.setEntryTitle(
+      'project',
+      p.__id,
+      '  Padded  ',
+      ACTOR,
+      p.__lastEditedAt as string
+    );
+    expect(a.__title).toBe('Padded');
+    const b = await e.setEntryTitle(
+      'project',
+      p.__id,
+      '   ',
+      ACTOR,
+      a.__lastEditedAt as string
+    );
+    expect(b.__title).toBeNull();
+    const c = await e.setEntryTitle(
+      'project',
+      p.__id,
+      'Back',
+      ACTOR,
+      b.__lastEditedAt as string
+    );
+    expect(c.__title).toBe('Back');
+    const d = await e.setEntryTitle(
+      'project',
+      p.__id,
+      null,
+      ACTOR,
+      c.__lastEditedAt as string
+    );
+    expect(d.__title).toBeNull();
+  });
+
+  it('is a normal CAS write — a stale token conflicts (ADR 0009)', async () => {
+    const e = await freshEngine();
+    const p = await e.create('project', { title: 'A' }, ACTOR);
+    const stale = p.__lastEditedAt as string;
+    await e.setEntryTitle('project', p.__id, 'First', ACTOR, stale);
+    await expect(
+      e.setEntryTitle('project', p.__id, 'Second', ACTOR, stale)
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+  });
+
+  it('is not draft-gated: an override needs no publish, and publishing keeps it', async () => {
+    const e = await freshEngine();
+    const p = await e.create('project', { title: 'A' }, ACTOR);
+    const named = await e.setEntryTitle(
+      'project',
+      p.__id,
+      'Islington loft',
+      ACTOR,
+      p.__lastEditedAt as string
+    );
+    // Live before any publish...
+    expect((await e.get('project', p.__id, { status: 'draft' }))?.__title).toBe(
+      'Islington loft'
+    );
+    // ...and untouched by publish, which only swaps values/__draft.
+    const pub = await e.publish(
+      'project',
+      p.__id,
+      ACTOR,
+      named.__lastEditedAt as string
+    );
+    expect(pub.__title).toBe('Islington loft');
+    expect((await e.get('project', p.__id))?.__title).toBe('Islington loft');
+  });
+
+  it('survives unpublish and discardDraft', async () => {
+    const e = await freshEngine();
+    const p = await e.create('project', { title: 'A' }, ACTOR);
+    const named = await e.setEntryTitle(
+      'project',
+      p.__id,
+      'Kept',
+      ACTOR,
+      p.__lastEditedAt as string
+    );
+    const pub = await e.publish(
+      'project',
+      p.__id,
+      ACTOR,
+      named.__lastEditedAt as string
+    );
+    const upd = await e.update(
+      'project',
+      p.__id,
+      { title: 'B' },
+      ACTOR,
+      pub.__lastEditedAt as string
+    );
+    expect(upd.__title).toBe('Kept');
+    const discarded = await e.discardDraft(
+      'project',
+      p.__id,
+      ACTOR,
+      upd.__lastEditedAt as string
+    );
+    expect(discarded.__title).toBe('Kept');
+    const un = await e.unpublish(
+      'project',
+      p.__id,
+      ACTOR,
+      discarded.__lastEditedAt as string
+    );
+    expect(un.__title).toBe('Kept');
+  });
+});
+
+describe('Type.titleField', () => {
+  /**
+   * Regression for the `withoutStamps` allowlist: it is an allowlist, not an
+   * omit, so a Type key missing from it is silently dropped by saveSchema. This
+   * is the only test that catches that.
+   */
+  it('round-trips through saveSchema', async () => {
+    const e = await freshEngine();
+    const next: Schema = schema.map((t) =>
+      t.__name === 'project' ? { ...t, titleField: 'category' } : t
+    );
+    const saved = await e.saveSchema(next, ACTOR, await e.getSchemaVersion());
+    expect(saved.find((t) => t.__name === 'project')?.titleField).toBe('category');
+
+    // And from storage, not just the returned value.
+    const reloaded = await Engine.load(
+      createMemoryStoragePort({ schema: saved }),
+      createMemoryBlobStore()
+    );
+    expect(
+      reloaded.getSchema().find((t) => t.__name === 'project')?.titleField
+    ).toBe('category');
+  });
+
+  it('bumps __updatedAt when only the Title field changed', async () => {
+    const e = await freshEngine();
+    const first = await e.saveSchema(schema, ACTOR, await e.getSchemaVersion());
+    const before = first.find((t) => t.__name === 'project')!.__updatedAt;
+
+    const next: Schema = first.map((t) =>
+      t.__name === 'project' ? { ...t, titleField: 'category' } : t
+    );
+    const after = await e.saveSchema(next, ACTOR, await e.getSchemaVersion());
+    expect(after.find((t) => t.__name === 'project')!.__updatedAt).not.toBe(before);
+  });
+});

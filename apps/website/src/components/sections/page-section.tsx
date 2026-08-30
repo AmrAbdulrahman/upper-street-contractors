@@ -12,6 +12,8 @@ import {
   type HowItWorksSectionFragment,
   type PageHeroSectionFragment,
   type PlanningRenovationSectionFragment,
+  type ProjectScopeSectionFragment,
+  type ProjectTimelineSectionFragment,
   type ProseSectionFragment,
   type QuoteSectionFragment,
   type RecentWorkSectionFragment,
@@ -37,6 +39,8 @@ import { HowItWorksSection } from "./how-it-works";
 import { ImageSection } from "./image-section";
 import { PageHeroSection } from "./page-hero";
 import { PlanningRenovationSection } from "./planning-renovation";
+import { ProjectScopeSection } from "./project-scope-section";
+import { ProjectTimelineSection } from "./project-timeline-section";
 import { ProseSection } from "./prose-section";
 import { QuoteSection } from "./quote-section";
 import { RecentWorkSection } from "./recent-work";
@@ -63,6 +67,8 @@ export type PageSectionData = (
   | HowItWorksSectionFragment
   | PageHeroSectionFragment
   | PlanningRenovationSectionFragment
+  | ProjectScopeSectionFragment
+  | ProjectTimelineSectionFragment
   | ProseSectionFragment
   | QuoteSectionFragment
   | RecentWorkSectionFragment
@@ -145,6 +151,19 @@ export function PageSection({ section }: { section: PageSectionData }) {
 
     case "ProseSection":
       return <ProseSection data={section as ProseSectionFragment} />;
+
+    // Project-only, and allowed only on `project.sections` — a page's Type
+    // picker never offers them, so these two cases are unreachable from a page
+    // and harmless there.
+    case "ProjectScopeSection":
+      return (
+        <ProjectScopeSection data={section as ProjectScopeSectionFragment} />
+      );
+
+    case "ProjectTimelineSection":
+      return (
+        <ProjectTimelineSection data={section as ProjectTimelineSectionFragment} />
+      );
 
     case "GoogleReviews":
       return <GoogleReviewsSection data={section as GoogleReviewsFragment} />;

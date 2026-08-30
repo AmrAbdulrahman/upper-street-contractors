@@ -183,6 +183,66 @@
   }
 }
 
+/*
+ * Card flash — marks the card an editor has just created.
+ *
+ * A new Blog Post / Project / Service lands somewhere in a grid the editor is
+ * not looking at: newest-first puts a post at the top, but a Service card goes
+ * wherever the grid's order says, and on a filtered view it may be off screen
+ * entirely. Without this the create appears to have done nothing.
+ *
+ * Defined here rather than in the widget lib because `libs/` ships no CSS of
+ * its own — an `animate-[...]` class used only in a lib silently resolves to
+ * nothing in a host that has not defined it.
+ *
+ * Gold rather than the inspect blue: blue is the hover outline every entry
+ * already has, so a blue flash reads as "you are hovering this", not "this is
+ * new". The ring is drawn with box-shadow so it costs no layout and cannot
+ * disturb a grid mid-animation.
+ */
+@keyframes card-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgb(var(--card-flash-rgb) / 0.85);
+    transform: scale(1);
+  }
+  12% {
+    box-shadow: 0 0 0 6px rgb(var(--card-flash-rgb) / 0.55);
+    transform: scale(1.02);
+  }
+  55% {
+    box-shadow: 0 0 0 4px rgb(var(--card-flash-rgb) / 0.4);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(var(--card-flash-rgb) / 0);
+    transform: scale(1);
+  }
+}
+
+.card-flash {
+  --card-flash-rgb: 193 154 88; /* gold */
+  animation: card-flash 2200ms ease-out;
+  /* Above its grid neighbours, so the ring is never clipped by the next card. */
+  position: relative;
+  z-index: 1;
+}
+
+/*
+ * Reduced motion still needs the answer to "where did it go?", so the ring is
+ * held rather than dropped — it just neither pulses nor scales.
+ */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes card-flash {
+    0%,
+    85% {
+      box-shadow: 0 0 0 4px rgb(var(--card-flash-rgb) / 0.5);
+    }
+    100% {
+      box-shadow: 0 0 0 4px rgb(var(--card-flash-rgb) / 0);
+    }
+  }
+}
+
 /* Clients carousel — infinitely rotating logo strip */
 @keyframes clients-marquee {
   from {

@@ -1,9 +1,15 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Toaster } from "sonner";
-import { ZeroCmsBar, ZeroCmsWidget } from "@usc/zero-cms-widget";
+import { BusyOverlay, ZeroCmsBar, ZeroCmsWidget } from "@usc/zero-cms-widget";
 import { HugeRTEBlocksEditor } from "@usc/zero-cms-blocks";
 import { cmsNotify } from "@/lib/cms/notify";
 
@@ -11,9 +17,17 @@ const ADMIN_PREFIX = "/admin";
 const CMS_PREFIX = "/admin/cms";
 const INSPECT_PARAM = "inspect";
 /**
- * Survives a navigation the click interceptor never sees — a form post, an
- * external round-trip, a typed URL, `exit-preview` and back. Session-scoped, so
- * it cannot leak edit mode into a new tab opened days later.
+ * Remembers edit mode across navigations the click interceptor never sees — a
+ * form post, an external round-trip, a typed URL, `exit-preview` and back.
+ *
+ * `localStorage`, not `sessionStorage`. It was session-scoped so edit mode could
+ * not surface in a tab opened days later, but that also meant an editor who
+ * closed the tab came back read-only every single time, which is the state they
+ * are almost never in. Persisting costs one surprise on a stale tab; not
+ * persisting cost a re-toggle on every visit.
+ *
+ * Being shared across tabs is then a real difference, so it is handled rather
+ * than ignored: a `storage` listener keeps every open /admin tab in step.
  */
 const INSPECT_STORAGE_KEY = "zero-cms-inspect";
 
@@ -27,20 +41,33 @@ function withInspect(href: string, on: boolean): string {
 
 function readStoredInspect(): boolean {
   try {
-    return window.sessionStorage.getItem(INSPECT_STORAGE_KEY) === "true";
+    return window.localStorage.getItem(INSPECT_STORAGE_KEY) === "true";
   } catch {
     // Private mode / blocked storage. Edit mode still works, it just stops
-    // surviving a full page load — never a reason to break the page.
+    // being remembered — never a reason to break the page.
     return false;
   }
 }
 
 function writeStoredInspect(on: boolean): void {
   try {
-    window.sessionStorage.setItem(INSPECT_STORAGE_KEY, String(on));
+    window.localStorage.setItem(INSPECT_STORAGE_KEY, String(on));
   } catch {
     /* see readStoredInspect */
   }
+}
+
+/** The current URL with `?inspect=true` present or absent, as `on` requires. */
+function inspectUrl(
+  pathname: string,
+  searchParams: URLSearchParams,
+  on: boolean,
+): string {
+  const params = new URLSearchParams(searchParams.toString());
+  if (on) params.set(INSPECT_PARAM, "true");
+  else params.delete(INSPECT_PARAM);
+  const query = params.toString();
+  return query ? `${pathname}?${query}` : pathname;
 }
 
 /**
@@ -55,15 +82,23 @@ function writeStoredInspect(on: boolean): void {
  * A module variable is scoped to the document instead, which is the actual unit
  * this should run once per: it survives every client-side navigation and resets
  * only on a real page load, which is exactly when restoring is wanted.
+ *
+ * It matters more now that the preference is persistent: without the latch, the
+ * restore would keep re-applying a stored `true` and "turn off edit mode" would
+ * be undone a frame after every click.
  */
 let inspectRestored = false;
 
 /**
  * Renders the zero-cms widget + admin bar (preview deploy only).
  *
- * `inspect` is driven by the `?inspect=true` query param read client-side via
- * `useSearchParams()`, so the toggle reacts instantly to client navigation (a
- * layout Server Component can't — it doesn't re-render on a query-only change).
+ * `inspect` lives in state here, and `?inspect=true` mirrors it. It used to be
+ * the other way round, with the toggle doing a `router.push` and the param
+ * driving the flag — which made every toggle wait on an RSC payload for the
+ * whole route tree. Nothing on the server reads the parameter (the only server
+ * gate is Draft Mode), so that round trip bought nothing at all. The parameter
+ * is kept because it makes an edit-mode URL shareable and reloadable, and
+ * because the link interceptor below carries it across /admin navigations.
  *
  * The widget provider stays mounted above `children` so they never remount, while
  * the param reader (which needs `useSearchParams`, hence a Suspense boundary) lives
@@ -168,43 +203,62 @@ function InspectControls({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [syncingUrl, startUrlSync] = useTransition();
 
   const paramInspect = searchParams.get(INSPECT_PARAM) === "true";
+  const underCms = pathname === CMS_PREFIX || pathname.startsWith(`${CMS_PREFIX}/`);
 
-  useEffect(() => {
-    onInspectChange(paramInspect);
-  }, [paramInspect, onInspectChange]);
-
-  // The URL stays the source of truth; sessionStorage is only a memory of the
-  // last choice, so a navigation the click interceptor cannot intercept — a
-  // full page load, a typed URL, a browser back out of an external link — comes
-  // back in edit mode instead of silently dropping to read-only.
+  // Restore, once per document. An explicit `?inspect=true` wins — a shared or
+  // typed URL says what it wants — otherwise the remembered preference applies,
+  // so a navigation the click interceptor cannot intercept (a full page load, a
+  // typed URL, a browser Back out of an external link) comes back in edit mode
+  // instead of silently dropping to read-only.
   //
-  // Runs once. A `replace`, not a `push`: restoring a state the editor never
-  // left should not cost them a history entry, and it must not be undoable by
-  // pressing Back straight back into the URL that triggered it.
+  // Nothing navigates here. The old restore did a `router.replace` after first
+  // paint; setting state does the same job without the round trip, and the URL
+  // effect below catches up on its own.
   useEffect(() => {
     if (inspectRestored) return;
     inspectRestored = true;
+    if (underCms) return;
 
-    const underCms = pathname === CMS_PREFIX || pathname.startsWith(`${CMS_PREFIX}/`);
-    if (underCms || paramInspect || !readStoredInspect()) return;
+    const initial = paramInspect || readStoredInspect();
+    // A URL-supplied `true` is a choice too, so it is remembered like any other.
+    writeStoredInspect(initial);
+    if (initial) onInspectChange(true);
+  }, [underCms, paramInspect, onInspectChange]);
 
-    const params = new URLSearchParams(searchParams.toString());
-    params.set(INSPECT_PARAM, "true");
-    router.replace(`${pathname}?${params.toString()}`);
-  }, [pathname, paramInspect, searchParams, router]);
-
+  // Mirror the flag into the URL. A `replace`, not a `push`: this is bookkeeping
+  // for a state the editor is already looking at, and it must not be undoable by
+  // pressing Back straight into the URL that triggered it. `scroll: false`
+  // because the page has not changed — only its query string has.
   useEffect(() => {
-    writeStoredInspect(paramInspect);
-  }, [paramInspect]);
+    if (underCms || paramInspect === inspect) return;
+    startUrlSync(() => {
+      router.replace(inspectUrl(pathname, searchParams, inspect), {
+        scroll: false,
+      });
+    });
+  }, [inspect, paramInspect, pathname, router, searchParams, underCms]);
+
+  // One preference, possibly several open /admin tabs. `storage` fires only in
+  // the *other* tabs, so this is what stops two of them silently disagreeing
+  // until one of them happens to navigate.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== INSPECT_STORAGE_KEY) return;
+      onInspectChange(event.newValue === "true");
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [onInspectChange]);
 
   const toggleInspect = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (paramInspect) params.delete(INSPECT_PARAM);
-    else params.set(INSPECT_PARAM, "true");
-    const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname);
+    const next = !inspect;
+    // Synchronous, and deliberately so — the pencils appear on this click, not
+    // when a network round trip decides to come back.
+    writeStoredInspect(next);
+    onInspectChange(next);
   };
 
   // /admin/bathrooms -> /bathrooms, /admin -> / — same mirror rule proxy.ts's
@@ -215,15 +269,20 @@ function InspectControls({
   const closeHref = `/admin/exit-preview?next=${encodeURIComponent(sitePath)}`;
 
   return (
-    <ZeroCmsBar
-      inspect={inspect}
-      onToggleInspect={toggleInspect}
-      onChange={onContentChange}
-      closeHref={closeHref}
-      // Site-wide settings — name, logos, metadata, contact details, social
-      // links — belong to no page, so no pencil on the site can reach them.
-      settingsType="site-meta-config"
-      settingsLabel="Site settings"
-    />
+    <>
+      <ZeroCmsBar
+        inspect={inspect}
+        onToggleInspect={toggleInspect}
+        onChange={onContentChange}
+        closeHref={closeHref}
+        // Site-wide settings — name, logos, metadata, contact details, social
+        // links — belong to no page, so no pencil on the site can reach them.
+        settingsType="site-meta-config"
+        settingsLabel="Site settings"
+      />
+      {/* A safety net, not the mechanism: the toggle itself is synchronous, so
+          this only ever shows if the URL mirror genuinely stalls. */}
+      <BusyOverlay show={syncingUrl} label="Switching edit mode…" />
+    </>
   );
 }

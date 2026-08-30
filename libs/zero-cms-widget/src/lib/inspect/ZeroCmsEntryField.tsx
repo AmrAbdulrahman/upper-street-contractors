@@ -7,6 +7,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
+import { humanize } from '@usc/zero-cms-core';
 import { useZeroCmsWidgetOptional } from '../context';
 import { useZeroCmsEntry } from './entry-context';
 import { useInspect } from './use-inspect';
@@ -58,7 +59,7 @@ export function ZeroCmsEntryField({
     actions: [
       {
         key: 'edit',
-        label: `Edit ${field}`,
+        label: `Edit ${humanize(field)}`,
         icon: <PencilIcon />,
         onClick: () =>
           void openEntry(ctx.entryId, {

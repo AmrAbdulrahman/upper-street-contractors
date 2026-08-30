@@ -45,7 +45,7 @@ export function RemoveSectionDialog({
   noun: string;
   onDone: () => void;
 }) {
-  const { adapter, schema, notify, currentUserId } = useZeroCms();
+  const { adapter, schema, media, notify, currentUserId } = useZeroCms();
   const { unlink } = useZeroCmsWidget();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export function RemoveSectionDialog({
     } catch (err) {
       const detail =
         err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY'
-          ? `${await describeReferenceHits(err.details as ReferenceHit[], schema, adapter)} Publish this page, then delete it from the CMS.`
+          ? `${await describeReferenceHits(err.details as ReferenceHit[], schema, adapter, media)} Publish this page, then delete it from the CMS.`
           : errorMessage(err);
       const msg = `Removed from the page. ${detail}`;
       setError(msg);

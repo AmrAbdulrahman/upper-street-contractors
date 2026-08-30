@@ -2,10 +2,18 @@
 
 import { useMemo, useState } from "react";
 import {
+  DuplicateActionProvider,
+  TemplateActionProvider,
   useInspect,
-  useSurfaceTone,
   useZeroCmsWidgetOptional,
 } from "@usc/zero-cms-widget";
+import { NewEntryButton } from "@/components/cms/new-entry-button";
+import {
+  BLOG_TEMPLATE,
+  DUPLICATE_BLOG_POST,
+  saveAsTemplateOptions,
+} from "@/components/cms/templates";
+import { useCardFlash } from "@/components/cms/use-card-flash";
 import { BlogCard } from "@/components/ui/blog-card";
 import {
   byNewestFirst,
@@ -16,31 +24,6 @@ import type { BlogPostCardFragment } from "@/generated/graphql";
 
 const ALL_POSTS_LABEL = "All posts";
 const PER_PAGE = 9;
-
-/**
- * What "duplicate this post" means, in this content model.
- *
- * A post's `sections` ARE its content, so they are copied — a shared section
- * would let an edit to the copy rewrite the original. These Types are not part
- * of the post and are shared instead:
- *
- * - `project` / `blog-post` / `page` — each has its own URL. A Recent Work
- *   section pins Projects; copying them would mint orphan case studies that
- *   appear nowhere and duplicate the real ones in `/projects`.
- * - `button` — every CTA band on the site points at the same two Button
- *   entries, so that changing the wording once changes it everywhere. A copy
- *   would quietly opt this post out of that.
- * - `icon` — a shared glyph registry, not content.
- *
- * `slug` is cleared rather than copied: zero-cms enforces no uniqueness, so a
- * duplicated slug silently shadows the original (the route takes the first
- * match). Blank, it re-derives from the new title.
- */
-const DUPLICATE_BLOG_POST = {
-  shareTypes: ["project", "blog-post", "page", "button", "icon"],
-  clearFields: ["slug"],
-  renameField: "title",
-} as const;
 
 type BlogIndexViewProps = {
   posts: BlogPostCardFragment[];
@@ -67,14 +50,10 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
   // there is no "+ Add" affordance to inherit — without this an editor has to
   // leave the site for the Content admin just to start a post.
   const widget = useZeroCmsWidgetOptional();
-  // `useInspect`, not `widget.inspect`: the button below is markup the server never
-  // sent, and the context flag flips before deep subtrees finish hydrating.
+  // `useInspect`, not `widget.inspect`: the affordances below are markup the
+  // server never sent, and the context flag flips before deep subtrees hydrate.
   const inspect = useInspect();
-  // This section is `bg-surface` today, but the tone is measured rather than
-  // assumed — same hook the Section builder's own add affordances use, so a
-  // future background change can't quietly make the button unreadable.
-  const [addHost, setAddHost] = useState<HTMLDivElement | null>(null);
-  const addTone = useSurfaceTone(addHost, [inspect]);
+  const { flashId, flashOnClose } = useCardFlash(widget?.isOpen ?? false);
 
   const sorted = useMemo(() => [...posts].sort(byNewestFirst), [posts]);
   const categories = useMemo(() => deriveBlogCategories(sorted), [sorted]);
@@ -107,26 +86,15 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
         {/* Card titles are <h3>s; without this the page jumps h1 → h3. */}
         <h2 className="sr-only">Blog posts</h2>
 
-        {inspect && widget ? (
-          <div ref={setAddHost} className="mb-6">
-            <button
-              type="button"
-              onClick={() => void widget.createEntry("blog-post")}
-              className={
-                addTone === "dark"
-                  ? "zero-cms inline-flex items-center gap-2 rounded-lg border border-dashed border-white/50 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white/85 transition-colors hover:border-white hover:bg-white/15 hover:text-white"
-                  : "zero-cms inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-400 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:border-neutral-900 hover:text-neutral-900"
-              }
-            >
-              <span
-                aria-hidden
-                className="flex h-5 w-5 items-center justify-center rounded-full border border-current leading-none"
-              >
-                +
-              </span>
-              New blog post
-            </button>
-          </div>
+        {widget ? (
+          <NewEntryButton
+            label="New blog post"
+            onClick={() =>
+              void widget
+                .createFromTemplate(BLOG_TEMPLATE)
+                .then(flashOnClose)
+            }
+          />
         ) : null}
 
         <div className="mb-6 max-w-md">
@@ -188,30 +156,34 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
         {visible.length > 0 ? (
           <div className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((post) =>
-              // In flow beneath the card, not overlaid on it: the card already
-              // grows a hover pencil cluster in its own top corner, and a second
-              // floating control there fights it for the same pixels.
+              // Duplicate rides the card's own hover cluster, beside the pencil.
+              // It used to be a dashed button in flow beneath the card, on the
+              // reasoning that a second floating control would fight the pencil
+              // for the same corner — but the cluster is right-anchored precisely
+              // so buttons can be added to it, and a row of dashed buttons under
+              // the grid read as part of the page rather than as editing.
+              //
+              // Both providers emit no DOM, so each card stays a direct grid item.
               inspect && widget ? (
-                <div key={post.id} className="flex flex-col gap-2">
-                  <BlogCard data={post} />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      void widget.duplicate(post.id, DUPLICATE_BLOG_POST)
-                    }
-                    className="zero-cms inline-flex items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-400 bg-white px-3 py-2 text-[13px] font-semibold text-neutral-700 transition-colors hover:border-neutral-900 hover:text-neutral-900"
+                <DuplicateActionProvider
+                  key={post.id}
+                  value={{
+                    options: DUPLICATE_BLOG_POST,
+                    // The title rides in the button's accessible name so a
+                    // screen reader listing controls doesn't hear "Duplicate
+                    // post" nine times with nothing to tell them apart.
+                    noun: post.title ? `post “${post.title}”` : "post",
+                  }}
+                >
+                  <TemplateActionProvider
+                    value={{
+                      ...saveAsTemplateOptions(BLOG_TEMPLATE, post.title),
+                      noun: post.title ? `post “${post.title}”` : "post",
+                    }}
                   >
-                    <span aria-hidden>⧉</span>
-                    Duplicate
-                    {/* The title rides in the accessible name so a screen
-                        reader listing controls doesn't hear "Duplicate" nine
-                        times with nothing to tell them apart. */}
-                    <span className="sr-only">
-                      {post.title ? ` “${post.title}”` : ""}
-                    </span>
-                  </button>
-                </div>
+                    <BlogCard data={post} flash={post.id === flashId} />
+                  </TemplateActionProvider>
+                </DuplicateActionProvider>
               ) : (
                 <BlogCard key={post.id} data={post} />
               ),

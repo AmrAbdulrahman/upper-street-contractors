@@ -87,7 +87,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Inside the provider so it resolves to THIS post; renders nothing
             unless edit mode is on. */}
         <div className="mx-auto max-w-container px-6 pt-6 empty:hidden">
-          <BlogPostActions />
+          <BlogPostActions title={post.title} />
         </div>
         <BlogPostHeader post={post} />
         <ZeroCmsSectionList field="sections" items={sections}>

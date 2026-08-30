@@ -23,6 +23,12 @@ export interface OutputEntry {
   __type: string;
   __status: Entry['__status'];
   hasDraft: boolean;
+  /**
+   * The Title override, or `null` when the entry's title is derived. Editor
+   * metadata rather than content, so it sits out here with the other `__` keys
+   * instead of inside the values bag (see `Entry.__title`).
+   */
+  __title: string | null;
   __createdAt: string;
   /**
    * The optimistic-concurrency token (ADR 0009) — callers must hold onto this
@@ -48,6 +54,7 @@ export function buildOutput(entry: Entry, status: ReadStatus): OutputEntry {
     __type: entry.__type,
     __status: entry.__status,
     hasDraft: hasDraft(entry),
+    __title: entry.__title ?? null,
     __createdAt: entry.__createdAt,
     __lastEditedAt: entry.__lastEditedAt,
     __lastEditedBy: entry.__lastEditedBy,

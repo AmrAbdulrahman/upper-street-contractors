@@ -3,6 +3,7 @@ import { Footer, Header, QuickContact } from "@/components/layout";
 import { CookieConsent } from "@/components/consent/cookie-consent";
 import { LocalBusinessJsonLd } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
+import { getServiceLinks } from "@/components/layout/get-service-links";
 import { resolveWhatsAppUrl } from "@/helpers";
 
 type SiteChromeProps = {
@@ -10,7 +11,12 @@ type SiteChromeProps = {
 };
 
 async function SiteChromeContent({ children }: SiteChromeProps) {
-  const siteMetaConfig = await getSiteMetaConfig();
+  // In parallel: the header needs both, and serialising them would put two
+  // sequential CMS round trips in front of every page's chrome.
+  const [siteMetaConfig, serviceLinks] = await Promise.all([
+    getSiteMetaConfig(),
+    getServiceLinks(),
+  ]);
 
   return (
     <>
@@ -21,7 +27,7 @@ async function SiteChromeContent({ children }: SiteChromeProps) {
       >
         Skip to content
       </a>
-      <Header config={siteMetaConfig} />
+      <Header config={siteMetaConfig} serviceLinks={serviceLinks} />
       <main id="main" className="flex flex-1 flex-col">
         {children}
       </main>

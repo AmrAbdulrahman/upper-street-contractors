@@ -74,7 +74,10 @@ the site deliberately points at the *same* two Button entries so that changing
   which matters more than usual, because `libs/` does not hot-reload under
   `next dev` and the browser is not a fast way to find out it is wrong.
 - Any Type gets it: the widget context exposes `duplicate(id, opts)`, and the
-  Blog index is simply its first caller.
+  Blog index is simply its first caller. The trigger has since moved onto the
+  entry’s own hover cluster (`DuplicateActionProvider`), and that changes
+  nothing here: the host still supplies `shareTypes`, because the provider
+  carries the options rather than the library guessing them.
 
 **Bad / accepted costs**
 

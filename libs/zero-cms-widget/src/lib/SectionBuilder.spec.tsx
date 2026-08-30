@@ -431,6 +431,71 @@ describe('<ZeroCmsSectionList> — the Section builder', () => {
       }
     });
   });
+
+  describe('Type picker search', () => {
+    /** Open the picker from the first insert slot. */
+    async function openPicker() {
+      const fx = await fixture();
+      render(<Builder fx={fx} />);
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Add section at position 1' })
+      );
+      await screen.findByRole('heading', { name: 'Add section' });
+      return fx;
+    }
+
+    it('narrows the grid to the Types that match, by label', async () => {
+      await openPicker();
+      expect(screen.getByRole('button', { name: /^Rich Text/ })).toBeTruthy();
+      expect(screen.getByRole('button', { name: /^Quote/ })).toBeTruthy();
+
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search section types' }), {
+        target: { value: 'quo' },
+      });
+
+      expect(screen.queryByRole('button', { name: /^Rich Text/ })).toBeNull();
+      expect(screen.getByRole('button', { name: /^Quote/ })).toBeTruthy();
+    });
+
+    it('matches a Type by its description too, not only its name', async () => {
+      await openPicker();
+      // "formatting" appears only in Rich Text's description.
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search section types' }), {
+        target: { value: 'formatting' },
+      });
+
+      expect(screen.getByRole('button', { name: /^Rich Text/ })).toBeTruthy();
+      expect(screen.queryByRole('button', { name: /^Quote/ })).toBeNull();
+    });
+
+    it('says so when nothing matches, rather than showing an empty grid', async () => {
+      await openPicker();
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search section types' }), {
+        target: { value: 'zzzz' },
+      });
+
+      expect(screen.queryByRole('button', { name: /^Rich Text/ })).toBeNull();
+      expect(screen.queryByRole('button', { name: /^Quote/ })).toBeNull();
+      expect(screen.getByText(/No section types match/)).toBeTruthy();
+    });
+
+    it('does not carry the grid query into the reuse list', async () => {
+      await openPicker();
+      // A query that narrows the grid to Rich Text but matches none of its
+      // entries ("Section one", "Section two", "Spare block").
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search section types' }), {
+        target: { value: 'formatting' },
+      });
+      fireEvent.click(await screen.findByRole('button', { name: /^Rich Text/ }));
+
+      // Shared state would leave "formatting" in this box and hide everything.
+      const reuseSearch = (await screen.findByRole('textbox', {
+        name: 'Search Rich Text',
+      })) as HTMLInputElement;
+      expect(reuseSearch.value).toBe('');
+      expect(await screen.findByRole('button', { name: /Spare block/ })).toBeTruthy();
+    });
+  });
 });
 
 // The remove dialog is the only destructive affordance reachable in one click

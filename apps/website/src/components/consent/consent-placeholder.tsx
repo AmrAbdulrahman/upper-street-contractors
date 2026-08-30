@@ -23,11 +23,17 @@ export function ConsentPlaceholder({
 }: ConsentPlaceholderProps) {
   if (variant === "inline") {
     return (
+      // Opaque, not `bg-white/60`. This pill is placed on both a light
+      // section and the navy Footer accreditation row, and a translucent
+      // background takes its colour from whatever is behind it — over navy it
+      // resolved to a mid grey, which put `text-muted` at 2.54:1. An opaque
+      // fill makes the contrast a property of the component rather than of
+      // wherever a caller happens to drop it.
       <button
         type="button"
         onClick={() => openPreferences()}
         className={[
-          "inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-white/60 px-3 text-xs font-medium text-muted transition-colors hover:bg-white hover:text-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
+          "inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-white px-3 text-xs font-medium text-muted transition-colors hover:text-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
           className,
         ]
           .filter(Boolean)

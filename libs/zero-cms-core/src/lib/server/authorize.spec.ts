@@ -48,6 +48,7 @@ const CONTENT_WRITE_OPS: RpcOp[] = [
   'publish',
   'unpublish',
   'discardDraft',
+  'setEntryTitle',
   'putMedia',
   'updateMedia',
   'deleteMedia',

@@ -10,6 +10,7 @@
 // Model
 export * from './lib/model/schema';
 export * from './lib/model/entry';
+export * from './lib/model/entry-title';
 export * from './lib/model/query';
 export * from './lib/model/media';
 export * from './lib/model/errors';
@@ -48,4 +49,4 @@ export { bytesToBase64, base64ToBytes } from './lib/adapter/base64';
 
 // Codegen (pure source generation — no fs)
 export { generateClientSource } from './lib/codegen/generate';
-export { pascalCase, camelCase } from './lib/codegen/naming';
+export { pascalCase, camelCase, humanize } from './lib/codegen/naming';

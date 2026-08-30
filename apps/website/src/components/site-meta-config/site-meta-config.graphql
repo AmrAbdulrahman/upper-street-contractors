@@ -2,16 +2,10 @@ fragment SiteMetaConfig on SiteMetaConfig {
   id
   siteName
   tagline
-  logoCrestDark {
+  logoDark {
     url
   }
-  logoCrestLight {
-    url
-  }
-  logoWordmarkDark {
-    url
-  }
-  logoWordmarkLight {
+  logoLight {
     url
   }
   favicon {
@@ -48,6 +42,8 @@ fragment SiteMetaConfig on SiteMetaConfig {
   }
   footerLogoSize
   footerGlowColor
+  footerGlowRadius
+  footerGlowIntensity
 }
 
 query GetSiteMetaConfig($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
