@@ -7,6 +7,15 @@ import { formatBytes, type HostedAttachment } from "@/helpers/enquiry-files";
 import { EMAIL_BADGES } from "./badges";
 
 const SITE = "Upper Street Contractors";
+/**
+ * The registered company, for the copyright line only — the same name the site
+ * footer renders from Global Settings' `legalName`.
+ *
+ * Stored WITHOUT the trailing period: the copyright sentence supplies its own,
+ * and "Ltd." plus that one reads "Ltd..". footer.tsx solves the same problem by
+ * stripping it off the CMS value at render time.
+ */
+const LEGAL_NAME = "Upper Street Contractors Ltd";
 const BRAND = {
   dark: "#031021",
   gold: "#906d37",
@@ -155,7 +164,7 @@ function layout(opts: {
             ${opts.note ? `<tr><td style="padding:0 30px 24px;font-size:13px;color:${BRAND.subtle};">${escapeHtml(opts.note)}</td></tr>` : ""}
             ${badgesHtml(opts.badgeCids ?? [])}
             <tr>
-              <td style="background:${BRAND.surface};padding:16px 30px;font-size:12px;color:${BRAND.subtle};text-align:center;">© ${SITE}</td>
+              <td style="background:${BRAND.surface};padding:16px 30px;font-size:12px;color:${BRAND.subtle};text-align:center;">© ${new Date().getFullYear()} ${LEGAL_NAME}. All rights reserved.</td>
             </tr>
           </table>
         </td>

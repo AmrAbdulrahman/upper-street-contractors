@@ -69,7 +69,7 @@ re-verify before budgeting ([Vercel](https://vercel.com/pricing),
 | **Upstash Redis** (via Vercel Marketplace) | The CMS database — schema, all content entries, CMS user accounts ([ADR 0008](./docs/adr/0008-zero-cms-redis-blob-store.md)). | $0 on free tier (256 MB, 500K commands/mo); then pay-as-you-go $0.20 / 100K commands |
 | **Vercel Blob** | All CMS media bytes (photos, files), CDN-served — plus Hosted attachments from the public enquiry form, which are never pruned ([ADR 0014](./docs/adr/0014-enquiry-attachments-inline-plus-hosted.md)). | Usage-billed ($0.023/GB stored + per-op); covered by Pro's included credit at current volume |
 | **Domain** | `upperstreet.contractors` registration. | ≈ $28/yr renewal (≈ $2.40/mo) |
-| **Email** | Enquiry-form delivery (nodemailer SMTP). Free Gmail app-password today; production wants `info@upperstreet.contractors`. | $0 now → Google Workspace Business Starter **£5/user/mo** (annual, + VAT) when `info@` goes live |
+| **Email** | Enquiry-form delivery (nodemailer over Resend SMTP), sending as `noreply@upperstreet.contractors` on the verified domain. Resend's free tier covers enquiry volume. Delivery *to* `info@upperstreet.contractors` still needs a real mailbox on the domain — sending and receiving are separate. | $0 now → Google Workspace Business Starter **£5/user/mo** (annual, + VAT) for the `info@` mailbox |
 | **GizmoSauce** | The Google Reviews widget embedded on the site. | $8.25/mo (Starter, 5 widgets — we use 1); ≈ $5.78/mo billed yearly (30% off) |
 | **Trustpilot** | TrustBox review widget + profile. | $0 — free business plan is enough (50 invites/mo, widget, replies) |
 
@@ -77,7 +77,7 @@ re-verify before budgeting ([Vercel](https://vercel.com/pricing),
 
 | Scenario | Monthly | Yearly |
 | -------- | ------- | ------ |
-| Today (Gmail email, monthly billing) | ≈ **$30.65** | ≈ $368 |
+| Today (Resend email, monthly billing) | ≈ **$30.65** | ≈ $368 |
 | Today, GizmoSauce billed yearly | ≈ $28.18 | ≈ $338 |
 | With `info@` mailbox (Workspace Starter) | + £5 + VAT | + £60 + VAT |
 | **Overall, everything on (incl. `info@` + VAT)** | ≈ **$38 / £30** | ≈ **$455 / £355** |

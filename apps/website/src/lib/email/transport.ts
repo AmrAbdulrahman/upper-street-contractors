@@ -4,8 +4,12 @@ let cached: Transporter | null = null;
 
 /**
  * Lazily builds a singleton nodemailer transport from SMTP_* env vars
- * (Gmail SMTP by default). Throws if credentials are missing so the API
+ * (Resend SMTP: host `smtp.resend.com`, user the literal string `resend`,
+ * password the Resend API key). Throws if credentials are missing so the API
  * route can return a clear error instead of crashing.
+ *
+ * Provider-agnostic on purpose — the swap off Gmail was four env values and
+ * no code at all.
  */
 export function getTransport(): Transporter {
   if (cached) return cached;
