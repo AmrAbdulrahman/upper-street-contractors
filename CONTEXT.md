@@ -17,7 +17,7 @@ The banner section at the top of an interior page (Refurbishments, Kitchens, Bat
 _Avoid_: page header, banner, ProjectsHeroPlaceholder (the removed UI-only mock)
 
 **Enquiry Wizard**:
-A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / date / Availability / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which emails a branded HTML enquiry to the business and a confirmation copy to the sender (nodemailer over SMTP), then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
+A stepped enquiry form section (`wizard` CMS type) on the Contact page, shown beside the Contact Details panel (its `contactDetails` relation). Each step is a Question — either an **Image Question** (image-card options, single or multi-select; an option may reveal a free-text box via `revealTextInput`) or a **Form Question** (text / email / tel / textarea / boolean-toggle / date / Availability / file fields, any of which may be a Conditional field). A connected-dot **stepper** marks each step Complete / Current / Pending and lets you click back to a visited step; advancing is manual via a Next button. On finish it POSTs the answers (plus any attachments) to `/api/enquiry`, which sends the Enquiry email to the business and the Confirmation email to the sender, then shows a done panel. (Superseded the earlier WhatsApp-prefill handoff.)
 _Avoid_: form, survey, quiz, multi-step form
 
 **Step introduction**:
@@ -41,8 +41,20 @@ An Attachment small enough to ride the enquiry email as a real attachment. Fille
 _Avoid_: small file, embedded file
 
 **Hosted attachment**:
-An Attachment that did not fit the Inline attachment budget. The browser uploads it directly to blob storage and the enquiry email carries a download link instead of the bytes — the only way a phone video reaches the business at all.
+An Attachment that did not fit the Inline attachment budget. The browser uploads it directly to blob storage and both emails carry a download link instead of the bytes — the only way a phone video reaches the business at all.
 _Avoid_: link, blob, big file
+
+**Enquiry email**:
+The copy of a wizard submission the business receives — subject *Online Enquiry*, plus the sender's name when one was given, and the sender's own address as the reply-to, so hitting reply answers the visitor. Its body is the answers as a labelled table, any Inline attachment riding along and any Hosted attachment as a download link.
+_Avoid_: notification, enquiry notification, Confirmation email (the sender's copy)
+
+**Confirmation email**:
+The copy of the same submission sent back to the visitor — subject *Confirmation of Your Enquiry - Upper Street Contractors* — opening on an acknowledgement that a member of the team will review the details and reply, then the same table under a line saying it is a copy of what they sent. Best-effort: a bounce here never fails the submission, since the business already has the enquiry.
+_Avoid_: receipt, auto-reply, thank-you email, Enquiry email (the business's copy)
+
+**Email trust row**:
+The band of accreditation and review marks at the foot of both emails, between the details and the copyright line: the Footer accreditation row's three badges on one line, then Trustpilot and Google on a second — five marks abreast overflow a phone's mail view. FMB, Trustpilot and Google are links (a membership profile and the two review destinations); Gas Safe and NIC EIC are plain images, there being no per-badge URL to point at. A **frozen copy**, not a live read: the marks are committed image files, so an enquiry send never depends on the CMS or the Blob store being up — and swapping a badge in the footer does not reach the emails.
+_Avoid_: email footer (the copyright line), Footer accreditation row (the site-wide one it copies), Accreditations section (the page section), trust bar, Badge glow (a footer-only treatment)
 
 **Availability** (Form Question field):
 An `availability` field: a multi-date calendar, and beneath it one "Preferred time of day (date)" row per Preferred date, each offering the same three Time windows as multi-select chips. So a visitor free Monday morning and Thursday evening can say exactly that. Paired on the Contact wizard with an Emergency boolean-toggle, replacing the start-date + standalone Time window pair. An editor tunes the calendar from the **Timing step**'s drawer rather than the field's: max dates, earliest date, horizon in months, allow Saturdays, and the emergency window — each `0` meaning no limit. Required means ≥1 Preferred date **and** ≥1 Time window across them; an empty calendar is not an answer.

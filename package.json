@@ -68,6 +68,7 @@
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "^22.7.5",
     "prettier": "~3.6.2",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "tslib": "^2.3.0",
     "typescript": "^5",

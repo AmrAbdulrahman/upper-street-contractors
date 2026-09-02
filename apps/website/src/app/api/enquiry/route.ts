@@ -7,6 +7,7 @@ import {
   renderEnquiryEmail,
   type EnquiryField,
 } from "@/lib/email/templates";
+import { EMAIL_BADGES } from "@/lib/email/badges";
 import {
   ENQUIRY_INLINE_BUDGET_BYTES,
   formatBytes,
@@ -21,23 +22,39 @@ export const dynamic = "force-dynamic";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Brand logo for the email header, embedded as a `cid` attachment. Loaded once;
- * if the PNG can't be read the templates fall back to the text wordmark so email
- * never breaks. Regenerate with `node scripts/generate-email-logo.mjs`.
+ * Artwork embedded in both emails as `cid` attachments, read once at module
+ * load. Anything that can't be read is simply left out rather than throwing:
+ * a missing header logo falls back to the text wordmark, and a missing trust
+ * mark drops that one badge. Email never breaks over a file.
+ *
+ * Regenerate the files with `node scripts/generate-email-logo.mjs` and
+ * `node scripts/generate-email-badges.mjs` (both run from apps/website).
  */
-const LOGO_ATTACHMENT = (() => {
+function readEmailAsset(file: string, cid: string, filename = file) {
   try {
-    const p = path.join(process.cwd(), "public", "email-logo.png");
     return {
-      filename: "logo.png",
-      content: readFileSync(p),
-      cid: "logo",
+      filename,
+      content: readFileSync(path.join(process.cwd(), "public", file)),
+      cid,
       contentType: "image/png",
-    } as const;
+    };
   } catch {
     return null;
   }
-})();
+}
+
+const LOGO_ATTACHMENT = readEmailAsset("email-logo.png", "logo", "logo.png");
+const BADGE_ATTACHMENTS = EMAIL_BADGES.map((badge) =>
+  readEmailAsset(badge.file, badge.cid),
+).filter((asset) => asset !== null);
+
+/** Which trust marks the templates may reference — only the ones that loaded. */
+const BADGE_CIDS = BADGE_ATTACHMENTS.map((asset) => asset.cid);
+
+/** Rides every message, alongside whatever the visitor attached. */
+const BRAND_ATTACHMENTS = LOGO_ATTACHMENT
+  ? [LOGO_ATTACHMENT, ...BADGE_ATTACHMENTS]
+  : BADGE_ATTACHMENTS;
 
 type Payload = {
   fields?: EnquiryField[];
@@ -146,16 +163,19 @@ export async function POST(request: Request) {
     typeof payload.senderEmail === "string" ? payload.senderEmail.trim() : "";
   const fullName =
     typeof payload.senderName === "string" ? payload.senderName.trim() : "";
-  // Greet with the first name only; the full name still appears in the details table.
-  const senderName = fullName.split(/\s+/)[0] ?? "";
+  // The sender's own copy greets them by first name. The business's copy names
+  // them in full — it has no greeting, and a subject line has to stay scannable
+  // in a busy inbox.
+  const firstName = fullName.split(/\s+/)[0] ?? "";
 
   const business = renderEnquiryEmail({
     fields,
-    senderName,
+    senderName: fullName,
     senderEmail,
     attachmentNames,
     hostedLinks,
     logoCid: LOGO_ATTACHMENT?.cid,
+    badgeCids: BADGE_CIDS,
   });
   try {
     await transport.sendMail({
@@ -164,7 +184,7 @@ export async function POST(request: Request) {
       replyTo: senderEmail && EMAIL_RE.test(senderEmail) ? senderEmail : undefined,
       subject: business.subject,
       html: business.html,
-      attachments: LOGO_ATTACHMENT ? [...attachments, LOGO_ATTACHMENT] : attachments,
+      attachments: [...attachments, ...BRAND_ATTACHMENTS],
     });
   } catch (e) {
     console.error("enquiry: business email failed", e);
@@ -178,10 +198,11 @@ export async function POST(request: Request) {
   if (senderEmail && EMAIL_RE.test(senderEmail)) {
     const confirmation = renderConfirmationEmail({
       fields,
-      senderName,
+      senderName: firstName,
       attachmentNames,
       hostedLinks,
       logoCid: LOGO_ATTACHMENT?.cid,
+      badgeCids: BADGE_CIDS,
     });
     try {
       await transport.sendMail({
@@ -189,7 +210,7 @@ export async function POST(request: Request) {
         to: senderEmail,
         subject: confirmation.subject,
         html: confirmation.html,
-        attachments: LOGO_ATTACHMENT ? [LOGO_ATTACHMENT] : undefined,
+        attachments: BRAND_ATTACHMENTS,
       });
     } catch (e) {
       console.error("enquiry: confirmation email failed", e);
