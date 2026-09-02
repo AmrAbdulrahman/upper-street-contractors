@@ -78,25 +78,39 @@ export function Accreditation({
     fallback: { color: glowColor, radius: glowRadius, intensity: glowIntensity },
   });
 
+  const picture = (
+    <CmsImage
+      data={image}
+      fallbackAlt={accreditationTitle ?? "Accreditation"}
+      placeholderLabel=""
+      sizes={`${maxWidth}px`}
+      className="w-auto object-contain"
+      style={{ height: logoHeight, maxWidth, filter: glow }}
+    />
+  );
+
   return (
     <div
       className={[
         bare
-          ? "flex items-center justify-center rounded-[5px] bg-white/10 p-1"
+          ? "flex items-center justify-center px-2"
           : "flex items-center justify-center rounded-xl bg-white px-5",
         HOVER_CLASS,
       ].join(" ")}
       style={{ height: logoHeight + TILE_PADDING_Y }}
     >
       <ZeroCmsEntryField field="image" className="flex items-center justify-center">
-        <CmsImage
-          data={image}
-          fallbackAlt={accreditationTitle ?? "Accreditation"}
-          placeholderLabel=""
-          sizes={`${maxWidth}px`}
-          className="w-auto object-contain"
-          style={{ height: logoHeight, maxWidth, filter: glow }}
-        />
+        {/* The wash hugs the mark, so it wraps the image itself rather than the
+            box above — that one is a fixed `logoHeight + TILE_PADDING_Y` tall,
+            which left the tile floating in a taller rectangle. It cannot live on
+            ZeroCmsEntryField either: outside Inspect mode that returns its
+            children untouched and drops the className. `flex` because an inline
+            <img> would add a baseline gap under it. */}
+        {bare ? (
+          <div className="flex rounded-[5px] bg-white/10 p-1">{picture}</div>
+        ) : (
+          picture
+        )}
       </ZeroCmsEntryField>
     </div>
   );
