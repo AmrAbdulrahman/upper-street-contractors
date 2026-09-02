@@ -264,8 +264,9 @@ export function Footer({ config }: FooterProps) {
                     <Accreditation
                       data={accreditation}
                       height={accreditationHeight}
-                      // No white tile on a dark footer, so the glow is what
-                      // separates each mark from the background.
+                      // No solid white tile on a dark footer — a faint wash
+                      // plus the glow is what separates each mark from the
+                      // background.
                       bare
                       glowColor={accreditationGlow}
                       glowRadius={accreditationGlowRadius}

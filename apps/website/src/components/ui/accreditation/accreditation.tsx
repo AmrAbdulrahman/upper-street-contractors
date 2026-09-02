@@ -31,9 +31,12 @@ export type AccreditationProps = {
   /** Rendered logo height in px — comes from the section's CMS `logoSize`. */
   height?: number;
   /**
-   * Drop the white tile behind the logo. For dark surfaces (the Footer
-   * accreditation row), where a white card is a bright rectangle punched into
-   * the footer rather than a badge sitting on it.
+   * Swap the solid white tile for a faint translucent one — a 10% white wash
+   * at a 5px radius. For dark surfaces (the Footer accreditation row), where
+   * an opaque white card reads as a rectangle punched into the footer rather
+   * than a badge sitting on it, while a wash lifts each mark off the navy
+   * without cutting a hole in it. (Named for what it drops, the solid tile,
+   * not for having no tile at all.)
    */
   bare?: boolean;
   /**
@@ -79,7 +82,7 @@ export function Accreditation({
     <div
       className={[
         bare
-          ? "flex items-center justify-center px-2"
+          ? "flex items-center justify-center rounded-[5px] bg-white/10 p-1"
           : "flex items-center justify-center rounded-xl bg-white px-5",
         HOVER_CLASS,
       ].join(" ")}
