@@ -4,7 +4,7 @@
  */
 
 import { formatBytes, type HostedAttachment } from "@/helpers/enquiry-files";
-import { EMAIL_BADGE_ROWS } from "./badges";
+import { EMAIL_BADGES } from "./badges";
 
 const SITE = "Upper Street Contractors";
 const BRAND = {
@@ -82,40 +82,34 @@ function introHtml(paragraphs: string[]): string {
  * the same guarantee the header logo has.
  *
  * Nested presentation tables rather than flex or inline-block: this has to
- * survive Outlook. Rows come from EMAIL_BADGE_ROWS so five marks never have to
- * fit one line on a phone.
+ * survive Outlook, and a table row is the only thing that reliably keeps all
+ * five marks on one line. That line is about 465px wide, so a phone's mail app
+ * scales the message down slightly rather than reflowing it.
  */
 function badgesHtml(cids: string[]): string {
-  const rows = EMAIL_BADGE_ROWS.map((row) =>
-    row.filter((badge) => cids.includes(badge.cid)),
-  ).filter((row) => row.length > 0);
-  if (!rows.length) return "";
+  const badges = EMAIL_BADGES.filter((badge) => cids.includes(badge.cid));
+  if (!badges.length) return "";
 
-  const rowsHtml = rows
-    .map((row) => {
-      const cells = row
-        .map((badge) => {
-          const img = `<img src="cid:${badge.cid}" alt="${escapeHtml(badge.alt)}" width="${badge.width}" height="${badge.height}" style="display:block;border:0;" />`;
-          const content = badge.href
-            ? `<a href="${escapeHtml(badge.href)}" style="text-decoration:none;">${img}</a>`
-            : img;
-          return `<td align="center" valign="middle" style="padding:0 7px;">${content}</td>`;
-        })
-        .join("");
-
-      return `
-        <tr>
-          <td align="center" style="padding:14px 0 0;">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table>
-          </td>
-        </tr>`;
+  const cells = badges
+    .map((badge) => {
+      const img = `<img src="cid:${badge.cid}" alt="${escapeHtml(badge.alt)}" width="${badge.width}" height="${badge.height}" style="display:block;border:0;" />`;
+      const content = badge.href
+        ? `<a href="${escapeHtml(badge.href)}" style="text-decoration:none;">${img}</a>`
+        : img;
+      return `<td align="center" valign="middle" style="padding:0 6px;">${content}</td>`;
     })
     .join("");
 
   return `
     <tr>
       <td align="center" style="padding:4px 16px 24px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${BRAND.border};">${rowsHtml}</table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${BRAND.border};">
+          <tr>
+            <td align="center" style="padding:16px 0 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table>
+            </td>
+          </tr>
+        </table>
       </td>
     </tr>`;
 }

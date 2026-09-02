@@ -53,7 +53,7 @@ The copy of the same submission sent back to the visitor — subject *Confirmati
 _Avoid_: receipt, auto-reply, thank-you email, Enquiry email (the business's copy)
 
 **Email trust row**:
-The band of accreditation and review marks at the foot of both emails, between the details and the copyright line: the Footer accreditation row's three badges on one line, then Trustpilot and Google on a second — five marks abreast overflow a phone's mail view. FMB, Trustpilot and Google are links (a membership profile and the two review destinations); Gas Safe and NIC EIC are plain images, there being no per-badge URL to point at. A **frozen copy**, not a live read: the marks are committed image files, so an enquiry send never depends on the CMS or the Blob store being up — and swapping a badge in the footer does not reach the emails.
+The band of accreditation and review marks at the foot of both emails, between the details and the copyright line: the Footer accreditation row's three badges, then Trustpilot and Google, all five on **one line** — about 465px of it, so a phone's mail app scales the message down a little rather than reflowing the row. FMB, Trustpilot and Google are links (a membership profile and the two review destinations); Gas Safe and NIC EIC are plain images, there being no per-badge URL to point at. A **frozen copy**, not a live read: the marks are committed image files, so an enquiry send never depends on the CMS or the Blob store being up — and swapping a badge in the footer does not reach the emails.
 _Avoid_: email footer (the copyright line), Footer accreditation row (the site-wide one it copies), Accreditations section (the page section), trust bar, Badge glow (a footer-only treatment)
 
 **Availability** (Form Question field):

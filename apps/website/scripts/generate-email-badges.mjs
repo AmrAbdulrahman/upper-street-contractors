@@ -18,7 +18,8 @@
  * sources exposes aspect ratios from 0.9:1 (Gas Safe) to 4.5:1 (FMB), so a
  * shared height would let FMB run four times the width of Gas Safe. The two
  * review wordmarks get their own smaller height so they do not dominate the
- * accreditations they sit under.
+ * accreditations they sit beside. All five share one line, so the bounds are
+ * also what keeps that line inside a 600px email.
  */
 import sharp from "sharp";
 import path from "node:path";
@@ -39,8 +40,8 @@ const CARD_BG = "#f8fdf9";
  * Rendered bounds in CSS px, per group. Output is 2x for retina. A mark is
  * scaled to fit inside both, so whichever bound binds first wins.
  */
-const ACCREDITATION = { height: 40, maxWidth: 110 };
-const REVIEW = { height: 24, maxWidth: 110 };
+const ACCREDITATION = { height: 38, maxWidth: 112 };
+const REVIEW = { height: 27, maxWidth: 118 };
 
 const BADGES = [
   { slug: "fmb", src: "fmb.webp", ...ACCREDITATION },
