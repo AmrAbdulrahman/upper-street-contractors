@@ -29,6 +29,13 @@ export interface AddZeroCmsEntryProps {
   disabled?: boolean;
   /** Tooltip shown when disabled (e.g. "Maximum of 6 reached"). */
   disabledReason?: string;
+  /**
+   * Overrides the "+ Add" text (and the aria-label with it), for a control
+   * whose field name does not describe what is being added — the wizard's
+   * `questions` relation is a list of STEPS, so "+ Add" / "Add Questions" both
+   * read wrong there. Include the "+" if you want one.
+   */
+  label?: string;
 }
 
 const TONE = {
@@ -46,7 +53,12 @@ const TONE = {
   ].join(' '),
 } as const;
 
-export function AddZeroCmsEntry({ field, disabled, disabledReason }: AddZeroCmsEntryProps) {
+export function AddZeroCmsEntry({
+  field,
+  disabled,
+  disabledReason,
+  label,
+}: AddZeroCmsEntryProps) {
   const widget = useZeroCmsWidgetOptional();
   const ctx = useZeroCmsEntry();
   const [host, setHost] = useState<HTMLButtonElement | null>(null);
@@ -60,7 +72,7 @@ export function AddZeroCmsEntry({ field, disabled, disabledReason }: AddZeroCmsE
     <button
       ref={setHost}
       type="button"
-      aria-label={`Add ${humanize(field)}`}
+      aria-label={label ?? `Add ${humanize(field)}`}
       disabled={disabled}
       title={disabled ? disabledReason : undefined}
       onClick={() =>
@@ -72,7 +84,7 @@ export function AddZeroCmsEntry({ field, disabled, disabledReason }: AddZeroCmsE
       }
       className={`zero-cms inline-flex items-center gap-1 rounded-md border border-dashed px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed ${TONE[tone]}`}
     >
-      + Add
+      {label ?? "+ Add"}
     </button>
   );
 }

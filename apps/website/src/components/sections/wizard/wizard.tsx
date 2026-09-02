@@ -725,6 +725,20 @@ export function WizardSection({ data }: WizardSectionProps) {
             they get the whole width too. */}
         <div className="mx-auto max-w-container px-6 py-[72px]">
           <div className="min-w-0">
+            {/* Adding a STEP belongs to the wizard, not to the step you happen
+                to be looking at — so it must stay outside the question's
+                <ZeroCmsEntryProvider> below, where `field="questions"` resolves
+                against the wizard entry. Above the stepper rather than at the
+                foot of the form: only one step is on screen at a time, so there
+                is no list to hang an insert slot off, and an editor looking for
+                "add a step" looks at the steps. This appends; the new step's own
+                pencil is reached by stepping to it. */}
+            {inspect ? (
+              <div className="mb-6">
+                <AddZeroCmsEntry field="questions" label="+ Add wizard step" />
+              </div>
+            ) : null}
+
             {/* Stepper */}
             <ol className="flex items-start">
               {nodes.map((node, i) => {
@@ -1352,21 +1366,6 @@ export function WizardSection({ data }: WizardSectionProps) {
               </div>
               </ZeroCmsEntryProvider>
             )}
-
-            {/* Adding a STEP belongs to the wizard, not to the step you happen
-                to be looking at — so it sits outside the question's provider,
-                where `field="questions"` resolves against the wizard entry.
-                Only one step is on screen at a time, so there is no list to
-                hang an insert slot off; this appends, and the new step's own
-                pencil is reached by stepping to it. */}
-            {inspect ? (
-              <div className="mt-8 border-t border-border pt-4">
-                <p className="mb-2 text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
-                  Wizard steps
-                </p>
-                <AddZeroCmsEntry field="questions" />
-              </div>
-            ) : null}
           </div>
         </div>
 
