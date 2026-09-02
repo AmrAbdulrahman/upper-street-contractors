@@ -75,7 +75,7 @@ function FaqRow({
           </ZeroCmsEntryField>
           <span
             aria-hidden
-            className="shrink-0 text-2xl leading-none text-gold transition-transform duration-200 group-open:rotate-45"
+            className="shrink-0 text-2xl leading-none text-gold transition-transform duration-200 group-open:rotate-45 select-none"
           >
             +
           </span>
