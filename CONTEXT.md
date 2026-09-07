@@ -73,12 +73,12 @@ The Enquiry Wizard step holding the Emergency toggle and the Availability calend
 _Avoid_: timing question, booking step, appointment step, slot picker, Availability (the field it configures)
 
 **Contact Details panel**:
-The `contact-details` section listing ways to reach the company as items (each a `contact-detail-item`: emoji, label, text), plus a note and a WhatsApp button.
-_Avoid_: contact card, info box, get-in-touch
+The `contact-details` section listing ways to reach the company as items (each a `contact-detail-item`: emoji, label, text), plus a note. It carried a WhatsApp button — and the green-tinted panel that framed it — until the Quick Contact widget became the site's one WhatsApp affordance; the `whatsappButton` field is gone from the Type, not merely unrendered, because a declared field is an invitation to put the button back.
+_Avoid_: contact card, info box, get-in-touch, whatsappButton (the removed field)
 
 **Quick Contact widget**:
-The pair of floating tabs pinned to the top-right of every public page (rendered by `QuickContact` in `SiteChrome`): a WhatsApp tab and a Request-a-Quote tab. Each shows only its icon at rest and stretches left to reveal its label on hover/focus (CSS-only). Superseded the desktop header's Request-a-Quote + WhatsApp buttons (removed); the mobile menu still carries its own.
-_Avoid_: floating buttons, contact FAB, sticky CTA
+The pair of floating tabs pinned to the top-right of every public page (rendered by `QuickContact` in `SiteChrome`): a WhatsApp tab and a Request-a-Quote tab. Each shows only its icon at rest and stretches left to reveal its label on hover/focus (CSS-only). Its WhatsApp tab is now the **only** WhatsApp affordance on the site: the footer row, the mobile menu's button, the Contact Details panel's and the CTA bands' Buttons are all gone, and a CMS Button can no longer carry a `whatsapp` action at all. One destination reached one way, rather than five controls all pointing at the same conversation. The two tabs hover differently on purpose — the quote tab takes the site-wide gold inversion, the WhatsApp tab keeps the vendor green.
+_Avoid_: floating buttons, contact FAB, sticky CTA, whatsapp (the retired Button action)
 
 **Category tag**:
 The gold uppercase badge overlaid on a Project card image showing its Category — a renovation type (Refurbishment, Kitchen, Bathroom, Loft) or a trade (Plumbing, Heating, Electrical, Carpentry, Roofing, Handyman). The Category also drives which Projects a Case Studies section shows.
@@ -137,7 +137,7 @@ The photos on a Project's detail page, held as `project-image` entries. A Projec
 _Avoid_: gallery (an _Avoid_ term for Recent Work / Projects index), carousel, slider, Figure (what replaced it)
 
 **Similar Work**:
-The related-Projects strip on a Project's detail page. Editor-pinned Projects (the `similarWork` relation) come first, then the closest others are filled in automatically, ranked by Category → Location → Duration. The same card grid is reused by a Service page's Case Studies section.
+The related-Projects strip on a Project's detail page. Editor-pinned Projects (the `similarWork` relation) come first, then the closest others are filled in automatically, ranked by Category → Location → Duration. The same card grid is reused by a Service page's Case Studies section. The **strip** carries a pencil for the host Project's `similarWork` pins — the grid is computed, so there is no list to insert into, but the pinned half is editable and had no way in; each card keeps its own pencil for its own Project. Case Studies gets no such pencil: its Projects are looked up by Category and pinned by nobody.
 _Avoid_: related posts, you-might-also-like, recommendations
 
 **Client Review section**:
@@ -153,7 +153,7 @@ The trust-badge strip (`accreditation-list` CMS type) sitting under the hero —
 _Avoid_: certifications, credentials, badges row, trust bar, Footer accreditation row
 
 **Footer accreditation row**:
-The full-width trust band at the foot of every page: the Trustpilot widget, then accreditation badges, between the footer's columns and its legal bar. Its badges are `accreditation` entries held by Global Settings (`footerAccreditations`) with their own Logo height — **copies** of the Accreditations section's, not the same entries, so a footer edit cannot restyle the home page. No solid white tiles here: on a navy footer a white card is a rectangle punched into the page rather than a badge sitting on it, so each mark sits on a faint 10% white wash (4px of padding, a 5px radius) and carries a Badge glow. Badges are full colour at rest and lift on hover; the Trustpilot widget gets neither the glow nor the hover (a vendor iframe has no element of ours to transform) and is rendered in its **dark** theme, without which its near-black type is invisible on navy while its stars still show. Replaced three hardcoded text labels that had already drifted from the real accreditations.
+The full-width trust band at the foot of every page: the Trustpilot widget, then accreditation badges, between the Social row and the legal bar. Its badges are `accreditation` entries held by Global Settings (`footerAccreditations`) with their own Logo height — **copies** of the Accreditations section's, not the same entries, so a footer edit cannot restyle the home page. No solid white tiles here: on a navy footer a white card is a rectangle punched into the page rather than a badge sitting on it, so each mark sits on a faint 10% white wash (4px of padding, a 5px radius) and carries a Badge glow. Badges are full colour at rest and lift on hover; the Trustpilot widget gets neither the glow nor the hover (a vendor iframe has no element of ours to transform) and is rendered in its **dark** theme, without which its near-black type is invisible on navy while its stars still show. Replaced three hardcoded text labels that had already drifted from the real accreditations.
 _Avoid_: Accreditations section (the home-page one), footer badges, trust bar, FOOTER_ACCREDITATIONS (the retired static list)
 
 **Badge glow**:
@@ -177,11 +177,11 @@ The SVG brand mark rendered by `SiteBanner` — **one** image, the crest and the
 _Avoid_: logo (the old text wordmark), crest / wordmark (the retired halves and their four settings slots), SiteLogo (the retired component), service-links row (the retired second header row)
 
 **Service page**:
-A per-service landing page — Refurbishments, Kitchens, Bathrooms, Plumbing, Heating, Electric, Carpentry, Roofing, Handyman, and any an editor adds. Reached from the Services menu and the Services index (they were the header row itself until the menu took over). Each is a CMS `page` whose `sections` follow one shared shape: a Page Hero, a Service Offer section, a Case Studies section, and a per-page CTA band (a `planning-renovation-section` carrying WhatsApp + Request-a-Quote). Served by **one dynamic route** resolving a page by its Slug; it was nine near-identical route files whose only difference was two constants, which made a Service the one kind of content nobody could create without a deploy (ADR 0020). The `<service>-service` `key` survives as an internal handle, but the URL comes from the Slug. Distinct from the Projects / About / Contact pages, which keep their own route files, and from the Services index that lists them.
+A per-service landing page — Refurbishments, Kitchens, Bathrooms, Plumbing, Heating, Electric, Carpentry, Roofing, Handyman, and any an editor adds. Reached from the Services index, and on a phone from the mobile menu's services accordion (they were the header row itself, then a desktop dropdown, before the index became the one way in). Each is a CMS `page` whose `sections` follow one shared shape: a Page Hero, a Service Offer section, a Case Studies section, and a per-page CTA band (a `planning-renovation-section` carrying WhatsApp + Request-a-Quote). Served by **one dynamic route** resolving a page by its Slug; it was nine near-identical route files whose only difference was two constants, which made a Service the one kind of content nobody could create without a deploy (ADR 0020). The `<service>-service` `key` survives as an internal handle, but the URL comes from the Slug. Distinct from the Projects / About / Contact pages, which keep their own route files, and from the Services index that lists them.
 _Avoid_: category page, landing page (generic), key (the internal handle, not the URL), service-links row (the retired header row)
 
 **Services index**:
-The `/services` page listing all nine Service pages as cards. A CMS `page` (key `services`) like any Service page — a Page Hero, a Service grid section and a CTA band — not a bespoke route with a hardcoded grid. It is the hub the Services menu's own label and the footer's Services link both point at, and since the footer stopped listing the nine trades it is the one page that links every Service page. No category filter: nine distinct items have nothing to narrow.
+The `/services` page listing all nine Service pages as cards. A CMS `page` (key `services`) like any Service page — a Page Hero, a Service grid section and a CTA band — not a bespoke route with a hardcoded grid. It is the hub the header's `Services` label and the footer's Services link both point at, and since the footer stopped listing the nine trades and the header's dropdown was removed it is the one page on desktop that links every Service page. No category filter: nine distinct items have nothing to narrow.
 _Avoid_: services page (ambiguous with a Service page), our services, category index, Projects index (the analogous page for Projects)
 
 **Service grid section**:
@@ -192,9 +192,11 @@ _Avoid_: services list, What We Do (the home-page section, which is Work Cards +
 One service in a Service grid (a `service-card`: image, title, summary, and a **relation to its Service page**). Its photo is a real Project hero for that Category, so a Kitchens card shows a kitchen. Its link is derived from the linked page's Slug, never typed: while it carried a free-text path, the card and the page it meant were two strings an editor could change independently, and a typo in one silently produced a card linking to a 404. Distinct from a Work Card, which is a home-page What We Do tile carrying an emoji and a price line rather than a photo.
 _Avoid_: Work Card, service tile, Project card, href (the retired free-text path field)
 
-**Services menu**:
-The header's `Services` item: a real link to the Services index **plus** a chevron button that opens a dropdown of the nine Service pages. Two controls, not one — making the whole item the toggle would put the Services index out of reach, and opening on hover alone would hide the menu from every touch visitor, since a tap navigates rather than hovers. Its items are read from the Services index's own card grid rather than a hardcoded list, so the menu and `/services` cannot disagree about what we do and a newly created Service appears in both; with no cards it is a plain link and no dropdown at all. Opens on hover for a mouse and on the chevron for everyone else (click, Enter, Space); Escape closes it and returns focus to the chevron, and tabbing out of the panel closes it behind you. A pointer leaving the group closes it after a short grace period, not immediately, and the panel's offset from the label is its own padding rather than a margin: the panel is out of flow, so a margin left a band of pixels belonging to neither control, and crossing it closed the menu before the pointer could arrive — which made every link in it unreachable by mouse. It deliberately does **not** open merely on focus: closing returns focus to the chevron, which sits inside the group, so a focus-to-open rule reopened the panel a frame after Escape and made Escape look broken. In the mobile menu it is a native `<details>` group with an "All services" row beneath it.
-_Avoid_: services dropdown, mega menu, service-links row (what it replaced), flyout
+**Services menu** (retired on desktop):
+The header's `Services` item is a plain link to the Services index. It was a link **plus** a chevron button opening a dropdown of the nine Service pages — first on hover, then on click alone, and now not at all. What the dropdown offered, the Services index already does better: the same nine, read from the same card grid, shown as cards with photos rather than a two-column list of text, on a page that is in the sitemap and reachable without a pointer. What it cost was a panel out of flow, a grace period, a close timer, an offset tuned so a pointer could cross the gap, and a standing rule that focus must not open it — every one of those mechanisms existing to stop the menu closing before it could be used.
+
+The nav model still carries the nine as `children`, for two reasons that are not a dropdown: the **mobile menu** still offers them as a native `<details>` group with an "All services" row beneath it, where a nested list costs nothing and saves a tap; and the desktop header reads them to know that a visitor on `/kitchens` should see `Services` lit, which is the only reason it looks at them at all.
+_Avoid_: services dropdown, mega menu, service-links row (what it replaced), flyout, chevron (the removed control)
 
 **Service Offer section**:
 The Service-page section stating what we deliver for that service — a `service-offer-section` with an overline, title, intro, a numbered scope list of Deliverables and an optional callout, beside an aside of one or more Cost cards. Present tense (the offer), distinct from a Project's past-tense What We Delivered.
@@ -433,6 +435,18 @@ A recorded CMS call is _real HTTP_ when it actually reached Strapi, or _cached_ 
 _Avoid_: Hit/miss (ambiguous), live call
 
 ## Consent & cookies
+
+**Social row**:
+The row of square platform icons at the foot of the page — right-aligned under the footer's columns and above the Footer accreditation row, centred on a phone. Drawn from the same **Social profiles** the structured data publishes as `sameAs`, so the icons a visitor sees and the profiles we claim to a search engine cannot disagree. An icon is keyed off a profile's Platform, which is a fixed option set rather than free text precisely so the match is a lookup and not a guess. Two stored profiles are deliberately not in the row: WhatsApp (the Quick Contact widget is its one affordance) and Google Maps (a review destination, not a profile to follow).
+_Avoid_: social links (the field's old name), footer icons, share buttons, Footer accreditation row (the band beneath it)
+
+**Social profiles**:
+The list of profile URLs on Global Settings (`socialLinks` → `social-link` entries: a Platform and a URL), edited on the **Social media** tab. One list serving three readers — the Social row, the LocalBusiness JSON-LD's `sameAs`, and `resolveWhatsAppUrl`, which takes the site's whole WhatsApp destination from the WhatsApp entry here. A second store for the footer's icons would have been a set of URLs the structured data never saw.
+_Avoid_: social links (ambiguous with the row), sameAs (one consumer of it), Social row (what renders five of them)
+
+**Theme override**:
+The colour tokens an editor can change from Global Settings' **Theme** tab — one `color` field per `@theme` colour in `globals.css`, emitted as a `:root` block by `ThemeOverride` in `SiteChrome`. Each is optional, and **empty means "use the built-in"**: an unset field emits nothing and the stylesheet's own value stands, which is what makes **Reset** a matter of clearing the fields rather than storing a second copy of the defaults where they could go stale. Colours only — radii, shadows, fonts and the container width stay in the stylesheet, since Tailwind compiles some of them into utility class names at build time and a runtime `:root` override cannot reach those.
+_Avoid_: theme, skin, branding (the Brand tab, which is logos and names), design tokens, Badge glow (a per-badge setting, not site-wide)
 
 **Cookie Banner**:
 The first-visit consent bar pinned to the bottom of every public page, offering equal-prominence Reject all / Manage / Accept all actions. Governs whether non-essential technologies may run; Strictly-necessary technologies are never gated. Distinct from the Site Banner (the brand crest) and the Badge (the pill base component).

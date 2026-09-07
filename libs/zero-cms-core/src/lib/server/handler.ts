@@ -90,7 +90,13 @@ async function dispatch(
       );
     case 'delete':
       return adapter
-        .delete(args[0] as string, args[1] as string, actorOf(args[2]), args[3] as string)
+        .delete(
+          args[0] as string,
+          args[1] as string,
+          actorOf(args[2]),
+          args[3] as string,
+          args[4] === true
+        )
         .then(() => ({ ok: true }));
     case 'publish':
       return adapter.publish(

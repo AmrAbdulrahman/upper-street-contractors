@@ -61,3 +61,5 @@ apps/website/next-env.d.ts
 vitest.config.*.timestamp*
 
 .zero-cms-store
+# local CMS audit scratch
+/.cms-audit/

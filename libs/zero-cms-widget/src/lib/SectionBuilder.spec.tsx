@@ -302,10 +302,13 @@ describe('<ZeroCmsSectionList> — the Section builder', () => {
     fireEvent.click(await screen.findByRole('button', { name: /^Remove section 1 of 2/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Delete permanently' }));
 
-    // The refusal is reported with the actual holder, not a bare stack trace.
-    const alert = await screen.findByText(/still referenced by/i);
-    expect(alert.textContent).toContain('Removed from the page.');
-    expect(alert.textContent).toContain('Page');
+    // The refusal names the actual holders, one per line — that list is what
+    // Force delete is offering to rewrite, so it has to be readable first.
+    const heading = await screen.findByText(/still in use here/i);
+    expect(heading.textContent).toContain('Removed from the page.');
+    const holders = heading.parentElement?.querySelectorAll('li') ?? [];
+    expect(holders.length).toBeGreaterThan(0);
+    expect([...holders].map((li) => li.textContent).join(' ')).toContain('Page');
 
     // Unlink applied; entry deliberately NOT destroyed.
     await waitFor(async () =>
@@ -317,6 +320,34 @@ describe('<ZeroCmsSectionList> — the Section builder', () => {
         includeUnpublished: true,
       })
     ).toBeTruthy();
+  });
+
+  it('"Force delete" strips the section out of the PUBLISHED page and deletes it', async () => {
+    const fx = await fixture();
+    await publishPage(fx.adapter, fx.pageId);
+
+    render(<Builder fx={fx} />);
+
+    await hoverSection('Section one');
+    fireEvent.click(await screen.findByRole('button', { name: /^Remove section 1 of 2/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete permanently' }));
+
+    // Force is offered only after the refusal has listed the holders.
+    fireEvent.click(await screen.findByRole('button', { name: /^Force delete/ }));
+
+    await waitFor(async () =>
+      expect(
+        await fx.adapter.get('prose', fx.sections[0].id, {
+          status: 'draft',
+          includeUnpublished: true,
+        })
+      ).toBeNull()
+    );
+
+    // The published page no longer points at it either — that rewrite is the
+    // whole point, and the reason the confirm names the pages first.
+    const published = await fx.adapter.get('page', fx.pageId);
+    expect(published?.sections).toEqual([fx.sections[1].id]);
   });
 
   it('"Delete permanently" destroys the entry once nothing references it', async () => {

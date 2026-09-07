@@ -41,7 +41,7 @@ export function PlaceholderPage({ title, summary }: PlaceholderPageProps) {
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           href={CONTACT_FORM_PATH}
-          className="inline-flex h-12 items-center justify-center rounded-full bg-gold px-6 text-base font-semibold text-white transition-colors hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          className="inline-flex h-12 items-center justify-center rounded-full border border-gold bg-gold px-6 text-base font-semibold text-white transition-colors hover:bg-white hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         >
           Request a Quote
         </Link>

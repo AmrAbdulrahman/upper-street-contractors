@@ -16,7 +16,12 @@ export const BUTTON_COLORS = [
   "black",
   "gold",
 ] as const;
-export const BUTTON_ACTIONS = ["whatsapp", "contact_form"] as const;
+// `whatsapp` was here. The site has one WhatsApp affordance now — the pinned
+// Quick Contact tab — so a Button can no longer be one, and the option is gone
+// from the CMS lookup too (see scripts/seed-retire-whatsapp-buttons.mjs).
+// Without that second half an editor could still pick an action nothing
+// resolves, and get a button that goes nowhere.
+export const BUTTON_ACTIONS = ["contact_form"] as const;
 export const ICON_POSITIONS = ["start", "end"] as const;
 
 export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
@@ -59,7 +64,6 @@ export function normalizeButtonAction(
 ): ButtonAction | undefined {
   const key = action?.toLowerCase().replace(/_/g, "-");
 
-  if (key === "whatsapp") return "whatsapp";
   if (key === "contact-form" || key === "contact_form") return "contact_form";
 
   return undefined;

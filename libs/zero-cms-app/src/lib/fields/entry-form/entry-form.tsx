@@ -55,6 +55,14 @@ export interface EntryFormProps {
   onSubmit: (values: FormValues) => void | Promise<void>;
   submitLabel?: string;
   footer?: ReactNode;
+  /**
+   * A message shown directly above the action row, inside the disabled
+   * fieldset. It sits there rather than at the top of the panel because that is
+   * where the actions producing it are: a refusal rendered above a long form is
+   * off-screen at the moment an editor presses the button it answers, and on a
+   * Type with two dozen fields they never see it at all.
+   */
+  notice?: ReactNode;
   /** Field `__name` to scroll to + highlight (in-place edit from the widget). */
   focusField?: string;
   /**
@@ -81,12 +89,13 @@ export function EntryForm({
   onSubmit,
   submitLabel = 'Save draft',
   footer,
+  notice,
   focusField,
   autosave,
   onDirtyChange,
   onSavingChange,
 }: EntryFormProps) {
-  const { control, handleSubmit, reset, getValues } = useForm<FormValues>({
+  const { control, handleSubmit, reset, getValues, setValue } = useForm<FormValues>({
     defaultValues: defaultValues as DefaultValues<FormValues>,
   });
 
@@ -243,6 +252,30 @@ export function EntryForm({
       ? type.fields.filter((f) => (f.group ?? '') === activeGroup)
       : type.fields;
 
+  /**
+   * A tab of optional `color` fields can be reset in one go.
+   *
+   * Offered by shape rather than by tab name, so it is not a special case for
+   * the one tab that asked for it (Settings' Theme). But the shape is narrow on
+   * purpose: "reset to defaults" is only honest where a blank field HAS a
+   * default to fall back to, which is what an unset colour token means and what
+   * an empty text field does not. A first pass allowed any all-optional tab and
+   * put "Reset Brand to defaults" directly above the company's own name, where
+   * the button would have simply erased it.
+   */
+  const clearableFields =
+    groups.length > 1 &&
+    visibleFields.length > 1 &&
+    visibleFields.every((f) => f.__type === 'color' && !f.required)
+      ? visibleFields
+      : null;
+
+  const clearGroup = () => {
+    for (const f of clearableFields ?? []) {
+      setValue(f.__name, null as never, { shouldDirty: true });
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       {/*
@@ -290,6 +323,18 @@ export function EntryForm({
           </div>
         ) : null}
 
+        {clearableFields ? (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={clearGroup}
+              className="rounded-md border border-neutral-200 px-2.5 py-1 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+            >
+              Reset colours to defaults
+            </button>
+          </div>
+        ) : null}
+
         {visibleFields.map((f) => (
           <FieldHighlight key={f.__name} highlighted={f.__name === focusField}>
             <FieldControl
@@ -301,6 +346,7 @@ export function EntryForm({
           </FieldHighlight>
         ))}
         <div className="space-y-2 border-t border-neutral-100 pt-3">
+          {notice}
           {/* One flat, wrap-safe row of uniform buttons so state-conditional actions
               (Discard/Unpublish) can appear without reshuffling the layout. The manual
               "Save draft" is redundant while autosave is armed, so it's hidden then. */}

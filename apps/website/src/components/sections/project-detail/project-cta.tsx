@@ -13,13 +13,13 @@ export function ProjectCta({ data }: { data?: CtaFragment | null }) {
             Ready to start your project?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-lg leading-relaxed text-white/70">
-            Send photos on WhatsApp or request a site visit for a detailed,
+            Send us your photos or request a site visit for a detailed,
             broken-down quote.
           </p>
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/contact"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-gold px-7 text-sm font-semibold text-white transition-colors hover:bg-gold-deep"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-gold bg-gold px-7 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-gold"
             >
               Request a Quote
             </Link>

@@ -47,10 +47,20 @@ const baseClasses =
 const buttonStyles: Record<ButtonVariant, Record<ButtonColor, string>> = {
   contained: {
     green: "bg-whatsapp text-dark hover:brightness-110",
-    dark_blue: "bg-dark text-white hover:bg-dark/90",
+    // Navy inverts to gold, the way the gold one inverts to white: both
+    // primaries answer a hover with a real change of colour rather than the 10%
+    // tint nobody could see. `gold-mid`, not `gold`: the label goes navy on the
+    // fill, and navy on the primary gold is 3.97:1 — under the 4.5:1 AA floor
+    // for a 16px semibold label. On `gold-mid` it is 6.6:1.
+    dark_blue: "border border-dark bg-dark text-white hover:border-gold-mid hover:bg-gold-mid hover:text-dark",
     white: "border border-border bg-white text-dark hover:bg-border-light",
     black: "bg-dark-2 text-white hover:bg-dark-2/90",
-    gold: "bg-gold text-white hover:bg-gold-deep",
+    // Hover inverts to white-on-gold. The border is load-bearing, not
+    // decoration: without it the button vanishes into the white and cream
+    // sections most of these sit on the moment a pointer touches it. Gold text
+    // on white is 4.9:1, over the AA floor for the bold >=14px label — which is
+    // why it is `gold` here and not `gold-mid`, which is not.
+    gold: "border border-gold bg-gold text-white hover:bg-white hover:text-gold",
   },
   outlined: {
     green:
@@ -83,20 +93,13 @@ const buttonStyles: Record<ButtonVariant, Record<ButtonColor, string>> = {
  *
  * `href` still wins when both are set — an editor who typed a URL meant it.
  *
- * The WhatsApp destination arrives as a prop rather than being fetched here.
- * This component has to stay renderable inside a Client Component (the Enquiry
- * Wizard renders the Contact Details panel, which renders a Button), and a
- * `getSiteMetaConfig()` call in here drags the whole CMS query layer — and with
- * it `zero-cms-core/node` — into the browser bundle. `<CmsButton>` is the
- * server-side wrapper that does the lookup; see `cms-button.tsx`.
+ * There is one action left. The `whatsapp` one was removed along with every
+ * WhatsApp button on the site: the pinned Quick Contact tab is the single
+ * affordance now, so a CMS Button has no WhatsApp destination to resolve to.
  */
-function resolveActionHref(
-  action: ButtonAction | undefined,
-  whatsappUrl: string | null | undefined,
-): string | null {
+function resolveActionHref(action: ButtonAction | undefined): string | null {
   if (!action) return null;
-  if (action === "contact_form") return CONTACT_FORM_PATH;
-  return whatsappUrl ?? null;
+  return action === "contact_form" ? CONTACT_FORM_PATH : null;
 }
 
 export type ButtonData = Partial<
@@ -116,12 +119,6 @@ export type ButtonData = Partial<
 export type ButtonProps = {
   data: ButtonData;
   className?: string;
-  /**
-   * Destination for a `whatsapp`-action Button. Supplied by `<CmsButton>`, or
-   * by any server parent that already holds it. Absent means the Button cannot
-   * resolve, and it renders nothing rather than a dead control.
-   */
-  whatsappUrl?: string | null;
 };
 
 function getDefaultBorderRadius(
@@ -191,7 +188,7 @@ function resolveButtonBorderRadius(value: unknown): number | undefined {
  * unfinished CMS entry should be invisible on the public site, not a dead
  * control captioned "N/A" (there is one of those published right now).
  */
-export function Button({ data, className, whatsappUrl }: ButtonProps) {
+export function Button({ data, className }: ButtonProps) {
   const {
     borderRadius: rawBorderRadius,
     variant,
@@ -203,7 +200,7 @@ export function Button({ data, className, whatsappUrl }: ButtonProps) {
     icon,
   } = data;
   const buttonAction = normalizeButtonAction(action);
-  const resolvedHref = href || resolveActionHref(buttonAction, whatsappUrl);
+  const resolvedHref = href || resolveActionHref(buttonAction);
   const trimmedLabel = label?.trim() || null;
 
   // Nowhere to go, or nothing to read: render nothing at all. A label is not

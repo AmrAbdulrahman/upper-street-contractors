@@ -2,9 +2,11 @@ export type NavLink = {
   label: string;
   href: string;
   /**
-   * Sub-links shown in a dropdown. Only `Services` has any: the nine trades used
-   * to be the header row itself, which left no width for Home / Projects /
-   * About / Contact.
+   * Sub-routes belonging to this item. Only `Services` has any — the nine
+   * trades. Nothing renders them on desktop any more (the dropdown is gone, and
+   * the Services index is where the nine are listed); they survive because the
+   * mobile menu still offers them as an accordion, and because the desktop
+   * header reads them to know that `/kitchens` should light `Services` up.
    */
   children?: NavLink[];
 };
@@ -18,10 +20,11 @@ export function isNavLinkActive(pathname: string, href: string): boolean {
 }
 
 /**
- * Active state for a link that owns a dropdown: the parent lights up on its own
+ * Active state for a link with sub-routes: the parent lights up on its own
  * route *and* on any child's, so standing on `/kitchens` still shows `Services`
  * as where you are. Without this a visitor on a Service page sees nothing
- * selected in the header at all.
+ * selected in the header at all — which is now the only reason the desktop
+ * header looks at `children` at all.
  */
 export function isNavGroupActive(pathname: string, link: NavLink): boolean {
   if (isNavLinkActive(pathname, link.href)) {
@@ -81,8 +84,8 @@ export function getMobileNavLinkClassName(isActive: boolean): string {
  * header component is a client component and cannot read the CMS itself.
  *
  * An empty array is a valid answer (the CMS read failed, or no cards are set up
- * yet): `Services` then renders as a plain link with no dropdown, which is
- * exactly what it should be when there is nothing to drop down.
+ * yet). On desktop it changes nothing — `Services` is a plain link either way
+ * now; on mobile the accordion collapses to a single row.
  */
 export function buildMainNavLinks(serviceLinks: NavLink[]): NavLink[] {
   return [
@@ -106,8 +109,8 @@ export function buildMainNavLinks(serviceLinks: NavLink[]): NavLink[] {
  * every page was never what earned them their rankings.
  *
  * `Services` here is the hub: it links `/services`, which links all nine and is
- * in the sitemap. One extra hop, no orphans — and the header dropdown still
- * links every trade directly from every page.
+ * in the sitemap. One extra hop, no orphans — the same hop the header now takes
+ * as well, since its dropdown is gone too.
  *
  * `Rates` is still not here. The route exists but has no content yet and is
  * noindexed, and a footer link is a promise that the destination answers the

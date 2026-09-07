@@ -133,8 +133,22 @@ _Avoid_: repository, DAO, model
 The rule that an Entry can only be deleted when nothing references it. References inside
 another Entry's `__draft` count — you cannot delete an Entry referenced by a pending
 draft. Publishing is **not** blocked by references to unpublished Entries; each Entry is
-statused independently.
+statused independently. It is the default rather than the law: **Force delete** goes
+through it.
 _Avoid_: cascade, foreign key
+
+**Force delete**:
+`delete(..., force)`. Strips the target's id out of every field still holding it — live
+`values` as well as `__draft`, published holders included — and then deletes it, all
+inside the one mutex, so no other write interleaves. Two things it deliberately does not
+do: it does not draft the unlink (a holder's own **published** version is the commonest
+thing blocking a delete, and a draft-only unlink could never clear it), and it does not
+`assertValid` the result (stripping a *required* relation is the point; validating would
+refuse the write and leave the Entry undeletable, which is the state this exists to get
+out of). Not atomic — a failure part-way leaves some holders unlinked — but idempotent,
+so the same call finishes the job. The CMS offers it only after a refusal has NAMED the
+holders, because what it rewrites is other people's published pages (ADR 0023).
+_Avoid_: cascade delete (nothing is deleted but the target), hard delete, purge
 
 **Generated client**:
 The `.ts` output produced from the Schema: the per-Type types and Stores that
@@ -149,7 +163,13 @@ _Avoid_: find, lookup (ambiguous)
 **Widget drawer**:
 The zero-cms-widget slide-over that edits one Entry in place (by `__id`) without leaving
 the host app, reusing the same field renderers and draft/publish actions as the app.
-_Avoid_: modal, popover, Edit drawer (the Website/Strapi-context term)
+Narrow (30rem) or wide (64rem), toggled from the control at the panel's top-left. The
+width is **one setting for the whole stack**, not per panel — stacked panels fully
+overlap, so a wide one behind a narrow one shows as a band of the parent sticking out
+from under its own child — and it is remembered per browser like Inspect mode, since
+widening the drawer says something about how an editor works rather than about one Entry.
+The confirm dialogs opt out: a paragraph and two buttons read no better at 64rem.
+_Avoid_: modal, popover, Edit drawer (the Website/Strapi-context term), fullscreen
 
 **Drawer breadcrumb**:
 The trail at the top of a Widget drawer naming every panel stacked beneath it, one
@@ -307,7 +327,8 @@ _Avoid_: help text, hint, label
 Two separate outcomes behind one trash button. **Remove** unlinks only — the Entry
 survives and can be linked back. **Delete** unlinks and then deletes it, which
 Reference integrity refuses while anything still points at it (commonly the parent's
-own *published* version), so the unlink stays applied and the holders are named.
+own *published* version), so the unlink stays applied and the holders are named — as a
+list, since that list is what the **Force delete** offered beside it would rewrite.
 _Avoid_: delete (ambiguous on its own), archive, trash
 
 **GraphQL layer**:

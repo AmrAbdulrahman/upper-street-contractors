@@ -44,6 +44,23 @@ fragment SiteMetaConfig on SiteMetaConfig {
   footerGlowColor
   footerGlowRadius
   footerGlowIntensity
+  # The Theme tab. Every one optional: an unset token emits nothing and the
+  # built-in in globals.css stands, which is what makes "Reset theme" a matter
+  # of clearing fields rather than storing a second copy of the defaults.
+  themeSurface
+  themeWhite
+  themeDark
+  themeDark2
+  themeGold
+  themeGoldLight
+  themeGoldMid
+  themeGoldDeep
+  themeForeground
+  themeMuted
+  themeSubtle
+  themeBorder
+  themeBorderLight
+  themeWhatsapp
 }
 
 query GetSiteMetaConfig($status: CmsReadStatus = published, $includeUnpublished: Boolean) {

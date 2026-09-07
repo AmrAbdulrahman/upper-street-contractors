@@ -4,7 +4,13 @@
  *  Stackable: pass `depth` (raises z-index) and `isTop` (only the top panel shows a
  *  scrim, takes focus, and handles Esc; lower panels stay mounted but inert). */
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react';
+import {
+  getDrawerWide,
+  getDrawerWideServer,
+  setDrawerWide,
+  subscribeDrawerWide,
+} from './drawer-width';
 
 export interface DrawerProps {
   open: boolean;
@@ -21,6 +27,42 @@ export interface DrawerProps {
    * in-flight response is meant to settle into.
    */
   busy?: boolean;
+  /**
+   * Offer the widen/narrow toggle on this panel. On by default: the width is
+   * one shared setting, so a panel that hid the control would still change
+   * width under the editor with no way to change it back. The confirm dialogs
+   * opt out — they are a paragraph and two buttons, and nothing about them
+   * reads better at 64rem.
+   */
+  resizable?: boolean;
+}
+
+/**
+ * Two arrows pushing apart (widen) or pulling together (narrow) — the state
+ * they lead TO, since the button's job is the change, not the status quo.
+ */
+function ResizeIcon({ wide }: { wide: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className="h-3.5 w-3.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M8 2.5v11" />
+      {wide ? (
+        // Pulling in towards the divider: the click narrows.
+        <path d="M2.5 5l3 3-3 3M13.5 5l-3 3 3 3" />
+      ) : (
+        // Pushing out from the divider: the click widens.
+        <path d="M5.5 5l-3 3 3 3M10.5 5l3 3-3 3" />
+      )}
+    </svg>
+  );
 }
 
 export function Drawer({
@@ -31,8 +73,14 @@ export function Drawer({
   depth = 0,
   isTop = true,
   busy = false,
+  resizable = true,
 }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const wide = useSyncExternalStore(
+    subscribeDrawerWide,
+    getDrawerWide,
+    getDrawerWideServer
+  );
 
   useEffect(() => {
     if (!open || !isTop || busy) return;
@@ -83,8 +131,29 @@ export function Drawer({
         aria-label={label}
         tabIndex={-1}
         inert={!isTop}
-        className="relative h-full w-full max-w-[30rem] overflow-auto bg-white p-5 text-neutral-900 shadow-2xl outline-none"
+        // `max-w-[95vw]` on both: the wide width is bigger than a laptop's
+        // viewport once a scrollbar is in it, and a panel wider than the screen
+        // pushes its own close button off the right-hand edge.
+        className={`relative h-full w-full overflow-auto bg-white p-5 text-neutral-900 shadow-2xl outline-none ${
+          wide ? 'max-w-[95vw] sm:max-w-[64rem]' : 'max-w-[95vw] sm:max-w-[30rem]'
+        }`}
       >
+        {resizable && (
+          // Top-left, above the breadcrumb: the right-hand side of this row is
+          // already the editor's own Close button, and the two would fight.
+          <div className="mb-2 flex">
+            <button
+              type="button"
+              aria-pressed={wide}
+              title={wide ? 'Narrow drawer' : 'Widen drawer'}
+              onClick={() => setDrawerWide(!wide)}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+            >
+              <span className="sr-only">{wide ? 'Narrow drawer' : 'Widen drawer'}</span>
+              <ResizeIcon wide={wide} />
+            </button>
+          </div>
+        )}
         {children}
       </div>
     </div>

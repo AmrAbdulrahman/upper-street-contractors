@@ -19,7 +19,7 @@
 
 import { useEffect, useState } from 'react';
 import { ZeroCmsError, entryTitle, isUntitled, type ReferenceHit } from '@usc/zero-cms-core';
-import { useZeroCms, describeReferenceHits, errorMessage, ui } from '@usc/zero-cms-app';
+import { useZeroCms, describeReferenceHolders, errorMessage, ui } from '@usc/zero-cms-app';
 import { Drawer } from '../Drawer';
 import { useZeroCmsWidget } from '../context';
 
@@ -48,6 +48,12 @@ export function DeleteEntryDialog({
   const [error, setError] = useState<string | null>(null);
   /** The entry's own title, so the confirm names the thing it is about to destroy. */
   const [label, setLabel] = useState<string | null>(null);
+  /**
+   * The holders a refused delete named, one line each. Their presence is what
+   * offers Force delete: it is never a button an editor can press before they
+   * have been told what it will rewrite.
+   */
+  const [holders, setHolders] = useState<string[] | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -69,7 +75,7 @@ export function DeleteEntryDialog({
     };
   }, [adapter, entryId, typeName, schema, media]);
 
-  const deleteForever = async () => {
+  const deleteForever = async (force = false) => {
     if (!typeName) {
       notify('error', `Can't delete — this ${noun}'s type is unknown.`);
       onDone();
@@ -85,18 +91,27 @@ export function DeleteEntryDialog({
         includeUnpublished: true,
       });
       if (!entry) throw new Error('Entry no longer exists');
-      await adapter.delete(typeName, entryId, currentUserId, entry.__lastEditedAt);
+      await adapter.delete(typeName, entryId, currentUserId, entry.__lastEditedAt, force);
       notify('success', `${noun[0].toUpperCase()}${noun.slice(1)} deleted`);
       widget.refresh();
       onDeleted?.(entryId);
       onDone();
     } catch (err) {
-      const message =
-        err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY'
-          ? await describeReferenceHits(err.details as ReferenceHit[], schema, adapter, media)
-          : errorMessage(err);
-      setError(message);
-      notify('error', message);
+      if (err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY') {
+        const lines = await describeReferenceHolders(
+          err.details as ReferenceHit[],
+          schema,
+          adapter,
+          media
+        );
+        setHolders(lines);
+        setError(null);
+        notify('error', `Can't delete — still referenced by ${lines.length} field(s).`);
+      } else {
+        const message = errorMessage(err);
+        setError(message);
+        notify('error', message);
+      }
     } finally {
       setBusy(false);
     }
@@ -109,6 +124,8 @@ export function DeleteEntryDialog({
       // drawer is open. Same depth as RemoveSectionDialog, which it never
       // co-exists with (one is a slot's trash, the other an entry's).
       depth={20}
+      // A paragraph and two buttons: nothing here reads better at 64rem.
+      resizable={false}
       isTop
       busy={busy}
       onClose={onDone}
@@ -124,20 +141,44 @@ export function DeleteEntryDialog({
             transform drops the one leading a text chunk, which silently ran the
             noun into the next word. */}
         <p className="text-sm text-neutral-600">
-          {`This deletes the ${noun} and everything it holds. It can't be undone, and any page still pointing at it will refuse the delete rather than lose the link.`}
+          {`This deletes the ${noun} and everything it holds. It can't be undone. Anything still pointing at it blocks the delete rather than silently losing the link — you'll be shown what, and can force it through.`}
         </p>
 
         {error && (
           <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
         )}
 
+        {holders && (
+          <div className="space-y-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="font-semibold">{`Can't delete — still in use here:`}</p>
+            <ul className="list-disc space-y-0.5 pl-5">
+              {holders.map((holder) => (
+                <li key={holder}>{holder}</li>
+              ))}
+            </ul>
+            <p>
+              {`Force delete takes it out of every one of these first — including the published versions, which changes what visitors see on those pages — and then deletes it.`}
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-2">
           <ui.Button onClick={onDone} disabled={busy}>
             Cancel
           </ui.Button>
-          <ui.Button variant="danger" onClick={() => void deleteForever()} disabled={busy}>
-            {busy ? 'Deleting…' : `Delete this ${noun}`}
-          </ui.Button>
+          {holders ? (
+            <ui.Button
+              variant="danger"
+              onClick={() => void deleteForever(true)}
+              disabled={busy}
+            >
+              {busy ? 'Deleting…' : `Force delete (unlink from ${holders.length})`}
+            </ui.Button>
+          ) : (
+            <ui.Button variant="danger" onClick={() => void deleteForever()} disabled={busy}>
+              {busy ? 'Deleting…' : `Delete this ${noun}`}
+            </ui.Button>
+          )}
         </div>
       </div>
     </Drawer>

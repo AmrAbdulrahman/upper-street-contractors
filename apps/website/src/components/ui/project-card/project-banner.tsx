@@ -51,7 +51,7 @@ export function ProjectBanner({
           alt={banner?.alt ?? "Project photo"}
           width={banner?.width ?? 800}
           height={banner?.height ?? 560}
-          className="h-full w-full object-cover"
+          className="card-zoom h-full w-full object-cover"
           sizes={imageSizes}
           priority={priority}
         />

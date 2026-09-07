@@ -63,3 +63,51 @@ describe('blocks ↔ HTML round-trip', () => {
     expect(blocks).toEqual(original);
   });
 });
+
+describe('the wider toolbar', () => {
+  it('reads an <img> back as an image block', () => {
+    const { blocks, dropped } = htmlToBlocks(
+      '<img src="/media/a.png" alt="A kitchen" width="800" height="600" />'
+    );
+    expect(dropped).toEqual([]);
+    expect(blocks).toEqual([
+      {
+        type: 'image',
+        image: {
+          url: '/media/a.png',
+          alternativeText: 'A kitchen',
+          width: 800,
+          height: 600,
+        },
+      },
+    ]);
+  });
+
+  it('lifts an image out of the paragraph the editor puts it in', () => {
+    // HugeRTE inserts into the current block, so this is the ordinary case —
+    // not an edge one. Before the lift, the <img> was an unknown inline node.
+    const { blocks, dropped } = htmlToBlocks('<p>before<img src="/m/a.png" alt="" />after</p>');
+    expect(dropped).toEqual([]);
+    expect(blocks).toEqual([
+      { type: 'paragraph', children: [{ type: 'text', text: 'before' }] },
+      { type: 'image', image: { url: '/m/a.png', alternativeText: '' } },
+      { type: 'paragraph', children: [{ type: 'text', text: 'after' }] },
+    ]);
+  });
+
+  it('round-trips an image, a quote, a code block, underline and an h5', () => {
+    const original: BlocksContent = [
+      { type: 'heading', level: 5, children: [{ type: 'text', text: 'Small heading' }] },
+      { type: 'quote', children: [{ type: 'text', text: 'Said so.' }] },
+      { type: 'code', children: [{ type: 'text', text: 'npm run build' }] },
+      { type: 'paragraph', children: [{ type: 'text', text: 'under', underline: true }] },
+      {
+        type: 'image',
+        image: { url: '/m/b.png', alternativeText: 'B', width: 4, height: 3 },
+      },
+    ];
+    const { blocks, dropped } = htmlToBlocks(blocksToHtml(original));
+    expect(dropped).toEqual([]);
+    expect(blocks).toEqual(original);
+  });
+});

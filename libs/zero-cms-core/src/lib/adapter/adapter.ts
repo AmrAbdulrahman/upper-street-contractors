@@ -77,7 +77,19 @@ export interface Adapter {
     actor: string,
     expectedLastEditedAt: string
   ): Promise<OutputEntry>;
-  delete(type: string, id: string, actor: string, expectedLastEditedAt: string): Promise<void>;
+  /**
+   * `force` unlinks the entry from every field still holding it — live values
+   * and drafts, published holders included — and then deletes it. Without it a
+   * held entry is refused (`REFERENCE_INTEGRITY`), which is the default and
+   * what an editor should normally see.
+   */
+  delete(
+    type: string,
+    id: string,
+    actor: string,
+    expectedLastEditedAt: string,
+    force?: boolean
+  ): Promise<void>;
   publish(
     type: string,
     id: string,

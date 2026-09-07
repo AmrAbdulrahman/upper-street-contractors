@@ -11,8 +11,12 @@ type QuickContactProps = {
 // Collapsed = icon-only tab peeking from the right edge; on hover/focus the
 // label stretches out to the left (max-width transition, ease-in-out). CSS-only,
 // so this stays a server component with zero client JS.
+// No shared hover: the two tabs invert differently. The quote tab follows the
+// site-wide gold rule (white fill, gold label); the WhatsApp tab keeps the
+// vendor green and only brightens, because a white WhatsApp tab reads as a
+// different service.
 const pillBase =
-  "group flex items-center rounded-l-full shadow-lg outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-white";
+  "group flex items-center rounded-l-full border shadow-lg outline-none transition-[filter,background-color,color] focus-visible:ring-2 focus-visible:ring-white";
 const labelWrap =
   "max-w-0 overflow-hidden transition-[max-width] duration-300 ease-in-out group-hover:max-w-[16rem] group-focus-visible:max-w-[16rem] motion-reduce:transition-none";
 const labelText = "block whitespace-nowrap pl-5 pr-2 text-sm font-semibold";
@@ -30,7 +34,7 @@ export function QuickContact({
         href={quoteHref}
         aria-label="Request a Quote"
         title="Request a Quote"
-        className={`${pillBase} bg-gold text-white`}
+        className={`${pillBase} border-gold bg-gold text-white hover:bg-white hover:text-gold`}
       >
         <span className={labelWrap}>
           <span className={labelText}>Request a Quote</span>
@@ -47,7 +51,7 @@ export function QuickContact({
           rel="noopener noreferrer"
           aria-label="Contact Us On WhatsApp"
           title="Contact Us On WhatsApp"
-          className={`${pillBase} bg-whatsapp text-dark`}
+          className={`${pillBase} border-whatsapp bg-whatsapp text-dark hover:brightness-110`}
         >
           <span className={labelWrap}>
             <span className={labelText}>Contact Us On WhatsApp</span>

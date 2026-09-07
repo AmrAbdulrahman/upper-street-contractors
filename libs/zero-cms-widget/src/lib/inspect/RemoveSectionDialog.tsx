@@ -20,7 +20,7 @@
 
 import { useState } from 'react';
 import { ZeroCmsError, type ReferenceHit } from '@usc/zero-cms-core';
-import { useZeroCms, describeReferenceHits, errorMessage, ui } from '@usc/zero-cms-app';
+import { useZeroCms, describeReferenceHolders, errorMessage, ui } from '@usc/zero-cms-app';
 import { Drawer } from '../Drawer';
 import { useZeroCmsWidget } from '../context';
 
@@ -49,6 +49,8 @@ export function RemoveSectionDialog({
   const { unlink } = useZeroCmsWidget();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** The holders a refused delete named — see `DeleteEntryDialog`. */
+  const [holders, setHolders] = useState<string[] | null>(null);
 
   const { childId, childType, childLabel, parentId, parentType, parentField } = target;
 
@@ -59,7 +61,7 @@ export function RemoveSectionDialog({
     onDone();
   };
 
-  const deleteForever = async () => {
+  const deleteForever = async (force = false) => {
     setBusy(true);
     setError(null);
     // Unlink first, unconditionally: it is the half that always works, and
@@ -77,17 +79,25 @@ export function RemoveSectionDialog({
         includeUnpublished: true,
       });
       if (!entry) throw new Error('Entry no longer exists');
-      await adapter.delete(childType, childId, currentUserId, entry.__lastEditedAt);
+      await adapter.delete(childType, childId, currentUserId, entry.__lastEditedAt, force);
       notify('success', `${noun[0].toUpperCase()}${noun.slice(1)} deleted`);
       onDone();
     } catch (err) {
-      const detail =
-        err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY'
-          ? `${await describeReferenceHits(err.details as ReferenceHit[], schema, adapter, media)} Publish this page, then delete it from the CMS.`
-          : errorMessage(err);
-      const msg = `Removed from the page. ${detail}`;
-      setError(msg);
-      notify('error', msg);
+      if (err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY') {
+        const lines = await describeReferenceHolders(
+          err.details as ReferenceHit[],
+          schema,
+          adapter,
+          media
+        );
+        setHolders(lines);
+        setError(null);
+        notify('error', `Removed from the page. Still referenced by ${lines.length} field(s).`);
+      } else {
+        const msg = `Removed from the page. ${errorMessage(err)}`;
+        setError(msg);
+        notify('error', msg);
+      }
     } finally {
       setBusy(false);
     }
@@ -99,6 +109,8 @@ export function RemoveSectionDialog({
       // Deliberately high depth: this sits above any drawer already on the
       // stack, since the trash is reachable while a drawer is open.
       depth={20}
+      // A paragraph and two buttons: nothing here reads better at 64rem.
+      resizable={false}
       isTop
       busy={busy}
       onClose={onDone}
@@ -121,16 +133,48 @@ export function RemoveSectionDialog({
           <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
         )}
 
+        {holders && (
+          <div className="space-y-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="font-semibold">
+              {`Removed from the page. It can't be deleted yet — still in use here:`}
+            </p>
+            <ul className="list-disc space-y-0.5 pl-5">
+              {holders.map((holder) => (
+                <li key={holder}>{holder}</li>
+              ))}
+            </ul>
+            <p>
+              {`Publishing this page usually clears its own hold. Force delete instead takes it out of every one of these — published versions included, which changes what visitors see there — and then deletes it.`}
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-2">
           <ui.Button onClick={onDone} disabled={busy}>
             Cancel
           </ui.Button>
-          <ui.Button variant="primary" onClick={() => void removeOnly()} disabled={busy}>
-            Remove from the page
-          </ui.Button>
-          <ui.Button variant="danger" onClick={() => void deleteForever()} disabled={busy}>
-            Delete permanently
-          </ui.Button>
+          {holders ? (
+            <ui.Button
+              variant="danger"
+              onClick={() => void deleteForever(true)}
+              disabled={busy}
+            >
+              {busy ? 'Deleting…' : `Force delete (unlink from ${holders.length})`}
+            </ui.Button>
+          ) : (
+            <>
+              <ui.Button variant="primary" onClick={() => void removeOnly()} disabled={busy}>
+                Remove from the page
+              </ui.Button>
+              <ui.Button
+                variant="danger"
+                onClick={() => void deleteForever()}
+                disabled={busy}
+              >
+                Delete permanently
+              </ui.Button>
+            </>
+          )}
         </div>
       </div>
     </Drawer>

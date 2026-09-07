@@ -4,10 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   getDesktopNavLinkClassName,
-  isNavLinkActive,
+  isNavGroupActive,
   type NavLink,
 } from "@/components/layout/nav-links";
-import { HeaderServicesMenu } from "@/components/layout/header/header-services-menu";
 
 type HeaderDesktopNavProps = {
   links: NavLink[];
@@ -33,12 +32,20 @@ export function HeaderDesktopNav({ links }: HeaderDesktopNavProps) {
         row of its own — it sits to the right of the lockup.
       */}
       <ul className="flex items-center justify-end gap-2 xl:gap-4">
-        {links.map((link) => {
-          if (link.children?.length) {
-            return <HeaderServicesMenu key={link.href} link={link} />;
-          }
+        {/*
+          Every item is a plain link. `Services` had a dropdown of the nine
+          trades hanging off a chevron beside it; it is gone, and the Services
+          index it linked is the one place that lists them — a page that has
+          always existed, is in the sitemap, and shows each service as a card
+          with a photo rather than a line of text in a panel.
 
-          const isActive = isNavLinkActive(pathname, link.href);
+          `isNavGroupActive`, not `isNavLinkActive`: a visitor standing on
+          `/kitchens` must still see `Services` lit in the header, and that is
+          what the `children` on the nav model are still for now that nothing
+          renders them.
+        */}
+        {links.map((link) => {
+          const isActive = isNavGroupActive(pathname, link);
 
           return (
             <li key={link.href} className="shrink-0">

@@ -33,6 +33,10 @@ export {
 } from "./normalize-button";
 export { pathnameToPageKey } from "./page-key";
 export { resolveSiteLogos, type SiteLogos } from "./resolve-site-logos";
+export {
+  resolveSocialProfiles,
+  type SocialProfile,
+} from "./resolve-social-profiles";
 export { resolveWhatsAppUrl } from "./resolve-whatsapp-url";
 export {
   detectSurfaceTone,

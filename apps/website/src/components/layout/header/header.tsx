@@ -6,7 +6,7 @@ import { HeaderDesktopNav } from "@/components/layout/header/header-desktop-nav"
 import { HeaderMobileNav } from "@/components/layout/header/header-mobile-nav";
 import { buildMainNavLinks, type NavLink } from "@/components/layout/nav-links";
 import { SiteBanner } from "@/components/layout/site-banner";
-import { resolveSiteLogos, resolveWhatsAppUrl } from "@/helpers";
+import { resolveSiteLogos } from "@/helpers";
 
 type HeaderProps = {
   config: SiteMetaConfigFragment | null;
@@ -40,7 +40,6 @@ type HeaderProps = {
  * readable; with no shrinking, that reason is gone.)
  */
 export function Header({ config, serviceLinks }: HeaderProps) {
-  const whatsappUrl = resolveWhatsAppUrl(config);
   const logos = resolveSiteLogos(config);
   // Memoised so the mobile and desktop navs get one stable array per render
   // rather than two fresh ones, which would defeat any memo below them.
@@ -58,7 +57,7 @@ export function Header({ config, serviceLinks }: HeaderProps) {
             className="h-11"
           />
 
-          <HeaderMobileNav links={navLinks} whatsappUrl={whatsappUrl} />
+          <HeaderMobileNav links={navLinks} />
         </div>
 
         {/* Desktop — lockup and nav on one line */}

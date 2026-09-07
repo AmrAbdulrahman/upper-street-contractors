@@ -51,33 +51,45 @@ export function BlogCard({ data, flash = false }: BlogCardProps) {
           <ZeroCmsEntry> clones a lone host element rather than wrapping it, and
           an extra div here would stop this being a direct grid item. */}
       <article
-        className={`group overflow-hidden rounded-lg border border-border bg-white transition-all duration-250 ease-out hover:-translate-y-[3px] hover:shadow-lg${
+        className={`card-lift group overflow-hidden rounded-lg border border-border bg-white${
           flash ? " card-flash" : ""
         }`}
       >
         <div className="relative">
+          {/* The image is clipped by its own wrapper, not just by the card: the
+              card clips too, but only at its outer edge — a zooming photo would
+              still grow down over the title beneath it. The Category badge sits
+              outside that wrapper on purpose, so it stays put while the photo
+              moves under it. */}
           {href ? (
-            <Link href={href} className="block" tabIndex={-1} aria-hidden>
+            <Link
+              href={href}
+              className="block overflow-hidden"
+              tabIndex={-1}
+              aria-hidden
+            >
               <ZeroCmsEntryField field="hero">
                 <CmsImage
                   data={hero}
                   fallbackAlt={title ?? "Blog post"}
                   placeholderLabel="Post image placeholder"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
-                  className="h-[200px] w-full object-cover"
+                  className="card-zoom h-[200px] w-full object-cover"
                 />
               </ZeroCmsEntryField>
             </Link>
           ) : (
-            <ZeroCmsEntryField field="hero">
-              <CmsImage
-                data={hero}
-                fallbackAlt={title ?? "Blog post"}
-                placeholderLabel="Post image placeholder"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
-                className="h-[200px] w-full object-cover"
-              />
-            </ZeroCmsEntryField>
+            <div className="overflow-hidden">
+              <ZeroCmsEntryField field="hero">
+                <CmsImage
+                  data={hero}
+                  fallbackAlt={title ?? "Blog post"}
+                  placeholderLabel="Post image placeholder"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
+                  className="card-zoom h-[200px] w-full object-cover"
+                />
+              </ZeroCmsEntryField>
+            </div>
           )}
 
           {category ? (

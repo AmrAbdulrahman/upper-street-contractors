@@ -1,8 +1,8 @@
-// `<CmsButton>` is the server-side default — it resolves the `whatsapp` action
-// for itself — and is deliberately NOT re-exported here. `cms-button.tsx` is
-// `server-only`, and a barrel that pulls it in would poison this entry point
-// for the Enquiry Wizard, which reaches `Button` from a Client Component.
-// Import it directly: `@/components/ui/button/cms-button`.
+// `<CmsButton>` is gone. It existed to resolve the `whatsapp` action's
+// destination server-side, and there is no such action any more — the pinned
+// Quick Contact tab is the site's one WhatsApp affordance. `Button` resolves
+// everything it needs from its own data, so every caller uses it directly and
+// this entry point stays safe for the Enquiry Wizard's Client Components.
 export {
   Button,
   BUTTON_ACTIONS,

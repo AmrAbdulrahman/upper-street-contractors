@@ -14,16 +14,12 @@ import { iconData } from "@/helpers";
 
 type HeaderMobileNavProps = {
   links: NavLink[];
-  whatsappUrl: string | null;
 };
 
 // Gold fill, not the old white-on-white outline: this is the primary CTA of the
 // whole site and it was the quieter of the two buttons in the mobile menu.
 const quoteButtonClass =
-  "inline-flex h-11 w-full items-center justify-center rounded-full bg-gold px-5 text-sm font-semibold text-white transition-colors hover:bg-gold-deep";
-
-const whatsappButtonClass =
-  "inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-whatsapp px-5 text-sm font-semibold text-dark transition-[filter] hover:brightness-110";
+  "inline-flex h-11 w-full items-center justify-center rounded-full border border-gold bg-gold px-5 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-gold";
 
 function MenuIcon() {
   return (
@@ -57,7 +53,7 @@ function CloseIcon() {
   );
 }
 
-export function HeaderMobileNav({ links, whatsappUrl }: HeaderMobileNavProps) {
+export function HeaderMobileNav({ links }: HeaderMobileNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const menuId = useId();
@@ -200,21 +196,12 @@ export function HeaderMobileNav({ links, whatsappUrl }: HeaderMobileNavProps) {
             </ul>
 
             <div className="mt-2 flex flex-col gap-3 border-t border-border-light pt-4">
+              {/* The menu's WhatsApp button is gone: the Quick Contact tab is
+                  pinned to this page too, so the menu was offering a second
+                  route to the same conversation. */}
               <Link href="/contact" className={quoteButtonClass} onClick={close}>
                 Request a Quote
               </Link>
-              {whatsappUrl ? (
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={whatsappButtonClass}
-                  onClick={close}
-                >
-                  <Icon data={iconData("whatsapp")} className="h-4 w-4 shrink-0" />
-                  WhatsApp
-                </a>
-              ) : null}
             </div>
           </nav>
         </>

@@ -16,8 +16,10 @@ type ServiceCardProps = {
 // The Project card's chrome, deliberately: the two grids are the same shape at
 // the same width, and a visitor moving between /projects and /services should
 // not feel they have changed site.
+// The lift, the shadow and the reduced-motion opt-out all come from
+// `card-lift` now (globals.css) — this used to carry its own copy of all three.
 const cardClasses =
-  "group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-white transition-all duration-250 ease-out hover:-translate-y-[3px] hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0";
+  "card-lift group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-white";
 
 export function ServiceCard({
   data,
@@ -52,7 +54,7 @@ export function ServiceCard({
               <CmsImage
                 data={image}
                 fallbackAlt={title ?? "Service"}
-                className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                className="card-zoom h-full w-full object-cover"
                 placeholderLabel="Service photo"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
                 priority={priority}

@@ -4,7 +4,7 @@ import {
   ZeroCmsList,
 } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
-import { CmsButton } from "@/components/ui/button/cms-button";
+import { Button } from "@/components/ui/button";
 import { CmsImage } from "@/components/ui/cms-image";
 import { WhoWeAreSectionFragment } from "@/generated/graphql";
 
@@ -53,7 +53,7 @@ export function WhoWeAreSection({ data }: WhoWeAreSectionProps) {
               {buttonItems.map((button) =>
                 button ? (
                   <ZeroCmsEntry key={button.id} entry={button}>
-                    <CmsButton data={button} />
+                    <Button data={button} />
                   </ZeroCmsEntry>
                 ) : null,
               )}

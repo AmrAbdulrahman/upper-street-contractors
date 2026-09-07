@@ -134,7 +134,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </ZeroCmsSectionList>
       </ZeroCmsEntryProvider>
 
-      <SimilarProjects projects={similar} />
+      {/* `host` is what gives the strip its pencil — it edits the Project's own
+          `similarWork` pins. Outside the provider above on purpose: the strip
+          is not one of the Project's sections. */}
+      <SimilarProjects projects={similar} host={project} />
       <ProjectCta data={project.cta} />
     </>
   );

@@ -184,6 +184,28 @@ export function RichTextViewer({
               {children}
             </blockquote>
           ),
+          // The default renderer emits a bare <img> with no max-width, which
+          // overflows every one of the narrow variants above. A plain <img>
+          // rather than next/image on purpose: the URL comes from the media
+          // store and can be on any host, and an unconfigured remote host is a
+          // hard error in next/image rather than an unoptimised picture.
+          image: ({ image }) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={image.url}
+              alt={image.alternativeText ?? ""}
+              width={image.width ?? undefined}
+              height={image.height ?? undefined}
+              loading="lazy"
+              decoding="async"
+              className="my-6 h-auto w-full rounded-lg"
+            />
+          ),
+          code: ({ plainText }) => (
+            <pre className="mb-4 overflow-x-auto rounded-lg bg-dark p-4 text-[13px] leading-relaxed text-white">
+              <code>{plainText}</code>
+            </pre>
+          ),
           link: ({ children, url }) => (
             <a
               href={url}

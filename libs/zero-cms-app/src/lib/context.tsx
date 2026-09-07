@@ -40,9 +40,17 @@ export type RichTextComponent = ComponentType<{
  * {@link BlocksEditor}; a host can inject a richer one (e.g. a HugeRTE-backed
  * WYSIWYG that converts blocks↔HTML internally) via `<ZeroCmsProvider blocks={…}>`.
  */
+/**
+ * `uploadImage` is optional on both sides: the editor that can insert images
+ * asks for it, the plain fallback editor ignores it, and the field renderer
+ * always supplies it. It is a function rather than the adapter itself so the
+ * blocks library stays free of any zero-cms import — it takes a file and
+ * answers with a URL the block model can hold.
+ */
 export type BlocksComponent = ComponentType<{
   value: BlocksContent;
   onChange: (value: BlocksContent) => void;
+  uploadImage?: (file: File) => Promise<{ url: string; alt?: string }>;
 }>;
 
 /**

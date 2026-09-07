@@ -6,9 +6,6 @@ fragment ContactDetailsSection on ContactDetails {
   items {
     ...ContactDetailItem
   }
-  whatsappButton {
-    ...Button
-  }
 }
 
 fragment ContactDetailItem on ContactDetailItem {

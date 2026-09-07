@@ -319,3 +319,81 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/*
+ * One hover for every card on the site.
+ *
+ * There were three treatments before this: a 3px lift with `shadow-lg` on the
+ * Project / Blog / Service cards, a dark-fill invert on the Work Card, a
+ * shadow-only change on the Review card that fired only when the card linked
+ * out, and nothing at all on the Cost card. Six card types, four answers to the
+ * same question.
+ *
+ * A class rather than a shared Tailwind string because the shadow is a real
+ * value, not a scale step: `--shadow-lg` is the resting shadow of several of
+ * these cards, so "one step above it" has to be written out.
+ *
+ * The colour properties are listed here too, even though only the Work Card
+ * animates them. This rule is unlayered and Tailwind's utilities are not, so a
+ * `transition-[background-color]` class beside it LOSES — the card would invert
+ * to navy instantly while its shadow eased. One declaration owning every
+ * transitioned property is the only version of this that cannot be half-applied.
+ */
+.card-lift {
+  transition:
+    transform 250ms ease-out,
+    box-shadow 250ms ease-out,
+    background-color 300ms ease-out,
+    border-color 300ms ease-out;
+  will-change: transform;
+}
+
+.card-lift:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 22px 60px rgba(3, 16, 33, 0.18);
+}
+
+/*
+ * The photo inside a lifting card, which pushes in slightly as the card comes
+ * forward. Marked on the image rather than inferred from the card, because a
+ * card holds more than one image — a Project card's Category tag would zoom
+ * too, and the badge is meant to sit still on top of a moving photo.
+ *
+ * Descendant of `.card-lift:hover` instead of Tailwind's `group-hover:`, so the
+ * pairing lives in one place with the lift it belongs to. It needs an ancestor
+ * with `overflow: hidden` around the image — every card that uses it has one,
+ * and without it the zoom spills over the card's own edge.
+ */
+.card-zoom {
+  transition: transform 500ms ease-out;
+}
+
+.card-lift:hover .card-zoom {
+  transform: scale(1.04);
+}
+
+/*
+ * The lift is the part that moves; the shadow is the part that says "this is
+ * interactive". Keep the second, drop the first — a card that neither moves nor
+ * changes gives a reduced-motion visitor no hover feedback at all. The zoom is
+ * motion with nothing else to say, so it goes entirely.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .card-lift {
+    transition:
+      box-shadow 250ms ease-out,
+      background-color 300ms ease-out,
+      border-color 300ms ease-out;
+  }
+
+  .card-lift:hover {
+    transform: none;
+  }
+
+  .card-zoom,
+  .card-lift:hover .card-zoom {
+    transition: none;
+    transform: none;
+  }
+}

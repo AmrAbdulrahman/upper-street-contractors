@@ -4,11 +4,16 @@ import { ChatIcon } from "./icons/chat";
 import { CheckIcon } from "./icons/check";
 import { ChevronDownIcon } from "./icons/chevron-down";
 import { EnvelopeIcon } from "./icons/envelope";
+import { FacebookIcon } from "./icons/facebook";
+import { InstagramIcon } from "./icons/instagram";
+import { LinkedinIcon } from "./icons/linkedin";
 import { PhoneIcon } from "./icons/phone";
 import { PinIcon } from "./icons/pin";
 import { ShieldIcon } from "./icons/shield";
 import { StarIcon } from "./icons/star";
+import { TiktokIcon } from "./icons/tiktok";
 import { WhatsappIcon } from "./icons/whatsapp";
+import { XIcon } from "./icons/x";
 import type { IconCode, IconSvgProps } from "./types";
 
 const iconMap: Record<IconCode, ComponentType<IconSvgProps>> = {
@@ -17,11 +22,16 @@ const iconMap: Record<IconCode, ComponentType<IconSvgProps>> = {
   check: CheckIcon,
   "chevron-down": ChevronDownIcon,
   envelope: EnvelopeIcon,
+  facebook: FacebookIcon,
+  instagram: InstagramIcon,
+  linkedin: LinkedinIcon,
   phone: PhoneIcon,
   pin: PinIcon,
   shield: ShieldIcon,
   star: StarIcon,
+  tiktok: TiktokIcon,
   whatsapp: WhatsappIcon,
+  x: XIcon,
 };
 
 export type IconProps = {

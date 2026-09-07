@@ -22,6 +22,8 @@ const Impl = dynamic(() => import('./hugerte-editor-impl'), {
 export function HugeRTEBlocksEditor(props: {
   value: BlocksContent;
   onChange: (value: BlocksContent) => void;
+  /** Stores a picked/pasted/dragged image and answers with its URL. */
+  uploadImage?: (file: File) => Promise<{ url: string; alt?: string }>;
 }) {
   return <Impl {...props} />;
 }

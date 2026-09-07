@@ -1,5 +1,5 @@
 import { Banner } from "@/components/ui/banner";
-import { CmsButton } from "@/components/ui/button/cms-button";
+import { Button } from "@/components/ui/button";
 import type { CtaFragment } from "@/generated/graphql";
 import { ZeroCmsEntry, ZeroCmsEntryField } from "@usc/zero-cms-widget";
 
@@ -19,7 +19,7 @@ export function Cta({ data, variant = "section" }: CtaProps) {
   if (variant === "sidebar") {
     return (
       <ZeroCmsEntry entry={data}>
-        <div className="rounded-xl border border-white/10 bg-dark p-6 text-white shadow-lg">
+        <div className="card-lift rounded-xl border border-white/10 bg-dark p-6 text-white shadow-lg">
           {title ? (
             <ZeroCmsEntryField field="title">
               <p className="text-[11px] font-semibold tracking-[0.14em] text-white/55 uppercase">
@@ -54,7 +54,7 @@ export function Cta({ data, variant = "section" }: CtaProps) {
             <div className="mt-4 flex flex-col gap-2.5">
               {items.map((b) => (
                 <ZeroCmsEntry key={b.id} entry={b}>
-                  <CmsButton data={b} className="w-full" />
+                  <Button data={b} className="w-full" />
                 </ZeroCmsEntry>
               ))}
             </div>
@@ -87,7 +87,7 @@ export function Cta({ data, variant = "section" }: CtaProps) {
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             {items.map((b) => (
               <ZeroCmsEntry key={b.id} entry={b}>
-                <CmsButton data={b} className="w-full sm:w-auto" />
+                <Button data={b} className="w-full sm:w-auto" />
               </ZeroCmsEntry>
             ))}
           </div>

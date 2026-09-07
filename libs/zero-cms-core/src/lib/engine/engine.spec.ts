@@ -103,6 +103,72 @@ describe('reference integrity', () => {
     ).rejects.toMatchObject({ code: 'REFERENCE_INTEGRITY' });
   });
 
+  it('force-deletes by unlinking a PUBLISHED holder first', async () => {
+    const e = await freshEngine();
+    const created = await e.create('author', { name: 'Jo' }, ACTOR);
+    const a = await e.publish(
+      'author',
+      created.__id,
+      ACTOR,
+      created.__lastEditedAt as string
+    );
+    const p = await e.create('project', { title: 'P', author: a.__id }, ACTOR);
+    await e.publish('project', p.__id, ACTOR, p.__lastEditedAt as string);
+
+    // The holder's own published version is the commonest blocker there is:
+    // a force that only touched drafts would still refuse this.
+    await e.delete('author', a.__id, ACTOR, a.__lastEditedAt as string, true);
+
+    expect(await e.get('author', a.__id, { status: 'draft' })).toBeNull();
+    expect((await e.get('project', p.__id))?.author).toBeNull();
+  });
+
+  it('force-delete removes one id from a list and leaves its siblings', async () => {
+    const e = await freshEngine([
+      { __name: 'author', fields: [{ __name: 'name', __type: 'text', required: true }] },
+      {
+        __name: 'page',
+        fields: [
+          { __name: 'title', __type: 'text' },
+          { __name: 'authors', __type: 'references', allowedTypes: ['author'] },
+        ],
+      },
+    ]);
+    const one = await e.create('author', { name: 'One' }, ACTOR);
+    const two = await e.create('author', { name: 'Two' }, ACTOR);
+    const page = await e.create(
+      'page',
+      { title: 'P', authors: [one.__id, two.__id] },
+      ACTOR
+    );
+    await e.publish('page', page.__id, ACTOR, page.__lastEditedAt as string);
+
+    await e.delete('author', one.__id, ACTOR, one.__lastEditedAt as string, true);
+
+    expect((await e.get('page', page.__id))?.authors).toEqual([two.__id]);
+  });
+
+  it('force-delete clears the same field in both values and draft', async () => {
+    const e = await freshEngine();
+    const a = await e.create('author', { name: 'Jo' }, ACTOR);
+    const p = await e.create('project', { title: 'P', author: a.__id }, ACTOR);
+    await e.publish('project', p.__id, ACTOR, p.__lastEditedAt as string);
+    // Re-point the draft at the same author, so the holder carries it twice.
+    const published = await e.get('project', p.__id);
+    await e.patch(
+      'project',
+      p.__id,
+      { author: a.__id },
+      ACTOR,
+      published?.__lastEditedAt as string
+    );
+
+    await e.delete('author', a.__id, ACTOR, a.__lastEditedAt as string, true);
+
+    expect((await e.get('project', p.__id))?.author).toBeNull();
+    expect((await e.get('project', p.__id, { status: 'draft' }))?.author).toBeNull();
+  });
+
   it('populates a reference', async () => {
     const e = await freshEngine();
     const a = await e.create('author', { name: 'Jo' }, ACTOR);

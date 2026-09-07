@@ -100,10 +100,21 @@ function blockToHtml(block: BlocksNode): string {
       const image = (block.image ?? {}) as {
         url?: string;
         alternativeText?: string;
+        width?: number;
+        height?: number;
       };
+      // Dimensions are emitted so they survive the trip back through
+      // `htmlToBlocks` — dropping them here would quietly strip them from
+      // every stored image the first time its field was edited.
+      const size =
+        image.width && image.height
+          ? ` width="${escapeAttr(String(image.width))}" height="${escapeAttr(
+              String(image.height)
+            )}"`
+          : '';
       return `<img src="${escapeAttr(image.url ?? '')}" alt="${escapeAttr(
         image.alternativeText ?? ''
-      )}" />`;
+      )}"${size} />`;
     }
     default:
       return '';
@@ -226,6 +237,66 @@ function listFrom(el: Element, dropped: Set<string>): ListNode {
   return { type: 'list', format, children };
 }
 
+/**
+ * An `<img>` as the `image` block the renderer already knows how to draw.
+ *
+ * Width and height are carried when the markup states them, so the public page
+ * can reserve the space and not shift its layout while the file loads; an image
+ * that never declared them stays undeclared rather than being given a guess.
+ */
+function imageBlockFrom(img: Element): BlocksNode {
+  const width = Number(img.getAttribute('width'));
+  const height = Number(img.getAttribute('height'));
+  return {
+    type: 'image',
+    image: {
+      url: img.getAttribute('src') ?? '',
+      alternativeText: img.getAttribute('alt') ?? '',
+      ...(Number.isFinite(width) && width > 0 ? { width } : {}),
+      ...(Number.isFinite(height) && height > 0 ? { height } : {}),
+    },
+  } as unknown as BlocksNode;
+}
+
+/**
+ * A `<p>`, with any images inside it lifted out into their own blocks.
+ *
+ * The editor puts an inserted image inside a paragraph, and `image` is a BLOCK
+ * in this model with no inline counterpart — so without this an inserted image
+ * is an unknown inline node and gets dropped on the very next save. Order is
+ * preserved by flushing the text collected so far each time an image is met,
+ * rather than emitting all the text and then all the images.
+ */
+function pushParagraph(el: Element, blocks: BlocksNode[], dropped: Set<string>): void {
+  if (!el.querySelector('img')) {
+    blocks.push({ type: 'paragraph', children: inlineChildren(el, dropped) });
+    return;
+  }
+
+  let pending: InlineNode[] = [];
+  const flush = () => {
+    if (pending.some((n) => n.type !== 'text' || n.text.trim().length > 0)) {
+      blocks.push({ type: 'paragraph', children: pending });
+    }
+    pending = [];
+  };
+
+  el.childNodes.forEach((child) => {
+    const asElement = child.nodeType === 1 ? (child as Element) : null;
+    const img =
+      asElement?.tagName === 'IMG'
+        ? asElement
+        : (asElement?.querySelector?.('img') as Element | null | undefined);
+    if (img) {
+      flush();
+      blocks.push(imageBlockFrom(img));
+      return;
+    }
+    pending.push(...inlineFromChild(child, {}, dropped));
+  });
+  flush();
+}
+
 function collectBlocks(node: Node, blocks: BlocksNode[], dropped: Set<string>): void {
   node.childNodes.forEach((child) => {
     if (child.nodeType === 3) {
@@ -241,7 +312,7 @@ function collectBlocks(node: Node, blocks: BlocksNode[], dropped: Set<string>): 
     const tag = el.tagName;
 
     if (tag === 'P') {
-      blocks.push({ type: 'paragraph', children: inlineChildren(el, dropped) });
+      pushParagraph(el, blocks, dropped);
     } else if (/^H[1-6]$/.test(tag)) {
       blocks.push({
         type: 'heading',
@@ -250,6 +321,13 @@ function collectBlocks(node: Node, blocks: BlocksNode[], dropped: Set<string>): 
       });
     } else if (tag === 'UL' || tag === 'OL') {
       blocks.push(listFrom(el, dropped) as unknown as BlocksNode);
+    } else if (tag === 'IMG' || (tag === 'FIGURE' && el.querySelector('img'))) {
+      // `blocksToHtml` has always emitted <img>, but nothing read one back, so
+      // an image survived exactly one direction and was dropped on the next
+      // save. HugeRTE wraps a resized image in a <figure>, hence the second arm
+      // — its <figcaption> has no block to live in and is not kept.
+      const img = tag === 'IMG' ? el : (el.querySelector('img') as Element);
+      blocks.push(imageBlockFrom(img));
     } else if (tag === 'BLOCKQUOTE') {
       blocks.push({ type: 'quote', children: inlineChildren(el, dropped) });
     } else if (tag === 'PRE') {

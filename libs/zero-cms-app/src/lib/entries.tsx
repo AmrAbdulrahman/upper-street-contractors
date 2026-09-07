@@ -221,7 +221,26 @@ export async function describeReferenceHits(
   adapter: ReturnType<typeof useZeroCms>['adapter'],
   media?: MediaItem[]
 ): Promise<string> {
-  const parts = await Promise.all(
+  const parts = await describeReferenceHolders(hits, schema, adapter, media);
+  return `Can't delete — still referenced by ${parts.join(', ')}.`;
+}
+
+/**
+ * The same hits as one readable line each, rather than a sentence.
+ *
+ * Force delete rewrites every one of these entries, so the confirm has to be
+ * able to SHOW them — an editor about to strip a shared Button out of six
+ * published pages should see the six, not a run-on sentence naming them.
+ * `describeReferenceHits` still joins these for the toast, where a list has
+ * nowhere to go.
+ */
+export async function describeReferenceHolders(
+  hits: ReferenceHit[],
+  schema: Type[],
+  adapter: ReturnType<typeof useZeroCms>['adapter'],
+  media?: MediaItem[]
+): Promise<string[]> {
+  return Promise.all(
     hits.map(async (h) => {
       const fromType = schema.find((t) => t.__name === h.fromType);
       const fieldLabel =
@@ -230,10 +249,12 @@ export async function describeReferenceHits(
         .get(h.fromType, h.fromId, { status: 'draft', includeUnpublished: true })
         .then((e) => (e ? entryLabel(fromType, e, media) : null))
         .catch(() => null);
-      return `"${label ?? h.fromId.slice(0, 8)}" (${fromType?.label ?? h.fromType} → ${fieldLabel})`;
+      // `in` matters to the editor, not just to the engine: a draft-only hold
+      // disappears on publish, a published one does not.
+      const where = h.in === 'draft' ? 'unpublished edit' : 'published';
+      return `"${label ?? h.fromId.slice(0, 8)}" (${fromType?.label ?? h.fromType} → ${fieldLabel}, ${where})`;
     })
   );
-  return `Can't delete — still referenced by ${parts.join(', ')}.`;
 }
 
 /**
@@ -365,6 +386,12 @@ export function EntryEditor({
   const [publishedEntry, setPublishedEntry] = useState<OutputEntry | null>(null);
   const [loading, setLoading] = useState(!isNew);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * The holders named by a refused delete, one readable line each. Non-null is
+   * what puts Force delete on screen — it is never offered before the editor
+   * has been shown what it would rewrite.
+   */
+  const [blockedBy, setBlockedBy] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
   // Autosave-in-flight, reported up from EntryForm. Kept separate from `busy`
   // (which the explicit Publish/Delete actions own) and then OR-ed at every
@@ -426,12 +453,21 @@ export function EntryEditor({
   const run = async (fn: () => Promise<unknown>, successMsg?: string) => {
     setBusy(true);
     setError(null);
+    setBlockedBy(null);
     try {
       await fn();
       await refreshMedia();
       onChanged();
       if (successMsg) notify('success', successMsg);
     } catch (err) {
+      if (err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY') {
+        // Keep the holders, not just the sentence: they are what the Force
+        // delete button is offering to rewrite, so they have to be readable
+        // one by one before it appears.
+        setBlockedBy(
+          await describeReferenceHolders(err.details as ReferenceHit[], schema, adapter, media)
+        );
+      }
       const msg =
         err instanceof ZeroCmsError && err.code === 'REFERENCE_INTEGRITY'
           ? await describeReferenceHits(err.details as ReferenceHit[], schema, adapter, media)
@@ -556,12 +592,6 @@ export function EntryEditor({
         />
       )}
 
-      {error && (
-        <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </div>
-      )}
-
       <EntryForm
         type={type}
         defaultValues={defaultsFor(type, entry)}
@@ -572,6 +602,33 @@ export function EntryEditor({
         onDirtyChange={onDirtyChange}
         onSavingChange={handleSavingChange}
         submitLabel={isNew ? 'Create draft' : 'Save draft'}
+        // Rendered beside the buttons rather than at the top of the panel: on a
+        // Type with two dozen fields, a refusal up there is off-screen at the
+        // moment the button producing it is pressed.
+        notice={
+          error ? (
+            <div
+              role="alert"
+              className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
+            >
+              {blockedBy ? (
+                <div className="space-y-2">
+                  <p className="font-semibold">{`Can't delete — still in use here:`}</p>
+                  <ul className="list-disc space-y-0.5 pl-5">
+                    {blockedBy.map((holder) => (
+                      <li key={holder}>{holder}</li>
+                    ))}
+                  </ul>
+                  <p>
+                    {`Force delete takes it out of every one of these first — published versions included, which changes what visitors see on those pages — and then deletes it.`}
+                  </p>
+                </div>
+              ) : (
+                error
+              )}
+            </div>
+          ) : null
+        }
         footer={
           !isNew && entry ? (
             // A fragment (not a nested flex container) so these render as direct
@@ -637,6 +694,29 @@ export function EntryEditor({
               >
                 Delete
               </Button>
+              {/* Only after a refusal has named the holders above. Force strips
+                  the entry out of every one of them — published values
+                  included — before deleting it. */}
+              {blockedBy ? (
+                <Button
+                  variant="danger"
+                  disabled={locked}
+                  onClick={() =>
+                    act(async () => {
+                      await adapter.delete(
+                        type.__name,
+                        entryId!,
+                        currentUserId,
+                        entry.__lastEditedAt,
+                        true
+                      );
+                      draftReg?.clearDraft(type.__name, entryId!);
+                    }, true, 'Entry force-deleted')
+                  }
+                >
+                  {`Force delete (unlink from ${blockedBy.length})`}
+                </Button>
+              ) : null}
             </>
           ) : null
         }

@@ -137,17 +137,14 @@ function ReviewProfile({
 export function ReviewCard({ data }: ReviewCardProps) {
   const { score, clientReview, clientInfo } = data;
 
+  // `card-lift` unconditionally: the hover used to fire only when the card
+  // linked out to Trustpilot or Google, so two cards in the same row responded
+  // differently to the same gesture for a reason no visitor can see.
   const cardClassName =
-    "flex h-full flex-col rounded-2xl border border-border bg-white p-6 shadow-sm transition-shadow";
+    "card-lift flex h-full flex-col rounded-2xl border border-border bg-white p-6 shadow-sm";
 
   const card = (
-    <article
-      className={
-        clientInfo?.reviewLink
-          ? `${cardClassName} group-hover:shadow-md`
-          : cardClassName
-      }
-    >
+    <article className={cardClassName}>
       <ZeroCmsEntryField field="score">
         <StarRating score={score} />
       </ZeroCmsEntryField>

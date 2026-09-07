@@ -54,7 +54,8 @@ export function createHttpAdapter(opts: HttpAdapterOptions): Adapter {
       rpc('update', [t, id, v, actor, expected]),
     patch: (t, id, v: EntryValues, actor: string, expected: string) =>
       rpc('patch', [t, id, v, actor, expected]),
-    delete: (t, id, actor: string, expected: string) => rpc('delete', [t, id, actor, expected]),
+    delete: (t, id, actor: string, expected: string, force?: boolean) =>
+      rpc('delete', [t, id, actor, expected, force === true]),
     publish: (t, id, actor: string, expected: string) => rpc('publish', [t, id, actor, expected]),
     unpublish: (t, id, actor: string, expected: string) =>
       rpc('unpublish', [t, id, actor, expected]),

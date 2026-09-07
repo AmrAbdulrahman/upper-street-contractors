@@ -29,7 +29,12 @@ export {
 } from './lib/reference-actions';
 
 // Sub-views (compose your own shell) + field extensibility
-export { EntriesList, EntryEditor, describeReferenceHits } from './lib/entries';
+export {
+  EntriesList,
+  EntryEditor,
+  describeReferenceHits,
+  describeReferenceHolders,
+} from './lib/entries';
 export { TypeBuilder } from './lib/type-builder';
 export { MediaLibrary } from './lib/components/media';
 export {

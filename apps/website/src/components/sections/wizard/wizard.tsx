@@ -750,7 +750,10 @@ export function WizardSection({ data }: WizardSectionProps) {
                     {i > 0 ? (
                       <li
                         aria-hidden
-                        className="mt-[13px] h-0.5 flex-1 rounded md:mt-[17px]"
+                        // Half the circle's height at each width, so the line
+                        // meets the dots' centres: 14 of 28 on a phone, 30 of
+                        // 60 from md up.
+                        className="mt-[13px] h-0.5 flex-1 rounded md:mt-[30px]"
                         style={{ background: connectorLit ? "var(--color-gold)" : "var(--color-border)" }}
                       />
                     ) : null}
@@ -762,7 +765,12 @@ export function WizardSection({ data }: WizardSectionProps) {
                         disabled={!canClick || submitting}
                         aria-current={state === "current" ? "step" : undefined}
                         onClick={() => goToStep(i)}
-                        className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors md:h-[34px] md:w-[34px] md:text-sm ${dotClass[state]} ${canClick ? "cursor-pointer" : "cursor-default"}`}
+                        // 60px from md up. It stays 28px on a phone on
+                        // purpose: the stepper is one horizontal row, and six
+                        // 60px circles with their gaps do not fit 360px of
+                        // screen without wrapping or scrolling the steps out of
+                        // sight.
+                        className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors md:h-[60px] md:w-[60px] md:text-base ${dotClass[state]} ${canClick ? "cursor-pointer" : "cursor-default"}`}
                       >
                         {i === nodes.length - 1 || state === "complete" ? "✓" : i + 1}
                       </button>
@@ -1348,7 +1356,7 @@ export function WizardSection({ data }: WizardSectionProps) {
                       type="button"
                       disabled={!canProceed}
                       onClick={next}
-                      className="rounded-lg bg-dark px-5 py-2.5 font-medium text-white transition-colors hover:bg-dark/90 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-lg border border-dark bg-dark px-5 py-2.5 font-medium text-white transition-colors hover:border-gold-mid hover:bg-gold-mid hover:text-dark disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Next →
                     </button>

@@ -13,8 +13,10 @@ type ProjectCardProps = {
   flash?: boolean;
 };
 
+// `card-lift` is the site-wide hover (see globals.css) — every card gets the
+// same lift and shadow rather than each one inventing its own.
 const cardClasses =
-  "group overflow-hidden rounded-lg border border-border bg-white transition-all duration-250 ease-out hover:-translate-y-[3px] hover:shadow-lg";
+  "card-lift group overflow-hidden rounded-lg border border-border bg-white";
 
 const titleClasses =
   "mb-1.5 font-sans text-[15px] font-semibold leading-snug text-dark";

@@ -3,7 +3,7 @@ import {
   ZeroCmsEntryField,
   ZeroCmsList,
 } from "@usc/zero-cms-widget";
-import { CmsButton } from "@/components/ui/button/cms-button";
+import { Button } from "@/components/ui/button";
 import { ReviewCard } from "@/components/ui/review-card";
 import { ClientReviewSectionFragment } from "@/generated/graphql";
 
@@ -64,7 +64,7 @@ export function ClientReviewsSection({ data }: ClientReviewsSectionProps) {
             {links.map((link) =>
               link ? (
                 <ZeroCmsEntry key={link.id} entry={link}>
-                  <CmsButton data={link} />
+                  <Button data={link} />
                 </ZeroCmsEntry>
               ) : null,
             )}

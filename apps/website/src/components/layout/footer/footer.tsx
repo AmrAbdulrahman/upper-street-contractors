@@ -33,7 +33,7 @@ import {
   iconData,
   resolveLogoHeight,
   resolveSiteLogos,
-  resolveWhatsAppUrl,
+  resolveSocialProfiles,
 } from "@/helpers";
 
 import { Icon } from "@/components/ui/icon";
@@ -88,11 +88,11 @@ export function Footer({ config }: FooterProps) {
 
   const legalName = config?.legalName ?? null;
 
-  const whatsappUrl = resolveWhatsAppUrl(config);
+  const socialProfiles = resolveSocialProfiles(config);
 
   const currentYear = new Date().getFullYear();
 
-  const hasContactDetails = Boolean(phone || email || whatsappUrl);
+  const hasContactDetails = Boolean(phone || email);
 
   const accreditations = config?.footerAccreditations?.filter(Boolean) ?? [];
 
@@ -199,22 +199,6 @@ export function Footer({ config }: FooterProps) {
                   </li>
                 ) : null}
 
-                {whatsappUrl ? (
-                  <li>
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-white/55 transition-colors hover:text-white"
-                    >
-                      <Icon
-                        data={iconData("chat")}
-                        className="h-3.5 w-3.5 shrink-0 text-gold"
-                      />
-                      WhatsApp available
-                    </a>
-                  </li>
-                ) : null}
               </ul>
             ) : null}
 
@@ -225,6 +209,33 @@ export function Footer({ config }: FooterProps) {
             </div>
           </div>
         </div>
+
+        {/* The Social row: its own band, right-aligned under the columns and
+            above the trust row. Right rather than centred so it reads as
+            belonging to the columns it sits under, and stays clear of the
+            centred badges below it. Its links come from the same Social
+            profiles the structured data publishes, so the icons on screen and
+            the profiles we claim to search engines cannot disagree. */}
+        {socialProfiles.length > 0 ? (
+          <div className="mb-8 flex justify-center sm:justify-end">
+            <h2 className="sr-only">Follow us</h2>
+            <ul className="flex flex-wrap items-center gap-2.5">
+              {socialProfiles.map((profile) => (
+                <li key={profile.id}>
+                  <a
+                    href={profile.url}
+                    target="_blank"
+                    rel="noopener noreferrer me"
+                    aria-label={profile.name}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-[5px] bg-white/10 text-white/70 transition-colors hover:bg-gold hover:text-white"
+                  >
+                    <Icon data={iconData(profile.icon)} className="h-4 w-4 shrink-0" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         {/* The trust row: full width, its own band between the columns and the
             legal bar. It replaced three hardcoded text labels that had drifted

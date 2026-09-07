@@ -4,6 +4,7 @@ import { CookieConsent } from "@/components/consent/cookie-consent";
 import { LocalBusinessJsonLd } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { getServiceLinks } from "@/components/layout/get-service-links";
+import { ThemeOverride } from "@/components/layout/theme-override";
 import { resolveWhatsAppUrl } from "@/helpers";
 
 type SiteChromeProps = {
@@ -20,6 +21,8 @@ async function SiteChromeContent({ children }: SiteChromeProps) {
 
   return (
     <>
+      {/* Before anything paints: the tokens the whole page is coloured with. */}
+      <ThemeOverride config={siteMetaConfig} />
       {siteMetaConfig ? <LocalBusinessJsonLd config={siteMetaConfig} /> : null}
       <a
         href="#main"

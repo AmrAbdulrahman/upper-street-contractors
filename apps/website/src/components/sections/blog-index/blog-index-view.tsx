@@ -135,7 +135,7 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
                 }}
                 className={
                   isActive
-                    ? "rounded-full border-[1.5px] border-dark bg-dark px-4 py-2 text-[13px] font-semibold text-white transition-colors"
+                    ? "rounded-full border-[1.5px] border-dark bg-dark px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:border-gold-mid hover:bg-gold-mid hover:text-dark"
                     : "rounded-full border-[1.5px] border-border bg-transparent px-4 py-2 text-[13px] font-semibold text-dark transition-colors hover:border-dark hover:bg-dark hover:text-white"
                 }
               >
@@ -211,7 +211,7 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
                 aria-label={`Page ${n}`}
                 className={
                   n === currentPage
-                    ? "rounded-full border-[1.5px] border-dark bg-dark px-3.5 py-2 text-[13px] font-semibold text-white"
+                    ? "rounded-full border-[1.5px] border-dark bg-dark px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:border-gold-mid hover:bg-gold-mid hover:text-dark"
                     : "rounded-full border-[1.5px] border-border px-3.5 py-2 text-[13px] font-semibold text-dark transition-colors hover:border-dark hover:bg-dark hover:text-white"
                 }
               >

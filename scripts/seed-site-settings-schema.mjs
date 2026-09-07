@@ -86,10 +86,40 @@ const GROUPS = {
   postalCode: 'Contact',
   mapLocation: 'Contact',
 
-  socialLinks: 'Social',
+  socialLinks: 'Social media',
+
+  footerAccreditations: 'Footer',
+  footerLogoSize: 'Footer',
+  footerGlowColor: 'Footer',
+  footerGlowRadius: 'Footer',
+  footerGlowIntensity: 'Footer',
 
   indexable: 'Robots',
 };
+
+/**
+ * The Theme tab's colour tokens, added by `seed-social-and-theme.mjs`. Listed
+ * here only so a re-run of THIS script does not sweep them onto Brand — the
+ * loop below groups every field it finds, and anything unlisted lands there.
+ */
+for (const name of [
+  'themeSurface',
+  'themeWhite',
+  'themeDark',
+  'themeDark2',
+  'themeGold',
+  'themeGoldLight',
+  'themeGoldMid',
+  'themeGoldDeep',
+  'themeForeground',
+  'themeMuted',
+  'themeSubtle',
+  'themeBorder',
+  'themeBorderLight',
+  'themeWhatsapp',
+]) {
+  GROUPS[name] = 'Theme';
+}
 
 /** New branding fields. Every one optional — empty means "keep the built-in". */
 const NEW_FIELDS = [

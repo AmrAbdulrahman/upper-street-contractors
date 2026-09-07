@@ -86,7 +86,7 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
                 onClick={() => setSelectedFilter(label)}
                 className={
                   isActive
-                    ? "rounded-full border-[1.5px] border-dark bg-dark px-4 py-2 text-[13px] font-semibold text-white transition-colors"
+                    ? "rounded-full border-[1.5px] border-dark bg-dark px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:border-gold-mid hover:bg-gold-mid hover:text-dark"
                     : "rounded-full border-[1.5px] border-border bg-transparent px-4 py-2 text-[13px] font-semibold text-dark transition-colors hover:border-dark hover:bg-dark hover:text-white"
                 }
               >

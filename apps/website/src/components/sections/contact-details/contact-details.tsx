@@ -1,10 +1,4 @@
-import {
-  ZeroCmsEntry,
-  ZeroCmsEntryField,
-  ZeroCmsList,
-  ZeroCmsRelationEntry,
-} from "@usc/zero-cms-widget";
-import { Button } from "@/components/ui/button";
+import { ZeroCmsEntry, ZeroCmsEntryField, ZeroCmsList } from "@usc/zero-cms-widget";
 import type { ContactDetailsSectionFragment } from "@/generated/graphql";
 
 /**
@@ -15,24 +9,14 @@ import type { ContactDetailsSectionFragment } from "@/generated/graphql";
  */
 export type ContactDetailsProps = {
   data: ContactDetailsSectionFragment;
-  /**
-   * The site's WhatsApp destination, for a `whatsappButton` that carries the
-   * action rather than an explicit href.
-   *
-   * Passed in rather than looked up, because this panel is also rendered by the
-   * Enquiry Wizard — a Client Component — and `<CmsButton>`'s own lookup would
-   * drag the CMS query layer into the browser bundle from there. Every server
-   * caller gets it from `<ContactDetailsSection>` below.
-   */
-  whatsappUrl?: string | null;
 };
 
 /**
  * The dark "Get in touch directly" card. Rendered on its own by
  * <ContactDetailsSection> and as the right column of the Contact wizard.
  */
-export function ContactDetailsPanel({ data, whatsappUrl }: ContactDetailsProps) {
-  const { title, items, note, whatsappButton } = data;
+export function ContactDetailsPanel({ data }: ContactDetailsProps) {
+  const { title, items, note } = data;
   const detailItems = items?.filter(Boolean) ?? [];
 
   return (
@@ -75,24 +59,15 @@ export function ContactDetailsPanel({ data, whatsappUrl }: ContactDetailsProps) 
           )}
         </ZeroCmsList>
 
-        {note || whatsappButton ? (
-          <div className="mt-7 rounded-2xl border border-whatsapp/25 bg-whatsapp/10 p-5">
-            {note ? (
-              <ZeroCmsEntryField field="note">
-                <p className="text-sm leading-relaxed text-white/80">{note}</p>
-              </ZeroCmsEntryField>
-            ) : null}
-            {whatsappButton ? (
-              <div className="mt-4">
-                <ZeroCmsRelationEntry entry={whatsappButton} field="whatsappButton">
-                  <Button
-                    data={whatsappButton}
-                    whatsappUrl={whatsappUrl}
-                    className="w-full justify-center"
-                  />
-                </ZeroCmsRelationEntry>
-              </div>
-            ) : null}
+        {/* The WhatsApp button that used to sit under this note is gone, along
+            with the green tint that was there to frame it: the pinned Quick
+            Contact tab is the site's one WhatsApp affordance now. The note
+            itself is ordinary copy and keeps a neutral wash. */}
+        {note ? (
+          <div className="mt-7 rounded-2xl border border-white/10 bg-white/5 p-5">
+            <ZeroCmsEntryField field="note">
+              <p className="text-sm leading-relaxed text-white/80">{note}</p>
+            </ZeroCmsEntryField>
           </div>
         ) : null}
       </div>

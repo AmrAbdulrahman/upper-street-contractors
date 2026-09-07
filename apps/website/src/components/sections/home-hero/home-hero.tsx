@@ -1,6 +1,6 @@
 import { ZeroCmsEntry, ZeroCmsEntryField, ZeroCmsList } from "@usc/zero-cms-widget";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
-import { CmsButton } from "@/components/ui/button/cms-button";
+import { Button } from "@/components/ui/button";
 import { AtAGlance } from "@/components/ui/at-a-glance";
 import type { HomeHeroSectionFragment } from "@/generated/graphql";
 
@@ -56,7 +56,7 @@ export default function HomeHeroSection({ data: hero }: { data: HomeHeroData }) 
             >
               {buttons.map((button) => (
                 <ZeroCmsEntry key={button.id} entry={button}>
-                  <CmsButton data={button} />
+                  <Button data={button} />
                 </ZeroCmsEntry>
               ))}
             </ZeroCmsList>

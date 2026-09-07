@@ -12,8 +12,10 @@ export function WorkCard({ data }: WorkCardProps) {
   const { emoji, title, body, href, linkText, priceLine } = data;
 
   const cardClasses = [
-    "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white p-7 shadow-sm",
-    "transition-[background-color,border-color] duration-300 ease-out",
+    // `card-lift` (globals.css) owns every transition on this card, the colour
+    // ones included — see the note there for why they cannot be split between
+    // a utility class and the rule.
+    "card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white p-7 shadow-sm",
     "before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-1 before:rounded-t-2xl before:bg-gold before:content-['']",
     "before:opacity-0 before:transition-opacity before:duration-300 before:ease-out",
     "hover:border-gold/50 hover:bg-dark hover:before:opacity-100",

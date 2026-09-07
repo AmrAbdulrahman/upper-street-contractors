@@ -28,7 +28,7 @@ export function createEngineAdapter(engine: Engine): EngineAdapter {
     create: (t, v, actor) => engine.create(t, v, actor),
     update: (t, id, v, actor, expected) => engine.update(t, id, v, actor, expected),
     patch: (t, id, v, actor, expected) => engine.patch(t, id, v, actor, expected),
-    delete: (t, id, actor, expected) => engine.delete(t, id, actor, expected),
+    delete: (t, id, actor, expected, force) => engine.delete(t, id, actor, expected, force),
     publish: (t, id, actor, expected) => engine.publish(t, id, actor, expected),
     unpublish: (t, id, actor, expected) => engine.unpublish(t, id, actor, expected),
     discardDraft: (t, id, actor, expected) => engine.discardDraft(t, id, actor, expected),

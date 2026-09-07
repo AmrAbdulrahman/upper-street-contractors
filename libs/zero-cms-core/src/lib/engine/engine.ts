@@ -286,22 +286,85 @@ export class Engine {
     });
   }
 
+  /**
+   * Strip `targetId` out of one reference slot, leaving every other value alone.
+   * A `references` list loses the one id; a single `reference` becomes `null`.
+   * Returns the bag unchanged (same object) when the id was not in it, so the
+   * caller can skip a pointless write.
+   */
+  private static stripRef(
+    bag: EntryValues | null,
+    field: string,
+    targetId: string
+  ): EntryValues | null {
+    if (!bag || !(field in bag)) return bag;
+    const value = bag[field];
+    if (Array.isArray(value)) {
+      if (!value.includes(targetId)) return bag;
+      return { ...bag, [field]: value.filter((v) => v !== targetId) };
+    }
+    if (value !== targetId) return bag;
+    return { ...bag, [field]: null };
+  }
+
   async delete(
     typeName: string,
     id: string,
     actor: string,
-    expectedLastEditedAt: string
+    expectedLastEditedAt: string,
+    force = false
   ): Promise<void> {
     return this.mutex.run(async () => {
       await this.require(typeName, id);
       const allEntries = await this.fetchAllEntries();
       const hits: ReferenceHit[] = findReferencesTo(id, allEntries, this.index);
-      if (hits.length)
+      if (hits.length && !force)
         throw new ZeroCmsError(
           'REFERENCE_INTEGRITY',
           `Entry "${id}" is referenced by ${hits.length} field(s)`,
           hits
         );
+
+      // Force: unlink from every holder first, so Reference integrity has
+      // nothing left to refuse. Two things here are deliberate.
+      //
+      // It writes a holder's LIVE `values`, not only its `__draft`. Draft-only
+      // unlinking cannot clear the commonest blocker there is — the holder's
+      // own published version — so it would refuse almost every delete it was
+      // added to allow.
+      //
+      // `assertValid` is not run. Stripping a required relation is exactly what
+      // was asked for; validating would refuse the write and leave the entry
+      // undeletable, which is the state this exists to get out of.
+      //
+      // Not atomic: a failure part-way leaves some holders unlinked. That is
+      // recoverable because it is idempotent — the same call finishes the job,
+      // and the entry stays until it can actually go.
+      if (hits.length) {
+        const byId = new Map(allEntries.map((e) => [e.__id, e]));
+        // One write per holder, not per hit: an entry can reference the target
+        // from two fields, and the second CAS write would be against a token
+        // the first one just invalidated.
+        const holders = new Map<string, string[]>();
+        for (const hit of hits) {
+          const fields = holders.get(hit.fromId) ?? [];
+          if (!fields.includes(hit.field)) fields.push(hit.field);
+          holders.set(hit.fromId, fields);
+        }
+        for (const [holderId, fields] of holders) {
+          const holder = byId.get(holderId);
+          if (!holder) continue;
+          let values = holder.values;
+          let draft = holder.__draft;
+          for (const field of fields) {
+            values = Engine.stripRef(values, field, id);
+            draft = Engine.stripRef(draft, field, id);
+          }
+          if (values === holder.values && draft === holder.__draft) continue;
+          const next = this.stampMutation({ ...holder, values, __draft: draft }, actor);
+          await this.casWrite(holderId, holder.__lastEditedAt, next);
+        }
+      }
       const ok = await this.port.deleteEntry(id, expectedLastEditedAt);
       if (!ok)
         throw new ZeroCmsError(
