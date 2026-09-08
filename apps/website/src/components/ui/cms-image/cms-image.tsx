@@ -37,6 +37,13 @@ export type CmsImageProps = {
    * Contentful Paint *and* delays it.
    */
   priority?: boolean;
+  /**
+   * The default hover zoom (`.img-zoom` in globals.css). Off for images that
+   * already move with something else — a card whose `.card-lift` zooms them, an
+   * accreditation tile that lifts as a whole — and for images that must stay
+   * put, like the Story Timeline's cross-fading carousel photos.
+   */
+  zoom?: boolean;
 };
 
 /**
@@ -54,9 +61,13 @@ export function CmsImage({
   placeholderLabel = "Image placeholder",
   sizes = "(max-width: 1024px) 100vw, 536px",
   priority = false,
+  zoom = true,
 }: CmsImageProps) {
   const url = resolveMediaUrl(data?.url);
   const alt = data?.alt?.trim() || fallbackAlt || "";
+  const imageClassName = zoom
+    ? `img-zoom ${className ?? ""}`.trim()
+    : className;
 
   if (!url) {
     return (
@@ -78,7 +89,7 @@ export function CmsImage({
       alt={alt}
       width={data?.width ?? 800}
       height={data?.height ?? 680}
-      className={className}
+      className={imageClassName}
       style={style}
       sizes={sizes}
       priority={priority}

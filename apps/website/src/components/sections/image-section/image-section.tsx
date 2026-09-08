@@ -32,13 +32,17 @@ export function ImageSection({ data }: ImageSectionProps) {
         <div className="mx-auto max-w-container px-6 py-10">
           <figure className={`mx-auto ${WIDTHS[width ?? "wide"] ?? WIDTHS.wide}`}>
             <ZeroCmsEntryField field="image">
-              <CmsImage
-                data={image}
-                fallbackAlt={caption ?? "Renovation work"}
-                placeholderLabel="Image placeholder"
-                sizes="(max-width: 1024px) 100vw, 1120px"
-                className="h-auto w-full rounded-2xl object-cover"
-              />
+              {/* Clips the hover zoom, and only around the photo — the caption
+                  below stays outside it. */}
+              <div className="overflow-hidden rounded-2xl">
+                <CmsImage
+                  data={image}
+                  fallbackAlt={caption ?? "Renovation work"}
+                  placeholderLabel="Image placeholder"
+                  sizes="(max-width: 1024px) 100vw, 1120px"
+                  className="h-auto w-full rounded-2xl object-cover"
+                />
+              </div>
             </ZeroCmsEntryField>
 
             {caption ? (

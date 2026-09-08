@@ -42,7 +42,9 @@ export function SplitSection({ data }: SplitSectionProps) {
             ) : null}
 
             <ZeroCmsEntryField field="image">
-              <div className={`min-w-0${imageStart ? " lg:order-first" : ""}`}>
+              <div
+                className={`min-w-0 overflow-hidden rounded-2xl${imageStart ? " lg:order-first" : ""}`}
+              >
                 <CmsImage
                   data={image}
                   fallbackAlt={overline ?? "Renovation work"}

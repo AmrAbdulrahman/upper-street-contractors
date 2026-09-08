@@ -74,6 +74,7 @@ export function BlogCard({ data, flash = false }: BlogCardProps) {
                   fallbackAlt={title ?? "Blog post"}
                   placeholderLabel="Post image placeholder"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
+                  zoom={false}
                   className="card-zoom h-[200px] w-full object-cover"
                 />
               </ZeroCmsEntryField>
@@ -86,6 +87,7 @@ export function BlogCard({ data, flash = false }: BlogCardProps) {
                   fallbackAlt={title ?? "Blog post"}
                   placeholderLabel="Post image placeholder"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
+                  zoom={false}
                   className="card-zoom h-[200px] w-full object-cover"
                 />
               </ZeroCmsEntryField>

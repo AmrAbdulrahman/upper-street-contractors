@@ -61,7 +61,7 @@ export function WhoWeAreSection({ data }: WhoWeAreSectionProps) {
           </div>
 
           <ZeroCmsEntryField field="imageContainer">
-            <div className="min-w-0">
+            <div className="min-w-0 overflow-hidden rounded-2xl">
               <CmsImage
                 data={imageContainer}
                 fallbackAlt={title ?? "Team photo"}

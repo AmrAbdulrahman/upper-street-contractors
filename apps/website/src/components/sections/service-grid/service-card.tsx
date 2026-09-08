@@ -54,6 +54,8 @@ export function ServiceCard({
               <CmsImage
                 data={image}
                 fallbackAlt={title ?? "Service"}
+                // `.card-zoom` already zooms it from the card's hover.
+                zoom={false}
                 className="card-zoom h-full w-full object-cover"
                 placeholderLabel="Service photo"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"

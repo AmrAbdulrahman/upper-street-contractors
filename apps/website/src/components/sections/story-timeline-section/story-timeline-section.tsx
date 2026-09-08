@@ -147,6 +147,10 @@ export function StoryTimelineSection({ data }: StoryTimelineSectionProps) {
                   placeholderLabel="Milestone image placeholder"
                   sizes="100vw"
                   priority={index === 0}
+                  // No hover zoom here: the photos cross-fade in a stack under
+                  // fixed prev/next buttons, and a scaling picture under a
+                  // still control reads as the control having moved.
+                  zoom={false}
                   className="h-full w-full object-cover"
                 />
               </div>

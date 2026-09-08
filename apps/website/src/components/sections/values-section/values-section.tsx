@@ -110,13 +110,15 @@ export function ValuesSection({ data }: ValuesSectionProps) {
                 <ZeroCmsEntry entry={value}>
                   <div className="grid gap-8 lg:grid-cols-2 lg:items-end lg:gap-14">
                     <ZeroCmsEntryField field="image">
-                      <CmsImage
-                        data={value.image}
-                        fallbackAlt={value.label ?? "Our values"}
-                        placeholderLabel="Value image placeholder"
-                        sizes="(max-width: 1024px) 100vw, 536px"
-                        className="h-[280px] w-full rounded-2xl object-cover sm:h-[420px]"
-                      />
+                      <div className="min-w-0 overflow-hidden rounded-2xl">
+                        <CmsImage
+                          data={value.image}
+                          fallbackAlt={value.label ?? "Our values"}
+                          placeholderLabel="Value image placeholder"
+                          sizes="(max-width: 1024px) 100vw, 536px"
+                          className="h-[280px] w-full rounded-2xl object-cover sm:h-[420px]"
+                        />
+                      </div>
                     </ZeroCmsEntryField>
 
                     <div className="lg:pb-2">

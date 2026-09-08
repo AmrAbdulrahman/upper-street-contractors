@@ -397,3 +397,33 @@
     transform: none;
   }
 }
+
+/*
+ * The default hover zoom, on the image itself.
+ *
+ * `.card-zoom` above is the card variant: the whole card is the hover target,
+ * so its zoom hangs off `.card-lift:hover`. This one is for a standalone
+ * photograph with no card around it — a Split Section photo, a Gallery tile, a
+ * post hero — where the image IS the thing being pointed at, so it reacts to
+ * its own `:hover`. `CmsImage` adds it by default; call sites that already
+ * animate (cards, the accreditation tiles) or must not move (the Story Timeline
+ * carousel, whose photos cross-fade under fixed arrows) pass `zoom={false}`.
+ *
+ * Like `.card-zoom`, it needs an ancestor with `overflow: hidden` — without one
+ * the scaled photo grows over whatever sits beside it.
+ */
+.img-zoom {
+  transition: transform 500ms ease-out;
+}
+
+.img-zoom:hover {
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .img-zoom,
+  .img-zoom:hover {
+    transition: none;
+    transform: none;
+  }
+}

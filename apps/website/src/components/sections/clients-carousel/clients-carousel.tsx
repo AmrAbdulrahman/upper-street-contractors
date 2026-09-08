@@ -37,6 +37,9 @@ function LogoMark({
       // own marks — greying them out until a visitor happens to hover made the
       // section look faded rather than restrained, and on touch there is no hover
       // to reveal them with at all.
+      // No hover zoom either: the track scrolls continuously, so a mark that
+      // also scales under the pointer just jitters as it slides past.
+      zoom={false}
       className="w-auto object-contain"
       style={{ height, maxWidth }}
     />

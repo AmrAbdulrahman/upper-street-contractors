@@ -41,13 +41,18 @@ export function GallerySection({ data }: GallerySectionProps) {
               <ZeroCmsEntry key={figure.id} entry={figure}>
                 <figure className="min-w-0">
                   <ZeroCmsEntryField field="image">
-                    <CmsImage
-                      data={figure.image}
-                      fallbackAlt={figure.caption ?? title ?? "Renovation work"}
-                      placeholderLabel="Photo placeholder"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
-                      className="h-[240px] w-full rounded-xl object-cover"
-                    />
+                    {/* The clip wraps the photo only, not the <figure>: a
+                        figure-level clip still lets the zoom grow down into
+                        the caption's box. */}
+                    <div className="overflow-hidden rounded-xl">
+                      <CmsImage
+                        data={figure.image}
+                        fallbackAlt={figure.caption ?? title ?? "Renovation work"}
+                        placeholderLabel="Photo placeholder"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
+                        className="h-[240px] w-full rounded-xl object-cover"
+                      />
+                    </div>
                   </ZeroCmsEntryField>
                   {figure.caption ? (
                     <ZeroCmsEntryField field="caption">

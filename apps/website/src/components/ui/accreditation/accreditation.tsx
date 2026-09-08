@@ -84,6 +84,9 @@ export function Accreditation({
       fallbackAlt={accreditationTitle ?? "Accreditation"}
       placeholderLabel=""
       sizes={`${maxWidth}px`}
+      // The whole tile lifts and scales on hover (HOVER_CLASS); zooming the
+      // mark inside it as well would compound to 1.08.
+      zoom={false}
       className="w-auto object-contain"
       style={{ height: logoHeight, maxWidth, filter: glow }}
     />

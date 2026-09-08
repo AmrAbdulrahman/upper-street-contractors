@@ -130,7 +130,7 @@ export function ProjectHero({ project }: { project: ProjectDetailFragment }) {
                 src={heroUrl}
                 alt={project.hero?.alt ?? title ?? "Project photo"}
                 fill
-                className="object-cover"
+                className="img-zoom object-cover"
                 sizes="(max-width: 1200px) 100vw, 1200px"
                 priority
               />

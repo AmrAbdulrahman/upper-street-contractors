@@ -103,7 +103,7 @@ export function BlogPostHeader({ post }: { post: BlogPost }) {
 
         {hero?.url ? (
           <ZeroCmsEntryField field="hero">
-            <div className="mt-8">
+            <div className="mt-8 overflow-hidden rounded-2xl">
               <CmsImage
                 data={hero}
                 fallbackAlt={title ?? "Blog post"}

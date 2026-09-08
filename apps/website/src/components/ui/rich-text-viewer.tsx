@@ -213,7 +213,7 @@ export function RichTextViewer({
                 height={image.height ?? undefined}
                 loading="lazy"
                 decoding="async"
-                className={`my-6 h-auto rounded-lg ${sized ? "max-w-full" : "w-full"}`}
+                className={`img-zoom my-6 h-auto rounded-lg ${sized ? "max-w-full" : "w-full"}`}
                 style={sized ? { width } : undefined}
               />
             );
