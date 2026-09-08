@@ -107,10 +107,13 @@ tsconfig.base.json
    fragment type from `@/generated/graphql`.
 4. **Barrel** — export from `apps/website/src/components/sections/<name>/index.ts`, and from
    `apps/website/src/components/sections/index.ts`.
-5. **Union fragments** — add `... on <GqlType> { ...<Fragment> }` to **both**
-   `PageSectionBlocks` and `BlogPostSectionBlocks` in
-   `apps/website/src/components/sections/page-sections.graphql`. They are byte-identical but
-   cannot share a definition, and missing one is the easiest thing to forget.
+5. **Union fragments** — add `... on <GqlType> { ...<Fragment> }` to
+   `apps/website/src/components/sections/page-sections.graphql`, in **each union the Type is
+   actually allowed on** — `PageSectionBlocks`, `BlogPostSectionBlocks`, `ProjectSectionBlocks`.
+   They are byte-identical but cannot share a definition, and missing one is the easiest thing
+   to forget. Add it to a union whose `allowedTypes` does NOT list the Type and codegen fails
+   with `Fragment cannot be spread here as objects of type "…SectionsRef" can never be of type
+   "…"` — the union members are derived from `allowedTypes`, so step 1 decides this, not taste.
 6. **Wire PageSection** — add the fragment type to the `PageSectionData` union and the
    `switch` in `apps/website/src/components/sections/page-section.tsx`.
 7. **Codegen** — `nx cms-schema website --skip-nx-cache && nx codegen website --skip-nx-cache`.

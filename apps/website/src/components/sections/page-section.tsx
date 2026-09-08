@@ -21,6 +21,8 @@ import {
   type ServiceGridSectionFragment,
   type ServiceOfferSectionFragment,
   type SplitSectionFragment,
+  type StoryTimelineSectionFragment,
+  type ValuesSectionFragment,
   type WhatWeDoSectionFragment,
   type WhoWeAreSectionFragment,
   type WhyChooseUsSectionFragment,
@@ -48,6 +50,8 @@ import { SeparatorSection } from "./separator-section";
 import { ServiceGridSection } from "./service-grid";
 import { ServiceOfferSection } from "./service-offer";
 import { SplitSection } from "./split-section";
+import { StoryTimelineSection } from "./story-timeline-section";
+import { ValuesSection } from "./values-section";
 import { WhatWeDoSection } from "./what-we-do";
 import { WhoWeAreSection } from "./who-we-are";
 import { WhyChooseUsSection } from "./why-choose-us";
@@ -76,6 +80,8 @@ export type PageSectionData = (
   | ServiceGridSectionFragment
   | ServiceOfferSectionFragment
   | SplitSectionFragment
+  | StoryTimelineSectionFragment
+  | ValuesSectionFragment
   | WhatWeDoSectionFragment
   | WhoWeAreSectionFragment
   | WhyChooseUsSectionFragment
@@ -151,6 +157,14 @@ export function PageSection({ section }: { section: PageSectionData }) {
 
     case "ProseSection":
       return <ProseSection data={section as ProseSectionFragment} />;
+
+    case "StoryTimelineSection":
+      return (
+        <StoryTimelineSection data={section as StoryTimelineSectionFragment} />
+      );
+
+    case "ValuesSection":
+      return <ValuesSection data={section as ValuesSectionFragment} />;
 
     // Project-only, and allowed only on `project.sections` — a page's Type
     // picker never offers them, so these two cases are unreachable from a page

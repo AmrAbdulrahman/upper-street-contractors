@@ -70,6 +70,12 @@ fragment PageSectionBlocks on PageSectionsRef {
   ... on ProseSection {
     ...ProseSection
   }
+  ... on StoryTimelineSection {
+    ...StoryTimelineSection
+  }
+  ... on ValuesSection {
+    ...ValuesSection
+  }
   ... on Faq {
     ...FaqSection
   }

@@ -1,0 +1,21 @@
+fragment ValueItem on ValueItem {
+  id
+  type
+  label
+  body
+  image {
+    url
+    alt
+    width
+    height
+  }
+}
+
+fragment ValuesSection on ValuesSection {
+  id
+  type
+  overline
+  values {
+    ...ValueItem
+  }
+}

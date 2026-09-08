@@ -126,11 +126,11 @@ _Avoid_: testimonial, review (the site-wide concept), Quote section (what replac
 
 **Project Timeline**:
 The section listing ordered Timeline Steps describing how a job progressed (a `project-timeline-section`, offered only on a Project).
-_Avoid_: schedule, roadmap, programme, How It Works section (the home page's, about the company)
+_Avoid_: schedule, roadmap, programme, How It Works section (the home page's, about the company), Story Timeline (the company's history, offered only on a page)
 
 **Timeline Step**:
 One stage in a Project Timeline — an optional step marker, a title, and a description.
-_Avoid_: milestone, phase
+_Avoid_: phase, Milestone (a year in the Story Timeline — a company year, not a stage of one job)
 
 **Project images** (retired):
 The photos on a Project's detail page, held as `project-image` entries. A Project's photos are a Gallery section of Figures now: a Figure and a Project image were the same two fields (image + caption), and the only thing separating them was which page they hung off. The hero collage they also fed is one `hero` photo instead. The Type still exists and its entries are still stored; nothing reads them.
@@ -215,11 +215,31 @@ A page section (`split-section` CMS type) pairing a gold overline — spanning t
 _Avoid_: hero, banner, feature row, Who We Are section (a distinct home-page section)
 
 **Prose Section**:
-A full-width page section (`prose-section` CMS type) pairing a gold overline with a rich-text `body` (blocks) in a narrow reading column — no image. Rendered by `ProseSection` via `<RichTextViewer variant="prose">`, whose heading scale is the largest of them — every variant sizes headings by level now, but this is the one meant for long-form copy. Powers the Legal pages and any other prose page.
+A full-width page section (`prose-section` CMS type) pairing a gold overline and an optional serif `title` with a rich-text `body` (blocks) in a narrow reading column — no image. Rendered by `ProseSection` via `<RichTextViewer variant="prose">`, whose heading scale is the largest of them — every variant sizes headings by level now, but this is the one meant for long-form copy. Powers the Legal pages, the About page's opening block, and any other prose page. The title came later than the Legal pages, so an entry without one closes the gap it would have left rather than reserving the space.
 _Avoid_: Split Section (pairs the body with an image), Who We Are section (home-page; has title/image/buttons), rich text (the field kind / RichTextViewer component)
 
+**Story Timeline**:
+The About page section telling the company's history (a `story-timeline-section`, offered only on a page): a gold overline and serif title, then a full-bleed photograph, a Year rail beneath it, and the selected Milestone's heading and body at container width. Selecting a year swaps the photograph and the copy. Distinct from the Project Timeline, which is one job's stages and is offered only on a Project.
+_Avoid_: carousel, slider, history slider, Project Timeline (the per-job stepper), About timeline
+
+**Milestone**:
+One year in a Story Timeline (a `milestone`): a free-text Date label — a rail reads "2016" or "Spring 2019", which the `date` field kind cannot hold — a heading, a rich body (blocks) and an image.
+_Avoid_: slide, step, Timeline Step (the Project Timeline's child), event
+
+**Year rail**:
+The row of Date labels under a Story Timeline's photograph, connected by a hairline with a filled marker on the selected year. It both labels the current Milestone and moves between them, which is why it replaces the dots a carousel would carry. Prev/next arrows sit over the photograph itself as the second way in, alongside swipe; all three stop at the first and last Milestone rather than looping, because a rail of years reads as chronological and not as a ring.
+_Avoid_: dots, bullets, pagination, stepper (the Enquiry Wizard's, which tracks progress through a form)
+
+**Value tabs**:
+The About page section presenting what the company stands for (a `values-section`, offered only on a page): a strip of tab buttons over the selected Value's image and copy, the copy sitting to the right and flush with the bottom edge of the image. Its section heading wears the overline style but is a real `<h2>` — the design asks for a small gold eyebrow instead of a serif title, and demoting it to a `<p>` would leave the page jumping from `h1` to `h3`. They are tabs in the WAI-ARIA sense (ADR 0024), not the Category chips the projects and blog indexes use.
+_Avoid_: overline (the eyebrow style the heading wears, not this strip), values carousel, accordion, chips, filters
+
+**Value**:
+One tab in a Value tabs section (a `value-item`): a tab label, a rich body (blocks) of three to five lines, and an image.
+_Avoid_: pillar, principle, card, tab (the control, not the content behind it)
+
 **FAQ section**:
-A page section (`faq` CMS type) pairing a gold overline and a serif title with a One-to-Many relation to FAQ items, rendered as a single-open accordion (native `<details>`, one row open at a time). Seeded on the About page (5 items, at the page foot) and as a 3-item, service-specific block directly above the Case Studies section on every nav service page.
+A page section (`faq` CMS type) pairing a gold overline and a serif title with a One-to-Many relation to FAQ items, rendered as a single-open accordion (native `<details>`, one row open at a time). Seeded as a 3-item, service-specific block directly above the Case Studies section on every nav service page. (It also sat at the foot of the About page until that page was rebuilt around the Story Timeline and Value tabs.)
 _Avoid_: accordion (the UI pattern only), questions section, help section, references (the implementation relation name)
 
 **FAQ item**:

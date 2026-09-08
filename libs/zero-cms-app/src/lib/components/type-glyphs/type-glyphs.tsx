@@ -138,6 +138,29 @@ export const TYPE_GLYPHS: Record<string, ReactElement> = {
     </Glyph>
   ),
 
+  /** Story Timeline — a full-bleed frame over a dotted year rail. */
+  storyTimeline: (
+    <Glyph>
+      <Frame x={4} y={5} w={56} h={18} />
+      <line x1="10" y1="30" x2="54" y2="30" />
+      {[10, 25, 39, 54].map((cx) => (
+        <circle key={cx} cx={cx} cy={30} r={cx === 25 ? 2.6 : 1.6} />
+      ))}
+      <line x1="18" y1="36" x2="46" y2="36" />
+    </Glyph>
+  ),
+
+  /** Value tabs — a strip of pills over a frame beside lines. */
+  valueTabs: (
+    <Glyph>
+      {[6, 24, 42].map((x) => (
+        <rect key={x} x={x} y={5} width="16" height="7" rx="3.5" />
+      ))}
+      <Frame x={6} y={17} w={24} h={17} />
+      <Lines n={3} x={36} width={22} top={21} gap={6} />
+    </Glyph>
+  ),
+
   /** Gallery — a 3×2 grid of tiles. */
   gallery: (
     <Glyph>

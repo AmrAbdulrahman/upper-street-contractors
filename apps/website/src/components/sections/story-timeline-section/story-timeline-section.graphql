@@ -1,0 +1,23 @@
+fragment Milestone on Milestone {
+  id
+  type
+  dateLabel
+  heading
+  body
+  image {
+    url
+    alt
+    width
+    height
+  }
+}
+
+fragment StoryTimelineSection on StoryTimelineSection {
+  id
+  type
+  overline
+  title
+  milestones {
+    ...Milestone
+  }
+}

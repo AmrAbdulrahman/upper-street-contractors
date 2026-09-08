@@ -11,6 +11,8 @@ export { ProseSection } from "./prose-section";
 export { RecentWorkSection } from "./recent-work";
 export { ServiceCard, ServiceGridSection } from "./service-grid";
 export { SplitSection } from "./split-section";
+export { StoryTimelineSection } from "./story-timeline-section";
+export { ValuesSection } from "./values-section";
 export { PageSection, type PageSectionData } from "./page-section";
 export { WhatWeDoSection } from "./what-we-do";
 export { WhoWeAreSection } from "./who-we-are";
