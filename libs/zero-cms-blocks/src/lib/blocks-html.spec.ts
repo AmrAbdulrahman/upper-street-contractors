@@ -83,6 +83,37 @@ describe('the wider toolbar', () => {
     ]);
   });
 
+  it('reads an image size off inline style when there are no attributes', () => {
+    // HugeRTE writes the width/height ATTRIBUTES on an image with no inline
+    // style, and switches to `style` once one exists — which is how pasted
+    // markup usually arrives. Reading attributes only dropped the size on save.
+    const { blocks } = htmlToBlocks(
+      '<img src="/media/b.png" alt="B" style="width: 400px; height: 300px" />'
+    );
+    expect(blocks).toEqual([
+      {
+        type: 'image',
+        image: { url: '/media/b.png', alternativeText: 'B', width: 400, height: 300 },
+      },
+    ]);
+  });
+
+  it('prefers the attribute over the style when both are present', () => {
+    const { blocks } = htmlToBlocks(
+      '<img src="/m/c.png" alt="" width="800" height="600" style="width: 400px; height: 300px" />'
+    );
+    expect(blocks[0]).toMatchObject({ image: { width: 800, height: 600 } });
+  });
+
+  it('ignores a size a pixel box cannot hold', () => {
+    // A percentage or a keyword is not a number of pixels, and guessing one
+    // would write a wrong size into the store rather than leaving it unset.
+    const { blocks } = htmlToBlocks('<img src="/m/d.png" alt="" style="width: 50%; height: auto" />');
+    expect(blocks).toEqual([
+      { type: 'image', image: { url: '/m/d.png', alternativeText: '' } },
+    ]);
+  });
+
   it('lifts an image out of the paragraph the editor puts it in', () => {
     // HugeRTE inserts into the current block, so this is the ordinary case —
     // not an edge one. Before the lift, the <img> was an unknown inline node.

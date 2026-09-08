@@ -189,18 +189,35 @@ export function RichTextViewer({
           // rather than next/image on purpose: the URL comes from the media
           // store and can be on any host, and an unconfigured remote host is a
           // hard error in next/image rather than an unoptimised picture.
-          image: ({ image }) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={image.url}
-              alt={image.alternativeText ?? ""}
-              width={image.width ?? undefined}
-              height={image.height ?? undefined}
-              loading="lazy"
-              decoding="async"
-              className="my-6 h-auto w-full rounded-lg"
-            />
-          ),
+          //
+          // The size an editor types into the image dialog is stored on the
+          // block and has to survive to here. It did not: `w-full` is
+          // `width: 100%`, and a class beats the `width` attribute, so every
+          // image rendered at full column width no matter what the dialog said.
+          //
+          // So a sized image gets its width from the block and `max-w-full` to
+          // stay inside a narrow column on a small screen; an image with no
+          // stored size keeps filling the column, which is what every existing
+          // one already does. `h-auto` in both cases — the height attribute is
+          // still emitted, so the browser reserves the right box from the
+          // aspect ratio and the copy below does not jump when the file lands.
+          image: ({ image }) => {
+            const width = image.width ?? undefined;
+            const sized = typeof width === "number" && width > 0;
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={image.url}
+                alt={image.alternativeText ?? ""}
+                width={width}
+                height={image.height ?? undefined}
+                loading="lazy"
+                decoding="async"
+                className={`my-6 h-auto rounded-lg ${sized ? "max-w-full" : "w-full"}`}
+                style={sized ? { width } : undefined}
+              />
+            );
+          },
           code: ({ plainText }) => (
             <pre className="mb-4 overflow-x-auto rounded-lg bg-dark p-4 text-[13px] leading-relaxed text-white">
               <code>{plainText}</code>

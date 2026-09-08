@@ -243,10 +243,28 @@ function listFrom(el: Element, dropped: Set<string>): ListNode {
  * Width and height are carried when the markup states them, so the public page
  * can reserve the space and not shift its layout while the file loads; an image
  * that never declared them stays undeclared rather than being given a guess.
+ *
+ * Either spelling counts. The editor writes the `width`/`height` ATTRIBUTES on
+ * an image that has no inline style — which is every image this file emits — so
+ * that is the usual shape. But it switches to inline `style` the moment one is
+ * present, and pasted markup routinely arrives that way. Reading attributes
+ * only meant a pasted `<img style="width:400px">` lost its size on the next
+ * save, silently, because nothing else in the round trip was wrong.
  */
+function sizeFrom(img: Element, name: 'width' | 'height'): number {
+  const attr = Number(img.getAttribute(name));
+  if (Number.isFinite(attr) && attr > 0) return attr;
+  // `style.width` is a string like "400px"; parseFloat stops at the unit and
+  // returns NaN for the percentages and keywords a pixel box cannot use.
+  const style = (img as Element & { style?: CSSStyleDeclaration }).style;
+  const raw = style?.[name];
+  if (!raw || !/^[\d.]+px$/.test(raw.trim())) return Number.NaN;
+  return parseFloat(raw);
+}
+
 function imageBlockFrom(img: Element): BlocksNode {
-  const width = Number(img.getAttribute('width'));
-  const height = Number(img.getAttribute('height'));
+  const width = sizeFrom(img, 'width');
+  const height = sizeFrom(img, 'height');
   return {
     type: 'image',
     image: {
