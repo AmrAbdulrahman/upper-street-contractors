@@ -61,7 +61,8 @@ Everything external the site depends on, and what it costs. Prices checked July 
 re-verify before budgeting ([Vercel](https://vercel.com/pricing),
 [Upstash](https://upstash.com/pricing/redis), [Porkbun](https://porkbun.com/tld/contractors),
 [Google Workspace](https://workspace.google.com/pricing),
-[GizmoSauce](https://gizmosauce.com/pricing), [Trustpilot](https://business.trustpilot.com/pricing)).
+[GizmoSauce](https://gizmosauce.com/pricing), [Trustpilot](https://business.trustpilot.com/pricing),
+[Ideal Postcodes](https://ideal-postcodes.co.uk/pricing)).
 
 | Service | What it does | Cost |
 | ------- | ------------ | ---- |
@@ -72,6 +73,7 @@ re-verify before budgeting ([Vercel](https://vercel.com/pricing),
 | **Email** | Enquiry-form delivery (nodemailer over Resend SMTP), sending as `noreply@upperstreet.contractors` on the verified domain. Resend's free tier covers enquiry volume. Delivery *to* `info@upperstreet.contractors` still needs a real mailbox on the domain — sending and receiving are separate. | $0 now → Google Workspace Business Starter **£5/user/mo** (annual, + VAT) for the `info@` mailbox |
 | **GizmoSauce** | The Google Reviews widget embedded on the site. | $8.25/mo (Starter, 5 widgets — we use 1); ≈ $5.78/mo billed yearly (30% off) |
 | **Trustpilot** | TrustBox review widget + profile. | $0 — free business plan is enough (50 invites/mo, widget, replies) |
+| **Ideal Postcodes** | UK address type-ahead on the enquiry form ([ADR 0026](./docs/adr/0026-address-lookup-server-proxied.md)). Usage-billed, not a subscription. Typing is free — only resolving the address someone picks costs a credit, so the bill tracks completed enquiries, not traffic. Resolved addresses are cached in the Redis we already run. | 50 free credits to start; then £9 / 200 credits (£0.045 each), down to £0.028 at volume. Credits valid 12 months |
 
 **Totals**
 
@@ -81,6 +83,10 @@ re-verify before budgeting ([Vercel](https://vercel.com/pricing),
 | Today, GizmoSauce billed yearly | ≈ $28.18 | ≈ $338 |
 | With `info@` mailbox (Workspace Starter) | + £5 + VAT | + £60 + VAT |
 | **Overall, everything on (incl. `info@` + VAT)** | ≈ **$38 / £30** | ≈ **$455 / £355** |
+
+Ideal Postcodes is left out of the totals: it is prepaid credit drawn down by real
+enquiries rather than a recurring charge. Roughly one credit per enquiry — searching is
+free, and the Redis cache means a second enquiry from the same address costs nothing.
 
 Overall row assumes ≈ $1.30/£ (re-check FX) and Workspace VAT included (reclaimable if
 VAT-registered). Vercel usage staying inside Pro's included credit and Redis inside the
@@ -98,8 +104,8 @@ Env vars live in a **single root file** — one app, no per-app duplication.
    cp .env.example .env.local
    ```
    Fill in the Upstash Redis + Vercel Blob values (Vercel Marketplace → Storage tab
-   on the project — see `docs/agents/project-stack.md` → Environment variables) and
-   `ZERO_CMS_AUTH_SECRET`.
+   on the project — see `docs/agents/project-stack.md` → Environment variables),
+   `ZERO_CMS_AUTH_SECRET`, and `IDEAL_POSTCODES_API_KEY` (Ideal Postcodes → API Keys).
 3. **Allow direnv** (once per machine):
    ```bash
    direnv allow          # repo root — loads .env.local via .envrc

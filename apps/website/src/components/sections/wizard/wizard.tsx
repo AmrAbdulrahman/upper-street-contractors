@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { DayPicker } from "@daypicker/react";
 import "@daypicker/react/style.css";
 import {
@@ -14,6 +15,11 @@ import { BusyOverlay } from "@/components/ui/busy-overlay";
 import { CmsImage } from "@/components/ui/cms-image";
 import { RichTextViewer } from "@/components/ui/rich-text-viewer";
 import type { WizardSectionFragment } from "@/generated/graphql";
+import {
+  MIN_QUERY_LENGTH,
+  type LookupAddress,
+  type Suggestion,
+} from "@/helpers/address-lookup";
 import { AvailabilityField } from "./availability-field";
 import {
   DAYPICKER_THEME,
@@ -72,7 +78,7 @@ const fileKey = (f: File) => `${f.name}:${f.size}:${f.lastModified}`;
 /** Files above this go up in parallel parts, with per-part retry — worth it for video. */
 const MULTIPART_THRESHOLD_BYTES = 5 * 1024 * 1024;
 
-// Postcode lookup (postcodes.io): matched by CMS fieldKey convention.
+// Address lookup: the fields it fills are matched by CMS fieldKey convention.
 const POSTCODE_RE = /^post.?code$/i;
 const TOWN_RE = /^(town|city)$/i;
 const REGION_RE = /^(region|county)$/i;
@@ -88,11 +94,19 @@ const COMPANY_RE = /^(?:company|organisation|organization)(?:[-_ ]?name)?$/i;
 const GIVEN_NAME_RE = /^(?:first|given|fore)[-_ ]?name$/i;
 const FAMILY_NAME_RE = /^(?:last|family|sur)[-_ ]?name$/i;
 const NAME_RE = /name/i;
-// Loose UK postcode shape (e.g. "N1 1AA", "SW1A 1AA"); postcodes.io is the source of truth.
-const UK_POSTCODE_RE = /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/;
-const POSTCODE_DEBOUNCE_MS = 700;
+// Short, because the suggestion request is free at the vendor and the list is
+// meant to keep up with the keyboard. Only resolving a pick costs a credit.
+const ADDRESS_DEBOUNCE_MS = 200;
 
-type PostcodeStatus = "idle" | "loading" | "found" | "notfound" | "error";
+type PostcodeStatus =
+  | "idle"
+  | "loading"
+  | "listed"
+  | "resolving"
+  | "found"
+  | "notfound"
+  | "ratelimited"
+  | "error";
 
 /**
  * Map a CMS fieldKey to an HTML autocomplete token.
@@ -192,21 +206,21 @@ export function WizardSection({ data }: WizardSectionProps) {
   // `company_website`, but nothing ever rendered it — so the check was dead.
   const [honeypot, setHoneypot] = useState("");
   const [pcStatus, setPcStatus] = useState<Record<string, PostcodeStatus>>({});
-  const [pcSuggestions, setPcSuggestions] = useState<Record<string, string[]>>({});
+  // The type-ahead's list, whether it is showing, and which row is highlighted.
+  // Keyed by question id: one address field per step, so one list per step.
+  const [pcSuggestions, setPcSuggestions] = useState<
+    Record<string, Suggestion[]>
+  >({});
   const [pcOpen, setPcOpen] = useState<Record<string, boolean>>({});
+  const [pcActive, setPcActive] = useState<Record<string, number>>({});
   const pcTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pcSuppressOpen = useRef(false);
 
-  // Close any open postcode dropdown when clicking outside its widget.
+  // Close an open suggestion list when the click lands outside its field.
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && target.closest("[data-pc-widget]")) return;
-      pcSuppressOpen.current = true;
       setPcOpen({});
-      window.setTimeout(() => {
-        pcSuppressOpen.current = false;
-      }, 300);
     };
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
@@ -331,105 +345,179 @@ export function WizardSection({ data }: WizardSectionProps) {
   const setField = (key: string, value: string) =>
     setFormAnswers((prev) => ({ ...prev, [key]: value }));
 
-  // Validate a UK postcode via postcodes.io and auto-fill sibling Town/Region
-  // fields (matched by fieldKey) in the same FormQuestion. Free, no API key.
-  const lookupPostcode = async (questionId: string, raw: string) => {
-    const pc = raw.trim();
+  /**
+   * Step 1, free: ask our own /api/address-lookup what matches what has been
+   * typed so far. Autocomplete does not draw down credit at the vendor, so
+   * this can run on every pause in typing; only picking one costs anything.
+   *
+   * The key and the vendor live server-side (ADR 0026), so the browser
+   * contacts no third party and nothing here needs a Consent gate.
+   */
+  const fetchSuggestions = async (questionId: string, query: string) => {
     const statusKey = `${questionId}:__postcode`;
-    if (!UK_POSTCODE_RE.test(pc)) {
+    const q = query.trim();
+    if (q.length < MIN_QUERY_LENGTH) {
+      setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
+      setPcOpen((s) => ({ ...s, [questionId]: false }));
       setPcStatus((s) => ({ ...s, [statusKey]: "idle" }));
       return;
     }
+
     setPcStatus((s) => ({ ...s, [statusKey]: "loading" }));
     try {
       const res = await fetch(
-        `https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`,
+        `/api/address-lookup?q=${encodeURIComponent(q)}`,
       );
-      if (!res.ok) {
-        setPcStatus((s) => ({ ...s, [statusKey]: "notfound" }));
-        return;
-      }
       const body = (await res.json()) as {
-        result?: {
-          admin_district?: string | null;
-          parish?: string | null;
-          region?: string | null;
-          country?: string | null;
-        } | null;
+        suggestions?: Suggestion[];
+        error?: string;
       };
-      const result = body.result;
-      if (!result) {
-        setPcStatus((s) => ({ ...s, [statusKey]: "notfound" }));
+      const found = body.suggestions ?? [];
+      if (!res.ok) {
+        setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
+        setPcOpen((s) => ({ ...s, [questionId]: false }));
+        setPcStatus((s) => ({
+          ...s,
+          [statusKey]: body.error === "rate-limited" ? "ratelimited" : "error",
+        }));
         return;
       }
-      const q = questions.find((x) => x.id === questionId);
-      const siblings =
-        q && q.__typename === "FormQuestion"
-          ? (q.fields ?? []).filter(Boolean)
-          : [];
-      const townField = siblings.find((f) => TOWN_RE.test(f!.fieldKey ?? ""));
-      const regionField = siblings.find((f) => REGION_RE.test(f!.fieldKey ?? ""));
-      // postcodes.io has no PAF "post town"; admin_district is the closest area name.
-      const town = result.admin_district || result.parish || "";
-      // region is null outside England — fall back to the country name.
-      const region = result.region || result.country || "";
-      if (townField?.fieldKey && town) {
-        setField(`${questionId}:${townField.fieldKey}`, town);
+      setPcSuggestions((s) => ({ ...s, [questionId]: found }));
+      setPcActive((s) => ({ ...s, [questionId]: -1 }));
+      setPcOpen((s) => ({ ...s, [questionId]: found.length > 0 }));
+      setPcStatus((s) => ({
+        ...s,
+        [statusKey]: found.length > 0 ? "listed" : "notfound",
+      }));
+    } catch {
+      setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
+      setPcOpen((s) => ({ ...s, [questionId]: false }));
+      setPcStatus((s) => ({ ...s, [statusKey]: "error" }));
+    }
+  };
+
+  /** Search once the typing settles. Short, because the request is free and
+   *  the list is meant to keep up with the keyboard. */
+  const scheduleSuggestions = (questionId: string, query: string) => {
+    if (pcTimer.current) clearTimeout(pcTimer.current);
+    pcTimer.current = setTimeout(() => {
+      void fetchSuggestions(questionId, query);
+    }, ADDRESS_DEBOUNCE_MS);
+  };
+
+  /**
+   * Writes a resolved address into the sibling fields of the same
+   * FormQuestion, matched by the same fieldKey convention `autoCompleteFor`
+   * uses.
+   *
+   * Line 2 has to be resolved BEFORE line 1 and excluded from it:
+   * `ADDRESS_LINE1_RE` is `/^address/i`, so on its own it matches
+   * `addressLine2` too and both lines would get the same street.
+   */
+  const applyAddress = (questionId: string, address: LookupAddress) => {
+    const q = questions.find((x) => x.id === questionId);
+    const siblings =
+      q && q.__typename === "FormQuestion"
+        ? (q.fields ?? []).filter(Boolean)
+        : [];
+    const keyFor = (re: RegExp) =>
+      siblings.find((f) => re.test(f!.fieldKey ?? ""))?.fieldKey ?? null;
+
+    const line2Key = keyFor(ADDRESS_LINE2_RE);
+    const line1Key =
+      siblings.find(
+        (f) =>
+          ADDRESS_LINE1_RE.test(f!.fieldKey ?? "") &&
+          !ADDRESS_LINE2_RE.test(f!.fieldKey ?? ""),
+      )?.fieldKey ?? null;
+    const townKey = keyFor(TOWN_RE);
+    const postcodeKey = keyFor(POSTCODE_RE);
+    const companyKey = keyFor(COMPANY_RE);
+
+    if (line1Key) setField(`${questionId}:${line1Key}`, address.line1);
+    if (line2Key) setField(`${questionId}:${line2Key}`, address.line2);
+    if (townKey) setField(`${questionId}:${townKey}`, address.town);
+    // The field the visitor typed into is the Postcode one, and what they typed
+    // was a search. Replace it with the postcode the API actually returned, so
+    // the Enquiry email carries one format rather than five.
+    if (postcodeKey && address.postcode) {
+      setField(`${questionId}:${postcodeKey}`, address.postcode);
+    }
+    // Only when it is empty, and never flip the "I am a company" toggle — that
+    // is the visitor's declaration to make, not ours.
+    if (
+      companyKey &&
+      address.organisation &&
+      !(formAnswers[`${questionId}:${companyKey}`] ?? "").trim()
+    ) {
+      setField(`${questionId}:${companyKey}`, address.organisation);
+    }
+  };
+
+  /** Step 2, one credit: resolve the chosen suggestion and fill the fields. */
+  const chooseSuggestion = async (questionId: string, suggestionId: string) => {
+    const statusKey = `${questionId}:__postcode`;
+    if (pcTimer.current) clearTimeout(pcTimer.current);
+    setPcOpen((s) => ({ ...s, [questionId]: false }));
+    setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
+    setPcStatus((s) => ({ ...s, [statusKey]: "resolving" }));
+
+    try {
+      const res = await fetch(
+        `/api/address-lookup?id=${encodeURIComponent(suggestionId)}`,
+      );
+      const body = (await res.json()) as {
+        address?: LookupAddress;
+        error?: string;
+      };
+      if (!res.ok || !body.address) {
+        setPcStatus((s) => ({
+          ...s,
+          [statusKey]:
+            body.error === "rate-limited"
+              ? "ratelimited"
+              : body.error === "not-found"
+                ? "notfound"
+                : "error",
+        }));
+        return;
       }
-      if (regionField?.fieldKey && region) {
-        setField(`${questionId}:${regionField.fieldKey}`, region);
-      }
+      applyAddress(questionId, body.address);
       setPcStatus((s) => ({ ...s, [statusKey]: "found" }));
     } catch {
       setPcStatus((s) => ({ ...s, [statusKey]: "error" }));
     }
   };
 
-  // postcodes.io autocomplete: candidate postcodes for a partial input (free).
-  const fetchPostcodeSuggestions = async (questionId: string, query: string) => {
-    const q = query.trim();
-    const statusKey = `${questionId}:__postcode`;
-    if (q.length < 2) {
-      setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
+  /** Arrow keys move the highlight, Enter takes it, Escape closes the list.
+   *  Without these the listbox is mouse-only, which fails WCAG 2.1.1. */
+  const onAddressKeyDown = (
+    questionId: string,
+    e: ReactKeyboardEvent<HTMLInputElement>,
+  ) => {
+    const list = pcSuggestions[questionId] ?? [];
+    const open = Boolean(pcOpen[questionId]) && list.length > 0;
+    const active = pcActive[questionId] ?? -1;
+
+    if (e.key === "Escape") {
       setPcOpen((s) => ({ ...s, [questionId]: false }));
-      setPcStatus((s) => ({ ...s, [statusKey]: "idle" }));
       return;
     }
-    setPcStatus((s) => ({ ...s, [statusKey]: "loading" }));
-    try {
-      const res = await fetch(
-        `https://api.postcodes.io/postcodes/${encodeURIComponent(q)}/autocomplete`,
-      );
-      if (!res.ok) {
-        setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
-        setPcOpen((s) => ({ ...s, [questionId]: true }));
-        setPcStatus((s) => ({ ...s, [statusKey]: "notfound" }));
-        return;
-      }
-      const body = (await res.json()) as { result?: string[] | null };
-      const list = body.result ?? [];
-      setPcSuggestions((s) => ({ ...s, [questionId]: list }));
-      setPcOpen((s) => ({ ...s, [questionId]: true }));
-      setPcStatus((s) => ({ ...s, [statusKey]: list.length ? "idle" : "notfound" }));
-    } catch {
-      setPcStatus((s) => ({ ...s, [statusKey]: "error" }));
+    if (!open) return;
+
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      const next = (active + step + list.length + 1) % (list.length + 1);
+      // The extra slot is "nothing highlighted", so arrowing past either end
+      // returns to the text the visitor typed rather than wrapping blindly.
+      setPcActive((s) => ({ ...s, [questionId]: next === list.length ? -1 : next }));
+      return;
     }
-  };
-
-  const schedulePostcodeSuggestions = (questionId: string, query: string) => {
-    if (pcTimer.current) clearTimeout(pcTimer.current);
-    pcTimer.current = setTimeout(() => {
-      void fetchPostcodeSuggestions(questionId, query);
-    }, POSTCODE_DEBOUNCE_MS);
-  };
-
-  // Pick a postcode from the dropdown → set the field + fill Town/Region.
-  const selectPostcode = (questionId: string, fieldKey: string, pc: string) => {
-    if (pcTimer.current) clearTimeout(pcTimer.current);
-    setField(`${questionId}:${fieldKey}`, pc);
-    setPcSuggestions((s) => ({ ...s, [questionId]: [] }));
-    setPcOpen((s) => ({ ...s, [questionId]: false }));
-    void lookupPostcode(questionId, pc);
+    if (e.key === "Enter" && active >= 0 && list[active]) {
+      e.preventDefault();
+      void chooseSuggestion(questionId, list[active]!.id);
+    }
   };
 
   /**
@@ -1164,29 +1252,44 @@ export function WizardSection({ data }: WizardSectionProps) {
                         const isPostcode = POSTCODE_RE.test(field!.fieldKey ?? "");
 
                         if (isPostcode) {
-                          const listId = `${id}-pc-list`;
+                          const listId = `${id}-address-list`;
+                          const statusId = `${id}-status`;
                           const pcState =
                             pcStatus[`${current.id}:__postcode`] ?? "idle";
                           const suggestions = pcSuggestions[current.id] ?? [];
                           const listOpen =
                             Boolean(pcOpen[current.id]) && suggestions.length > 0;
+                          const active = pcActive[current.id] ?? -1;
                           const pcMessage =
                             pcState === "loading"
-                              ? "Searching postcodes…"
-                              : pcState === "found"
-                                ? "Town & region filled in below."
-                                : pcState === "notfound"
-                                  ? "No matching postcodes — check and try again."
-                                  : pcState === "error"
-                                    ? "Couldn't reach the postcode service — type your address manually."
-                                    : "";
+                              ? "Searching addresses…"
+                              : pcState === "listed"
+                                ? `${suggestions.length} ${suggestions.length === 1 ? "match" : "matches"} — use the arrow keys or click one.`
+                                : pcState === "resolving"
+                                  ? "Fetching the full address…"
+                                  : pcState === "found"
+                                    ? "Address filled in below — edit anything that is not right."
+                                    : pcState === "notfound"
+                                      ? "No matches — keep typing, or fill the address in below."
+                                      : pcState === "ratelimited"
+                                        ? "Too many searches just now — fill the address in below."
+                                        : pcState === "error"
+                                          ? "Couldn't reach the address service — fill the address in below."
+                                          : "";
+
                           return (
+                            /* One host element, not a fragment: ZeroCmsEntry
+                               clones a lone host child, and anything else forces
+                               an extra wrapper div into the field stack. */
                             <label
                               key={field!.id}
                               className="flex flex-col gap-1.5"
                               data-pc-widget
                             >
                               {labelText}
+                              {/* The list is absolutely positioned over what
+                                  follows, so it opening and closing never moves
+                                  the fields below it. */}
                               <div className="relative">
                                 <input
                                   id={id}
@@ -1195,80 +1298,96 @@ export function WizardSection({ data }: WizardSectionProps) {
                                   aria-expanded={listOpen}
                                   aria-controls={listId}
                                   aria-autocomplete="list"
+                                  aria-activedescendant={
+                                    listOpen && active >= 0
+                                      ? `${listId}-${active}`
+                                      : undefined
+                                  }
+                                  aria-describedby={statusId}
                                   className={inputClass}
                                   required={Boolean(field!.required)}
                                   placeholder={
-                                    field!.placeholder ?? "Start typing a postcode…"
+                                    field!.placeholder ??
+                                    "Start typing your postcode or address…"
                                   }
                                   autoComplete="postal-code"
                                   value={formAnswers[key] ?? ""}
                                   onChange={(e) => {
                                     setField(key, e.target.value);
-                                    schedulePostcodeSuggestions(
+                                    scheduleSuggestions(
                                       current.id,
                                       e.target.value,
                                     );
                                   }}
-                                  onBlur={() => {
-                                    if (!pcSuppressOpen.current) {
-                                      void fetchPostcodeSuggestions(
-                                        current.id,
-                                        formAnswers[key] ?? "",
-                                      );
-                                    }
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Escape") {
+                                  onFocus={() => {
+                                    if ((pcSuggestions[current.id] ?? []).length)
                                       setPcOpen((s) => ({
                                         ...s,
-                                        [current.id]: false,
+                                        [current.id]: true,
                                       }));
-                                    }
                                   }}
+                                  onKeyDown={(e) =>
+                                    onAddressKeyDown(current.id, e)
+                                  }
                                 />
                                 {listOpen ? (
                                   <ul
                                     id={listId}
                                     role="listbox"
-                                    className="absolute top-full right-0 left-0 z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-border bg-white py-1 shadow-lg"
+                                    aria-label="Matching addresses"
+                                    className="absolute top-full right-0 left-0 z-20 mt-1 max-h-64 overflow-auto rounded-lg border border-border bg-white py-1 shadow-lg"
                                   >
-                                    {suggestions.map((pc) => (
+                                    {suggestions.map((s, i) => (
                                       <li
-                                        key={pc}
+                                        key={s.id}
+                                        id={`${listId}-${i}`}
                                         role="option"
-                                        aria-selected={false}
+                                        aria-selected={i === active}
+                                        // Keep focus in the input, or the blur
+                                        // would close the list before the click
+                                        // ever lands.
                                         onMouseDown={(e) => e.preventDefault()}
-                                        onClick={() =>
-                                          selectPostcode(
-                                            current.id,
-                                            field!.fieldKey ?? "",
-                                            pc,
-                                          )
+                                        onMouseEnter={() =>
+                                          setPcActive((st) => ({
+                                            ...st,
+                                            [current.id]: i,
+                                          }))
                                         }
-                                        className="cursor-pointer px-4 py-2 text-sm text-dark hover:bg-surface"
+                                        onClick={() =>
+                                          void chooseSuggestion(current.id, s.id)
+                                        }
+                                        className={`min-h-11 cursor-pointer px-4 py-3 text-sm text-dark ${
+                                          i === active ? "bg-surface" : ""
+                                        }`}
                                       >
-                                        {pc}
+                                        {s.label}
                                       </li>
                                     ))}
                                   </ul>
                                 ) : null}
                               </div>
-                              {pcMessage ? (
-                                <span
-                                  aria-live="polite"
-                                  className={`text-xs ${
-                                    pcState === "notfound" || pcState === "error"
-                                      ? "text-red-600"
-                                      : "text-muted"
-                                  }`}
-                                >
-                                  {pcMessage}
-                                </span>
-                              ) : null}
+                              {/* Always rendered, with its line reserved: a
+                                  status that appears on the first keystroke
+                                  would push every field below it down, and
+                                  layout shift is a hard gate here. An empty
+                                  aria-live region is also the one shape screen
+                                  readers announce reliably. */}
+                              <span
+                                id={statusId}
+                                aria-live="polite"
+                                className={`min-h-4 text-xs ${
+                                  pcState === "notfound" ||
+                                  pcState === "error" ||
+                                  pcState === "ratelimited"
+                                    ? "text-red-600"
+                                    : "text-muted"
+                                }`}
+                              >
+                                {pcMessage}
+                              </span>
                             </label>
                           );
                         }
-
                         return (
                           <label key={field!.id} className="flex flex-col gap-1.5">
                             {labelText}

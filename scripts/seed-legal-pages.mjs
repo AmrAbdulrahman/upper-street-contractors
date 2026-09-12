@@ -16,7 +16,8 @@
  * from an earlier run), leaving its hero + meta untouched. Re-running is safe.
  *
  * NOTE FOR THE SITE OWNER: the drafted copy is sensible UK boilerplate grounded
- * in how this site actually works (enquiry emails, consent cookies, Trustpilot /
+ * in how this site actually works (enquiry emails, consent cookies, address
+ * lookup, Trustpilot /
  * Google review widgets), but it is NOT legal advice. Have a solicitor review it
  * before you rely on it. All copy is editable in the CMS afterwards.
  *
@@ -215,6 +216,9 @@ const privacyBody = [
   ptext('We do not sell your personal information. We share it only where necessary with:'),
   ul([
     'our email provider, to deliver enquiry emails to us and a confirmation to you;',
+    'our address lookup provider, which receives only the postcode you type into the ' +
+      'enquiry form so we can offer you the addresses at it — the request is made by our ' +
+      'server, not your browser, and no cookie is set on your device;',
     'Trustpilot and Google, if you consent to their review widgets loading on the site;',
     'professional advisers or authorities where we are required to by law.',
   ]),

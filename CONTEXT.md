@@ -32,6 +32,18 @@ _Avoid_: Prose Section (the page section), rich text (the field kind / RichTextV
 A Form Question field (or an Image Question free-text box) that is only shown when another answer matches. A `form-field` carries `dependsOnFieldKey` + `dependsOnValue` (e.g. Company Name appears only when the "I am a company" toggle is on); an `image-option` with `revealTextInput` shows a describe-more textarea when that option is selected. Hidden fields never block Next.
 _Avoid_: dependent field, show/hide rule, branching
 
+**Address lookup**:
+The type-ahead on the wizard's Your Info step: a visitor starts typing a postcode or a street, a list of real addresses drops down beneath the field, and picking one fills the Address lines, the Town and the Postcode. Two steps, and only the second is paid for — offering the list is free, resolving the address someone chooses is not — which is why the list may follow the keyboard but the choice happens once. Both run on our own server, never the browser, so it is not a Consent gate's business and the provider's key is a server credential like any other. Every field it touches stays visible and editable throughout, and the enquiry sends whether or not the lookup ever worked: it saves typing, it is never a step. Nothing is checked against it — an address outside the working area is a conversation to have, not an enquiry to refuse.
+_Avoid_: postcode lookup (the provider's product name, and no longer what this does), address validation (we validate nothing), autocomplete (the browser's own saved-value feature, which these fields also use)
+
+**Address line**:
+The two free-text fields the Address lookup fills with the street part of an address (`addressLine1`, `addressLine2`). Where the provider returns three lines, the last two are joined into the second — the form asks for two and PAF keeps three, and dropping one would silently lose a flat number.
+_Avoid_: street, address 1 / address 2 (near-misses an editor might type), premise
+
+**Town**:
+The settlement an address is delivered to (`town`), filled by the Address lookup from the postal town. Stored as the postal record has it but shown in title case; the raw data is upper case and would read as shouting next to every other answer. There is no county alongside it: a UK address is identified by its first Address line and its Postcode, and the provider's own guidance is to leave county data alone.
+_Avoid_: city (the near-miss an editor might type), region / county (the retired field), locality, area
+
 **Attachment**:
 A file a visitor adds on the wizard's final step (`file` field type). Any file type; validated on both sides against three caps (≤10 files, ≤50 MB each, ≤200 MB total). Picks accumulate rather than replace, so a visitor can add more on a later click. Each one reaches the business as either an Inline attachment or a Hosted attachment.
 _Avoid_: upload, file field (implementation phrasing)

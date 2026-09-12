@@ -44,6 +44,10 @@ Copy `.env.example` → `.env.local`. Key ones:
 - `BLOB_READ_WRITE_TOKEN` — Vercel Blob (media bytes).
 - `ZERO_CMS_AUTH_SECRET` — signs session JWTs; also verified in `proxy.ts`.
 - `ZERO_CMS_ADMIN_EMAIL` / `ZERO_CMS_ADMIN_PASSWORD` — first-admin seed (only used once, when the Redis `users` set is empty).
+- `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` — enquiry email delivery (nodemailer over Resend SMTP). Nothing in code is Resend-specific; `lib/email/transport.ts` only reads `SMTP_*`.
+- `ENQUIRY_TO` / `ENQUIRY_FROM` — where enquiries are delivered and who they come from. `ENQUIRY_FROM` falls back to `SMTP_USER`, which is useless under Resend, so set it.
+- `APP_URL` — the origin this deployment answers on; every canonical URL, `metadataBase`, `robots.txt` and `sitemap.xml` entry is built from it. Falls back to `VERCEL_URL`, then localhost.
+- `IDEAL_POSTCODES_API_KEY` / `IDEAL_POSTCODES_CACHE_TTL_DAYS` — the Enquiry Wizard's Address lookup ([ADR 0026](../adr/0026-address-lookup-server-proxied.md)). Server-only: `/api/address-lookup` proxies every search, so no `NEXT_PUBLIC_` and no Consent gate. TTL is in days, `0` disables the cache, default 30.
 
 Codegen (`codegen.ts`) introspects the zero-cms schema by reading **live Redis**
 (`scripts/generate-cms-schema.mjs`, via `createRedisAdapter` + the read-only token) —
