@@ -1,7 +1,7 @@
 import { cache } from "react";
 import type { Metadata } from "next";
 import { PageSections } from "@/components/sections/page-sections";
-import { pageMetaToMetadata } from "@/components/metadata";
+import { BreadcrumbJsonLd, pageMetaToMetadata } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { GetPageDocument } from "@/generated/graphql";
 import { query } from "@/lib/cms/query";
@@ -19,20 +19,23 @@ export async function generateMetadata(): Promise<Metadata> {
     ]);
     return pageMetaToMetadata(data?.pages?.at(0)?.meta, {
       path: PAGE_PATH,
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   } catch {
     const siteMetaConfig = await getSiteMetaConfig();
 
     return pageMetaToMetadata(null, {
       path: PAGE_PATH,
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   }
 }
 
 export default async function AboutPage() {
-  const data = await getPage();
+  const [siteMetaConfig, data] = await Promise.all([
+    getSiteMetaConfig(),
+    getPage(),
+  ]);
 
   // Nothing page-specific left: this file used to pull the FAQ out of
   // `sections` and re-render it last so it sat below a block of Trustpilot dev
@@ -40,5 +43,13 @@ export default async function AboutPage() {
   // builder anyway — it derives insert positions and drag targets from the
   // STORED order, so a rendered order that differs would insert and reorder in
   // the wrong places. Where the FAQ sits is an editor's decision now (drag it).
-  return <PageSections page={data.pages[0]} />;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        config={siteMetaConfig}
+        trail={[{ name: "About Us" }]}
+      />
+      <PageSections page={data.pages[0]} />
+    </>
+  );
 }

@@ -1,7 +1,7 @@
 import { cache } from "react";
 import type { Metadata } from "next";
 import { PageSections } from "@/components/sections/page-sections";
-import { pageMetaToMetadata } from "@/components/metadata";
+import { BreadcrumbJsonLd, pageMetaToMetadata } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { GetPageDocument } from "@/generated/graphql";
 import { query } from "@/lib/cms/query";
@@ -19,19 +19,30 @@ export async function generateMetadata(): Promise<Metadata> {
     ]);
     return pageMetaToMetadata(data?.pages?.at(0)?.meta, {
       path: PAGE_PATH,
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   } catch {
     const siteMetaConfig = await getSiteMetaConfig();
     return pageMetaToMetadata(null, {
       path: PAGE_PATH,
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   }
 }
 
 export default async function PrivacyPolicyPage() {
-  const data = await getPage();
+  const [siteMetaConfig, data] = await Promise.all([
+    getSiteMetaConfig(),
+    getPage(),
+  ]);
 
-  return <PageSections page={data.pages[0]} />;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        config={siteMetaConfig}
+        trail={[{ name: "Privacy Policy" }]}
+      />
+      <PageSections page={data.pages[0]} />
+    </>
+  );
 }

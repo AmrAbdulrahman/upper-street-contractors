@@ -16,6 +16,12 @@ type ProjectBannerProps = {
   banner: BannerMedia;
   /** The project Category (enum value), rendered as the gold Category tag. */
   category?: string | null;
+  /**
+   * The Project's title, used as the alt text when the media carries none.
+   * "Project photo" on every card is alt text that describes nothing; the
+   * title at least says which job the picture is of.
+   */
+  title?: string | null;
   heightClassName?: string;
   rounded?: boolean;
   imageSizes?: string;
@@ -28,6 +34,7 @@ const categoryTagClasses =
 export function ProjectBanner({
   banner,
   category,
+  title,
   heightClassName = "h-[210px]",
   rounded = false,
   imageSizes = "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw",
@@ -48,7 +55,10 @@ export function ProjectBanner({
       <div className={`relative overflow-hidden ${heightClassName} ${roundedClass}`}>
         <Image
           src={bannerUrl}
-          alt={banner?.alt ?? "Project photo"}
+          // `||`, not `??`: an editor who clears the alt field leaves an
+          // empty string, which `??` treats as a real answer and passes
+          // through as decorative.
+          alt={banner?.alt?.trim() || title?.trim() || "Project photo"}
           width={banner?.width ?? 800}
           height={banner?.height ?? 560}
           className="card-zoom h-full w-full object-cover"

@@ -22,13 +22,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
     return pageMetaToMetadata(page?.meta, {
       path: "/",
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   } catch {
     const siteMetaConfig = await getSiteMetaConfig();
     return pageMetaToMetadata(null, {
       path: "/",
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   }
 }

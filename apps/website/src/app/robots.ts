@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
-import { normalizeSiteUrl } from "@/helpers";
+import { resolveAppUrl } from "@/helpers";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const config = await getSiteMetaConfig();
-  const siteUrl = normalizeSiteUrl(process.env.APP_URL);
+  const siteUrl = resolveAppUrl();
   const indexable = config?.indexable !== false;
 
   if (!indexable) {

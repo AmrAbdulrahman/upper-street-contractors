@@ -22,9 +22,11 @@ const titleClasses =
   "mb-1.5 font-sans text-[15px] font-semibold leading-snug text-dark";
 
 export function ProjectCard({ data, flash = false }: ProjectCardProps) {
-  const { id, title, summary, category, hero } = data;
+  const { id, slug, title, summary, category, hero } = data;
   const chips = getProjectMetaChips(data);
-  const href = `/projects/${id}`;
+  // The Slug is the URL. A Project created before the field existed has none
+  // and still answers on its uuid, which the route resolves either way.
+  const href = `/projects/${slug?.trim() || id}`;
 
   return (
     <ZeroCmsEntry entry={data}>
@@ -34,7 +36,7 @@ export function ProjectCard({ data, flash = false }: ProjectCardProps) {
       <article className={flash ? `${cardClasses} card-flash` : cardClasses}>
         <Link href={href} className="block">
           <ZeroCmsEntryField field="hero">
-            <ProjectBanner banner={hero} category={category} />
+            <ProjectBanner banner={hero} category={category} title={title} />
           </ZeroCmsEntryField>
         </Link>
 

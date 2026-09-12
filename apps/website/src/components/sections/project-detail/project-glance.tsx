@@ -33,7 +33,12 @@ function Stat({
         {value}
         {unit ? <span className="text-gold-mid">{unit}</span> : null}
       </p>
-      <p className="mt-1.5 text-[11px] font-semibold tracking-wide text-subtle uppercase">
+      {/* `text-white/75`, not `text-subtle`: the token is the right one for a
+          dark ground, but these labels are 11px on a card whose `bg-white/[0.06]`
+          wash lifts the navy to #182534, and #7a8798 on that is 4.24:1 — under
+          the 4.5:1 small text needs. A fixed white alpha also cannot be pushed
+          back under the bar by a Theme tab override. */}
+      <p className="mt-1.5 text-[11px] font-semibold tracking-wide text-white/75 uppercase">
         {label}
       </p>
     </div>

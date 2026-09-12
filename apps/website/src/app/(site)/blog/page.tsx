@@ -2,7 +2,7 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import { BlogIndexView } from "@/components/sections/blog-index";
 import { PageSections } from "@/components/sections/page-sections";
-import { pageMetaToMetadata } from "@/components/metadata";
+import { BreadcrumbJsonLd, pageMetaToMetadata } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { GetBlogPostsDocument, GetPageDocument } from "@/generated/graphql";
 import { query } from "@/lib/cms/query";
@@ -20,19 +20,20 @@ export async function generateMetadata(): Promise<Metadata> {
     const [siteMetaConfig, data] = await Promise.all([getSiteMetaConfig(), getPage()]);
     return pageMetaToMetadata(data?.pages?.at(0)?.meta, {
       path: PAGE_PATH,
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   } catch {
     const siteMetaConfig = await getSiteMetaConfig();
     return pageMetaToMetadata(null, {
       path: PAGE_PATH,
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   }
 }
 
 export default async function BlogIndexPage() {
-  const [pageData, postsData] = await Promise.all([
+  const [siteMetaConfig, pageData, postsData] = await Promise.all([
+    getSiteMetaConfig(),
     getPage(),
     query(GetBlogPostsDocument),
   ]);
@@ -44,6 +45,7 @@ export default async function BlogIndexPage() {
 
   return (
     <>
+      <BreadcrumbJsonLd config={siteMetaConfig} trail={[{ name: "Blog" }]} />
       <PageSections page={pageData.pages[0]} />
       <BlogIndexView posts={posts} />
     </>

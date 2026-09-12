@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { normalizeSiteUrl } from "@/helpers";
+import { resolveAppUrl } from "@/helpers";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { getAllSitePaths } from "@/lib/cms/site-routes";
 
@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const indexable = config?.indexable !== false;
   if (!indexable) return [];
 
-  const siteUrl = normalizeSiteUrl(process.env.APP_URL);
+  const siteUrl = resolveAppUrl();
   const paths = await getAllSitePaths();
 
   return paths.map((path) => ({

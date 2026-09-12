@@ -33,8 +33,27 @@ query GetProject($id: ID!, $status: CmsReadStatus = published) {
   }
 }
 
+query GetProjectBySlug(
+  $slug: String!
+  $status: CmsReadStatus = published
+  $includeUnpublished: Boolean
+) {
+  projects(
+    filters: { slug: { eq: $slug } }
+    pagination: { limit: 1 }
+    status: $status
+    includeUnpublished: $includeUnpublished
+  ) {
+    ...ProjectDetail
+  }
+}
+
+# Both halves of every Project's address: the slug it should be served at, and
+# the uuid that still has to redirect there. Used by `generateStaticParams`,
+# the sitemap and the cache-warm pass alike.
 query GetProjectIds($status: CmsReadStatus = published, $includeUnpublished: Boolean) {
   projects(pagination: { limit: 100 }, status: $status, includeUnpublished: $includeUnpublished) {
     id
+    slug
   }
 }

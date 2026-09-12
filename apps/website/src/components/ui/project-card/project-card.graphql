@@ -2,6 +2,9 @@ fragment ProjectCard on Project {
   id
   type
   title
+  # The URL. `id` stays selected: a Project created before the slug field
+  # existed may still have none, and the route falls back to the uuid.
+  slug
   summary
   category
   location

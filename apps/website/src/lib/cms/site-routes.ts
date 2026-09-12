@@ -24,7 +24,7 @@ import { query } from "@/lib/cms/query";
  *   introspect (readdir-based enumeration only works at build time, which is
  *   exactly the mistake the old `scripts/generate-sitemap.mjs` made without
  *   the walk even reaching these routes — see ADR 0012).
- * - **Project pages** (`/projects/:id`), **Blog posts** (`/blog/:slug`) and
+ * - **Project pages** (`/projects/:slug`), **Blog posts** (`/blog/:slug`) and
  *   **Service pages** (`/:slug`) — genuinely CMS-driven (a publish can add one
  *   with no code change), so this list queries live via the same
  *   `GetProjectIds` / `GetBlogSlugs` / `GetServicePageSlugs` used by those
@@ -87,9 +87,17 @@ export async function getAllSitePaths(): Promise<string[]> {
       includeUnpublished: false,
     }),
   ]);
-  const projectPaths = (projectData?.projects ?? [])
-    .filter((p): p is { id: string } => Boolean(p?.id))
-    .map((p) => `/projects/${p.id}`);
+  // Slug where there is one, uuid where there is not — the same rule the
+  // Project card's href follows, so the sitemap lists the URL a visitor would
+  // actually arrive on rather than a second address that redirects. Also
+  // de-duplicated: `slug` carries no unique constraint.
+  const projectPaths = [
+    ...new Set(
+      (projectData?.projects ?? [])
+        .filter((p) => Boolean(p?.id))
+        .map((p) => `/projects/${p!.slug?.trim() || p!.id}`),
+    ),
+  ];
   // De-duplicated for the same reason generateStaticParams is: `slug` carries no
   // unique constraint, so two posts can claim one path.
   const blogSlugs = new Set(

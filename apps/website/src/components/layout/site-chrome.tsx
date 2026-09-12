@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Footer, Header, QuickContact } from "@/components/layout";
 import { CookieConsent } from "@/components/consent/cookie-consent";
-import { LocalBusinessJsonLd } from "@/components/metadata";
+import { LocalBusinessJsonLd, WebSiteJsonLd } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { getServiceLinks } from "@/components/layout/get-service-links";
 import { ThemeOverride } from "@/components/layout/theme-override";
@@ -24,6 +24,7 @@ async function SiteChromeContent({ children }: SiteChromeProps) {
       {/* Before anything paints: the tokens the whole page is coloured with. */}
       <ThemeOverride config={siteMetaConfig} />
       {siteMetaConfig ? <LocalBusinessJsonLd config={siteMetaConfig} /> : null}
+      <WebSiteJsonLd config={siteMetaConfig} />
       <a
         href="#main"
         className="sr-only top-[50] focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-dark focus:px-4 focus:py-2 focus:text-white"

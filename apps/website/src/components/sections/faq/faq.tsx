@@ -2,9 +2,10 @@ import {
   AddZeroCmsEntry,
   ZeroCmsEntry,
   ZeroCmsEntryField,
-} from "@usc/zero-cms-widget";
-import { RichTextViewer } from "@/components/ui/rich-text-viewer";
-import type { FaqItemFragment, FaqSectionFragment } from "@/generated/graphql";
+} from '@usc/zero-cms-widget';
+import { FaqJsonLd } from '@/components/metadata';
+import { RichTextViewer } from '@/components/ui/rich-text-viewer';
+import type { FaqItemFragment, FaqSectionFragment } from '@/generated/graphql';
 
 type FaqSectionProps = {
   data: FaqSectionFragment;
@@ -26,36 +27,42 @@ export function FaqSection({ data }: FaqSectionProps) {
   const groupName = `faq-${data.id}`;
 
   return (
-    <ZeroCmsEntry entry={data}>
-      <section className="bg-white">
-        <div className="mx-auto max-w-container px-6 py-[88px]">
-          <div className="mx-auto max-w-3xl">
-            {overline ? (
-              <ZeroCmsEntryField field="overline">
-                <p className="text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
-                  {overline}
-                </p>
-              </ZeroCmsEntryField>
-            ) : null}
+    <>
+      {/* Outside <ZeroCmsEntry>, not inside it: that component clones a lone
+          host child rather than wrapping it, and a second child here would
+          force an extra div around the section. */}
+      <FaqJsonLd items={items} />
+      <ZeroCmsEntry entry={data}>
+        <section className="bg-white">
+          <div className="mx-auto max-w-container px-6 py-[88px]">
+            <div className="mx-auto max-w-3xl">
+              {overline ? (
+                <ZeroCmsEntryField field="overline">
+                  <p className="text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
+                    {overline}
+                  </p>
+                </ZeroCmsEntryField>
+              ) : null}
 
-            {title ? (
-              <ZeroCmsEntryField field="title">
-                <h2 className="mt-2.5 font-serif text-[clamp(26px,3.5vw,42px)] leading-tight text-dark">
-                  {title}
-                </h2>
-              </ZeroCmsEntryField>
-            ) : null}
+              {title ? (
+                <ZeroCmsEntryField field="title">
+                  <h2 className="mt-2.5 font-serif text-[clamp(26px,3.5vw,42px)] leading-tight text-dark">
+                    {title}
+                  </h2>
+                </ZeroCmsEntryField>
+              ) : null}
 
-            <div className="mt-10 divide-y divide-border overflow-hidden rounded-2xl border border-border">
-              {items.map((item) => (
-                <FaqRow key={item.id} item={item} groupName={groupName} />
-              ))}
-              <AddZeroCmsEntry field="items" />
+              <div className="mt-10 divide-y divide-border overflow-hidden rounded-2xl border border-border">
+                {items.map((item) => (
+                  <FaqRow key={item.id} item={item} groupName={groupName} />
+                ))}
+                <AddZeroCmsEntry field="items" />
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-    </ZeroCmsEntry>
+        </section>
+      </ZeroCmsEntry>
+    </>
   );
 }
 
@@ -71,7 +78,9 @@ function FaqRow({
       <details name={groupName} className="group bg-white open:bg-surface/40">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left [&::-webkit-details-marker]:hidden">
           <ZeroCmsEntryField field="question">
-            <span className="font-serif text-lg text-dark">{item.question}</span>
+            <span className="font-serif text-lg text-dark">
+              {item.question}
+            </span>
           </ZeroCmsEntryField>
           <span
             aria-hidden

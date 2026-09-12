@@ -3,6 +3,13 @@ import { notFound } from "next/navigation";
 import { ZeroCmsEntryProvider, ZeroCmsSectionList } from "@usc/zero-cms-widget";
 import { BlogPostActions, BlogPostHeader } from "@/components/sections/blog-post-header";
 import { PageSection, type PageSectionData } from "@/components/sections/page-section";
+import {
+  BlogPostingJsonLd,
+  BreadcrumbJsonLd,
+  NOT_FOUND_METADATA,
+  resolveSocialImageUrl,
+  resolveSocialImages,
+} from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { GetBlogPostDocument, GetBlogSlugsDocument } from "@/generated/graphql";
 import { resolveMediaUrl } from "@/helpers/media-url";
@@ -34,10 +41,10 @@ export async function generateMetadata({
   ]);
 
   const post = data?.blogPosts?.at(0);
-  // No fallback title: an unknown slug must render as a 404, not leak a generic
-  // title onto the not-found page (a soft-404 signal). Same rule as
-  // projects/[id].
-  if (!post) notFound();
+  // An unknown slug gets the Not Found head rather than a generic one (a
+  // soft-404 signal). The component below still throws; see
+  // NOT_FOUND_METADATA. Same rule as projects/[id].
+  if (!post) return NOT_FOUND_METADATA;
 
   const siteName = siteMetaConfig?.siteName ?? "Upper Street Contractors";
   // Derived, never picked: a post's own title and Excerpt ARE its metadata, so
@@ -47,6 +54,12 @@ export async function generateMetadata({
   const description = post.excerpt ?? undefined;
   const absoluteTitle = `${title} | ${siteName}`;
   const heroUrl = resolveMediaUrl(post.hero?.url);
+  // The post's own hero when it has one, the site default when it does not —
+  // a post with no picture still gets a card rather than a bare link.
+  const { images, twitterImages, card } = resolveSocialImages(
+    siteMetaConfig,
+    heroUrl,
+  );
 
   return {
     title: { absolute: absoluteTitle },
@@ -54,24 +67,32 @@ export async function generateMetadata({
     alternates: { canonical: `/blog/${slug}` },
     ...(post.author ? { authors: [{ name: post.author }] } : {}),
     openGraph: {
+      type: "article",
+      locale: "en_GB",
+      siteName,
       title: absoluteTitle,
       description,
       url: `/blog/${slug}`,
-      type: "article",
       ...(post.publishedAt ? { publishedTime: post.publishedAt } : {}),
-      ...(heroUrl ? { images: [heroUrl] } : {}),
+      images,
     },
     twitter: {
+      card,
       title: absoluteTitle,
       description,
-      card: heroUrl ? "summary_large_image" : "summary",
+      images: twitterImages,
     },
   };
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const data = await query(GetBlogPostDocument, { slug });
+  // `getSiteMetaConfig` is React-cached, so this is the same read the chrome
+  // and `generateMetadata` already made, not a third CMS call.
+  const [siteMetaConfig, data] = await Promise.all([
+    getSiteMetaConfig(),
+    query(GetBlogPostDocument, { slug }),
+  ]);
   const post = data?.blogPosts?.at(0);
 
   if (!post) notFound();
@@ -80,6 +101,22 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <article>
+      <BlogPostingJsonLd
+        title={post.title}
+        description={post.excerpt}
+        slug={slug}
+        author={post.author}
+        publishedAt={post.publishedAt}
+        image={resolveSocialImageUrl(siteMetaConfig, resolveMediaUrl(post.hero?.url))}
+        config={siteMetaConfig}
+      />
+      <BreadcrumbJsonLd
+        config={siteMetaConfig}
+        trail={[
+          { name: "Blog", path: "/blog" },
+          { name: post.title ?? "Blog post" },
+        ]}
+      />
       {/* Provider, not <ZeroCmsEntry>: the Section builder needs the post's id
           and type in context, but an outline + pencil around the entire page
           would swallow every section's own affordance. */}

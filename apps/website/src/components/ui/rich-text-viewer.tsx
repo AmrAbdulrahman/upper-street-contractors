@@ -229,7 +229,13 @@ export function RichTextViewer({
               className={
                 variant === "planning-renovation-footer"
                   ? "text-white/65 underline hover:text-white/80"
-                  : "text-gold underline hover:text-gold-mid"
+                  : // `gold-deep`, not `gold`: #906d37 on the cream surface is
+                    // 4.17:1, under the 4.5:1 body text needs, and a link is the
+                    // one run of coloured text a reader has to be able to pick
+                    // out. #7a5a2b clears it at 5.55:1. Hover darkens rather
+                    // than lightening for the same reason — `gold-mid` is
+                    // 2.53:1 here.
+                    "text-gold-deep underline hover:text-dark"
               }
             >
               {children}

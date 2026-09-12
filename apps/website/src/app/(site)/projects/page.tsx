@@ -2,7 +2,7 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import { ProjectsView } from "@/components/sections/projects";
 import { PageSections } from "@/components/sections/page-sections";
-import { pageMetaToMetadata } from "@/components/metadata";
+import { BreadcrumbJsonLd, pageMetaToMetadata } from "@/components/metadata";
 import { getSiteMetaConfig } from "@/components/site-meta-config";
 import { GetPageDocument, GetProjectsDocument } from "@/generated/graphql";
 import { query } from "@/lib/cms/query";
@@ -20,19 +20,20 @@ export async function generateMetadata(): Promise<Metadata> {
     ]);
     return pageMetaToMetadata(data?.pages?.at(0)?.meta, {
       path: PAGE_PATH,
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   } catch {
     const siteMetaConfig = await getSiteMetaConfig();
     return pageMetaToMetadata(null, {
       path: PAGE_PATH,
-      siteName: siteMetaConfig?.siteName ?? undefined,
+      config: siteMetaConfig,
     });
   }
 }
 
 export default async function ProjectsPage() {
-  const [pageData, projectsData] = await Promise.all([
+  const [siteMetaConfig, pageData, projectsData] = await Promise.all([
+    getSiteMetaConfig(),
     getPage(),
     query(GetProjectsDocument),
   ]);
@@ -44,6 +45,7 @@ export default async function ProjectsPage() {
 
   return (
     <>
+      <BreadcrumbJsonLd config={siteMetaConfig} trail={[{ name: "Projects" }]} />
       <PageSections page={pageData.pages[0]} />
       <ProjectsView projects={projects} />
     </>

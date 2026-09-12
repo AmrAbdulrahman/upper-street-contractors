@@ -1,12 +1,13 @@
 import type { SiteMetaConfigFragment } from "@/generated/graphql";
-import { normalizeSiteUrl, resolveMediaUrl } from "@/helpers";
+import { resolveMediaUrl } from "@/helpers";
+import { resolveSiteOrigin } from "./site-origin";
 
 type LocalBusinessJsonLdProps = {
   config: SiteMetaConfigFragment;
 };
 
 export function LocalBusinessJsonLd({ config }: LocalBusinessJsonLdProps) {
-  const siteUrl = normalizeSiteUrl(config.siteUrl);
+  const siteUrl = resolveSiteOrigin(config);
   // `sameAs` is a structured-data claim that these URLs are the business, so it
   // must not publish whatever scheme an editor happened to type — the stored
   // WhatsApp link is `http://` today. Upgrade to https, then keep only what is

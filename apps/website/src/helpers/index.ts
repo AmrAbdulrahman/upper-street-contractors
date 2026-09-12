@@ -13,7 +13,11 @@ export {
 export {
   buildBaseMetadata,
   normalizeSiteUrl,
+  resolveAppUrl,
   pageMetaToMetadata,
+  resolveSocialImages,
+  resolveSocialImageUrl,
+  NOT_FOUND_METADATA,
 } from "./metadata";
 export {
   BUTTON_ACTIONS,
