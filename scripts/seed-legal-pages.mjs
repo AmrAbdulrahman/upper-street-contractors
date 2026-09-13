@@ -1,9 +1,12 @@
 /**
  * Seed the legal pages: Privacy Policy + Terms & Conditions.
  *
- * 1. Adds the `prose-section` Type (overline + blocks `body`) to the live Redis
- *    schema and appends it to the `page` type's `sections` allowedTypes (both
- *    idempotent — additive, so they pass `saveSchema`'s destructive-edit guard).
+ * 1. Ensures the `prose-section` Type (overline + blocks `body`) exists in the
+ *    live Redis schema and appends it to the `page` type's `sections`
+ *    allowedTypes (both idempotent — additive, so they pass `saveSchema`'s
+ *    destructive-edit guard). Strictly additive on the Type's fields: anything
+ *    added since — `title`, from scripts/seed-about-redesign.mjs — is left
+ *    exactly where it is.
  * 2. Creates + publishes, for each page, a MetaData + a PageHero + a
  *    ProseSection, then the `page` entry that references them (key
  *    `privacy-policy` / `terms-and-conditions`).
@@ -81,6 +84,12 @@ let schemaChanged = false;
 // use and what <RichTextViewer> renders. (`richtext` maps to a String scalar,
 // which would mis-render and collide with the other sections' JSON `body` inside
 // the GetPage union — see scripts/seed-split-sections.mjs.)
+// What this script needs to exist, NOT the whole Type. An earlier version
+// reconciled `fields` to exactly this list whenever it differed, which deleted
+// the `title` seed-about-redesign.mjs adds later: the generated SDL lost the
+// field, the colocated ProseSection fragment stopped compiling, and every
+// entry's stored title stopped projecting (ADR 0011 reads what the schema
+// declares). Ensure ours are present and the right kind; never remove.
 const PROSE_FIELDS = [
   { __name: 'overline', __type: 'text' },
   { __name: 'body', __type: 'blocks' },
@@ -91,16 +100,36 @@ if (existingIdx === -1) {
   nextSchema.push({ __name: PROSE_TYPE, label: 'Prose Section', fields: PROSE_FIELDS });
   schemaChanged = true;
   console.log(`schema: added Type "${PROSE_TYPE}"`);
-} else if (
-  JSON.stringify(nextSchema[existingIdx].fields) !== JSON.stringify(PROSE_FIELDS)
-) {
-  nextSchema[existingIdx] = {
-    ...nextSchema[existingIdx],
-    label: 'Prose Section',
-    fields: PROSE_FIELDS,
-  };
-  schemaChanged = true;
-  console.log(`schema: reconciled Type "${PROSE_TYPE}" fields`);
+} else {
+  const existing = nextSchema[existingIdx];
+  const fields = existing.fields.map((f) => ({ ...f }));
+  let typeChanged = false;
+
+  for (const want of PROSE_FIELDS) {
+    const at = fields.findIndex((f) => f.__name === want.__name);
+    if (at === -1) {
+      fields.push({ ...want });
+      typeChanged = true;
+      console.log(`schema: added "${want.__name}" to Type "${PROSE_TYPE}"`);
+    } else if (fields[at].__type !== want.__type) {
+      // e.g. a `body` left as `richtext` by an older run — see the note above.
+      console.log(
+        `schema: "${PROSE_TYPE}.${want.__name}" is ${fields[at].__type}, correcting to ${want.__type}`
+      );
+      fields[at] = { ...fields[at], __type: want.__type };
+      typeChanged = true;
+    }
+  }
+
+  if (existing.label !== 'Prose Section') {
+    typeChanged = true;
+    console.log(`schema: relabelled Type "${PROSE_TYPE}"`);
+  }
+
+  if (typeChanged) {
+    nextSchema[existingIdx] = { ...existing, label: 'Prose Section', fields };
+    schemaChanged = true;
+  }
 }
 
 const pageType = nextSchema.find((t) => t.__name === 'page');
