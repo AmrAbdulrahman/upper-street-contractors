@@ -41,6 +41,18 @@
 
 :root {
   --gold: var(--color-gold);
+
+  /* The sticky header's own height, for anything that has to size itself
+     against the space left under it. Must match `header.tsx:52-70` — the h-11
+     lockup, py-3 above and below, and the 1px bottom border. */
+  --site-header-h: 69px;
+}
+
+/* The header swaps to its h-16 lockup at `lg`, not `md`. */
+@media (min-width: 1024px) {
+  :root {
+    --site-header-h: 89px;
+  }
 }
 
 @layer base {
@@ -425,5 +437,63 @@
   .img-zoom:hover {
     transition: none;
     transform: none;
+  }
+}
+
+/*
+ * The Enquiry Wizard's scrolling step body — see `wizard.tsx`.
+ *
+ * The Wizard panel bounds one step to the visible viewport with its Step header
+ * pinned above it and its Step actions pinned below, so the content between
+ * them has to say when there is more of it. Two signals, because they answer
+ * two different questions: the fade says "this text continues", and the shadow
+ * cast by the chrome (drawn in the panel itself) says "that edge is a lid, not
+ * the end of the step".
+ *
+ * A class rather than an arbitrary Tailwind value because a four-stop
+ * `mask-image` is unreadable inline, and because this rule is unlayered while
+ * Tailwind's utilities are not — a `transition-[mask-image]` class beside it
+ * would LOSE, exactly as `.card-lift` records above. The transition belongs
+ * here, next to the property it animates. Transitioning a custom property at
+ * all is what the two `@property` declarations buy: without a registered
+ * syntax the fades would snap.
+ *
+ * `0px` on an edge collapses that stop pair, so nothing is drawn there rather
+ * than a hard-edged copy of the mask — a real off switch, the same shape as
+ * Glow size.
+ */
+@property --fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.wizard-scroll {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade-top),
+    #000 calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
+  transition:
+    --fade-top 200ms ease-out,
+    --fade-bottom 200ms ease-out;
+}
+
+/*
+ * The fade IS the answer to "is there more?", so it stays — only the easing
+ * goes. Keep the signal, drop the motion, the same call `.card-lift` and
+ * `card-flash` make above.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .wizard-scroll {
+    transition: none;
   }
 }

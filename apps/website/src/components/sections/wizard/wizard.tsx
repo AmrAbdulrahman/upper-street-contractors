@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { DayPicker } from "@daypicker/react";
 import "@daypicker/react/style.css";
@@ -21,6 +21,8 @@ import {
   type Suggestion,
 } from "@/helpers/address-lookup";
 import { AvailabilityField } from "./availability-field";
+import { scrollEdges, type ScrollEdges } from "./scroll-edges";
+import { usePanelHeight } from "./use-panel-height";
 import {
   DAYPICKER_THEME,
   TIME_WINDOWS,
@@ -45,6 +47,43 @@ import {
 
 type WizardQuestion = NonNullable<WizardSectionFragment["questions"]>[number];
 type WizardSectionProps = { data: WizardSectionFragment };
+
+/**
+ * How tall the Wizard panel is allowed to get.
+ *
+ * `--wizard-vh` is written by `usePanelHeight` from `visualViewport`, which is
+ * the only measure that shrinks when a phone keyboard opens; `100dvh` is the
+ * fallback that stands server-side and on anything without the API. The sticky
+ * header sits inside that space, and the zero-cms bar pushes the header down
+ * again, so both come off — `--admin-banner-offset` read with a `0px` default,
+ * the same contract `header.tsx` and `quick-contact.tsx` already use.
+ *
+ * A cap, not a height: a two-field step shrinks the panel to fit and shows no
+ * scrollbar and no Edge fade at all.
+ */
+const PANEL_MAX_HEIGHT =
+  "calc(var(--wizard-vh, 100dvh) - var(--admin-banner-offset, 0px) - var(--site-header-h) - 24px)";
+
+/**
+ * Where the Step header parks once the page has scrolled the panel up: the
+ * underside of the sticky site header, wherever the zero-cms bar has pushed
+ * that to. Without it the header slides behind the nav and takes the stepper
+ * with it — the panel is roughly a screenful, so there is exactly one scroll
+ * position at which it would otherwise all be visible.
+ *
+ * Inline rather than an arbitrary Tailwind class for the same reason the panel's
+ * own cap is: one nested `calc` of two custom properties reads better as a
+ * named constant than as a bracketed class, and it cannot be missed by the JIT.
+ */
+const STICKY_TOP = "calc(var(--admin-banner-offset, 0px) + var(--site-header-h))";
+
+const NO_EDGES: ScrollEdges = {
+  overflowing: false,
+  top: false,
+  bottom: false,
+  fadeTop: 0,
+  fadeBottom: 0,
+};
 
 /**
  * A **Branch rule**: the condition an option card, a form field or a step's
@@ -225,6 +264,104 @@ export function WizardSection({ data }: WizardSectionProps) {
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
+
+  const panelRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  /** The two sticky halves of the chrome, measured to work out how much of the
+   *  body they are currently sitting over. */
+  const stepHeaderRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
+  /** The Step header's own text — the focus target on a step change, and the
+   *  name of the scroller when it becomes a keyboard-scrollable region. */
+  const stepHeadRef = useRef<HTMLElement | null>(null);
+  const headId = useId();
+  /** Nothing is focused until the visitor has moved a step themselves; without
+   *  this the wizard would steal focus off the page on first paint. */
+  const interacted = useRef(false);
+  const [edges, setEdges] = useState<ScrollEdges>(NO_EDGES);
+
+  usePanelHeight(panelRef);
+
+  // A new step starts at its top, and the panel does not move on screen — the
+  // point of pinning the chrome is that nothing jumps. `preventScroll` is
+  // load-bearing: the head sits in the pinned header, and focusing it without
+  // that would have the browser scroll the PAGE to reveal it.
+  useEffect(() => {
+    if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
+    if (!interacted.current) return;
+    stepHeadRef.current?.focus({ preventScroll: true });
+  }, [step, done]);
+
+  // Which edges have more behind them. The fades are written straight to the
+  // element (a custom property, so they can transition); only the booleans go
+  // through state, because the shadows and the tab stop need to re-render.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    const read = () => {
+      const box = scroller.getBoundingClientRect();
+      const head = stepHeaderRef.current?.getBoundingClientRect();
+      const actions = actionsRef.current?.getBoundingClientRect();
+      const next = scrollEdges({
+        scrollTop: scroller.scrollTop,
+        scrollHeight: scroller.scrollHeight,
+        clientHeight: scroller.clientHeight,
+        occludedTop: head ? head.bottom - box.top : 0,
+        occludedBottom: actions ? box.bottom - actions.top : 0,
+      });
+      scroller.style.setProperty("--fade-top", `${next.fadeTop}px`);
+      scroller.style.setProperty("--fade-bottom", `${next.fadeBottom}px`);
+      setEdges((prev) =>
+        prev.overflowing === next.overflowing &&
+        prev.top === next.top &&
+        prev.bottom === next.bottom
+          ? prev
+          : next,
+      );
+    };
+
+    // Reads five rects and then writes two properties, so it is held to one
+    // frame rather than run per scroll event.
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(read);
+    };
+
+    read();
+    scroller.addEventListener("scroll", measure, { passive: true });
+    // The page too: scrolling it slides the panel under the sticky chrome,
+    // which hides body content without touching the scroller's own offset.
+    window.addEventListener("scroll", measure, { passive: true });
+    // The content too, not just the scroller: the scroller alone catches a
+    // viewport change but not a Conditional field appearing or an Availability
+    // row being added, which is most of what changes a step's height.
+    const observer = new ResizeObserver(measure);
+    observer.observe(scroller);
+    if (contentRef.current) observer.observe(contentRef.current);
+    return () => {
+      cancelAnimationFrame(frame);
+      scroller.removeEventListener("scroll", measure);
+      window.removeEventListener("scroll", measure);
+      observer.disconnect();
+    };
+  }, [step, done]);
+
+  // The Address lookup's list is absolutely positioned, so inside a scroller it
+  // is cut off at the bottom edge instead of floating over the Step actions.
+  // Scrolling the list itself into view gives it the room back.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || !Object.values(pcOpen).some(Boolean)) return;
+    const frame = requestAnimationFrame(() => {
+      scroller
+        .querySelector('[data-pc-widget] [role="listbox"]')
+        ?.scrollIntoView({ block: "nearest" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pcOpen]);
 
   const total = questions.length;
   if (total === 0) return null;
@@ -654,12 +791,14 @@ export function WizardSection({ data }: WizardSectionProps) {
 
   const goToStep = (index: number) => {
     if (index < 0 || index > maxStep) return;
+    interacted.current = true;
     setDone(false);
     setStep(index);
   };
 
   const next = () => {
     const target = Math.min(total - 1, step + 1);
+    interacted.current = true;
     setStep(target);
     setMaxStep((m) => Math.max(m, target));
   };
@@ -773,6 +912,7 @@ export function WizardSection({ data }: WizardSectionProps) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
         throw new Error(data?.error || "We couldn't send your enquiry. Please try again.");
       }
+      interacted.current = true;
       setDone(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
@@ -827,672 +967,782 @@ export function WizardSection({ data }: WizardSectionProps) {
               </div>
             ) : null}
 
-            {/* Stepper */}
-            <ol className="flex items-start">
-              {nodes.map((node, i) => {
-                const state = dotState(i);
-                const connectorLit = done || i <= step;
-                const canClick = node.clickable && i <= maxStep;
-                return (
-                  <Fragment key={node.key}>
-                    {i > 0 ? (
-                      <li
-                        aria-hidden
-                        // Half the circle's height at each width, so the line
-                        // meets the dots' centres: 14 of 28 on a phone, 30 of
-                        // 60 from md up.
-                        className="mt-[13px] h-0.5 flex-1 rounded md:mt-[30px]"
-                        style={{ background: connectorLit ? "var(--color-gold)" : "var(--color-border)" }}
-                      />
-                    ) : null}
-                    <li className="flex w-9 shrink-0 flex-col items-center gap-1.5 text-center md:w-20 md:gap-2">
-                      <button
-                        type="button"
-                        // Locked while sending: stepping away mid-upload leaves
-                        // the visitor on a form that is already being submitted.
-                        disabled={!canClick || submitting}
-                        aria-current={state === "current" ? "step" : undefined}
-                        onClick={() => goToStep(i)}
-                        // 60px from md up. It stays 28px on a phone on
-                        // purpose: the stepper is one horizontal row, and six
-                        // 60px circles with their gaps do not fit 360px of
-                        // screen without wrapping or scrolling the steps out of
-                        // sight.
-                        className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors md:h-[60px] md:w-[60px] md:text-base ${dotClass[state]} ${canClick ? "cursor-pointer" : "cursor-default"}`}
-                      >
-                        {i === nodes.length - 1 || state === "complete" ? "✓" : i + 1}
-                      </button>
-                      <span className={`text-[10px] font-bold tracking-[0.1em] uppercase sr-only md:not-sr-only ${state === "pending" ? "text-muted" : "text-dark"}`}>
-                        {node.label}
-                      </span>
-                    </li>
-                  </Fragment>
-                );
-              })}
-            </ol>
+            {/* The Wizard panel. One step is bounded to the space actually on
+                screen — its Step header pinned above, its Step actions pinned
+                below, and only the body between them scrolling. Before this the
+                whole thing was one flat column: on a step with six option cards
+                the visitor scrolled the page and lost both the stepper (how far
+                through am I?) and the Next button (is this step finishable?).
 
-            {done ? (
-              <div className="mt-10 rounded-2xl border border-border bg-white p-8">
-                <h2 className="font-serif text-2xl text-dark">
-                  {data.doneTitle || "Thank you — your enquiry is on its way"}
-                </h2>
-                <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">
-                  {data.doneMessage ||
-                    "We've emailed you a copy of your request and will be in touch shortly."}
-                </p>
-              </div>
-            ) : (
-              // Everything below belongs to the CURRENT question, not to the
-              // wizard: the provider re-points `<ZeroCmsList field="options">`
-              // and `field="fields"` at this step, and it is a Provider rather
-              // than a <ZeroCmsEntry> so it draws no outline of its own and
-              // cannot swallow the pencils inside it.
-              <ZeroCmsEntryProvider entry={current}>
-              <div className="mt-10">
-                <p className="text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase">
-                  Step {step + 1} of {total}
-                  {current.stepLabel ? ` — ${current.stepLabel}` : ""}
-                </p>
-                {/* The step's own heading and hint are fields of the question
-                    entry, so the pencil here opens exactly those — along with
-                    its wording variants and its Branch gate. The Step
-                    introduction is no longer part of this block; it renders
-                    below the inputs. */}
-                <ZeroCmsEntry entry={current}>
-                  <div>
-                    {currentCopy.title ? (
-                      <h2 className="mt-2 font-serif text-[clamp(24px,3.5vw,34px)] leading-tight text-dark">
-                        {currentCopy.title}
-                      </h2>
-                    ) : null}
-                    {current.hint ? (
-                      <p className="mt-2 text-sm text-muted">{current.hint}</p>
-                    ) : null}
-                  </div>
-                </ZeroCmsEntry>
-
-                {current.__typename === "ImageQuestion" ? (
-                  <>
-                    <ZeroCmsList
-                      className="mt-6 grid gap-4 sm:grid-cols-2"
-                      field="options"
-                      items={optionItems}
-                    >
-                      {optionItems.map((option) => {
-                        const label = option!.label ?? "";
-                        const selected = (imageAnswers[current.id] ?? []).includes(option!.id);
-                        const live = matches(option!);
-                        return (
-                          <ZeroCmsEntry key={option!.id} entry={option!}>
-                          <button
-                            type="button"
-                            aria-pressed={selected}
-                            onClick={() => toggleImage(current.id, option!.id, Boolean(current.multiSelect))}
-                            // `border-2` on both states, so choosing one never
-                            // reflows the grid. The ring and shadow sit outside
-                            // the box, so they cost no layout either.
-                            className={`group relative h-44 overflow-hidden rounded-2xl border-2 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 ${selected ? "border-gold shadow-[0_10px_30px_rgba(144,109,55,0.35)] ring-4 ring-gold/40" : "border-transparent hover:border-gold/40"} ${live ? "" : "border-dashed border-gold/60 opacity-45"}`}
-                          >
-                            <CmsImage
-                              data={option!.image}
-                              fallbackAlt={label}
-                              placeholderLabel=""
-                              sizes="(max-width: 640px) 100vw, 320px"
-                              className="absolute inset-0 h-full w-full object-cover"
-                            />
-                            <span
-                              aria-hidden
-                              className="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/35 to-transparent"
-                            />
-                            {/* The label plate turns gold when chosen. A hairline
-                                border on top of arbitrary photography is not
-                                something a visitor scanning nine cards will see;
-                                a change of colour behind the words is. Confined
-                                to the bottom two fifths on purpose — tinting the
-                                whole card washes out the photograph, and the
-                                photograph is the reason these are image cards. */}
-                            {selected ? (
-                              <span
-                                aria-hidden
-                                className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-gold-deep/95 to-transparent"
-                              />
-                            ) : null}
-                            <span className="absolute inset-x-0 bottom-0 p-4">
-                              {option!.emoji ? (
-                                <span aria-hidden className="mb-1 block text-xl">
-                                  {option!.emoji}
-                                </span>
-                              ) : null}
-                              <span className="block font-semibold text-white">{label}</span>
-                              {option!.description ? (
-                                <span className="mt-0.5 block text-sm text-white/75">
-                                  {option!.description}
-                                </span>
-                              ) : null}
-                            </span>
-                            {selected ? (
-                              <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-gold text-sm font-bold text-white shadow-md ring-2 ring-white/90">
-                                ✓
-                              </span>
-                            ) : null}
-                            {inspect ? (
-                              <span className="absolute left-3 top-3 rounded-full bg-dark/85 px-2 py-1 text-[10px] font-semibold tracking-wide text-white">
-                                {branchBadge(option!, current)}
-                              </span>
-                            ) : null}
-                          </button>
-                          </ZeroCmsEntry>
-                        );
-                      })}
-                    </ZeroCmsList>
-
-                    {/* Reveal a free-text box for any selected option that asks for detail. */}
-                    {(current.options ?? []).filter(Boolean).map((option) => {
-                      const label = option!.label ?? "";
-                      const selected =
-                        (imageAnswers[current.id] ?? []).includes(option!.id) &&
-                        matches(option!);
-                      if (!option!.revealTextInput || !selected) return null;
+                The provider moved up here from inside the not-done branch. It
+                renders no DOM of its own, so it cannot disturb the flex column,
+                and `current` is defined on every render (see its Math.min
+                above) — so the stepper does not have to exist twice. */}
+            <ZeroCmsEntryProvider entry={current}>
+              <div
+                ref={panelRef}
+                className="relative flex flex-col"
+                style={{ maxHeight: PANEL_MAX_HEIGHT }}
+              >
+                {/* ---- Step header: pinned ---- */}
+                {/* `sticky`, not just first-in-the-column: the panel is about a
+                    screenful, so scrolling the page past its parked position
+                    would slide the stepper under the site header. It holds at
+                    the nav's underside instead, and carries the section's own
+                    background so the body passes behind it rather than through
+                    it. Its containing block is the panel, so it lets go again at
+                    the panel's bottom edge like any other sticky child. */}
+                <div
+                  ref={stepHeaderRef}
+                  // `pt-4` is part of the pinned block, not a margin above it:
+                  // a margin would sit outside the sticky box, so the stepper
+                  // would end up flush against the nav's bottom border the
+                  // moment it stuck. Padding keeps the gap — and the section's
+                  // background behind it — in both states.
+                  className="sticky z-10 shrink-0 bg-surface pt-4 pb-4"
+                  style={{ top: STICKY_TOP }}
+                >
+                  {/* Stepper */}
+                  <ol className="flex items-start">
+                    {nodes.map((node, i) => {
+                      const state = dotState(i);
+                      const connectorLit = done || i <= step;
+                      const canClick = node.clickable && i <= maxStep;
                       return (
-                        <label key={`reveal-${option!.id}`} className="mt-4 flex flex-col gap-1.5">
-                          <span className="text-sm font-medium text-dark">
-                            Tell us more about “{label}”
-                          </span>
-                          <textarea
-                            rows={3}
-                            className={inputClass}
-                            placeholder={option!.textInputPlaceholder ?? ""}
-                            value={optionText[option!.id] ?? ""}
-                            onChange={(e) =>
-                              setOptionText((prev) => ({ ...prev, [option!.id]: e.target.value }))
-                            }
-                          />
-                        </label>
+                        <Fragment key={node.key}>
+                          {i > 0 ? (
+                            <li
+                              aria-hidden
+                              // Half the circle's height at each width, so the line
+                              // meets the dots' centres: 14 of 28 on a phone, 30 of
+                              // 60 from md up.
+                              className="mt-[13px] h-0.5 flex-1 rounded md:mt-[30px]"
+                              style={{ background: connectorLit ? "var(--color-gold)" : "var(--color-border)" }}
+                            />
+                          ) : null}
+                          <li className="flex w-9 shrink-0 flex-col items-center gap-1.5 text-center md:w-20 md:gap-2">
+                            <button
+                              type="button"
+                              // Locked while sending: stepping away mid-upload leaves
+                              // the visitor on a form that is already being submitted.
+                              disabled={!canClick || submitting}
+                              aria-current={state === "current" ? "step" : undefined}
+                              onClick={() => goToStep(i)}
+                              // 60px from md up. It stays 28px on a phone on
+                              // purpose: the stepper is one horizontal row, and six
+                              // 60px circles with their gaps do not fit 360px of
+                              // screen without wrapping or scrolling the steps out of
+                              // sight.
+                              className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors md:h-[60px] md:w-[60px] md:text-base ${dotClass[state]} ${canClick ? "cursor-pointer" : "cursor-default"}`}
+                            >
+                              {i === nodes.length - 1 || state === "complete" ? "✓" : i + 1}
+                            </button>
+                            <span className={`text-[10px] font-bold tracking-[0.1em] uppercase sr-only md:not-sr-only ${state === "pending" ? "text-muted" : "text-dark"}`}>
+                              {node.label}
+                            </span>
+                          </li>
+                        </Fragment>
                       );
                     })}
-                  </>
-                ) : (
-                  <ZeroCmsList
-                    className="mt-6 flex flex-col gap-4"
-                    field="fields"
-                    items={fieldItems}
-                  >
-                    {/* Every control is one `form-field` entry, so each gets its
-                        own pencil — label, key, input type, required and the
-                        Branch rule live there. The Availability calendar's
-                        settings deliberately do not: they belong to the step,
-                        and are edited from the step title's own pencil.
-                        The control itself is built by an inline IIFE
-                        rather than a named function purely so the existing
-                        per-input-type branches keep their `return`s; the
-                        wrapper is what had to change, not the 250 lines of
-                        rendering inside it. */}
-                    {fieldItems.map((field) => (
-                      <ZeroCmsEntry key={field!.id} entry={field!}>
-                        {(() => {
-                        const key = `${current.id}:${field!.fieldKey}`;
-                        const id = `wizard-${field!.id}`;
-                        const gated = !matches(field!);
-                        const labelText = (
-                          <span className="text-sm font-medium text-dark">
-                            {field!.label}
-                            {field!.required ? (
-                              <span className="text-gold" aria-hidden>
-                                {" *"}
-                              </span>
-                            ) : null}
-                            {gated ? (
-                              <span className="ml-2 rounded-full bg-dark/85 px-2 py-0.5 align-middle text-[10px] font-semibold tracking-wide text-white">
-                                {branchBadge(field!)}
-                              </span>
-                            ) : null}
-                          </span>
-                        );
+                  </ol>
 
-                        if (field!.inputType === "boolean") {
-                          const on = formAnswers[key] === "true";
-                          return (
-                            <div key={field!.id} className="flex items-center gap-3">
-                              <button
-                                type="button"
-                                role="switch"
-                                aria-checked={on}
-                                id={id}
-                                onClick={() => setField(key, on ? "" : "true")}
-                                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${on ? "bg-gold ring-2 ring-gold/30" : "bg-border"}`}
-                              >
-                                <span
-                                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${on ? "translate-x-5" : "translate-x-0.5"}`}
-                                />
-                              </button>
-                              <label htmlFor={id} className="cursor-pointer">
-                                {labelText}
-                              </label>
-                            </div>
-                          );
-                        }
-
-                        if (field!.inputType === "file") {
-                          const files = fileAnswers[key] ?? [];
-                          // Counts and the inline/hosted split span the whole
-                          // enquiry, not this field. Recomputed on every change
-                          // because removing a file can promote a later one back
-                          // into the inline budget.
-                          const allFiles = orderedAttachments();
-                          const totalBytes = allFiles.reduce((s, f) => s + f.size, 0);
-                          const { inline } = planEnquiryDelivery(allFiles);
-                          const inlineKeys = new Set(inline.map(fileKey));
-                          const capsId = `${id}-caps`;
-                          return (
-                            <div key={field!.id} className="flex flex-col gap-1.5">
-                              <label htmlFor={id}>{labelText}</label>
-                              <input
-                                id={id}
-                                type="file"
-                                multiple
-                                accept={FILE_ACCEPT}
-                                aria-describedby={capsId}
-                                onChange={(e) => {
-                                  handleFiles(key, e.target.files);
-                                  // Clear the native selection so picking the same
-                                  // file again still fires `change`, and so the
-                                  // control never contradicts our own list.
-                                  e.target.value = "";
-                                }}
-                                className="w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-border-light file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-dark outline-none focus:border-gold"
-                              />
-
-                              {files.length ? (
-                                <ul className="mt-1 flex flex-col gap-1.5">
-                                  {files.map((f) => {
-                                    const k = fileKey(f);
-                                    const isInline = inlineKeys.has(k);
-                                    const pct = uploadProgress[k];
-                                    return (
-                                      <li
-                                        key={k}
-                                        className="flex items-center gap-2 rounded-lg border border-border-light bg-white px-3 py-2"
-                                      >
-                                        <span aria-hidden="true">📎</span>
-                                        <span className="min-w-0 flex-1">
-                                          <span className="block truncate text-sm text-dark">
-                                            {f.name}
-                                          </span>
-                                          <span className="block text-xs text-muted">
-                                            {formatBytes(f.size)}
-                                            {" · "}
-                                            {isInline
-                                              ? "attached to the email"
-                                              : "sent as a download link"}
-                                            {typeof pct === "number" && pct < 100
-                                              ? ` · uploading ${Math.round(pct)}%`
-                                              : ""}
-                                          </span>
-                                        </span>
-                                        <button
-                                          type="button"
-                                          onClick={() => removeFile(key, f)}
-                                          disabled={submitting}
-                                          aria-label={`Remove ${f.name}`}
-                                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-border-light hover:text-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:opacity-50"
-                                        >
-                                          <span aria-hidden="true">✕</span>
-                                        </button>
-                                      </li>
-                                    );
-                                  })}
-                                </ul>
-                              ) : null}
-
-                              {/* Caps stay visible once files are picked — they used
-                                  to be replaced by the file list, which is exactly
-                                  when a visitor needs to know what is left. */}
-                              <span id={capsId} className="text-xs text-muted">
-                                {enquiryFileCapsText()}
-                                {allFiles.length ? (
-                                  <>
-                                    {" "}
-                                    <span className="text-dark">
-                                      {allFiles.length} of {ENQUIRY_MAX_FILES} files ·{" "}
-                                      {formatBytes(totalBytes)} of{" "}
-                                      {formatBytes(ENQUIRY_MAX_TOTAL_BYTES)} used.
-                                    </span>
-                                  </>
-                                ) : null}
-                              </span>
-                            </div>
-                          );
-                        }
-
-                        if (field!.inputType === "availability") {
-                          return (
-                            <AvailabilityField
-                              key={field!.id}
-                              id={id}
-                              labelText={labelText}
-                              field={field!}
-                              config={availabilityConfig}
-                              emergency={emergencyOn}
-                              value={availabilityAnswers[key] ?? []}
-                              onChange={(next) =>
-                                setAvailabilityAnswers((prev) => ({ ...prev, [key]: next }))
-                              }
-                            />
-                          );
-                        }
-
-                        if (field!.inputType === "date") {
-                          const value = formAnswers[key] ?? "";
-                          const selected = value ? fromISODate(value) : undefined;
-                          const today = new Date();
-                          today.setHours(0, 0, 0, 0);
-                          return (
-                            <div key={field!.id} className="flex flex-col gap-1.5">
-                              {labelText}
-                              <div className="w-fit rounded-lg border border-border bg-white p-2">
-                                <DayPicker
-                                  mode="single"
-                                  selected={selected}
-                                  onSelect={(d) => setField(key, d ? toISODate(d) : "")}
-                                  disabled={{ before: today }}
-                                  style={DAYPICKER_THEME}
-                                />
-                              </div>
-                              {value ? (
-                                <span className="text-xs text-muted">
-                                  Selected: {formatDateLong(value)}
-                                </span>
-                              ) : null}
-                            </div>
-                          );
-                        }
-
-                        if (field!.inputType === "timeWindow") {
-                          const selectedWindows = (formAnswers[key] ?? "")
-                            .split(", ")
-                            .filter(Boolean);
-                          const toggleWindow = (w: string) => {
-                            const nextSel = selectedWindows.includes(w)
-                              ? selectedWindows.filter((x) => x !== w)
-                              : [...selectedWindows, w];
-                            // Persist in canonical slot order regardless of click order.
-                            setField(
-                              key,
-                              TIME_WINDOWS.filter((x) => nextSel.includes(x)).join(", "),
-                            );
-                          };
-                          return (
-                            <div key={field!.id} className="flex flex-col gap-1.5">
-                              {labelText}
-                              <div
-                                role="group"
-                                aria-label={field!.label ?? "Preferred time"}
-                                className="flex flex-wrap gap-2"
-                              >
-                                {TIME_WINDOWS.map((w) => {
-                                  const on = selectedWindows.includes(w);
-                                  return (
-                                    <button
-                                      type="button"
-                                      key={w}
-                                      aria-pressed={on}
-                                      onClick={() => toggleWindow(w)}
-                                      className={optionChipClassName(on)}
-                                    >
-                                      {on ? <span aria-hidden>✓</span> : null}
-                                      {w}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        }
-
-                        const isPostcode = POSTCODE_RE.test(field!.fieldKey ?? "");
-
-                        if (isPostcode) {
-                          const listId = `${id}-address-list`;
-                          const statusId = `${id}-status`;
-                          const pcState =
-                            pcStatus[`${current.id}:__postcode`] ?? "idle";
-                          const suggestions = pcSuggestions[current.id] ?? [];
-                          const listOpen =
-                            Boolean(pcOpen[current.id]) && suggestions.length > 0;
-                          const active = pcActive[current.id] ?? -1;
-                          const pcMessage =
-                            pcState === "loading"
-                              ? "Searching addresses…"
-                              : pcState === "listed"
-                                ? `${suggestions.length} ${suggestions.length === 1 ? "match" : "matches"} — use the arrow keys or click one.`
-                                : pcState === "resolving"
-                                  ? "Fetching the full address…"
-                                  : pcState === "found"
-                                    ? "Address filled in below — edit anything that is not right."
-                                    : pcState === "notfound"
-                                      ? "No matches — keep typing, or fill the address in below."
-                                      : pcState === "ratelimited"
-                                        ? "Too many searches just now — fill the address in below."
-                                        : pcState === "error"
-                                          ? "Couldn't reach the address service — fill the address in below."
-                                          : "";
-
-                          return (
-                            /* One host element, not a fragment: ZeroCmsEntry
-                               clones a lone host child, and anything else forces
-                               an extra wrapper div into the field stack. */
-                            <label
-                              key={field!.id}
-                              className="flex flex-col gap-1.5"
-                              data-pc-widget
-                            >
-                              {labelText}
-                              {/* The list is absolutely positioned over what
-                                  follows, so it opening and closing never moves
-                                  the fields below it. */}
-                              <div className="relative">
-                                <input
-                                  id={id}
-                                  type="text"
-                                  role="combobox"
-                                  aria-expanded={listOpen}
-                                  aria-controls={listId}
-                                  aria-autocomplete="list"
-                                  aria-activedescendant={
-                                    listOpen && active >= 0
-                                      ? `${listId}-${active}`
-                                      : undefined
-                                  }
-                                  aria-describedby={statusId}
-                                  className={inputClass}
-                                  required={Boolean(field!.required)}
-                                  placeholder={
-                                    field!.placeholder ??
-                                    "Start typing your postcode or address…"
-                                  }
-                                  autoComplete="postal-code"
-                                  value={formAnswers[key] ?? ""}
-                                  onChange={(e) => {
-                                    setField(key, e.target.value);
-                                    scheduleSuggestions(
-                                      current.id,
-                                      e.target.value,
-                                    );
-                                  }}
-                                  onFocus={() => {
-                                    if ((pcSuggestions[current.id] ?? []).length)
-                                      setPcOpen((s) => ({
-                                        ...s,
-                                        [current.id]: true,
-                                      }));
-                                  }}
-                                  onKeyDown={(e) =>
-                                    onAddressKeyDown(current.id, e)
-                                  }
-                                />
-                                {listOpen ? (
-                                  <ul
-                                    id={listId}
-                                    role="listbox"
-                                    aria-label="Matching addresses"
-                                    className="absolute top-full right-0 left-0 z-20 mt-1 max-h-64 overflow-auto rounded-lg border border-border bg-white py-1 shadow-lg"
-                                  >
-                                    {suggestions.map((s, i) => (
-                                      <li
-                                        key={s.id}
-                                        id={`${listId}-${i}`}
-                                        role="option"
-                                        aria-selected={i === active}
-                                        // Keep focus in the input, or the blur
-                                        // would close the list before the click
-                                        // ever lands.
-                                        onMouseDown={(e) => e.preventDefault()}
-                                        onMouseEnter={() =>
-                                          setPcActive((st) => ({
-                                            ...st,
-                                            [current.id]: i,
-                                          }))
-                                        }
-                                        onClick={() =>
-                                          void chooseSuggestion(current.id, s.id)
-                                        }
-                                        className={`min-h-11 cursor-pointer px-4 py-3 text-sm text-dark ${
-                                          i === active ? "bg-surface" : ""
-                                        }`}
-                                      >
-                                        {s.label}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : null}
-                              </div>
-                              {/* Always rendered, with its line reserved: a
-                                  status that appears on the first keystroke
-                                  would push every field below it down, and
-                                  layout shift is a hard gate here. An empty
-                                  aria-live region is also the one shape screen
-                                  readers announce reliably. */}
-                              <span
-                                id={statusId}
-                                aria-live="polite"
-                                className={`min-h-4 text-xs ${
-                                  pcState === "notfound" ||
-                                  pcState === "error" ||
-                                  pcState === "ratelimited"
-                                    ? "text-red-600"
-                                    : "text-muted"
-                                }`}
-                              >
-                                {pcMessage}
-                              </span>
-                            </label>
-                          );
-                        }
-                        return (
-                          <label key={field!.id} className="flex flex-col gap-1.5">
-                            {labelText}
-                            {field!.inputType === "textarea" ? (
-                              <textarea
-                                id={id}
-                                rows={4}
-                                className={inputClass}
-                                required={Boolean(field!.required)}
-                                placeholder={field!.placeholder ?? undefined}
-                                value={formAnswers[key] ?? ""}
-                                onChange={(e) => setField(key, e.target.value)}
-                              />
-                            ) : (
-                              <input
-                                id={id}
-                                type={field!.inputType ?? "text"}
-                                className={inputClass}
-                                required={Boolean(field!.required)}
-                                placeholder={field!.placeholder ?? undefined}
-                                autoComplete={autoCompleteFor(field!.fieldKey)}
-                                value={formAnswers[key] ?? ""}
-                                onChange={(e) => setField(key, e.target.value)}
-                              />
-                            )}
-                          </label>
-                        );
-                        })()}
+                  {done ? null : (
+                    <>
+                      <p
+                        id={headId}
+                        ref={(el) => {
+                          stepHeadRef.current = el;
+                        }}
+                        tabIndex={-1}
+                        className="mt-8 text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase outline-none"
+                      >
+                        Step {step + 1} of {total}
+                        {current.stepLabel ? ` — ${current.stepLabel}` : ""}
+                      </p>
+                      {/* The step's own heading and hint are fields of the question
+                          entry, so the pencil here opens exactly those — along with
+                          its wording variants and its Branch gate. The Step
+                          introduction is no longer part of this block; it renders
+                          below the inputs. */}
+                      <ZeroCmsEntry entry={current}>
+                        <div>
+                          {currentCopy.title ? (
+                            <h2 className="mt-2 font-serif text-[clamp(24px,3.5vw,34px)] leading-tight text-dark">
+                              {currentCopy.title}
+                            </h2>
+                          ) : null}
+                          {current.hint ? (
+                            <p className="mt-2 text-sm text-muted">{current.hint}</p>
+                          ) : null}
+                        </div>
                       </ZeroCmsEntry>
-                    ))}
-                  </ZeroCmsList>
-                )}
+                    </>
+                  )}
 
-                {/* The Step introduction, BELOW the inputs rather than above
-                    them. Above the options it sat between the question and the
-                    answers, pushing the thing being asked about off the first
-                    screen on a phone; the copy is context for a choice already
-                    on screen, so it reads after it. Still the question's own
-                    `body` (or the matching variant's), so the pencil opens the
-                    same field it always did. */}
-                {currentCopy.intro?.body ? (
-                  // Wrapped on the BLOCK, not the question: the introduction is
-                  // its own entry now, so its pencil should open that block's
-                  // rich text rather than the whole step's form.
-                  <ZeroCmsEntry entry={currentCopy.intro}>
-                    <div className="mt-8 max-w-2xl border-t border-border-light pt-6">
-                      <RichTextViewer content={currentCopy.intro.body} />
-                    </div>
-                  </ZeroCmsEntry>
-                ) : null}
-
-                {/* Honeypot — off-screen rather than display:none so bots that
-                    skip hidden inputs still fill it. Never announced, never
-                    tabbable, never labelled for a human. */}
-                <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-                  <input
-                    type="text"
-                    name="company_website"
-                    tabIndex={-1}
-                    autoComplete="off"
-                    value={honeypot}
-                    onChange={(e) => setHoneypot(e.target.value)}
+                  {/* The shadow half of the Edge fade. Cast by the chrome onto
+                      the body, so it is drawn here and not in the scroller,
+                      where the mask would eat it along with the content. */}
+                  <div
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute inset-x-0 top-full h-4 bg-gradient-to-b from-dark/15 to-transparent transition-opacity duration-200 ${
+                      edges.top ? "opacity-100" : "opacity-0"
+                    }`}
                   />
                 </div>
 
-                {error ? (
-                  <p role="alert" className="mt-5 text-sm font-medium text-red-600">
-                    {error}
-                  </p>
-                ) : null}
+                {/* ---- Step body: the only thing that scrolls ----
 
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  {step > 0 ? (
-                    <button
-                      type="button"
-                      disabled={submitting}
-                      onClick={() => goToStep(step - 1)}
-                      className="rounded-lg border border-border bg-white px-5 py-2.5 font-medium text-dark transition-colors hover:bg-border-light disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      ← Back
-                    </button>
-                  ) : null}
-                  {!isLast ? (
-                    <button
-                      type="button"
-                      disabled={!canProceed}
-                      onClick={next}
-                      className="rounded-lg border border-dark bg-dark px-5 py-2.5 font-medium text-white transition-colors hover:border-gold-mid hover:bg-gold-mid hover:text-dark disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Next →
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={!canProceed || submitting}
-                      onClick={submit}
-                      className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-2.5 font-semibold text-white transition-[filter] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {submitting ? "Sending…" : data.submitLabel || "Send enquiry"}
-                    </button>
-                  )}
+                    `min-h-0` and nothing else: the default `flex: 0 1 auto`
+                    already does the right thing against a content-sized panel,
+                    while `flex-1` would set a 0 basis and fight it. `min-height:
+                    auto` is what otherwise refuses to let a flex item shrink
+                    below its content, which is the whole trick here.
+
+                    No `overscroll-behavior`, deliberately, and the opposite call
+                    to the drag panel in ZeroCmsSectionList: the wizard is a
+                    full-width band with no page margin left to swipe on, so
+                    containing the scroll would trap a phone visitor inside the
+                    form. Reaching the end has to carry on down the page.
+
+                    The padding lives on the child, not here: `clientHeight`
+                    counts padding, so padding the scroller inflates the number
+                    the edge measurement is derived from. */}
+                <div
+                  ref={scrollerRef}
+                  className="wizard-scroll min-h-0 overflow-x-hidden overflow-y-auto"
+                  // The Step introduction renders BELOW the inputs, so a
+                  // keyboard visitor tabbing past the last field lands on Back
+                  // and could never scroll down to read it (WCAG 2.1.1). Only
+                  // when it actually overflows — an unconditional tab stop is a
+                  // tab stop for nothing.
+                  tabIndex={edges.overflowing ? 0 : undefined}
+                  role={edges.overflowing ? "group" : undefined}
+                  aria-labelledby={edges.overflowing ? headId : undefined}
+                >
+                  <div ref={contentRef} className="min-w-0 pb-2">
+                    {done ? (
+                      <div className="mt-6 rounded-2xl border border-border bg-white p-8">
+                        <h2
+                          id={headId}
+                          ref={(el) => {
+                            stepHeadRef.current = el;
+                          }}
+                          tabIndex={-1}
+                          className="font-serif text-2xl text-dark outline-none"
+                        >
+                          {data.doneTitle || "Thank you — your enquiry is on its way"}
+                        </h2>
+                        <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">
+                          {data.doneMessage ||
+                            "We've emailed you a copy of your request and will be in touch shortly."}
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {current.__typename === "ImageQuestion" ? (
+                          <>
+                            <ZeroCmsList
+                              className="mt-6 grid gap-4 sm:grid-cols-2"
+                              field="options"
+                              items={optionItems}
+                            >
+                              {optionItems.map((option) => {
+                                const label = option!.label ?? "";
+                                const selected = (imageAnswers[current.id] ?? []).includes(option!.id);
+                                const live = matches(option!);
+                                return (
+                                  <ZeroCmsEntry key={option!.id} entry={option!}>
+                                  <button
+                                    type="button"
+                                    aria-pressed={selected}
+                                    onClick={() => toggleImage(current.id, option!.id, Boolean(current.multiSelect))}
+                                    // `border-2` on both states, so choosing one never
+                                    // reflows the grid. The ring and shadow sit outside
+                                    // the box, so they cost no layout either.
+                                    className={`group relative h-44 overflow-hidden rounded-2xl border-2 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 ${selected ? "border-gold shadow-[0_10px_30px_rgba(144,109,55,0.35)] ring-4 ring-gold/40" : "border-transparent hover:border-gold/40"} ${live ? "" : "border-dashed border-gold/60 opacity-45"}`}
+                                  >
+                                    <CmsImage
+                                      data={option!.image}
+                                      fallbackAlt={label}
+                                      placeholderLabel=""
+                                      sizes="(max-width: 640px) 100vw, 320px"
+                                      className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                    <span
+                                      aria-hidden
+                                      className="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/35 to-transparent"
+                                    />
+                                    {/* The label plate turns gold when chosen. A hairline
+                                        border on top of arbitrary photography is not
+                                        something a visitor scanning nine cards will see;
+                                        a change of colour behind the words is. Confined
+                                        to the bottom two fifths on purpose — tinting the
+                                        whole card washes out the photograph, and the
+                                        photograph is the reason these are image cards. */}
+                                    {selected ? (
+                                      <span
+                                        aria-hidden
+                                        className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-gold-deep/95 to-transparent"
+                                      />
+                                    ) : null}
+                                    <span className="absolute inset-x-0 bottom-0 p-4">
+                                      {option!.emoji ? (
+                                        <span aria-hidden className="mb-1 block text-xl">
+                                          {option!.emoji}
+                                        </span>
+                                      ) : null}
+                                      <span className="block font-semibold text-white">{label}</span>
+                                      {option!.description ? (
+                                        <span className="mt-0.5 block text-sm text-white/75">
+                                          {option!.description}
+                                        </span>
+                                      ) : null}
+                                    </span>
+                                    {selected ? (
+                                      <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-gold text-sm font-bold text-white shadow-md ring-2 ring-white/90">
+                                        ✓
+                                      </span>
+                                    ) : null}
+                                    {inspect ? (
+                                      <span className="absolute left-3 top-3 rounded-full bg-dark/85 px-2 py-1 text-[10px] font-semibold tracking-wide text-white">
+                                        {branchBadge(option!, current)}
+                                      </span>
+                                    ) : null}
+                                  </button>
+                                  </ZeroCmsEntry>
+                                );
+                              })}
+                            </ZeroCmsList>
+
+                            {/* Reveal a free-text box for any selected option that asks for detail. */}
+                            {(current.options ?? []).filter(Boolean).map((option) => {
+                              const label = option!.label ?? "";
+                              const selected =
+                                (imageAnswers[current.id] ?? []).includes(option!.id) &&
+                                matches(option!);
+                              if (!option!.revealTextInput || !selected) return null;
+                              return (
+                                <label key={`reveal-${option!.id}`} className="mt-4 flex flex-col gap-1.5">
+                                  <span className="text-sm font-medium text-dark">
+                                    Tell us more about “{label}”
+                                  </span>
+                                  <textarea
+                                    rows={3}
+                                    className={inputClass}
+                                    placeholder={option!.textInputPlaceholder ?? ""}
+                                    value={optionText[option!.id] ?? ""}
+                                    onChange={(e) =>
+                                      setOptionText((prev) => ({ ...prev, [option!.id]: e.target.value }))
+                                    }
+                                  />
+                                </label>
+                              );
+                            })}
+                          </>
+                        ) : (
+                          <ZeroCmsList
+                            className="mt-6 flex flex-col gap-4"
+                            field="fields"
+                            items={fieldItems}
+                          >
+                            {/* Every control is one `form-field` entry, so each gets its
+                                own pencil — label, key, input type, required and the
+                                Branch rule live there. The Availability calendar's
+                                settings deliberately do not: they belong to the step,
+                                and are edited from the step title's own pencil.
+                                The control itself is built by an inline IIFE
+                                rather than a named function purely so the existing
+                                per-input-type branches keep their `return`s; the
+                                wrapper is what had to change, not the 250 lines of
+                                rendering inside it. */}
+                            {fieldItems.map((field) => (
+                              <ZeroCmsEntry key={field!.id} entry={field!}>
+                                {(() => {
+                                const key = `${current.id}:${field!.fieldKey}`;
+                                const id = `wizard-${field!.id}`;
+                                const gated = !matches(field!);
+                                const labelText = (
+                                  <span className="text-sm font-medium text-dark">
+                                    {field!.label}
+                                    {field!.required ? (
+                                      <span className="text-gold" aria-hidden>
+                                        {" *"}
+                                      </span>
+                                    ) : null}
+                                    {gated ? (
+                                      <span className="ml-2 rounded-full bg-dark/85 px-2 py-0.5 align-middle text-[10px] font-semibold tracking-wide text-white">
+                                        {branchBadge(field!)}
+                                      </span>
+                                    ) : null}
+                                  </span>
+                                );
+
+                                if (field!.inputType === "boolean") {
+                                  const on = formAnswers[key] === "true";
+                                  return (
+                                    <div key={field!.id} className="flex items-center gap-3">
+                                      <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={on}
+                                        id={id}
+                                        onClick={() => setField(key, on ? "" : "true")}
+                                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${on ? "bg-gold ring-2 ring-gold/30" : "bg-border"}`}
+                                      >
+                                        <span
+                                          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${on ? "translate-x-5" : "translate-x-0.5"}`}
+                                        />
+                                      </button>
+                                      <label htmlFor={id} className="cursor-pointer">
+                                        {labelText}
+                                      </label>
+                                    </div>
+                                  );
+                                }
+
+                                if (field!.inputType === "file") {
+                                  const files = fileAnswers[key] ?? [];
+                                  // Counts and the inline/hosted split span the whole
+                                  // enquiry, not this field. Recomputed on every change
+                                  // because removing a file can promote a later one back
+                                  // into the inline budget.
+                                  const allFiles = orderedAttachments();
+                                  const totalBytes = allFiles.reduce((s, f) => s + f.size, 0);
+                                  const { inline } = planEnquiryDelivery(allFiles);
+                                  const inlineKeys = new Set(inline.map(fileKey));
+                                  const capsId = `${id}-caps`;
+                                  return (
+                                    <div key={field!.id} className="flex flex-col gap-1.5">
+                                      <label htmlFor={id}>{labelText}</label>
+                                      <input
+                                        id={id}
+                                        type="file"
+                                        multiple
+                                        accept={FILE_ACCEPT}
+                                        aria-describedby={capsId}
+                                        onChange={(e) => {
+                                          handleFiles(key, e.target.files);
+                                          // Clear the native selection so picking the same
+                                          // file again still fires `change`, and so the
+                                          // control never contradicts our own list.
+                                          e.target.value = "";
+                                        }}
+                                        className="w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-border-light file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-dark outline-none focus:border-gold"
+                                      />
+
+                                      {files.length ? (
+                                        <ul className="mt-1 flex flex-col gap-1.5">
+                                          {files.map((f) => {
+                                            const k = fileKey(f);
+                                            const isInline = inlineKeys.has(k);
+                                            const pct = uploadProgress[k];
+                                            return (
+                                              <li
+                                                key={k}
+                                                className="flex items-center gap-2 rounded-lg border border-border-light bg-white px-3 py-2"
+                                              >
+                                                <span aria-hidden="true">📎</span>
+                                                <span className="min-w-0 flex-1">
+                                                  <span className="block truncate text-sm text-dark">
+                                                    {f.name}
+                                                  </span>
+                                                  <span className="block text-xs text-muted">
+                                                    {formatBytes(f.size)}
+                                                    {" · "}
+                                                    {isInline
+                                                      ? "attached to the email"
+                                                      : "sent as a download link"}
+                                                    {typeof pct === "number" && pct < 100
+                                                      ? ` · uploading ${Math.round(pct)}%`
+                                                      : ""}
+                                                  </span>
+                                                </span>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => removeFile(key, f)}
+                                                  disabled={submitting}
+                                                  aria-label={`Remove ${f.name}`}
+                                                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-border-light hover:text-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:opacity-50"
+                                                >
+                                                  <span aria-hidden="true">✕</span>
+                                                </button>
+                                              </li>
+                                            );
+                                          })}
+                                        </ul>
+                                      ) : null}
+
+                                      {/* Caps stay visible once files are picked — they used
+                                          to be replaced by the file list, which is exactly
+                                          when a visitor needs to know what is left. */}
+                                      <span id={capsId} className="text-xs text-muted">
+                                        {enquiryFileCapsText()}
+                                        {allFiles.length ? (
+                                          <>
+                                            {" "}
+                                            <span className="text-dark">
+                                              {allFiles.length} of {ENQUIRY_MAX_FILES} files ·{" "}
+                                              {formatBytes(totalBytes)} of{" "}
+                                              {formatBytes(ENQUIRY_MAX_TOTAL_BYTES)} used.
+                                            </span>
+                                          </>
+                                        ) : null}
+                                      </span>
+                                    </div>
+                                  );
+                                }
+
+                                if (field!.inputType === "availability") {
+                                  return (
+                                    <AvailabilityField
+                                      key={field!.id}
+                                      id={id}
+                                      labelText={labelText}
+                                      field={field!}
+                                      config={availabilityConfig}
+                                      emergency={emergencyOn}
+                                      value={availabilityAnswers[key] ?? []}
+                                      onChange={(next) =>
+                                        setAvailabilityAnswers((prev) => ({ ...prev, [key]: next }))
+                                      }
+                                    />
+                                  );
+                                }
+
+                                if (field!.inputType === "date") {
+                                  const value = formAnswers[key] ?? "";
+                                  const selected = value ? fromISODate(value) : undefined;
+                                  const today = new Date();
+                                  today.setHours(0, 0, 0, 0);
+                                  return (
+                                    <div key={field!.id} className="flex flex-col gap-1.5">
+                                      {labelText}
+                                      <div className="w-fit rounded-lg border border-border bg-white p-2">
+                                        <DayPicker
+                                          mode="single"
+                                          selected={selected}
+                                          onSelect={(d) => setField(key, d ? toISODate(d) : "")}
+                                          disabled={{ before: today }}
+                                          style={DAYPICKER_THEME}
+                                        />
+                                      </div>
+                                      {value ? (
+                                        <span className="text-xs text-muted">
+                                          Selected: {formatDateLong(value)}
+                                        </span>
+                                      ) : null}
+                                    </div>
+                                  );
+                                }
+
+                                if (field!.inputType === "timeWindow") {
+                                  const selectedWindows = (formAnswers[key] ?? "")
+                                    .split(", ")
+                                    .filter(Boolean);
+                                  const toggleWindow = (w: string) => {
+                                    const nextSel = selectedWindows.includes(w)
+                                      ? selectedWindows.filter((x) => x !== w)
+                                      : [...selectedWindows, w];
+                                    // Persist in canonical slot order regardless of click order.
+                                    setField(
+                                      key,
+                                      TIME_WINDOWS.filter((x) => nextSel.includes(x)).join(", "),
+                                    );
+                                  };
+                                  return (
+                                    <div key={field!.id} className="flex flex-col gap-1.5">
+                                      {labelText}
+                                      <div
+                                        role="group"
+                                        aria-label={field!.label ?? "Preferred time"}
+                                        className="flex flex-wrap gap-2"
+                                      >
+                                        {TIME_WINDOWS.map((w) => {
+                                          const on = selectedWindows.includes(w);
+                                          return (
+                                            <button
+                                              type="button"
+                                              key={w}
+                                              aria-pressed={on}
+                                              onClick={() => toggleWindow(w)}
+                                              className={optionChipClassName(on)}
+                                            >
+                                              {on ? <span aria-hidden>✓</span> : null}
+                                              {w}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  );
+                                }
+
+                                const isPostcode = POSTCODE_RE.test(field!.fieldKey ?? "");
+
+                                if (isPostcode) {
+                                  const listId = `${id}-address-list`;
+                                  const statusId = `${id}-status`;
+                                  const pcState =
+                                    pcStatus[`${current.id}:__postcode`] ?? "idle";
+                                  const suggestions = pcSuggestions[current.id] ?? [];
+                                  const listOpen =
+                                    Boolean(pcOpen[current.id]) && suggestions.length > 0;
+                                  const active = pcActive[current.id] ?? -1;
+                                  const pcMessage =
+                                    pcState === "loading"
+                                      ? "Searching addresses…"
+                                      : pcState === "listed"
+                                        ? `${suggestions.length} ${suggestions.length === 1 ? "match" : "matches"} — use the arrow keys or click one.`
+                                        : pcState === "resolving"
+                                          ? "Fetching the full address…"
+                                          : pcState === "found"
+                                            ? "Address filled in below — edit anything that is not right."
+                                            : pcState === "notfound"
+                                              ? "No matches — keep typing, or fill the address in below."
+                                              : pcState === "ratelimited"
+                                                ? "Too many searches just now — fill the address in below."
+                                                : pcState === "error"
+                                                  ? "Couldn't reach the address service — fill the address in below."
+                                                  : "";
+
+                                  return (
+                                    /* One host element, not a fragment: ZeroCmsEntry
+                                       clones a lone host child, and anything else forces
+                                       an extra wrapper div into the field stack. */
+                                    <label
+                                      key={field!.id}
+                                      className="flex flex-col gap-1.5"
+                                      data-pc-widget
+                                    >
+                                      {labelText}
+                                      {/* The list is absolutely positioned over what
+                                          follows, so it opening and closing never moves
+                                          the fields below it. */}
+                                      <div className="relative">
+                                        <input
+                                          id={id}
+                                          type="text"
+                                          role="combobox"
+                                          aria-expanded={listOpen}
+                                          aria-controls={listId}
+                                          aria-autocomplete="list"
+                                          aria-activedescendant={
+                                            listOpen && active >= 0
+                                              ? `${listId}-${active}`
+                                              : undefined
+                                          }
+                                          aria-describedby={statusId}
+                                          className={inputClass}
+                                          required={Boolean(field!.required)}
+                                          placeholder={
+                                            field!.placeholder ??
+                                            "Start typing your postcode or address…"
+                                          }
+                                          autoComplete="postal-code"
+                                          value={formAnswers[key] ?? ""}
+                                          onChange={(e) => {
+                                            setField(key, e.target.value);
+                                            scheduleSuggestions(
+                                              current.id,
+                                              e.target.value,
+                                            );
+                                          }}
+                                          onFocus={() => {
+                                            if ((pcSuggestions[current.id] ?? []).length)
+                                              setPcOpen((s) => ({
+                                                ...s,
+                                                [current.id]: true,
+                                              }));
+                                          }}
+                                          onKeyDown={(e) =>
+                                            onAddressKeyDown(current.id, e)
+                                          }
+                                        />
+                                        {listOpen ? (
+                                          <ul
+                                            id={listId}
+                                            role="listbox"
+                                            aria-label="Matching addresses"
+                                            className="absolute top-full right-0 left-0 z-20 mt-1 max-h-64 overflow-auto rounded-lg border border-border bg-white py-1 shadow-lg"
+                                          >
+                                            {suggestions.map((s, i) => (
+                                              <li
+                                                key={s.id}
+                                                id={`${listId}-${i}`}
+                                                role="option"
+                                                aria-selected={i === active}
+                                                // Keep focus in the input, or the blur
+                                                // would close the list before the click
+                                                // ever lands.
+                                                onMouseDown={(e) => e.preventDefault()}
+                                                onMouseEnter={() =>
+                                                  setPcActive((st) => ({
+                                                    ...st,
+                                                    [current.id]: i,
+                                                  }))
+                                                }
+                                                onClick={() =>
+                                                  void chooseSuggestion(current.id, s.id)
+                                                }
+                                                className={`min-h-11 cursor-pointer px-4 py-3 text-sm text-dark ${
+                                                  i === active ? "bg-surface" : ""
+                                                }`}
+                                              >
+                                                {s.label}
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        ) : null}
+                                      </div>
+                                      {/* Always rendered, with its line reserved: a
+                                          status that appears on the first keystroke
+                                          would push every field below it down, and
+                                          layout shift is a hard gate here. An empty
+                                          aria-live region is also the one shape screen
+                                          readers announce reliably. */}
+                                      <span
+                                        id={statusId}
+                                        aria-live="polite"
+                                        className={`min-h-4 text-xs ${
+                                          pcState === "notfound" ||
+                                          pcState === "error" ||
+                                          pcState === "ratelimited"
+                                            ? "text-red-600"
+                                            : "text-muted"
+                                        }`}
+                                      >
+                                        {pcMessage}
+                                      </span>
+                                    </label>
+                                  );
+                                }
+                                return (
+                                  <label key={field!.id} className="flex flex-col gap-1.5">
+                                    {labelText}
+                                    {field!.inputType === "textarea" ? (
+                                      <textarea
+                                        id={id}
+                                        rows={4}
+                                        className={inputClass}
+                                        required={Boolean(field!.required)}
+                                        placeholder={field!.placeholder ?? undefined}
+                                        value={formAnswers[key] ?? ""}
+                                        onChange={(e) => setField(key, e.target.value)}
+                                      />
+                                    ) : (
+                                      <input
+                                        id={id}
+                                        type={field!.inputType ?? "text"}
+                                        className={inputClass}
+                                        required={Boolean(field!.required)}
+                                        placeholder={field!.placeholder ?? undefined}
+                                        autoComplete={autoCompleteFor(field!.fieldKey)}
+                                        value={formAnswers[key] ?? ""}
+                                        onChange={(e) => setField(key, e.target.value)}
+                                      />
+                                    )}
+                                  </label>
+                                );
+                                })()}
+                              </ZeroCmsEntry>
+                            ))}
+                          </ZeroCmsList>
+                        )}
+
+                        {/* The Step introduction, BELOW the inputs rather than above
+                            them. Above the options it sat between the question and the
+                            answers, pushing the thing being asked about off the first
+                            screen on a phone; the copy is context for a choice already
+                            on screen, so it reads after it. Still the question's own
+                            `body` (or the matching variant's), so the pencil opens the
+                            same field it always did. */}
+                        {currentCopy.intro?.body ? (
+                          // Wrapped on the BLOCK, not the question: the introduction is
+                          // its own entry now, so its pencil should open that block's
+                          // rich text rather than the whole step's form.
+                          <ZeroCmsEntry entry={currentCopy.intro}>
+                            <div className="mt-8 max-w-2xl border-t border-border-light pt-6">
+                              <RichTextViewer content={currentCopy.intro.body} />
+                            </div>
+                          </ZeroCmsEntry>
+                        ) : null}
+
+                        {/* Honeypot — off-screen rather than display:none so bots that
+                            skip hidden inputs still fill it. Never announced, never
+                            tabbable, never labelled for a human. */}
+                        <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+                          <input
+                            type="text"
+                            name="company_website"
+                            tabIndex={-1}
+                            autoComplete="off"
+                            value={honeypot}
+                            onChange={(e) => setHoneypot(e.target.value)}
+                          />
+                        </div>
+
+                        {error ? (
+                          <p role="alert" className="mt-5 text-sm font-medium text-red-600">
+                            {error}
+                          </p>
+                        ) : null}
+                      </>
+                    )}
+                  </div>
                 </div>
+
+                {/* ---- Step actions: pinned ---- */}
+                {done ? null : (
+                  // Sticky for the mirror-image reason: Back and Next are the
+                  // answer to "is this step finishable?", and a panel entering
+                  // from the bottom of the screen would otherwise keep them
+                  // below the fold until it had fully arrived.
+                  <div
+                    ref={actionsRef}
+                    className="sticky bottom-0 z-10 shrink-0 bg-surface pt-5 pb-1"
+                  >
+                    <div className="flex flex-wrap items-center gap-3">
+                      {step > 0 ? (
+                        <button
+                          type="button"
+                          disabled={submitting}
+                          onClick={() => goToStep(step - 1)}
+                          className="rounded-lg border border-border bg-white px-5 py-2.5 font-medium text-dark transition-colors hover:bg-border-light disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          ← Back
+                        </button>
+                      ) : null}
+                      {!isLast ? (
+                        <button
+                          type="button"
+                          disabled={!canProceed}
+                          onClick={next}
+                          className="rounded-lg border border-dark bg-dark px-5 py-2.5 font-medium text-white transition-colors hover:border-gold-mid hover:bg-gold-mid hover:text-dark disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          Next →
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={!canProceed || submitting}
+                          onClick={submit}
+                          className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-2.5 font-semibold text-white transition-[filter] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          {submitting ? "Sending…" : data.submitLabel || "Send enquiry"}
+                        </button>
+                      )}
+                    </div>
+
+                    <div
+                      aria-hidden="true"
+                      className={`pointer-events-none absolute inset-x-0 bottom-full h-4 bg-gradient-to-t from-dark/15 to-transparent transition-opacity duration-200 ${
+                        edges.bottom ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                  </div>
+                )}
               </div>
-              </ZeroCmsEntryProvider>
-            )}
+            </ZeroCmsEntryProvider>
           </div>
         </div>
 
