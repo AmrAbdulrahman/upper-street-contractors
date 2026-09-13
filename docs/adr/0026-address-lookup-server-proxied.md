@@ -31,7 +31,8 @@ against it:
    visitor who refuses them loses the ability to have their address filled in —
    consent purchased with usability, for a technology that stores nothing on their
    device.
-3. **Credits are real money**, and a browser-side widget has nowhere to cache.
+3. **Credits are real money**, and a browser-side widget spends them with nothing
+   in between — no rate limit, no budget of our own, no log of what was asked.
 
 The pricing shape is what decides the interaction design. Ideal Postcodes bills a
 credit for *resolving* an address, and **charges nothing for autocomplete**. A
@@ -51,12 +52,21 @@ Whatever we chose had to settle that too.
     while someone types, every keystroke is a new prefix, so a cache read before
     the vendor call is latency spent to miss. Free to fetch means nothing to save.
   - `?id=<hit id>` — the full address behind one suggestion. One credit; rate-limited
-    tightly; cached for `IDEAL_POSTCODES_CACHE_TTL_DAYS`. The paid half is the
-    only half worth caching.
+    tightly; and **not cached either**. The address someone picks is theirs, not a row
+    to keep in our Redis against the next person who picks the same door — so every
+    enquiry spends its credit and every answer is current PAF.
 
   `IDEAL_POSTCODES_API_KEY` is an ordinary server secret. The browser only ever calls
   this origin, so there is **no `categories.ts` entry and no `CONSENT_VERSION` bump** —
   not an oversight, a consequence.
+- **The visitor's own request headers ride along on the upstream call.** Proxying
+  costs the vendor the one signal it polices a browser key with — the request's
+  `Referer` — so the route forwards what the browser sent rather than calling
+  anonymously on its own behalf. Credentials (`cookie`, `authorization`), the
+  headers describing the hop that just ended (`host`, `content-length`, …),
+  conditional and ranged reads, and `accept-encoding` are all withheld;
+  `HEADERS_NOT_FORWARDED` in the route is the list. Allowed URLs therefore work on
+  this key again — see the Consequences below.
 - **The route returns our own shapes, never the vendor's.** `Suggestion` is
   `{ id, label }` with `id` opaque to the browser; `LookupAddress` is
   `{ line1, line2, town, postcode, organisation }`. The wizard has never heard of
@@ -108,13 +118,24 @@ Whatever we chose had to settle that too.
   Development — there is no `vercel.json`, so env is dashboard-only and nothing in the
   repo checks it. Unset, the route answers `"unavailable"`, the address fields stay
   typable and the enquiry still sends.
-- **Allowed URLs must be left empty on this key.** That list is checked against the
-  `Referer`/`Origin` of the request; a server sends neither, so a populated list
-  rejects every call with `4011` — which is exactly what happened the first time this
-  ran against a key still carrying a browser-era whitelist. The remaining control is
-  the daily lookup cap, which does apply, and should be set.
-- Cost tracks enquiries, roughly one credit each, not traffic. Typing is free at the
-  vendor and uncached here, so a search always reflects live PAF. Credit is prepaid and
+- **Allowed URLs work on this key, because the visitor's `Referer` is forwarded.**
+  That list is checked against the `Referer`/`Origin` of the request. A server calling
+  on its own behalf sends neither, so a populated list rejected every call with `4011`
+  — which is exactly what happened the first time this ran against a key still carrying
+  a browser-era whitelist. Forwarding the browser's headers puts the real page back on
+  the request, so the list can be used: enter the site's origin, or leave it empty. It
+  will still reject anything that arrives with no `Referer` at all (a `curl`, a browser
+  configured to send none), so the daily lookup cap remains the control that always
+  applies, and should be set.
+- **The vendor sees a little more of the visitor than the postcode.** Forwarding
+  headers means `User-Agent`, `Accept-Language` and — behind Vercel — the visitor's
+  forwarded IP reach Ideal Postcodes with the search. Still a processor relationship
+  and still no browser-to-third-party contact, so still no Consent gate — but it is
+  more than the Privacy Policy used to claim we sent ("only the postcode you type"), so
+  that copy in `scripts/seed-legal-pages.mjs` now says what actually goes, and the
+  policy carries its own "last updated" date apart from the Terms'.
+- Cost tracks enquiries, roughly one credit each, not traffic. Nothing is cached on
+  either half, so a search and a resolve both always reflect live PAF. Credit is prepaid and
   expires after 12 months. It is left out of the README's subscription totals because
   it is usage drawn down by real enquiries, not a recurring charge.
 - The Privacy Policy now names an address lookup provider, and says the request comes

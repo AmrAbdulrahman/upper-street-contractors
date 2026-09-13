@@ -20,15 +20,16 @@ export const dynamic = "force-dynamic";
  * Two steps, because that is how the vendor prices it:
  *
  *   GET ?q=<partial>  — suggestions as the visitor types. FREE; autocomplete
- *                       does not touch the credit balance, so this goes
- *                       straight to the vendor with nothing in between.
+ *                       does not touch the credit balance.
  *   GET ?id=<hit id>  — the full address behind one suggestion. BILLED, one
- *                       credit, so it happens once per enquiry — and this one
- *                       is cached, because that is where the money is.
+ *                       credit, so it happens once per enquiry.
+ *
+ * Neither half is cached: every lookup is a live PAF read, and no visitor's
+ * address is kept here once the response has gone out.
  *
  * Ideal Postcodes is perfectly happy to be called from a browser with a
  * URL-restricted key, and its own React package does exactly that. We don't,
- * for three reasons:
+ * for two reasons:
  *
  *   1. A browser key is a public key, and CONTEXT.md's "Read-only service
  *      token" entry rules that vocabulary out on purpose.
@@ -36,7 +37,10 @@ export const dynamic = "force-dynamic";
  *      one. Proxying means the visitor's browser only ever talks to this
  *      origin, so refusing Functional cookies doesn't cost anyone the ability
  *      to enter their address.
- *   3. Credits are real money. On our own server we can cache.
+ *
+ * What proxying costs is the one signal the vendor polices a browser key with —
+ * the request's own `Referer` — so the visitor's headers ride along on the call.
+ * `HEADERS_NOT_FORWARDED` is the list of what does not.
  *
  * Like /api/enquiry/upload-token this is a public, unauthenticated endpoint on
  * a marketing site, so it carries the ADR 0014 guard set: a per-IP Redis rate
@@ -48,15 +52,13 @@ const RATE_LIMIT_WINDOW_SECONDS = 600;
 const RATE_LIMIT_MAX_SUGGEST = 300;
 /** Resolving costs a credit, so it gets the tighter budget. */
 const RATE_LIMIT_MAX_RESOLVE = 40;
-const DEFAULT_CACHE_TTL_DAYS = 30;
-const SECONDS_PER_DAY = 86_400;
 const UPSTREAM_TIMEOUT_MS = 5_000;
 const SUGGEST_LIMIT = 10;
 
 /** Vendor success code. Anything else is a failure however it is dressed up. */
 const IDPC_SUCCESS = 2000;
 const IDPC_NOT_FOUND = 4040;
-/** The key restricts Allowed URLs. A server sends no Referer, so it can't match. */
+/** The key restricts Allowed URLs, and the request's Referer matched none. */
 const IDPC_URL_NOT_WHITELISTED = 4011;
 
 type LookupResponse =
@@ -66,8 +68,8 @@ type LookupResponse =
 
 /**
  * Direct client rather than the zero-cms adapters in lib/zero-cms/server.ts —
- * those expose an EngineAdapter, not raw Redis, and this needs INCR and a plain
- * keyed get/set with a TTL. The read-write token never leaves the server.
+ * those expose an EngineAdapter, not raw Redis, and the rate limit needs INCR
+ * and EXPIRE. The read-write token never leaves the server.
  */
 let redis: Redis | null = null;
 function getRedis(): Redis | null {
@@ -111,64 +113,81 @@ async function isRateLimited(
 }
 
 /**
- * Cache lifetime for a resolved address, in seconds. `0` means "don't cache at
- * all" — an escape hatch for anyone chasing an address PAF has only just
- * published. The billed half is the only half that is cached at all.
+ * Headers the browser sent us that are *not* passed on to the vendor,
+ * lowercased. Four groups, each a refusal rather than an oversight:
+ *
+ *   - Credentials — `cookie`, `authorization`. They were sent to this origin by
+ *     someone told the browser talks to nobody else. Not ours to hand on.
+ *   - The hop that just ended — `host`, `connection`, `content-length` and
+ *     friends describe a connection that is already closed. Copied onto a fresh
+ *     GET with no body they are simply untrue.
+ *   - Conditional and ranged reads — `if-none-match`, `range` and the rest turn
+ *     a 200 carrying JSON into a 304 or a 206 that carries none, and
+ *     `upstream.json()` throws on those.
+ *   - `accept-encoding`, because undici only decompresses a response when it
+ *     set that header itself. Forward the browser's and the JSON arrives as
+ *     gzip bytes.
  */
-function addressTtlSeconds(): number {
-  const raw = process.env.IDEAL_POSTCODES_CACHE_TTL_DAYS;
-  if (raw === undefined || raw.trim() === "") {
-    return DEFAULT_CACHE_TTL_DAYS * SECONDS_PER_DAY;
-  }
+const HEADERS_NOT_FORWARDED = new Set([
+  "accept-encoding",
+  "authorization",
+  "connection",
+  "content-length",
+  "cookie",
+  "host",
+  "if-match",
+  "if-modified-since",
+  "if-none-match",
+  "if-range",
+  "if-unmodified-since",
+  "keep-alive",
+  "proxy-authorization",
+  "range",
+  "te",
+  "trailer",
+  "transfer-encoding",
+  "upgrade",
+]);
 
-  const days = Number(raw);
-  if (!Number.isFinite(days) || days < 0) {
-    console.error(
-      `address-lookup: IDEAL_POSTCODES_CACHE_TTL_DAYS is not a number ("${raw}"), using ${DEFAULT_CACHE_TTL_DAYS}`,
-    );
+/**
+ * The visitor's own request headers, minus the set above, for the upstream call.
+ *
+ * `Referer` is the one that earns this. Ideal Postcodes matches a key's Allowed
+ * URLs against it, and a server calling on its own behalf sends none — which is
+ * the whole of the 4011 story in `logRefusal`. Passing the browser's through
+ * puts the real page back on the request, so a whitelist can be used again.
+ *
+ * It also means the vendor sees the visitor's `User-Agent`, `Accept-Language`
+ * and — behind Vercel — their forwarded IP. That is a processor detail to
+ * record (ADR 0026), not a consent one: the browser still contacts nobody but
+ * this origin.
+ */
+function forwardedHeaders(request: Request): Headers {
+  const headers = new Headers();
+  request.headers.forEach((value, name) => {
+    if (HEADERS_NOT_FORWARDED.has(name.toLowerCase())) return;
 
-    return DEFAULT_CACHE_TTL_DAYS * SECONDS_PER_DAY;
-  }
+    headers.set(name, value);
+  });
 
-  return Math.round(days * SECONDS_PER_DAY);
-}
-
-async function readCache<T>(key: string, ttl: number): Promise<T | null> {
-  const store = getRedis();
-  if (!store || ttl === 0) return null;
-
-  try {
-    // @upstash/redis deserialises JSON for us.
-    return await store.get<T>(key);
-  } catch (e) {
-    console.error("address-lookup: cache read failed", e);
-
-    return null;
-  }
-}
-
-async function writeCache<T>(key: string, value: T, ttl: number): Promise<void> {
-  const store = getRedis();
-  if (!store || ttl === 0) return;
-
-  try {
-    await store.set(key, value, { ex: ttl });
-  } catch (e) {
-    console.error("address-lookup: cache write failed", e);
-  }
+  return headers;
 }
 
 const json = (body: LookupResponse, status: number) =>
   NextResponse.json(body, {
     status,
-    // What the visitor typed is the visitor's; the answer is cached in Redis.
+    // What the visitor typed is the visitor's, and nothing here keeps a copy.
     headers: { "Cache-Control": "no-store" },
   });
 
 type Envelope<T> = { code?: number; message?: string; result?: T };
 
-/** One call to the vendor. Returns null once it has logged the reason. */
-async function callVendor<T>(path: string): Promise<Envelope<T> | null> {
+/** One call to the vendor, under the visitor's own headers. Returns null once
+ *  it has logged the reason. */
+async function callVendor<T>(
+  request: Request,
+  path: string,
+): Promise<Envelope<T> | null> {
   const apiKey = process.env.IDEAL_POSTCODES_API_KEY;
   if (!apiKey) {
     // Not fatal by design: the address fields are always visible and typable,
@@ -182,7 +201,10 @@ async function callVendor<T>(path: string): Promise<Envelope<T> | null> {
   try {
     const upstream = await fetch(
       `https://api.ideal-postcodes.co.uk/v1${path}${sep}api_key=${encodeURIComponent(apiKey)}`,
-      { signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) },
+      {
+        headers: forwardedHeaders(request),
+        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+      },
     );
 
     return (await upstream.json()) as Envelope<T>;
@@ -201,25 +223,25 @@ function logRefusal(body: Envelope<unknown>): void {
   );
   if (body.code === IDPC_URL_NOT_WHITELISTED) {
     // Worth naming, because the fix is in the vendor's dashboard and the
-    // generic message sends you looking in the wrong place. Allowed URLs
-    // defend a key embedded in a browser; this key lives on the server and
-    // sends no Referer, so a whitelist can only ever reject it. Clear the list
-    // and keep the daily cap — that is the control that still applies.
+    // generic message sends you looking in the wrong place. The call carries
+    // the visitor's own Referer now, so a whitelist *can* match — but it has to
+    // list the site this runs on, and it still rejects anything arriving with
+    // no Referer at all (a curl, a browser configured to send none).
     console.error(
-      "address-lookup: clear Allowed URLs on this key (Ideal Postcodes -> API Keys). " +
-        "A server-side key sends no Referer, so any whitelist rejects every request.",
+      "address-lookup: this key's Allowed URLs (Ideal Postcodes -> API Keys) did not match the " +
+        "request's Referer. Add this site's origin, or clear the list and keep the daily cap.",
     );
   }
 }
 
 /**
- * Step 1 — free, and deliberately uncached.
+ * Step 1 — free, and uncached.
  *
  * A cache would earn its keep if queries repeated, and while typing they barely
  * do: every keystroke is a new prefix, so a Redis round-trip before the vendor
  * call is latency spent to miss. Since the vendor charges nothing here, the
  * cache was buying nothing and costing a hop on the request the visitor is
- * actually waiting on. The paid half is still cached.
+ * actually waiting on.
  */
 async function suggest(request: Request, rawQuery: string): Promise<Response> {
   const query = normalizeQuery(rawQuery);
@@ -232,6 +254,7 @@ async function suggest(request: Request, rawQuery: string): Promise<Response> {
   }
 
   const body = await callVendor<{ hits?: IdealPostcodesHit[] }>(
+    request,
     `/autocomplete/addresses?query=${encodeURIComponent(query)}&limit=${SUGGEST_LIMIT}`,
   );
   if (!body) {
@@ -246,20 +269,20 @@ async function suggest(request: Request, rawQuery: string): Promise<Response> {
   return json({ suggestions: toSuggestions(body.result?.hits ?? []) }, 200);
 }
 
-/** Step 2 — one credit. The full address behind a chosen suggestion. */
+/**
+ * Step 2 — one credit. The full address behind a chosen suggestion.
+ *
+ * Read live from the vendor every time. The address a visitor picks is theirs,
+ * not ours to hold in Redis against the next person who picks the same one, so
+ * every enquiry spends its credit and every answer is current PAF.
+ */
 async function resolve(request: Request, id: string): Promise<Response> {
   if (await isRateLimited(request, "resolve", RATE_LIMIT_MAX_RESOLVE)) {
     return json({ error: "rate-limited" }, 429);
   }
 
-  const ttl = addressTtlSeconds();
-  const key = `idpc:id:${id}`;
-  const cached = await readCache<LookupAddress>(key, ttl);
-  if (cached) {
-    return json({ address: cached }, 200);
-  }
-
   const body = await callVendor<IdealPostcodesAddress>(
+    request,
     `/autocomplete/addresses/${encodeURIComponent(id)}/gbr`,
   );
   if (!body) {
@@ -274,10 +297,7 @@ async function resolve(request: Request, id: string): Promise<Response> {
     return json({ error: "unavailable" }, 502);
   }
 
-  const address = toLookupAddress(body.result);
-  await writeCache(key, address, ttl);
-
-  return json({ address }, 200);
+  return json({ address: toLookupAddress(body.result) }, 200);
 }
 
 export async function GET(request: Request): Promise<Response> {

@@ -73,7 +73,7 @@ re-verify before budgeting ([Vercel](https://vercel.com/pricing),
 | **Email** | Enquiry-form delivery (nodemailer over Resend SMTP), sending as `noreply@upperstreet.contractors` on the verified domain. Resend's free tier covers enquiry volume. Delivery *to* `info@upperstreet.contractors` still needs a real mailbox on the domain — sending and receiving are separate. | $0 now → Google Workspace Business Starter **£5/user/mo** (annual, + VAT) for the `info@` mailbox |
 | **GizmoSauce** | The Google Reviews widget embedded on the site. | $8.25/mo (Starter, 5 widgets — we use 1); ≈ $5.78/mo billed yearly (30% off) |
 | **Trustpilot** | TrustBox review widget + profile. | $0 — free business plan is enough (50 invites/mo, widget, replies) |
-| **Ideal Postcodes** | UK address type-ahead on the enquiry form ([ADR 0026](./docs/adr/0026-address-lookup-server-proxied.md)). Usage-billed, not a subscription. Typing is free — only resolving the address someone picks costs a credit, so the bill tracks completed enquiries, not traffic. Resolved addresses are cached in the Redis we already run. | 50 free credits to start; then £9 / 200 credits (£0.045 each), down to £0.028 at volume. Credits valid 12 months |
+| **Ideal Postcodes** | UK address type-ahead on the enquiry form ([ADR 0026](./docs/adr/0026-address-lookup-server-proxied.md)). Usage-billed, not a subscription. Typing is free — only resolving the address someone picks costs a credit, so the bill tracks completed enquiries, not traffic. Nothing is cached, so the bill is one credit per enquiry and every answer is live PAF. | 50 free credits to start; then £9 / 200 credits (£0.045 each), down to £0.028 at volume. Credits valid 12 months |
 
 **Totals**
 

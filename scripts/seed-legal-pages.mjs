@@ -163,11 +163,13 @@ const ul = (items) => ({
   children: items.map((i) => (typeof i === 'string' ? li(text(i)) : i)),
 });
 
-const LAST_UPDATED = 'Last updated: 12 July 2026.';
+// Dated separately: a change to one document is not a change to the other.
+const PRIVACY_LAST_UPDATED = 'Last updated: 13 September 2026.';
+const TERMS_LAST_UPDATED = 'Last updated: 12 July 2026.';
 
 // --- 4. drafted copy --------------------------------------------------------
 const privacyBody = [
-  p(bold(LAST_UPDATED)),
+  p(bold(PRIVACY_LAST_UPDATED)),
   ptext(
     'This policy explains how Upper Street Contractors ("we", "us", "our") ' +
       'collects and uses your personal information when you visit this website or ' +
@@ -216,9 +218,11 @@ const privacyBody = [
   ptext('We do not sell your personal information. We share it only where necessary with:'),
   ul([
     'our email provider, to deliver enquiry emails to us and a confirmation to you;',
-    'our address lookup provider, which receives only the postcode you type into the ' +
-      'enquiry form so we can offer you the addresses at it — the request is made by our ' +
-      'server, not your browser, and no cookie is set on your device;',
+    'our address lookup provider, which receives what you type into the address field ' +
+      'so we can offer you the addresses at it, along with the ordinary technical details ' +
+      'any web request carries — your IP address, your browser type and its language. The ' +
+      'request is made by our server rather than your browser, and no cookie is set on ' +
+      'your device;',
     'Trustpilot and Google, if you consent to their review widgets loading on the site;',
     'professional advisers or authorities where we are required to by law.',
   ]),
@@ -258,7 +262,7 @@ const privacyBody = [
 ];
 
 const termsBody = [
-  p(bold(LAST_UPDATED)),
+  p(bold(TERMS_LAST_UPDATED)),
   ptext(
     'These terms govern your use of the Upper Street Contractors website and, ' +
       'together with any written quotation we give you, the building and ' +
