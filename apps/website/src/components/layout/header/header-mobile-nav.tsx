@@ -5,12 +5,9 @@ import { useCallback, useEffect, useId, useState } from "react";
 import {
   getMobileNavLinkClassName,
   isNavGroupActive,
-  isNavLinkActive,
   type NavLink,
 } from "@/components/layout/nav-links";
 import { usePathname } from "next/navigation";
-import { Icon } from "@/components/ui/icon";
-import { iconData } from "@/helpers";
 
 type HeaderMobileNavProps = {
   links: NavLink[];
@@ -109,76 +106,22 @@ export function HeaderMobileNav({ links }: HeaderMobileNavProps) {
             className="absolute right-0 z-40 mt-3 w-[min(100vw-3rem,20rem)] rounded-xl border border-border bg-white p-4 shadow-lg"
           >
             <ul>
+              {/*
+                Every item is a plain link, exactly as on desktop. `Services`
+                used to be a native <details> accordion of the nine trades with
+                an "All services" row beneath it: tapping the label opened a
+                panel rather than going anywhere, so one label did two different
+                things depending on which breakpoint you were on. It now
+                navigates to the Services index — the page that lists all nine
+                as cards with photos, and the one place they are maintained.
+
+                `isNavGroupActive`, not `isNavLinkActive`: a visitor standing on
+                `/kitchens` must still see `Services` lit, and that is the only
+                thing the `children` on the nav model are for now that neither
+                nav renders them.
+              */}
               {links.map((link) => {
-                const isActive = isNavLinkActive(pathname, link.href);
-
-                // A nav item with children becomes a native <details>. The
-                // panel is already a piece of React state; a second, nested
-                // open/closed state per group is state the platform will hold
-                // for free, with keyboard and screen-reader support included.
-                if (link.children?.length) {
-                  return (
-                    <li key={link.href}>
-                      <details
-                        className="group/nav"
-                        open={link.children.some((child) =>
-                          isNavLinkActive(pathname, child.href),
-                        )}
-                      >
-                        <summary
-                          className={`${getMobileNavLinkClassName(
-                            isNavGroupActive(pathname, link),
-                          )} flex cursor-pointer list-none items-center justify-between marker:content-none [&::-webkit-details-marker]:hidden`}
-                        >
-                          {link.label}
-
-                          <Icon
-                            data={iconData("chevron-down")}
-                            className="h-4 w-4 shrink-0 transition-transform duration-200 group-open/nav:rotate-180 motion-reduce:transition-none"
-                          />
-                        </summary>
-
-                        <ul className="mt-0.5 mb-1 ml-2 border-l border-border-light pl-2">
-                          {link.children.map((child) => {
-                            const isChildActive = isNavLinkActive(
-                              pathname,
-                              child.href,
-                            );
-
-                            return (
-                              <li key={child.href}>
-                                <Link
-                                  href={child.href}
-                                  className={`${getMobileNavLinkClassName(
-                                    isChildActive,
-                                  )} text-[0.9375rem]`}
-                                  aria-current={
-                                    isChildActive ? "page" : undefined
-                                  }
-                                  onClick={close}
-                                >
-                                  {child.label}
-                                </Link>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </details>
-
-                      {/* The group's own destination. `<summary>` toggles, so
-                          it cannot also navigate — without this row the
-                          Services index is unreachable from the mobile menu. */}
-                      <Link
-                        href={link.href}
-                        className={`${getMobileNavLinkClassName(isActive)} ml-2 text-[0.9375rem]`}
-                        aria-current={isActive ? "page" : undefined}
-                        onClick={close}
-                      >
-                        All {link.label.toLowerCase()}
-                      </Link>
-                    </li>
-                  );
-                }
+                const isActive = isNavGroupActive(pathname, link);
 
                 return (
                   <li key={link.href}>

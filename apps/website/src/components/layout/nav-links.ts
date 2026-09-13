@@ -3,10 +3,10 @@ export type NavLink = {
   href: string;
   /**
    * Sub-routes belonging to this item. Only `Services` has any — the nine
-   * trades. Nothing renders them on desktop any more (the dropdown is gone, and
-   * the Services index is where the nine are listed); they survive because the
-   * mobile menu still offers them as an accordion, and because the desktop
-   * header reads them to know that `/kitchens` should light `Services` up.
+   * trades. Neither nav renders them any more: the desktop dropdown is gone and
+   * so is the mobile accordion, and the Services index is where the nine are
+   * listed. They survive for one reason — both headers read them to know that
+   * `/kitchens` should light `Services` up.
    */
   children?: NavLink[];
 };
@@ -84,8 +84,8 @@ export function getMobileNavLinkClassName(isActive: boolean): string {
  * header component is a client component and cannot read the CMS itself.
  *
  * An empty array is a valid answer (the CMS read failed, or no cards are set up
- * yet). On desktop it changes nothing — `Services` is a plain link either way
- * now; on mobile the accordion collapses to a single row.
+ * yet). It changes nothing on either breakpoint — `Services` is a plain link to
+ * the index now, and the trades are only ever read for active state.
  */
 export function buildMainNavLinks(serviceLinks: NavLink[]): NavLink[] {
   return [
