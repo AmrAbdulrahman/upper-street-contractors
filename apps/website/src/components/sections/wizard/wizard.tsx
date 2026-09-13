@@ -275,6 +275,10 @@ export function WizardSection({ data }: WizardSectionProps) {
   /** The Step header's own text — the focus target on a step change, and the
    *  name of the scroller when it becomes a keyboard-scrollable region. */
   const stepHeadRef = useRef<HTMLElement | null>(null);
+  /** The step's own heading, when it has one. Preferred over the eyebrow as the
+   *  focus target: it names the question rather than the position. A callback
+   *  ref clears it for a step that carries no title. */
+  const stepTitleRef = useRef<HTMLElement | null>(null);
   const headId = useId();
   /** Nothing is focused until the visitor has moved a step themselves; without
    *  this the wizard would steal focus off the page on first paint. */
@@ -290,7 +294,7 @@ export function WizardSection({ data }: WizardSectionProps) {
   useEffect(() => {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     if (!interacted.current) return;
-    stepHeadRef.current?.focus({ preventScroll: true });
+    (stepTitleRef.current ?? stepHeadRef.current)?.focus({ preventScroll: true });
   }, [step, done]);
 
   // Which edges have more behind them. The fades are written straight to the
@@ -951,7 +955,7 @@ export function WizardSection({ data }: WizardSectionProps) {
             address rows all wanted the space more than a phone number does.
             Contact details now sit in their own section below the wizard, where
             they get the whole width too. */}
-        <div className="mx-auto max-w-container px-6 py-[72px]">
+        <div className="mx-auto max-w-container px-6 py-6">
           <div className="min-w-0">
             {/* Adding a STEP belongs to the wizard, not to the step you happen
                 to be looking at — so it must stay outside the question's
@@ -1046,37 +1050,24 @@ export function WizardSection({ data }: WizardSectionProps) {
                     })}
                   </ol>
 
+                  {/* Only the eyebrow rides up here with the stepper. The
+                      heading and hint scroll with the body: they are the
+                      question, and the answers belong under it — pinning them
+                      spent a third of a phone's panel on copy the visitor reads
+                      once and then scrolls past. What has to stay is which step
+                      this is, and that is what the dots and this line say. */}
                   {done ? null : (
-                    <>
-                      <p
-                        id={headId}
-                        ref={(el) => {
-                          stepHeadRef.current = el;
-                        }}
-                        tabIndex={-1}
-                        className="mt-8 text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase outline-none"
-                      >
-                        Step {step + 1} of {total}
-                        {current.stepLabel ? ` — ${current.stepLabel}` : ""}
-                      </p>
-                      {/* The step's own heading and hint are fields of the question
-                          entry, so the pencil here opens exactly those — along with
-                          its wording variants and its Branch gate. The Step
-                          introduction is no longer part of this block; it renders
-                          below the inputs. */}
-                      <ZeroCmsEntry entry={current}>
-                        <div>
-                          {currentCopy.title ? (
-                            <h2 className="mt-2 font-serif text-[clamp(24px,3.5vw,34px)] leading-tight text-dark">
-                              {currentCopy.title}
-                            </h2>
-                          ) : null}
-                          {current.hint ? (
-                            <p className="mt-2 text-sm text-muted">{current.hint}</p>
-                          ) : null}
-                        </div>
-                      </ZeroCmsEntry>
-                    </>
+                    <p
+                      id={headId}
+                      ref={(el) => {
+                        stepHeadRef.current = el;
+                      }}
+                      tabIndex={-1}
+                      className="mt-8 text-[11px] font-bold tracking-[0.12em] text-gold-deep uppercase outline-none"
+                    >
+                      Step {step + 1} of {total}
+                      {current.stepLabel ? ` — ${current.stepLabel}` : ""}
+                    </p>
                   )}
 
                   {/* The shadow half of the Edge fade. Cast by the chrome onto
@@ -1139,6 +1130,28 @@ export function WizardSection({ data }: WizardSectionProps) {
                       </div>
                     ) : (
                       <>
+                        {/* The step's heading and hint are fields of the question
+                            entry, so the pencil here opens exactly those — along
+                            with its wording variants and its Branch gate. */}
+                        <ZeroCmsEntry entry={current}>
+                          <div>
+                            {currentCopy.title ? (
+                              <h2
+                                ref={(el) => {
+                                  stepTitleRef.current = el;
+                                }}
+                                tabIndex={-1}
+                                className="font-serif text-[clamp(24px,3.5vw,34px)] leading-tight text-dark outline-none"
+                              >
+                                {currentCopy.title}
+                              </h2>
+                            ) : null}
+                            {current.hint ? (
+                              <p className="mt-2 text-sm text-muted">{current.hint}</p>
+                            ) : null}
+                          </div>
+                        </ZeroCmsEntry>
+
                         {current.__typename === "ImageQuestion" ? (
                           <>
                             <ZeroCmsList
